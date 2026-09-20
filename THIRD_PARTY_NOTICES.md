@@ -12,6 +12,6 @@ Google Sans Code: licencia SIL Open Font License incluida en [`public/fonts/OFL-
 
 ## Dependencias
 
-Las versiones exactas están en `package-lock.json`. Cada paquete conserva su licencia. Este documento no sustituye esas licencias ni concede una licencia al código propio de Chordi.
+Las versiones exactas están en `pnpm-lock.yaml`. Cada paquete conserva su licencia. Este documento no sustituye esas licencias ni concede una licencia al código propio de Chordi.
 
 La distribución web incluye también la licencia del catálogo en `public/licenses/chords-db.txt`, accesible desde el explorador de acordes.

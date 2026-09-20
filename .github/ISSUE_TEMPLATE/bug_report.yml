@@ -1,0 +1,22 @@
+name: Algo no funciona
+description: Cuéntanos qué pasó al preparar tu canción.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: ¿Qué intentabas hacer y qué pasó?
+      description: Incluye lo que esperabas que ocurriera.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducirlo
+      description: Si hace falta, usa un ejemplo breve inventado con los acordes afectados. Evita documentos personales o letras ajenas completas.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Navegador y dispositivo
+      placeholder: Por ejemplo, Firefox en Windows o Safari en iPhone.

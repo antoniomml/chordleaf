@@ -5,20 +5,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
-      - run: npx playwright install --with-deps chromium
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
       - name: Browser tests
         run: |
           mkdir -p artifacts
-          npm run dev > /tmp/chordi-vite.log 2>&1 &
+          pnpm dev > /tmp/chordi-vite.log 2>&1 &
           for attempt in {1..30}; do
             if curl --silent --fail http://localhost:5173 > /dev/null; then break; fi
             sleep 1
           done
-          npm run test:e2e
+          pnpm test:e2e

@@ -3,3 +3,13 @@ dist/
 .DS_Store
 artifacts/
 output/
+
+# Local configuration and generated reports
+.env
+.env.*
+!.env.example
+*.log
+coverage/
+playwright-report/
+test-results/
+.pnpm-store/

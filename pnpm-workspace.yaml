@@ -1,0 +1,4 @@
+# Explicit lifecycle-script policy; esbuild supplies the Vite compiler.
+allowBuilds:
+  esbuild: true
+  core-js: false

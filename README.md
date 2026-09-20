@@ -1,69 +1,84 @@
-# Chordi
+<div align="center">
+  <img src="public/logo.svg" width="76" height="76" alt="Logo de Chordi">
+  <h1>Chordi</h1>
+  <p><strong>Tu canción. Tus acordes. Todo en su sitio.</strong></p>
+  <p>Un espacio para preparar letras y acordes, encontrar cómo tocarlos<br>y llevarte una hoja lista para el próximo ensayo.</p>
+  <p>
+    <a href="https://github.com/antoniomml/Chordi/releases/tag/v0.0.1"><img src="https://img.shields.io/badge/versión-0.0.1-c9e79c?style=flat-square&labelColor=263426" alt="Versión inicial 0.0.1"></a>
+    <a href="https://github.com/antoniomml/Chordi/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/Chordi/actions/workflows/checks.yml/badge.svg" alt="Comprobaciones automáticas"></a>
+  </p>
+  <p><a href="#un-pequeño-estudio-para-tus-canciones">Qué puedes hacer</a> · <a href="docs/guide.md">Guía de uso</a> · <a href="CHANGELOG.md">Novedades</a> · <a href="CONTRIBUTING.md">Participar</a></p>
+</div>
 
-Estudio local de canciones con letra y acordes. Edita, transporta y prepara hojas para tocar, con importación y exportación TXT, PDF y DOCX.
+![Chordi: editor de letra y acordes a la izquierda y hoja de canción a la derecha](docs/images/workspace.png)
 
-## Ejecutar
+## Un pequeño estudio para tus canciones
 
-```sh
-npm ci
-npm run dev
+Preparar una canción debería dejarte tiempo para tocarla. Chordi reúne la letra, los acordes y el documento final en una misma pantalla: escribe un verso, mueve un cambio de acorde hasta la sílaba adecuada y comprueba cómo quedará en la hoja.
+
+Está pensado para quien canta, toca la guitarra, prepara un ensayo o quiere tener sus canciones ordenadas. No necesitas saber programar para usar la interfaz.
+
+| Para cuando quieres…            | Chordi te ayuda a…                                                          |
+| ------------------------------- | --------------------------------------------------------------------------- |
+| **Preparar una canción**        | Empezar con una hoja en blanco o importar un archivo TXT, PDF o Word.       |
+| **Clavar el cambio de acorde**  | Colocar cada acorde en una letra concreta, al inicio o centrado sobre ella. |
+| **Escribir con espacio**        | Ajustar el ancho del editor o ampliarlo en una ventana grande.              |
+| **Llevarla a tu voz**           | Transportar los acordes por semitonos y ajustar la cejilla.                 |
+| **Encontrar una posición**      | Explorar 828 acordes y 3.283 posiciones de guitarra en afinación estándar.  |
+| **Preparar la hoja para tocar** | Elegir tamaño de letra, márgenes y una o dos columnas con vista previa A4.  |
+| **Compartir el resultado**      | Descargar un PDF, un documento Word editable o el texto con sus acordes.    |
+
+## Del primer verso a la hoja de ensayo
+
+**1. Dale nombre a tu canción.** Pulsa **Nueva canción** y empieza de cero o importa un archivo. Puedes tener varias canciones abiertas en pestañas.
+
+**2. Escribe la letra y coloca los acordes.** Pon el acorde entre corchetes justo donde cambia la armonía:
+
+```text
+[G]Guardo la luz de [D]esta mañana
+[C]en las cuerdas de mi [G]guitarra.
 ```
 
-`npm run build` genera `dist/`. `npm test` comprueba el análisis de acordes, el transporte, la alineación y la paginación.
+Los corchetes desaparecen de la hoja: solo verás los acordes encima de la letra. Para afinar un cambio dentro de una palabra, escribe `ca[G]sa`: el acorde queda anclado a la **s**.
 
-## Uso
+**3. Hazla cómoda para tocar.** Prueba otra tonalidad, consulta una posición de guitarra y ajusta el documento. Cuando esté listo, pulsa **Exportar**.
 
-Escribe `[G]Hola [D]mundo` o coloca una línea de acordes entre corchetes encima del verso. Puedes abrir varias canciones, cambiar tamaño, márgenes y columnas, y editar cada verso desde el lápiz de la previsualización. Enter confirma, Escape cancela y Shift+Enter añade un salto.
+[Descubre los controles y los pequeños detalles en la guía de uso →](docs/guide.md)
 
-La cadena no modifica acordes al activarse. Con el vínculo activo, subir un traste la cejilla baja los acordes un semitono y conserva la tonalidad que suena. La tonalidad es una estimación orientativa y no se exporta.
+## Ese acorde también tiene sitio
 
-Las canciones se guardan automáticamente en localStorage de este navegador. Exporta copias para conservarlas fuera de él. Cerrar una canción con cambios sin exportar requiere confirmación.
+Mayores, menores, séptimas, disminuidos, extensiones e inversiones: el explorador permite escribir un nombre como `Emaj7`, `Abm7b5` o `C/G`, recorrer sus posiciones e insertar el acorde en la canción.
 
-## Formatos
+<div align="center">
+  <img src="docs/images/chord-library.png" width="430" alt="Explorador de Abm7b5 con diagrama de guitarra y controles para recorrer sus posiciones">
+</div>
 
-- TXT: texto UTF-8 con metadatos ChordPro y acordes entre corchetes.
-- PDF: importación local con PDF.js, basada en posiciones, encabezados y detección de dos columnas. Los PDF escaneados necesitan OCR previo. Las maquetaciones complejas deben revisarse a mano.
-- DOCX: importación de texto mediante Mammoth y exportación editable con tablas sin bordes para las columnas. Los archivos Word antiguos `.doc` deben convertirse a `.docx`.
-- PDF y DOCX comparten el cálculo de líneas y páginas de la previsualización. Word puede variar ligeramente según las fuentes y el procesador de documentos.
+Las digitaciones proceden de un catálogo abierto incluido en la aplicación. Si un símbolo no tiene una posición disponible, Chordi te lo indica. La tonalidad sugerida es una orientación musical; tú decides cómo interpretar la canción.
 
-Los diagramas SVG se generan con posiciones de dedos, incluidas formas móviles. Cuando no se conoce una posición, se indica en lugar de mostrar un diagrama incorrecto.
+## Tu música se queda contigo
 
-No hay servidor de datos, cuentas ni envíos de canciones. Las dependencias de importación y exportación se cargan bajo demanda. La interfaz utiliza DM Sans de Google Fonts, con Arial como alternativa.
+Las canciones y los archivos que importas se procesan en tu navegador. No hay cuentas ni un servidor que reciba tus canciones. Los cambios se guardan automáticamente en ese navegador para que puedas seguir trabajando.
 
-## Estilo del documento e importación PDF
+**Exporta una copia de lo que quieras conservar.** El guardado del navegador no sincroniza dispositivos y puede desaparecer si borras sus datos. Para seguir editando con precisión, guarda también el TXT de Chordi.
 
-La hoja usa **Google Sans Code**, servida desde `public/fonts` con licencia OFL. El PDF incrusta las variantes regular y negrita; el DOCX también incluye ambas. Algunos lectores de Word ignoran las fuentes incrustadas: en ese caso se puede instalar la fuente incluida para obtener la misma composición.
+La interfaz carga su tipografía desde Google Fonts; el texto de tus canciones no se envía a ese servicio.
 
-El estilo es compacto y en negro, con título y artista en la primera línea cuando caben, y la cejilla debajo. Las importaciones PDF recuperan el tamaño de letra y el margen aproximados del original, y leen cada columna de arriba abajo. El marcador editable `{column}` conserva un salto de columna; no se imprime. Con una sola columna equivale a un salto de página. Los pasajes instrumentales admiten barras y guiones, por ejemplo `[Emaj7] | [G#m7] - [E5+]`.
+## Una primera versión para seguir creciendo
 
-`npm run test:e2e` ejecuta las pruebas de navegador con el servidor iniciado. Para repetir la revisión de Alone Again sin incluir documentos personales en el repositorio:
+**0.0.1** es la primera versión etiquetada de Chordi. Ya puedes editar, transportar, consultar acordes e importar y exportar canciones. Aún hay detalles que conviene revisar al traer un documento: los PDF escaneados necesitan reconocimiento de texto previo y las maquetaciones complejas pueden requerir ajustes. Word también puede variar según el lector y las fuentes instaladas.
 
-```sh
-CHORDI_REFERENCE_PDF="/ruta/al/original.pdf" node tests/reference-pdf.mjs
-```
+La transcripción de letra y acordes desde audio es una idea para más adelante; todavía no está disponible. Consulta [las novedades y limitaciones de esta versión](CHANGELOG.md).
 
-## Edición y acordes
+## Forma parte de Chordi
 
-Arrastra el separador entre el editor y la hoja para ajustar el ancho. Con el separador enfocado, usa las flechas; Inicio o doble clic restaura el ancho. En móvil los paneles se apilan. El botón de expansión abre el mismo editor en un diálogo grande; Listo o Escape lo cierra y conserva el cursor y los cambios.
+Una idea de músico, una explicación que falta o un fallo al colocar un acorde también son buenas aportaciones. Puedes [contar un problema](https://github.com/antoniomml/Chordi/issues/new?template=bug_report.yml) o [proponer una mejora](https://github.com/antoniomml/Chordi/issues/new?template=feature_request.yml). Utiliza ejemplos breves inventados cuando compartas una canción.
 
-Una canción nueva tiene el título vacío: «Nombre de la canción» es una ayuda del campo, no contenido exportado. La pestaña se llama «Nueva canción» hasta escribir un título.
+Para ejecutar tu propia copia o trabajar en el proyecto, sigue [la guía de desarrollo con pnpm](docs/development.md). No hay una instancia pública anunciada todavía.
 
-Para colocar un cambio en una sílaba escribe `ca[G]sa`. El ancla es la `s`: los corchetes no ocupan espacio en la letra. La opción de alineación permite empezar el acorde en esa letra o centrarlo sobre ella. Cerca del margen izquierdo se limita el desplazamiento para que el acorde permanezca en la hoja. Los acordes que colisionan se apilan sin añadir espacios a la letra. Previsualización, PDF y DOCX comparten estas posiciones; los saltos manuales ayudan a controlar los versos largos. El formato TXT guarda la opción de alineación. Al reimportar un PDF o DOCX, revisa los anclajes: esos formatos conservan posiciones visuales, no el ancla musical original.
+---
 
-El explorador ofrece **828 entradas y 3.283 posiciones de guitarra** en afinación estándar. Admite equivalencias como `EM7` / `Emaj7`, `A♭ø7` / `Abm7b5`, `C6/9`, `Dm(maj7)` y bajos como `C/G`. Reconocer un símbolo y disponer de una digitación son capacidades diferentes: no se inventan posiciones para las extensiones que faltan.
-
-## Desarrollo
-
-Requiere Node.js 22.13 o posterior. El gestor de referencia es npm y `package-lock.json` fija las dependencias.
-
-```sh
-npm ci
-npm test
-npm run build
-npm run dev
-# En otra terminal, con el servidor anterior activo:
-npx playwright install chromium
-npm run test:e2e
-```
-
-Consulta [la arquitectura](docs/architecture.md), [la guía de contribución](CONTRIBUTING.md) y [las atribuciones](THIRD_PARTY_NOTICES.md). CI ejecuta pruebas unitarias, compilación y navegador. No subas canciones personales ni documentos de prueba con derechos ajenos. La licencia del código propio queda pendiente de elección antes de publicar el proyecto como código abierto; las licencias de terceros se incluyen por separado.
+<div align="center">
+  <p><strong>Hecho para tocar.</strong></p>
+  <p><a href="docs/guide.md">Guía de uso</a> · <a href="docs/architecture.md">Arquitectura</a> · <a href="THIRD_PARTY_NOTICES.md">Créditos y atribuciones</a></p>
+  <sub>La licencia del código propio está pendiente de elección antes de su publicación como código abierto. Los datos y las fuentes conservan sus respectivas licencias.</sub>
+</div>

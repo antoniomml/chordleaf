@@ -1,0 +1,15 @@
+name: Una idea para Chordi
+description: Propón algo que te ayude a escribir, ensayar o tocar.
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: ¿Qué te gustaría conseguir?
+      description: Cuenta en qué momento te ayudaría y cómo lo haces ahora.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: ¿Cómo imaginas la mejora?
+      description: Puedes añadir un boceto o un ejemplo inventado.
