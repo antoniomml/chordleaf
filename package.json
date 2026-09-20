@@ -1,0 +1,25 @@
+{
+  "name": "chordi",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node --test tests/*.test.js",
+    "test:e2e": "node tests/browser.mjs",
+    "format": "prettier --write src tests index.html package.json"
+  },
+  "dependencies": {
+    "docx": "^9.5.1",
+    "jspdf": "^4.2.1",
+    "mammoth": "^1.10.0",
+    "pdfjs-dist": "^6.3.289",
+    "vite": "^7.1.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "prettier": "^3.9.8"
+  }
+}

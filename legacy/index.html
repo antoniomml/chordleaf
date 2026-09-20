@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chordi</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-topbar" aria-label="Barra de herramientas">
+      <div class="topbar-left">
+        <div class="app-mark" aria-label="Chordi">
+          <span class="logo-mark">C</span>
+          <strong>Chordi</strong>
+        </div>
+        <button type="button" id="newSong" class="new-song-button">+ Nueva</button>
+        <input id="txtFile" type="file" accept=".txt,.cho,.chordpro,.pdf,.doc,.docx,text/plain,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden />
+      </div>
+      <div class="topbar-docs">
+        <nav id="songTabs" class="song-tabs" aria-label="Canciones abiertas"></nav>
+        <div class="topbar-actions export-actions">
+          <button type="button" id="downloadTxt">TXT</button>
+          <button type="button" id="downloadDoc">DOCX</button>
+          <button type="button" id="printPdf" class="primary">PDF</button>
+        </div>
+      </div>
+    </header>
+    <main class="app-shell">
+      <aside class="workspace-panel" aria-label="Editor">
+        <nav class="activity-bar" aria-label="Apartados">
+          <button type="button" class="active" data-panel-tab="documento" title="Documento" aria-label="Documento">▤</button>
+          <button type="button" data-panel-tab="musica" title="Tonalidad">♪</button>
+        </nav>
+        <div class="panel-content">
+          <header class="brand-bar panel-section active" data-panel="documento">
+            <div>
+              <p class="eyebrow">Chordi</p>
+              <h1>Canciones y acordes</h1>
+            </div>
+            <span class="status-pill" id="saveStatus">Guardado local</span>
+          </header>
+
+        <section class="control-section panel-section active" data-panel="documento">
+          <div class="field-grid">
+            <label>
+              Título
+              <input id="songTitle" type="text" autocomplete="off" />
+            </label>
+            <label>
+              Artista
+              <input id="songArtist" type="text" autocomplete="off" />
+            </label>
+          </div>
+
+          <div class="music-controls" aria-label="Herramientas musicales">
+            <div class="music-strip">
+              <div class="stepper">
+              <span title="Transportar">Tono</span>
+              <button type="button" id="transposeDown" title="Bajar medio tono">-</button>
+              <strong id="transposeValue">0</strong>
+              <button type="button" id="transposeUp" title="Subir medio tono">+</button>
+              </div>
+              <button type="button" id="capoLink" class="link-toggle" title="Vincular cejilla y acordes" aria-label="Vincular cejilla y acordes">🔗</button>
+              <div class="stepper">
+              <span>Cejilla</span>
+              <button type="button" id="capoDown" title="Bajar cejilla">-</button>
+              <strong id="capoValue">0</strong>
+              <button type="button" id="capoUp" title="Subir cejilla">+</button>
+              </div>
+            </div>
+            <p id="capoLinkHint" class="control-hint">Cejilla solo como indicación</p>
+          </div>
+
+          <div class="settings-grid">
+            <div class="mini-stepper">
+              <span>Columnas</span>
+              <button type="button" id="columnsToggle">2</button>
+            </div>
+            <div class="mini-stepper">
+              <span>Tamaño</span>
+              <button type="button" id="fontDown">-</button>
+              <strong id="fontSizeValue">18 px</strong>
+              <button type="button" id="fontUp">+</button>
+            </div>
+            <div class="mini-stepper">
+              <span>Márgenes</span>
+              <button type="button" id="marginDown">-</button>
+              <strong id="marginValue">12 mm</strong>
+              <button type="button" id="marginUp">+</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="control-section panel-section active" data-panel="documento">
+          <div id="chordToolbar" class="toolbar" aria-label="Insertar acordes"></div>
+          <label class="source-label" for="songSource">
+            Documento editable
+            <span>Escribe acordes entre corchetes: [G]Yo era el arbol</span>
+          </label>
+          <textarea id="songSource" spellcheck="false"></textarea>
+        </section>
+
+        <footer class="action-bar panel-section active" data-panel="documento">
+          <button type="button" id="resetSong">Restaurar ejemplo</button>
+        </footer>
+        <section class="control-section panel-section" data-panel="musica">
+          <div class="key-panel" aria-live="polite">
+            <span>Tonalidad probable</span>
+            <strong id="keyName">Analizando...</strong>
+            <p id="keyChords"></p>
+          </div>
+          <div id="degreeList" class="degree-list"></div>
+        </section>
+        </div>
+      </aside>
+
+      <section class="preview-stage" aria-label="Vista previa">
+        <div class="preview-tools">
+          <button type="button" id="editPreview" class="icon-action" title="Editar hoja" aria-label="Editar hoja">✎</button>
+          <div class="page-nav" aria-label="Paginas">
+            <button type="button" id="prevPage" title="Pagina anterior">-</button>
+            <span id="pageIndicator">1 de 1</span>
+            <button type="button" id="nextPage" title="Pagina siguiente">+</button>
+          </div>
+        </div>
+        <div id="previewPages" class="preview-pages"></div>
+        <div id="chordTooltip" class="chord-tooltip" hidden></div>
+      </section>
+    </main>
+
+    <template id="lineTemplate">
+      <div class="lyric-line"></div>
+    </template>
+
+    <dialog id="newSongModal" class="song-modal">
+      <form method="dialog">
+        <header>
+          <p class="eyebrow">Nueva canción</p>
+          <h2>¿Cómo quieres empezar?</h2>
+        </header>
+        <div class="field-grid">
+          <label>
+            Título
+            <input id="modalTitle" type="text" autocomplete="off" placeholder="Nueva canción" />
+          </label>
+          <label>
+            Artista
+            <input id="modalArtist" type="text" autocomplete="off" />
+          </label>
+        </div>
+        <footer class="modal-actions">
+          <button type="button" id="modalCancel">Cancelar</button>
+          <button type="button" id="modalImport">Importar archivo</button>
+          <button type="button" id="modalBlank" class="primary">Empezar de cero</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <dialog id="closeSongModal" class="song-modal">
+      <form method="dialog">
+        <header>
+          <p class="eyebrow">Cerrar pestaña</p>
+          <h2>¿Cerrar esta canción?</h2>
+          <p class="modal-copy">La canción está guardada en este navegador, pero puedes exportarla antes de cerrar la pestaña.</p>
+        </header>
+        <footer class="modal-actions">
+          <button type="button" id="closeCancel">Cancelar</button>
+          <button type="button" id="closeExport">Exportar TXT</button>
+          <button type="button" id="closeConfirm" class="primary">Cerrar</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
