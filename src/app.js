@@ -1,5 +1,6 @@
+import { setupEditorTools } from "./editor-tools.js";
 import "./style.css";
-import { chords, keyInfo, transpose, diagram } from "./music.js";
+import { chords, keyInfo, transpose, diagram, fingerings } from "./music.js";
 import { layout, PAGE } from "./layout.js";
 import { exportSong, importFile } from "./files.js";
 const $ = (s) => document.querySelector(s),
@@ -15,21 +16,11 @@ const $ = (s) => document.querySelector(s),
           "'": "&#39;",
         })[c],
     );
-const icons = {
-  plus: "＋",
-  edit: "✎",
-  close: "×",
-  minus: "−",
-  link: "↔",
-  doc: "▤",
-  key: "♮",
-  download: "↓",
-};
 const example = `[G]Hay un lugar al [D]otro lado\n[Em]donde el tiempo va [C]despacio.\n[G]Guardo la luz de [D]esta mañana\n[C]en las cuerdas de mi [G]guitarra.\n\n[Em]Y si la noche nos [C]encuentra,\n[G]que nos encuentre al [D]caminar.\n[Em]Con una canción [C]pequeña\n[G]y tantas cosas por [D]contar.\n\n[G]Vuelve a sonar, [D]vuelve a empezar,\n[Em]cada camino nos [C]trae hasta aquí.\n[G]Vuelve a sonar, [D]sin preguntar,\n[C]hoy esta canción es [G]para ti.\n\n[G]Dejo una puerta [D]siempre abierta,\n[Em]un verso a medio [C]terminar.\n[G]Que lo complete [D]quien lo sienta,\n[C]que lo acompañe el [G]mar.`;
 function create(data = {}) {
   return {
     id: crypto.randomUUID(),
-    title: "Sin título",
+    title: "",
     artist: "",
     text: "",
     capo: 0,
@@ -38,6 +29,7 @@ function create(data = {}) {
     margin: 10,
     columns: 1,
     dirty: false,
+    chordAlign: "start",
     ...data,
     capo: Math.max(0, Math.min(12, Number(data.capo) || 0)),
     fontSize: Math.max(7, Math.min(20, Number(data.fontSize) || 10)),
@@ -87,13 +79,13 @@ function toast(message) {
   setTimeout(() => $("#toast").classList.remove("visible"), 6500);
 }
 $("#app").innerHTML =
-  `<header class="topbar"><a class="brand" href="#" aria-label="Chordi"><img src="/logo.svg" alt="">chordi<span>ESTUDIO DE CANCIONES</span></a><div class="top-actions"><span class="local-badge"><i></i> Tu música se queda contigo</span><button id="new" class="primary">＋ Nueva canción</button><div class="export-wrap"><button id="export" class="outline">↓ Exportar <span>⌄</span></button><div id="export-menu" class="menu" hidden><button data-export="pdf">PDF <small>Listo para imprimir</small></button><button data-export="docx">Word · DOCX <small>Documento editable</small></button><button data-export="txt">Texto · TXT <small>Letra y acordes</small></button></div></div></div></header><nav id="tabs" class="tabs" aria-label="Canciones abiertas"></nav><main><aside class="rail"><button data-section="document" class="selected" title="Editar documento">▤<span>Documento</span></button><button data-section="key" title="Consultar tonalidad">♮<span>Tonalidad</span></button><div class="rail-bottom">C<span>HECHO PARA<br>TOCAR</span></div></aside><section class="workspace"><div class="editor-panel"><div id="settings"></div><div id="source-area"><div class="source-heading"><span>LETRA Y ACORDES</span><span class="code-label">[C] texto</span></div><div class="source-container"><div id="line-numbers" aria-hidden="true"></div><textarea id="source" spellcheck="false" aria-label="Letra y acordes" placeholder="[G]Escribe aquí tu canción…"></textarea></div><div class="quick"><div class="quick-head"><span>INSERTAR ACORDE</span><span id="quick-hint"></span></div><div id="quick-chords"></div></div><div class="editor-foot"><span class="tiny-dot"></span><span id="save-state">Guardado en este navegador</span><span id="line-count"></span></div></div></div><section class="preview-panel"><div class="preview-toolbar"><div><span class="tiny-dot"></span> VISTA DEL DOCUMENTO <span class="paper-label">A4</span></div><div class="preview-actions"><button id="fit" title="Ajustar el tamaño para intentar una página">Ajustar a 1 página</button><button id="pencil" title="Editar directamente la hoja" aria-label="Editar directamente la hoja" aria-pressed="false">✎</button></div></div><div id="pages-scroll"><div id="pages"></div></div><footer class="preview-footer"><span id="page-count">Página 1 de 1</span><span id="editing-hint">Tu próxima canción empieza aquí.</span><span>A4 · 210 × 297 mm</span></footer></section></section></main><div id="chord-tooltip" role="tooltip" hidden></div><div id="toast" role="status"></div><dialog id="new-dialog"><button class="dialog-close" aria-label="Cerrar">×</button><img src="/logo.svg" class="dialog-logo" alt=""><p class="eyebrow">DALE ESPACIO A TU MÚSICA</p><h1>Una nueva canción.</h1><p>De una idea a tu próxima hoja de acordes.</p><button id="blank" class="choice"><span>＋</span><div><strong>Empezar de cero</strong><small>Un folio en blanco. Todas las posibilidades.</small></div><b>→</b></button><button id="import" class="choice"><span>↥</span><div><strong>Importar una canción</strong><small>TXT, PDF o Word (.docx)</small></div><b>→</b></button><p class="privacy-note">Los archivos se procesan aquí, en tu navegador.</p><input id="file" type="file" accept=".txt,.pdf,.docx,.cho,.chordpro" hidden></dialog><dialog id="close-dialog"><h2>¿Cerrar esta canción?</h2><p>Hay cambios sin exportar. Si cierras la pestaña, perderás esta copia de trabajo.</p><div class="dialog-actions"><button id="cancel-close">Seguir editando</button><button id="confirm-close" class="danger">Cerrar y descartar</button></div></dialog>`;
+  `<header class="topbar"><a class="brand" href="#" aria-label="Chordi"><img src="/logo.svg" alt="">chordi<span>ESTUDIO DE CANCIONES</span></a><div class="top-actions"><span class="local-badge"><i></i> Tu música se queda contigo</span><button id="new" class="primary">＋ Nueva canción</button><div class="export-wrap"><button id="export" class="outline">↓ Exportar <span>⌄</span></button><div id="export-menu" class="menu" hidden><button data-export="pdf">PDF <small>Listo para imprimir</small></button><button data-export="docx">Word · DOCX <small>Documento editable</small></button><button data-export="txt">Texto · TXT <small>Letra y acordes</small></button></div></div></div></header><nav id="tabs" class="tabs" aria-label="Canciones abiertas"></nav><main><aside class="rail"><button data-section="document" class="selected" title="Editar documento">▤<span>Documento</span></button><button data-section="key" title="Consultar tonalidad">♮<span>Tonalidad</span></button><div class="rail-bottom">C<span>HECHO PARA<br>TOCAR</span></div></aside><section class="workspace"><div class="editor-panel"><div id="settings"></div><div id="source-area"><div class="source-heading"><span>LETRA Y ACORDES</span><button id="expand-editor" class="icon-button" aria-label="Ampliar editor" title="Ampliar editor"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7"/></svg></button></div><div class="source-help">Coloca [C] justo antes de la letra donde cambia el acorde: ca[G]sa.<label>Alineación <select id="chord-align" aria-label="Alineación de acordes"><option value="start">Inicio de la letra</option><option value="center">Centrado sobre la letra</option></select></label></div><div class="source-container"><div id="line-numbers" aria-hidden="true"></div><textarea id="source" spellcheck="false" aria-label="Letra y acordes" placeholder="[G]Escribe aquí tu canción…"></textarea></div><div class="quick"><div class="quick-head"><button id="browse-chords">EXPLORAR ACORDES</button><span id="quick-hint"></span></div><div id="quick-chords"></div></div><div class="editor-foot"><span class="tiny-dot"></span><span id="save-state">Guardado en este navegador</span><span id="line-count"></span></div></div></div><div id="panel-splitter" role="separator" tabindex="0" aria-label="Ancho del editor" aria-orientation="vertical" aria-valuemin="280" aria-valuemax="760" aria-valuenow="365"></div><section class="preview-panel"><div class="preview-toolbar"><div><span class="tiny-dot"></span> VISTA DEL DOCUMENTO <span class="paper-label">A4</span></div><div class="preview-actions"><button id="fit" title="Ajustar el tamaño para intentar una página">Ajustar a 1 página</button><button id="pencil" title="Editar directamente la hoja" aria-label="Editar directamente la hoja" aria-pressed="false">✎</button></div></div><div id="pages-scroll"><div id="pages"></div></div><footer class="preview-footer"><span id="page-count">Página 1 de 1</span><span id="editing-hint">Tu próxima canción empieza aquí.</span><span>A4 · 210 × 297 mm</span></footer></section></section></main><div id="chord-tooltip" role="tooltip" hidden></div><div id="toast" role="status"></div><dialog id="new-dialog"><button class="dialog-close" aria-label="Cerrar">×</button><img src="/logo.svg" class="dialog-logo" alt=""><p class="eyebrow">DALE ESPACIO A TU MÚSICA</p><h1>Una nueva canción.</h1><p>De una idea a tu próxima hoja de acordes.</p><button id="blank" class="choice"><span>＋</span><div><strong>Empezar de cero</strong><small>Un folio en blanco. Todas las posibilidades.</small></div><b>→</b></button><button id="import" class="choice"><span>↥</span><div><strong>Importar una canción</strong><small>TXT, PDF o Word (.docx)</small></div><b>→</b></button><p class="privacy-note">Los archivos se procesan aquí, en tu navegador.</p><input id="file" type="file" accept=".txt,.pdf,.docx,.cho,.chordpro" hidden></dialog><dialog id="editor-dialog" aria-labelledby="expanded-title"><header class="expanded-header"><h2 id="expanded-title">Letra y acordes</h2><button id="collapse-editor" aria-label="Cerrar editor ampliado">Listo ↙</button></header><p class="expanded-help">Los cambios se guardan mientras escribes. Escape vuelve al documento.</p></dialog><dialog id="chord-library" aria-labelledby="library-title"><h2 id="library-title">Explorar acordes</h2><button id="close-library" class="dialog-close" aria-label="Cerrar catálogo">×</button><label>Acorde<input id="chord-name" value="Emaj7" placeholder="Emaj7, Abm7b5, C/G…" autocomplete="off"></label><div id="library-diagram"></div><div class="position-navigation"><button id="previous-position" aria-label="Posición anterior">←</button><span id="position-count"></span><button id="next-position" aria-label="Posición siguiente">→</button></div><button id="insert-library-chord" class="primary">Insertar acorde</button><p class="catalog-credit">828 acordes · 3283 posiciones · afinación estándar<br>Datos abiertos de <a href="https://github.com/tombatossals/chords-db" target="_blank" rel="noopener noreferrer">chords-db</a> · <a href="/licenses/chords-db.txt" target="_blank" rel="noopener">MIT</a>.</p></dialog><dialog id="close-dialog"><h2>¿Cerrar esta canción?</h2><p>Hay cambios sin exportar. Si cierras la pestaña, perderás esta copia de trabajo.</p><div class="dialog-actions"><button id="cancel-close">Seguir editando</button><button id="confirm-close" class="danger">Cerrar y descartar</button></div></dialog>`;
 function renderTabs() {
   $("#tabs").innerHTML =
     songs
       .map(
         (s) =>
-          `<div class="tab ${s.id === active ? "active" : ""}"><button class="tab-select" data-id="${s.id}"><span class="tab-icon">♫</span><span>${esc(s.title || "Sin título")}</span>${s.dirty ? '<i title="Cambios sin exportar"></i>' : ""}</button><button class="tab-close" data-close="${s.id}" aria-label="Cerrar ${esc(s.title)}">×</button></div>`,
+          `<div class="tab ${s.id === active ? "active" : ""}"><button class="tab-select" data-id="${s.id}"><span class="tab-icon">♫</span><span>${esc(s.title || "Nueva canción")}</span>${s.dirty ? '<i title="Cambios sin exportar"></i>' : ""}</button><button class="tab-close" data-close="${s.id}" aria-label="Cerrar ${esc(s.title)}">×</button></div>`,
       )
       .join("") +
     '<button id="tab-plus" aria-label="Nueva canción">＋</button>';
@@ -194,6 +186,7 @@ function setCapo(value) {
   render();
 }
 function renderSource() {
+  $("#chord-align").value = song().chordAlign || "start";
   $("#source").value = song().text;
   sourceMeta();
 }
@@ -226,7 +219,7 @@ function renderPages() {
           .flat()
           .map(
             (r) =>
-              `<div class="song-line ${editing ? "editable" : ""}" data-line="${r.index}" data-end="${r.endIndex ?? r.index}" style="left:${r.x}px;top:${r.y}px;width:${r.width}px;height:${r.height}px;font-size:${l.size}px" ${editing ? 'tabindex="0" role="button" aria-label="Editar verso"' : ""}>${r.marks.map((m) => `<span class="sheet-chord" data-chord="${esc(m.chord)}" style="left:${m.at * l.cw}px;top:${(m.lane || 0) * l.size * 1.44}px">${esc(m.chord)}</span>`).join("")}<span class="lyric" style="top:${r.lyricOffset}px">${esc(r.lyric) || " "}</span></div>`,
+              `<div class="song-line ${editing ? "editable" : ""}" data-line="${r.index}" data-end="${r.endIndex ?? r.index}" style="left:${r.x}px;top:${r.y}px;width:${r.width}px;height:${r.height}px;font-size:${l.size}px" ${editing ? 'tabindex="0" role="button" aria-label="Editar verso"' : ""}>${r.marks.map((m) => `<span class="sheet-chord" data-chord="${esc(m.chord)}" style="left:${m.x * l.cw}px;top:${(m.lane || 0) * l.size * 1.44}px">${esc(m.chord)}</span>`).join("")}<span class="lyric" style="top:${r.lyricOffset}px">${esc(r.lyric) || " "}</span></div>`,
           )
           .join("")}<span class="sheet-page">${i + 1}</span></article></div>`,
     )
@@ -474,6 +467,26 @@ document.addEventListener("keydown", (e) => {
     persist();
     toast("Canciones guardadas en este navegador.");
   }
+});
+setupEditorTools({
+  resizePages,
+  diagram,
+  fingerings,
+  onAlignment(value) {
+    song().chordAlign = value;
+    changed();
+    renderPages();
+  },
+  onChord(value) {
+    const input = $("#source");
+    input.setRangeText(
+      `[${value}]`,
+      input.selectionStart,
+      input.selectionEnd,
+      "end",
+    );
+    input.dispatchEvent(new Event("input"));
+  },
 });
 render();
 persist();

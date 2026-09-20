@@ -267,7 +267,10 @@ main {
 }
 .workspace {
   display: grid;
-  grid-template-columns: 365px minmax(0, 1fr);
+  grid-template-columns: minmax(280px, var(--editor-width, 365px)) 8px minmax(
+      0,
+      1fr
+    );
   width: calc(100% - 94px);
   min-width: 0;
 }
@@ -898,7 +901,10 @@ dialog .choice {
 }
 @media (min-width: 1500px) {
   .workspace {
-    grid-template-columns: 410px minmax(0, 1fr);
+    grid-template-columns: minmax(280px, var(--editor-width, 410px)) 8px minmax(
+        0,
+        1fr
+      );
   }
   #settings {
     padding-left: 28px;
@@ -917,7 +923,10 @@ dialog .choice {
     display: none;
   }
   .workspace {
-    grid-template-columns: 320px minmax(0, 1fr);
+    grid-template-columns: minmax(280px, var(--editor-width, 320px)) 8px minmax(
+        0,
+        1fr
+      );
   }
   .rail {
     width: 75px;
@@ -1088,4 +1097,139 @@ dialog .choice {
 .inline-editor {
   font-family: "Google Sans Code", monospace;
   font-variant-ligatures: none;
+}
+
+#panel-splitter {
+  cursor: col-resize;
+  touch-action: none;
+  background: #252d25;
+  position: relative;
+}
+#panel-splitter::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 36px;
+  background: #748566;
+  top: 48%;
+  left: 3px;
+  border-radius: 2px;
+}
+#panel-splitter:hover,
+#panel-splitter:focus-visible,
+#panel-splitter.dragging {
+  background: #465a35;
+  outline: 1px solid #c9e79c;
+}
+.icon-button {
+  display: inline-flex;
+  padding: 4px;
+  color: #c9e79c;
+}
+.source-help {
+  padding: 0 23px 12px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #a0ad93;
+}
+.source-help label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 8px;
+}
+.source-help select {
+  min-width: 0;
+  background: #252d25;
+  color: #d9e5ce;
+  border: 1px solid #46533d;
+  border-radius: 5px;
+  padding: 5px;
+  font: inherit;
+}
+#browse-chords {
+  font: inherit;
+  letter-spacing: inherit;
+  padding: 0;
+  color: #c9e79c;
+  text-align: left;
+}
+#editor-dialog {
+  width: min(1100px, 94vw);
+  max-width: 94vw;
+  height: 88dvh;
+  max-height: 94dvh;
+  padding: 24px;
+}
+#editor-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.expanded-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.expanded-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+.expanded-help {
+  color: #a0ad93;
+  font-size: 12px;
+}
+#editor-dialog #source-area {
+  min-height: 0;
+  overflow: hidden;
+}
+#editor-dialog .source-container {
+  min-height: 100px;
+  overflow: hidden;
+}
+#editor-dialog #source {
+  font-size: 15px;
+}
+#editor-dialog .source-heading {
+  display: none;
+}
+#editor-dialog .quick {
+  max-height: 130px;
+  overflow: auto;
+  flex-shrink: 0;
+}
+#chord-library {
+  width: min(390px, 94vw);
+}
+#chord-name {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+#library-diagram {
+  max-width: 220px;
+  margin: 20px auto;
+}
+.position-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.catalog-credit {
+  color: #9ba78f;
+  font-size: 11px;
+  line-height: 1.7;
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+@media (max-width: 760px) {
+  #panel-splitter {
+    display: none;
+  }
+  #editor-dialog {
+    padding: 16px;
+  }
 }

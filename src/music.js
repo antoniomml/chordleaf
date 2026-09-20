@@ -1,3 +1,4 @@
+import guitar from "./data/guitar.json" with { type: "json" };
 export const NOTES = [
   "C",
   "C#",
@@ -13,16 +14,41 @@ export const NOTES = [
   "B",
 ];
 const pitch = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-export const chordRE =
-  /^[A-G](?:#|b)?(?:m(?!aj)|maj|min|dim|aug|sus|add)?(?:\d+)?(?:[+°ø]|sus[24]|add\d+|[b#]\d+|maj\d+)*(?:\/[A-G][#b]?)?$/;
+/** Normalize notation for lookup while preserving the author's spelling on the page. */
+export function normalizeChord(value) {
+  return value
+    .replace(/♭/g, "b")
+    .replace(/♯/g, "#")
+    .replace(/[() ,]/g, "")
+    .replace(/Δ/g, "maj")
+    .replace(/ø7?/g, "m7b5")
+    .replace(/[°º]/g, "dim")
+    .replace(/^([A-G][#b]?)(?:min|-)/, "$1m")
+    .replace(/Maj|M(?=\d|$)/g, "maj")
+    .replace(/maj$/, "")
+    .replace(/6\/9/g, "69")
+    .replace(/\+(?=\d)/g, "aug")
+    .replace(/5\+$/, "aug")
+    .replace(/7\+$/, "aug7")
+    .replace(/\+$/, "aug");
+}
+const notationRE =
+  /^[A-G][#b]?(?:(?:m|maj|dim|aug|sus|add)?(?:5|6|7|9|11|13|69)?(?:sus[24]|add(?:2|4|9|11|13)|[b#](?:5|9|11|13)|maj(?:7|9|11|13))*|alt|mmaj(?:7|9|11|13))(?:\/[A-G][#b]?)?$/;
+// Shared validator used by text, PDF and ChordPro importers.
+export const chordRE = {
+  test: (value) => notationRE.test(normalizeChord(value)),
+};
 export function pc(n) {
   return (
-    ((pitch[n[0]] ?? 0) + (n[1] === "#" ? 1 : n[1] === "b" ? -1 : 0) + 12) % 12
+    ((pitch[n[0]] ?? 0) +
+      (["#", "♯"].includes(n[1]) ? 1 : ["b", "♭"].includes(n[1]) ? -1 : 0) +
+      12) %
+    12
   );
 }
 export function transposeChord(c, n) {
   return c.replace(
-    /^[A-G][#b]?|(?<=\/)[A-G][#b]?/g,
+    /^[A-G][#b♯♭]?|(?<=\/)[A-G][#b♯♭]?/g,
     (r) => NOTES[(pc(r) + (n % 12) + 12) % 12],
   );
 }
@@ -95,7 +121,7 @@ export function keyInfo(text) {
       );
       let score = 0;
       for (const c of cs) {
-        const base = c.split("/")[0];
+        const base = normalizeChord(c).split("/")[0];
         const degree = intervals.indexOf((pc(base) - root + 12) % 12);
         score += degree < 0 ? -3 : 2;
         if (degree >= 0) {
@@ -122,50 +148,19 @@ export function keyInfo(text) {
     }
   return candidates.sort((a, b) => b.score - a.score)[0];
 }
-const shapes = {
-  C: [-1, 3, 2, 0, 1, 0],
-  D: [-1, -1, 0, 2, 3, 2],
-  E: [0, 2, 2, 1, 0, 0],
-  F: [1, 3, 3, 2, 1, 1],
-  G: [3, 2, 0, 0, 0, 3],
-  A: [-1, 0, 2, 2, 2, 0],
-  B: [-1, 2, 4, 4, 4, 2],
-  Am: [-1, 0, 2, 2, 1, 0],
-  Dm: [-1, -1, 0, 2, 3, 1],
-  Em: [0, 2, 2, 0, 0, 0],
-  C7: [-1, 3, 2, 3, 1, 0],
-  D7: [-1, -1, 0, 2, 1, 2],
-  E7: [0, 2, 0, 1, 0, 0],
-  G7: [3, 2, 0, 0, 0, 1],
-  A7: [-1, 0, 2, 0, 2, 0],
-  B7: [-1, 2, 1, 2, 0, 2],
-  Cmaj7: [-1, 3, 2, 0, 0, 0],
-  Dmaj7: [-1, -1, 0, 2, 2, 2],
-  Amaj7: [-1, 0, 2, 1, 2, 0],
-  Dsus4: [-1, -1, 0, 2, 3, 3],
-  Asus2: [-1, 0, 2, 2, 0, 0],
-  Dsus2: [-1, -1, 0, 2, 3, 0],
-};
-export function fingering(c) {
-  if (shapes[c]) return shapes[c];
-  if (c.includes("/")) return null;
-  let m = c.match(/^([A-G][#b]?)(m|7|m7|maj7)?$/);
-  if (!m) return null;
-  let fret = (pc(m[1]) - 4 + 12) % 12;
-  const shape =
-    m[2] === "m"
-      ? [0, 2, 2, 0, 0, 0]
-      : m[2] === "7"
-        ? [0, 2, 0, 1, 0, 0]
-        : m[2] === "m7"
-          ? [0, 2, 0, 0, 0, 0]
-          : m[2] === "maj7"
-            ? [0, 2, 1, 1, 0, 0]
-            : [0, 2, 2, 1, 0, 0];
-  return shape.map((v) => v + fret);
+/** Frets are absolute, low E to high e; -1 means muted and 0 open. */
+export function fingerings(chord) {
+  const match = normalizeChord(chord).match(/^([A-G][#b]?)(.*)$/);
+  if (!match) return [];
+  let suffix = match[2].replace(/\/([A-G][#b]?)$/, (_, bass) => "/" + pc(bass));
+  if (suffix === "sus") suffix = "sus4";
+  return guitar[`${pc(match[1])}:${suffix}`] || [];
 }
-export function diagram(c) {
-  const f = fingering(c);
+export function fingering(chord) {
+  return fingerings(chord)[0] || null;
+}
+export function diagram(c, position = 0) {
+  const f = fingerings(c)[position];
   if (!f) return "<p>Posición no disponible para este acorde.</p>";
   const min = Math.min(...f.filter((n) => n > 0)),
     start = Math.max(...f) > 5 ? min : 1;

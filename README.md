@@ -1,11 +1,11 @@
 # Chordi
 
-Estudio local de canciones con letra y acordes, creado desde cero. La versión anterior se conserva, sin modificaciones, en `legacy/`.
+Estudio local de canciones con letra y acordes. Edita, transporta y prepara hojas para tocar, con importación y exportación TXT, PDF y DOCX.
 
 ## Ejecutar
 
 ```sh
-npm install
+npm ci
 npm run dev
 ```
 
@@ -41,3 +41,29 @@ El estilo es compacto y en negro, con título y artista en la primera línea cua
 ```sh
 CHORDI_REFERENCE_PDF="/ruta/al/original.pdf" node tests/reference-pdf.mjs
 ```
+
+## Edición y acordes
+
+Arrastra el separador entre el editor y la hoja para ajustar el ancho. Con el separador enfocado, usa las flechas; Inicio o doble clic restaura el ancho. En móvil los paneles se apilan. El botón de expansión abre el mismo editor en un diálogo grande; Listo o Escape lo cierra y conserva el cursor y los cambios.
+
+Una canción nueva tiene el título vacío: «Nombre de la canción» es una ayuda del campo, no contenido exportado. La pestaña se llama «Nueva canción» hasta escribir un título.
+
+Para colocar un cambio en una sílaba escribe `ca[G]sa`. El ancla es la `s`: los corchetes no ocupan espacio en la letra. La opción de alineación permite empezar el acorde en esa letra o centrarlo sobre ella. Cerca del margen izquierdo se limita el desplazamiento para que el acorde permanezca en la hoja. Los acordes que colisionan se apilan sin añadir espacios a la letra. Previsualización, PDF y DOCX comparten estas posiciones; los saltos manuales ayudan a controlar los versos largos. El formato TXT guarda la opción de alineación. Al reimportar un PDF o DOCX, revisa los anclajes: esos formatos conservan posiciones visuales, no el ancla musical original.
+
+El explorador ofrece **828 entradas y 3.283 posiciones de guitarra** en afinación estándar. Admite equivalencias como `EM7` / `Emaj7`, `A♭ø7` / `Abm7b5`, `C6/9`, `Dm(maj7)` y bajos como `C/G`. Reconocer un símbolo y disponer de una digitación son capacidades diferentes: no se inventan posiciones para las extensiones que faltan.
+
+## Desarrollo
+
+Requiere Node.js 22.13 o posterior. El gestor de referencia es npm y `package-lock.json` fija las dependencias.
+
+```sh
+npm ci
+npm test
+npm run build
+npm run dev
+# En otra terminal, con el servidor anterior activo:
+npx playwright install chromium
+npm run test:e2e
+```
+
+Consulta [la arquitectura](docs/architecture.md), [la guía de contribución](CONTRIBUTING.md) y [las atribuciones](THIRD_PARTY_NOTICES.md). CI ejecuta pruebas unitarias, compilación y navegador. No subas canciones personales ni documentos de prueba con derechos ajenos. La licencia del código propio queda pendiente de elección antes de publicar el proyecto como código abierto; las licencias de terceros se incluyen por separado.

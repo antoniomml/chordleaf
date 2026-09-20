@@ -22,7 +22,7 @@ export function layout(song) {
     capacity = Math.max(8, Math.floor(width / cw));
   const titleSize = 16,
     artistSize = 12,
-    title = song.title || "Sin título",
+    title = song.title || "",
     artist = song.artist || "";
   const artistInline =
     !!artist &&
@@ -101,10 +101,16 @@ export function layout(song) {
         .map((m) => ({ ...m, at: m.at - offset }));
       const laneEnds = [];
       for (const m of ms) {
-        let lane = laneEnds.findIndex((end) => m.at >= end + 0.5);
+        // Keep the musical anchor (at) separate from the visual left edge (x).
+        // At the page boundary, clamp the label rather than moving the lyric.
+        m.x =
+          song.chordAlign === "center" && !instrumental
+            ? Math.max(0, m.at - (m.chord.length - 1) / 2)
+            : m.at;
+        let lane = laneEnds.findIndex((end) => m.x >= end + 0.5);
         if (lane < 0) lane = laneEnds.length;
         m.lane = lane;
-        laneEnds[lane] = m.at + m.chord.length;
+        laneEnds[lane] = m.x + m.chord.length;
       }
       const chordHeight =
         ms.length && !instrumental ? laneEnds.length * size * 1.44 : 0;

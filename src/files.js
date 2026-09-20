@@ -10,10 +10,10 @@ export function download(blob, name) {
   setTimeout(() => URL.revokeObjectURL(a.href), 30000);
 }
 export function txt(song) {
-  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n\n${song.text}`;
+  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordAlign: ${song.chordAlign || "start"}}\n\n${song.text}`;
 }
 export async function exportSong(song, type) {
-  const name = (song.title || "Sin título").replace(/[\\/:*?"<>|]/g, "-");
+  const name = (song.title || "Canción").replace(/[\\/:*?"<>|]/g, "-");
   if (type === "txt") {
     download(
       new Blob([txt(song)], { type: "text/plain;charset=utf-8" }),
@@ -60,7 +60,7 @@ export async function exportSong(song, type) {
           for (const m of row.marks)
             pdf.text(
               m.chord,
-              row.x + m.at * l.cw,
+              row.x + m.x * l.cw,
               row.y + l.size + (m.lane || 0) * l.size * 1.44,
             );
           pdf.setFont("GoogleSansCode", "normal");
@@ -82,6 +82,7 @@ export async function exportSong(song, type) {
     WidthType,
     BorderStyle,
     TabStopType,
+    Tab,
     PageBreak,
   } = await import("docx");
   const noBorder = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
@@ -206,10 +207,38 @@ export async function exportSong(song, type) {
             lane < Math.round(row.lyricOffset / (l.size * 1.44));
             lane++
           ) {
-            let line = "";
-            for (const m of row.marks.filter((m) => (m.lane || 0) === lane))
-              line = line.padEnd(m.at, " ") + m.chord;
-            paras.push(para(line, l.size, true, "111111", l.size * 1.44));
+            const marks = row.marks.filter((m) => (m.lane || 0) === lane);
+            if (song.chordAlign !== "center") {
+              let line = "";
+              for (const m of marks) line = line.padEnd(m.at, " ") + m.chord;
+              paras.push(para(line, l.size, true, "111111", l.size * 1.44));
+              continue;
+            }
+            paras.push(
+              new Paragraph({
+                spacing: {
+                  before: 0,
+                  after: 0,
+                  line: Math.round(l.size * 1.44 * 20),
+                  lineRule: "exact",
+                },
+                tabStops: marks
+                  .filter((m) => m.x > 0)
+                  .map((m) => ({
+                    type: TabStopType.LEFT,
+                    position: Math.round(m.x * l.cw * 20),
+                  })),
+                children: marks.map(
+                  (m) =>
+                    new TextRun({
+                      children: [...(m.x > 0 ? [new Tab()] : []), m.chord],
+                      font: DOCUMENT_FONT,
+                      size: l.size * 2,
+                      bold: true,
+                    }),
+                ),
+              }),
+            );
           }
           paras.push(
             para(
@@ -327,11 +356,13 @@ export function importText(text, fallback) {
     lines = text.replace(/\r/g, "").split("\n");
   lines = lines.filter((line) => {
     const m = line.match(
-      /^\{(title|artist|capo|columns|fontSize|margin):\s*(.*?)\}$/i,
+      /^\{(title|artist|capo|columns|fontSize|margin|chordAlign):\s*(.*?)\}$/i,
     );
     if (!m) return true;
     const key = m[1];
-    song[key] = ["title", "artist"].includes(key) ? m[2] : Number(m[2]);
+    song[key] = ["title", "artist", "chordAlign"].includes(key)
+      ? m[2]
+      : Number(m[2]);
     return false;
   });
   const capo = lines.findIndex((l) =>

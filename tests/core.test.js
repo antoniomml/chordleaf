@@ -7,6 +7,8 @@ import {
   fingering,
   pc,
   chords,
+  fingerings,
+  chordRE,
 } from "../src/music.js";
 import { layout, PAGE } from "../src/layout.js";
 import { importText } from "../src/files.js";
@@ -48,7 +50,7 @@ test("key and diagrams are derived from chords", () => {
   assert.equal(keyInfo("[G] [C] [D] [Em] [G]").name, "G mayor");
   assert.deepEqual(fingering("Am"), [-1, 0, 2, 2, 1, 0]);
   assert.equal(fingering("F#m").length, 6);
-  assert.equal(fingering("C/G"), null);
+  assert.equal(fingering("C/G").length, 6);
 });
 test("all rows fit page bounds in both column modes", () => {
   for (const columns of [1, 2]) {
@@ -102,4 +104,115 @@ test("long titles reserve space above both columns", () => {
   });
   assert.ok(l.titleLines.length > 1);
   assert.ok(l.pages[0].columns[0][0].y >= l.margin + l.headerHeight);
+});
+
+test("extended chord spellings survive parsing and transposition", () => {
+  for (const name of [
+    "Emaj7",
+    "EM7",
+    "EΔ7",
+    "Abm7(b5)",
+    "A♭ø7",
+    "F#dim7",
+    "C6/9",
+    "G7(#9)",
+    "Dm(maj7)",
+    "C/G",
+    "E5+",
+  ]) {
+    assert.ok(chordRE.test(name), name);
+    assert.equal(chords(`[${name}]voz`)[0], name);
+    assert.equal(fingerings(name).length > 0, true, name);
+    assert.ok(chordRE.test(chords(transpose(`[${name}]`, 2))[0]), name);
+  }
+  for (const name of ["Estribillo", "Charge", "Cfoo", "C99", "A song"])
+    assert.equal(chordRE.test(name), false, name);
+});
+
+test("catalog covers all chromatic roots and common extended families", () => {
+  for (const root of [
+    "C",
+    "C#",
+    "D",
+    "Eb",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "Ab",
+    "A",
+    "Bb",
+    "B",
+  ]) {
+    for (const suffix of [
+      "",
+      "m",
+      "maj7",
+      "m7b5",
+      "dim7",
+      "9",
+      "m9",
+      "13",
+      "sus2",
+      "sus4",
+    ]) {
+      const positions = fingerings(root + suffix);
+      assert.ok(positions.length, root + suffix);
+      positions.forEach((frets) => {
+        assert.equal(frets.length, 6);
+        assert.ok(
+          frets.every(
+            (fret) => Number.isInteger(fret) && fret >= -1 && fret <= 24,
+          ),
+        );
+      });
+    }
+  }
+  const tuning = [40, 45, 50, 55, 59, 64];
+  for (const [name, allowed] of [
+    ["Emaj7", [4, 8, 11, 3]],
+    ["Abm7b5", [8, 11, 2, 6]],
+  ]) {
+    for (const frets of fingerings(name)) {
+      const notes = frets.flatMap((fret, i) =>
+        fret < 0 ? [] : [(tuning[i] + fret) % 12],
+      );
+      assert.ok(
+        notes.every((note) => allowed.includes(note)),
+        name,
+      );
+      assert.ok(
+        allowed.every((note) => notes.includes(note)),
+        name,
+      );
+    }
+  }
+});
+
+test("centered labels retain exact syllable anchors and avoid collisions", () => {
+  const l = layout({
+    ...base,
+    chordAlign: "center",
+    text: "Una ca[Emaj7]sa [Abm7b5]azul",
+  });
+  const row = l.pages[0].columns[0][0];
+  assert.equal(row.lyric, "Una casa azul");
+  assert.equal(row.marks[0].at, 6);
+  assert.equal(row.marks[0].x, 4);
+  assert.notEqual(row.marks[0].lane, row.marks[1].lane);
+  const edge = layout({ ...base, chordAlign: "center", text: "[Emaj7]Casa" })
+    .pages[0].columns[0][0];
+  assert.equal(edge.marks[0].x, 0);
+});
+
+test("blank titles stay blank in document layout and text round trips", () => {
+  assert.deepEqual(layout({ ...base, title: "" }).titleLines, [""]);
+  assert.equal(
+    importText("{title: }\n{chordAlign: center}\n[C]Voz", "fallback").title,
+    "",
+  );
+  assert.equal(
+    importText("{chordAlign: center}\n[C]Voz", "fallback").chordAlign,
+    "center",
+  );
 });

@@ -1,5 +1,7 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
+import { mkdir } from "node:fs/promises";
+await mkdir("artifacts", { recursive: true });
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 const errors = [];
@@ -82,6 +84,82 @@ assert.equal(
 );
 await source.fill(original);
 await page.locator('[data-columns="1"]').click();
+// Resizing works with keyboard and pointer, without losing source content.
+await page.locator("#panel-splitter").focus();
+const beforeWidth = await page
+  .locator(".editor-panel")
+  .evaluate((el) => el.clientWidth);
+await page.keyboard.press("ArrowRight");
+assert.ok(
+  (await page.locator(".editor-panel").evaluate((el) => el.clientWidth)) >
+    beforeWidth,
+);
+const handle = await page.locator("#panel-splitter").boundingBox();
+await page.mouse.move(handle.x + 4, handle.y + 80);
+await page.mouse.down();
+await page.mouse.move(handle.x + 84, handle.y + 80);
+await page.mouse.up();
+assert.ok(
+  (await page.locator(".editor-panel").evaluate((el) => el.clientWidth)) >
+    beforeWidth + 50,
+);
+await page.locator("#panel-splitter").press("Home");
+await page.locator("#expand-editor").click();
+assert.equal(await page.locator("#editor-dialog").isVisible(), true);
+await source.fill("Una ca[Emaj7]sa [Abm7b5]azul");
+await page.locator("#chord-align").selectOption("center");
+await page.screenshot({
+  path: "artifacts/expanded-editor.png",
+  fullPage: true,
+});
+await source.press("Escape");
+assert.equal(await page.locator("#editor-dialog").isVisible(), false);
+assert.equal(await source.inputValue(), "Una ca[Emaj7]sa [Abm7b5]azul");
+assert.equal(
+  await page
+    .locator(".sheet-chord")
+    .first()
+    .evaluate((el) => parseFloat(el.style.left)),
+  24,
+);
+for (const type of ["pdf", "docx", "txt"]) {
+  await page.locator("#export").click();
+  const download = page.waitForEvent("download");
+  await page.locator(`[data-export="${type}"]`).click();
+  await (await download).saveAs(`artifacts/centered.${type}`);
+}
+await page.locator("#browse-chords").click();
+await page.locator("#chord-name").fill("Abm7b5");
+assert.ok(
+  (await page.locator("#position-count").textContent()).startsWith(
+    "Posición 1 de",
+  ),
+);
+await page.locator("#next-position").click();
+assert.ok(
+  (await page.locator("#position-count").textContent()).startsWith(
+    "Posición 2 de",
+  ),
+);
+await page.screenshot({ path: "artifacts/chord-library.png" });
+await page.locator("#insert-library-chord").click();
+assert.ok((await source.inputValue()).endsWith("[Abm7b5]"));
+await page.locator("#new").click();
+await page.locator("#blank").click();
+assert.equal(await page.locator("#title").inputValue(), "");
+assert.equal(
+  await page.locator("#title").getAttribute("placeholder"),
+  "Nombre de la canción",
+);
+assert.equal(await page.locator(".sheet-header h1").textContent(), "");
+assert.equal(await source.inputValue(), "");
+await page.locator("#title").fill("Prueba de edición");
+await source.fill("Una ca[Emaj7]sa [Abm7b5]azul");
+await page.locator("#chord-align").selectOption("center");
+await page.waitForTimeout(450);
+await page.reload();
+assert.equal(await source.inputValue(), "Una ca[Emaj7]sa [Abm7b5]azul");
+assert.equal(await page.locator("#chord-align").inputValue(), "center");
 await page.setViewportSize({ width: 900, height: 800 });
 await page.screenshot({ path: "artifacts/compact.png", fullPage: true });
 await page.setViewportSize({ width: 390, height: 844 });
@@ -90,6 +168,19 @@ assert.equal(
   await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
   false,
 );
+await page.locator("#expand-editor").click();
+assert.equal(await page.locator("#editor-dialog").isVisible(), true);
+assert.equal(
+  await page
+    .locator("#editor-dialog")
+    .evaluate((el) => el.scrollWidth > el.clientWidth),
+  false,
+);
+await page.screenshot({
+  path: "artifacts/mobile-expanded.png",
+  fullPage: true,
+});
+await page.locator("#collapse-editor").click();
 assert.deepEqual(errors, []);
 console.log("Browser checks passed; multi-page count:", count);
 await browser.close();
