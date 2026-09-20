@@ -12,11 +12,27 @@ try {
   await page.locator(".page").waitFor();
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: "docs/images/workspace.png" });
-  await page.locator("#browse-chords").click();
-  await page.locator("#chord-name").fill("Abm7b5");
+  await page.locator('[data-section="chords"]').click();
   await page
-    .locator("#chord-library")
+    .locator(".editor-panel")
     .screenshot({ path: "docs/images/chord-library.png" });
+  await page.locator('[data-mode="identify"]').click();
+  for (const [string, fret] of [
+    [1, 3],
+    [2, 2],
+    [3, 0],
+    [4, 1],
+    [5, 0],
+  ]) {
+    await page
+      .locator(
+        `[data-string="${string}"][data-fret="${fret === 0 ? -1 : fret}"]`,
+      )
+      .click();
+  }
+  await page
+    .locator(".editor-panel")
+    .screenshot({ path: "docs/images/chord-identifier.png" });
 } finally {
   await browser.close();
 }

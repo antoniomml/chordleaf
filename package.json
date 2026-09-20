@@ -8,10 +8,11 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test tests/*.test.js",
-    "test:e2e": "node tests/browser.mjs",
-    "format": "prettier --write src tests scripts docs *.md index.html package.json pnpm-workspace.yaml .github",
+    "test:e2e": "node tests/browser.mjs && node tests/chords-browser.mjs && node tests/workspace-browser.mjs && node tests/import-browser.mjs && node tests/instrumental-browser.mjs && node tests/new-song-browser.mjs",
+    "format": "prettier --write src tests scripts server vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
     "docs:screenshots": "node scripts/docs-screenshots.mjs",
-    "format:check": "prettier --check src tests scripts docs *.md index.html package.json pnpm-workspace.yaml .github"
+    "format:check": "prettier --check src tests scripts server vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
+    "start": "node server/start.js"
   },
   "dependencies": {
     "docx": "^9.5.1",
