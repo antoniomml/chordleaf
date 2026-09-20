@@ -22,8 +22,8 @@ export function layout(song) {
     capacity = Math.max(8, Math.floor(width / cw));
   const titleSize = 16,
     artistSize = 12,
-    title = song.title || "",
-    artist = song.artist || "";
+    title = (song.title || "").toLocaleUpperCase(),
+    artist = (song.artist || "").toLocaleUpperCase();
   const artistInline =
     !!artist &&
     title.length * titleSize * 0.6 + 32 + artist.length * artistSize * 0.6 <=
@@ -46,6 +46,10 @@ export function layout(song) {
     artistLines,
     capoY,
   };
+  const label = (chord) =>
+    song.chordShapes?.[chord]?.star && !chord.endsWith("*")
+      ? chord + "*"
+      : chord;
   const rows = [];
   for (const line of parseSong(song.text)) {
     if (line.break) {
@@ -53,7 +57,7 @@ export function layout(song) {
       continue;
     }
     let lyric = line.lyric,
-      marks = line.marks.map((m) => ({ ...m }));
+      marks = line.marks.map((m) => ({ ...m, chord: label(m.chord) }));
     const instrumental = marks.length > 0 && /^[\s|:–—−\-]*$/.test(lyric);
     if (instrumental) {
       let text = "",
@@ -62,8 +66,8 @@ export function layout(song) {
       for (const m of line.raw.matchAll(/\[([^\]]+)\]/g)) {
         text += line.raw.slice(end, m.index);
         if (chordRE.test(m[1])) {
-          marks.push({ at: text.length, chord: m[1] });
-          text += " ".repeat(m[1].length);
+          marks.push({ at: text.length, chord: label(m[1]) });
+          text += " ".repeat(label(m[1]).length);
         } else text += m[0];
         end = m.index + m[0].length;
       }
@@ -102,11 +106,7 @@ export function layout(song) {
       const laneEnds = [];
       for (const m of ms) {
         // Keep the musical anchor (at) separate from the visual left edge (x).
-        // At the page boundary, clamp the label rather than moving the lyric.
-        m.x =
-          song.chordAlign === "center" && !instrumental
-            ? Math.max(0, m.at - (m.chord.length - 1) / 2)
-            : m.at;
+        m.x = m.at;
         let lane = laneEnds.findIndex((end) => m.x >= end + 0.5);
         if (lane < 0) lane = laneEnds.length;
         m.lane = lane;

@@ -17,6 +17,7 @@ const pitch = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 /** Normalize notation for lookup while preserving the author's spelling on the page. */
 export function normalizeChord(value) {
   return value
+    .replace(/\*$/, "")
     .replace(/♭/g, "b")
     .replace(/♯/g, "#")
     .replace(/[() ,]/g, "")
@@ -159,8 +160,8 @@ export function fingerings(chord) {
 export function fingering(chord) {
   return fingerings(chord)[0] || null;
 }
-export function diagram(c, position = 0) {
-  const f = fingerings(c)[position];
+export function diagram(c, position = 0, custom) {
+  const f = custom || fingerings(c)[position];
   if (!f) return "<p>Posición no disponible para este acorde.</p>";
   const min = Math.min(...f.filter((n) => n > 0)),
     start = Math.max(...f) > 5 ? min : 1;

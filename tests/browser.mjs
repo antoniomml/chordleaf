@@ -64,12 +64,12 @@ await page.locator("#file").setInputFiles("artifacts/sample.pdf");
 await page.waitForFunction(
   () => document.querySelector("#new-dialog").open === false,
 );
-assert.equal(await page.locator("#title").inputValue(), "Al otro lado");
+assert.equal(await page.locator("#title").inputValue(), "Al Otro Lado");
 assert.equal(await source.inputValue(), original);
 await page.locator("#new").click();
 await page.locator("#file").setInputFiles("artifacts/sample.docx");
 await page.waitForFunction(() => !document.querySelector("#new-dialog").open);
-assert.equal(await page.locator("#title").inputValue(), "Al otro lado");
+assert.equal(await page.locator("#title").inputValue(), "Al Otro Lado");
 assert.equal((await source.inputValue()).trim(), original.trim());
 await page.locator("#new").click();
 await page.locator("#file").setInputFiles("artifacts/multipage.pdf");
@@ -107,7 +107,7 @@ await page.locator("#panel-splitter").press("Home");
 await page.locator("#expand-editor").click();
 assert.equal(await page.locator("#editor-dialog").isVisible(), true);
 await source.fill("Una ca[Emaj7]sa [Abm7b5]azul");
-await page.locator("#chord-align").selectOption("center");
+assert.equal(await page.locator("#chord-align").count(), 0);
 await page.screenshot({
   path: "artifacts/expanded-editor.png",
   fullPage: true,
@@ -120,7 +120,7 @@ assert.equal(
     .locator(".sheet-chord")
     .first()
     .evaluate((el) => parseFloat(el.style.left)),
-  24,
+  36,
 );
 for (const type of ["pdf", "docx", "txt"]) {
   await page.locator("#export").click();
@@ -155,11 +155,108 @@ assert.equal(await page.locator(".sheet-header h1").textContent(), "");
 assert.equal(await source.inputValue(), "");
 await page.locator("#title").fill("Prueba de edición");
 await source.fill("Una ca[Emaj7]sa [Abm7b5]azul");
-await page.locator("#chord-align").selectOption("center");
+assert.equal(await page.locator("#chord-align").count(), 0);
 await page.waitForTimeout(450);
 await page.reload();
 assert.equal(await source.inputValue(), "Una ca[Emaj7]sa [Abm7b5]azul");
-assert.equal(await page.locator("#chord-align").inputValue(), "center");
+assert.equal(await page.locator("#chord-align").count(), 0);
+// View zoom leaves the document layout unchanged.
+const pageWidth = await page
+  .locator(".page")
+  .first()
+  .evaluate((el) => el.getBoundingClientRect().width);
+await page.locator("#zoom-in").click();
+assert.ok(
+  (await page
+    .locator(".page")
+    .first()
+    .evaluate((el) => el.getBoundingClientRect().width)) > pageWidth,
+);
+await page.locator("#zoom-reset").click();
+await page.locator("#title").fill("alone again");
+await page.locator("#artist").fill("gilbert sullivan");
+assert.equal(
+  await page.locator(".sheet-header h1").textContent(),
+  "ALONE AGAIN",
+);
+assert.equal(await page.locator("#title").inputValue(), "alone again");
+await page.locator(".dictionary-tray summary").click();
+await page
+  .getByRole("button", { name: "Editar posición de Emaj7", exact: true })
+  .click();
+await page.locator(".fret-inputs input").nth(0).fill("0");
+await page.locator("#shape-dialog button", { hasText: "Guardar" }).click();
+assert.equal(
+  await page.locator(".sheet-chord").first().textContent(),
+  "Emaj7*",
+);
+await page
+  .getByRole("button", { name: "Añadir todos los diagramas", exact: true })
+  .click();
+assert.equal(await page.locator(".chord-sticker").count(), 1);
+const sticker = page.locator(".chord-sticker");
+await sticker.scrollIntoViewIfNeeded();
+await sticker.focus();
+const oldLeft = await sticker.evaluate((el) => parseFloat(el.style.left));
+await sticker.press("ArrowRight");
+assert.equal(
+  await sticker.evaluate((el) => parseFloat(el.style.left)),
+  oldLeft + 5,
+);
+const resizer = sticker.locator(".resize-sticker");
+await resizer.focus();
+const oldWidth = await sticker.evaluate((el) => parseFloat(el.style.width));
+await resizer.press("ArrowRight");
+assert.ok(
+  (await sticker.evaluate((el) => parseFloat(el.style.width))) > oldWidth,
+);
+// Pointer drag remains accurate when the document is zoomed.
+await page.locator("#zoom-in").click();
+await sticker.scrollIntoViewIfNeeded();
+const bounds = await sticker.boundingBox();
+const originalY = await sticker.evaluate((el) => parseFloat(el.style.top));
+await page.mouse.move(bounds.x + 20, bounds.y + 25);
+await page.mouse.down();
+await page.mouse.move(bounds.x + 50, bounds.y - 35, { steps: 5 });
+await page.mouse.up();
+assert.ok(
+  (await sticker.evaluate((el) => parseFloat(el.style.top))) < originalY - 30,
+);
+await page.locator("#zoom-reset").click();
+await page
+  .getByRole("button", { name: "Editar posición de Emaj7", exact: true })
+  .click();
+await page.locator("#shape-dialog [name=star]").uncheck();
+await page.locator("#shape-dialog button", { hasText: "Guardar" }).click();
+assert.equal(await page.locator(".sheet-chord").first().textContent(), "Emaj7");
+await page
+  .getByRole("button", { name: "Editar posición de Emaj7", exact: true })
+  .click();
+await page.locator("#shape-dialog [name=star]").check();
+await page.locator("#shape-dialog button", { hasText: "Guardar" }).click();
+for (const type of ["pdf", "docx", "txt"]) {
+  await page.locator("#export").click();
+  const download = page.waitForEvent("download");
+  await page.locator(`[data-export="${type}"]`).click();
+  await (await download).saveAs(`artifacts/dictionary.${type}`);
+}
+await page.waitForTimeout(450);
+await page.reload();
+assert.equal(await page.locator(".chord-sticker").count(), 1);
+assert.equal(
+  await page.locator(".sheet-chord").first().textContent(),
+  "Emaj7*",
+);
+await page.screenshot({ path: "artifacts/dictionary.png", fullPage: true });
+await page.locator("#new").click();
+await page.locator("#file").setInputFiles("artifacts/dictionary.txt");
+await page.waitForFunction(() => !document.querySelector("#new-dialog").open);
+assert.equal(await page.locator(".chord-sticker").count(), 1);
+assert.equal(
+  await page.locator(".sheet-chord").first().textContent(),
+  "Emaj7*",
+);
+assert.equal(await page.locator("#title").inputValue(), "Alone Again");
 await page.setViewportSize({ width: 900, height: 800 });
 await page.screenshot({ path: "artifacts/compact.png", fullPage: true });
 await page.setViewportSize({ width: 390, height: 844 });

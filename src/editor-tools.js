@@ -2,7 +2,6 @@
  * so selection, undo history and autosave have a single source of truth. */
 export function setupEditorTools({
   resizePages,
-  onAlignment,
   onChord,
   diagram,
   fingerings,
@@ -28,7 +27,6 @@ export function setupEditorTools({
     input.focus();
     input.setSelectionRange(...selection);
   });
-  $("#chord-align").onchange = (event) => onAlignment(event.target.value);
 
   const splitter = $("#panel-splitter");
   const workspace = $(".workspace");

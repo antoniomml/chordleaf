@@ -1,3 +1,4 @@
+import { stickerPng, stickerGeometry } from "./dictionary.js";
 import { layout, PAGE } from "./layout.js";
 import { chordRE } from "./music.js";
 import { parsePdfPages, chordRow } from "./pdf-import.js";
@@ -10,7 +11,7 @@ export function download(blob, name) {
   setTimeout(() => URL.revokeObjectURL(a.href), 30000);
 }
 export function txt(song) {
-  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordAlign: ${song.chordAlign || "start"}}\n\n${song.text}`;
+  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordi: ${JSON.stringify({ chordShapes: song.chordShapes || {}, chordStickers: song.chordStickers || [] })}}\n\n${song.text}`;
 }
 export async function exportSong(song, type) {
   const name = (song.title || "Canción").replace(/[\\/:*?"<>|]/g, "-");
@@ -22,6 +23,14 @@ export async function exportSong(song, type) {
     return;
   }
   const l = layout(song);
+  const stickers = await Promise.all(
+    (song.chordStickers || []).map(async (sticker) => ({
+      ...sticker,
+      ...stickerGeometry(song, sticker),
+      page: Math.min(sticker.page, l.pages.length - 1),
+      png: await stickerPng(song, sticker),
+    })),
+  );
   if (type === "pdf") {
     const { jsPDF } = await import("jspdf");
     const pdf = new jsPDF({ unit: "pt", format: "a4" });
@@ -67,6 +76,15 @@ export async function exportSong(song, type) {
           pdf.setTextColor("#111111");
           pdf.text(row.lyric, row.x, row.y + l.size + row.lyricOffset);
         }
+      for (const sticker of stickers.filter((s) => s.page === i))
+        pdf.addImage(
+          sticker.png,
+          "PNG",
+          sticker.x,
+          sticker.y,
+          sticker.width,
+          sticker.height,
+        );
     });
     pdf.save(name + ".pdf");
     return;
@@ -82,8 +100,8 @@ export async function exportSong(song, type) {
     WidthType,
     BorderStyle,
     TabStopType,
-    Tab,
     PageBreak,
+    ImageRun,
   } = await import("docx");
   const noBorder = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
     borders = {
@@ -119,6 +137,38 @@ export async function exportSong(song, type) {
           spacing: { before: 0, after: 0, line: 1, lineRule: "exact" },
         }),
       );
+    for (const sticker of stickers.filter((s) => s.page === i)) {
+      children.push(
+        new Paragraph({
+          spacing: { before: 0, after: 0, line: 1, lineRule: "exact" },
+          children: [
+            new ImageRun({
+              type: "png",
+              data: Uint8Array.from(atob(sticker.png.split(",")[1]), (c) =>
+                c.charCodeAt(0),
+              ),
+              transformation: {
+                width: (sticker.width * 96) / 72,
+                height: (sticker.height * 96) / 72,
+              },
+              floating: {
+                horizontalPosition: {
+                  relative: "page",
+                  offset: Math.round(sticker.x * 12700),
+                },
+                verticalPosition: {
+                  relative: "page",
+                  offset: Math.round(sticker.y * 12700),
+                },
+                allowOverlap: true,
+                behindDocument: false,
+                layoutInCell: false,
+              },
+            }),
+          ],
+        }),
+      );
+    }
     if (!i) {
       l.titleLines.forEach((line, index) =>
         children.push(
@@ -141,7 +191,7 @@ export async function exportSong(song, type) {
               ...(index === 0 && l.header.artistInline
                 ? [
                     new TextRun({
-                      text: "\t" + song.artist,
+                      text: "\t" + song.artist.toLocaleUpperCase(),
                       font: DOCUMENT_FONT,
                       size: 24,
                       color: "111111",
@@ -208,37 +258,9 @@ export async function exportSong(song, type) {
             lane++
           ) {
             const marks = row.marks.filter((m) => (m.lane || 0) === lane);
-            if (song.chordAlign !== "center") {
-              let line = "";
-              for (const m of marks) line = line.padEnd(m.at, " ") + m.chord;
-              paras.push(para(line, l.size, true, "111111", l.size * 1.44));
-              continue;
-            }
-            paras.push(
-              new Paragraph({
-                spacing: {
-                  before: 0,
-                  after: 0,
-                  line: Math.round(l.size * 1.44 * 20),
-                  lineRule: "exact",
-                },
-                tabStops: marks
-                  .filter((m) => m.x > 0)
-                  .map((m) => ({
-                    type: TabStopType.LEFT,
-                    position: Math.round(m.x * l.cw * 20),
-                  })),
-                children: marks.map(
-                  (m) =>
-                    new TextRun({
-                      children: [...(m.x > 0 ? [new Tab()] : []), m.chord],
-                      font: DOCUMENT_FONT,
-                      size: l.size * 2,
-                      bold: true,
-                    }),
-                ),
-              }),
-            );
+            let line = "";
+            for (const m of marks) line = line.padEnd(m.at, " ") + m.chord;
+            paras.push(para(line, l.size, true, "111111", l.size * 1.44));
           }
           paras.push(
             para(
@@ -351,10 +373,56 @@ function alignText(lines) {
   }
   return out.join("\n");
 }
+export function titleCase(value = "") {
+  return value
+    .toLocaleLowerCase()
+    .replace(
+      /(^|[\s\-–—/])([\p{L}])/gu,
+      (_, gap, letter) => gap + letter.toLocaleUpperCase(),
+    );
+}
 export function importText(text, fallback) {
   let song = { title: fallback, artist: "", capo: 0 },
     lines = text.replace(/\r/g, "").split("\n");
   lines = lines.filter((line) => {
+    const metadata = line.match(/^\{chordi: (.*)\}$/);
+    if (metadata) {
+      try {
+        const data = JSON.parse(metadata[1]);
+        song.chordShapes = Object.fromEntries(
+          Object.entries(data.chordShapes || {}).filter(
+            ([name, shape]) =>
+              chordRE.test(name) &&
+              Array.isArray(shape?.frets) &&
+              shape.frets.length === 6 &&
+              shape.frets.every(
+                (n) => Number.isInteger(n) && n >= -1 && n <= 24,
+              ),
+          ),
+        );
+        song.chordStickers = (
+          Array.isArray(data.chordStickers) ? data.chordStickers : []
+        ).filter(
+          (s) =>
+            s &&
+            [s.x, s.y, s.width, s.page].every(Number.isFinite) &&
+            s.x >= 0 &&
+            s.y >= 0 &&
+            s.width >= 65 &&
+            s.width <= PAGE.width &&
+            Number.isInteger(s.page) &&
+            s.page >= 0 &&
+            (s.chords === "all" ||
+              (Array.isArray(s.chords) &&
+                s.chords.every(
+                  (c) => typeof c === "string" && chordRE.test(c),
+                ))),
+        );
+      } catch {
+        /* Ignore malformed optional editor metadata. */
+      }
+      return false;
+    }
     const m = line.match(
       /^\{(title|artist|capo|columns|fontSize|margin|chordAlign):\s*(.*?)\}$/i,
     );
@@ -373,6 +441,8 @@ export function importText(text, fallback) {
     lines.splice(capo, 1);
   }
   song.text = alignText(lines).replace(/^\n+|\n+$/g, "");
+  song.title = titleCase(song.title);
+  song.artist = titleCase(song.artist);
   return song;
 }
 export async function importFile(file) {
@@ -433,8 +503,8 @@ export async function importFile(file) {
     const imported = importText(lines.join("\n"), fallback);
     return {
       ...imported,
-      title,
-      artist,
+      title: titleCase(title),
+      artist: titleCase(artist),
       columns,
       notice:
         "Word importado. Revisa el título y la alineación de los acordes.",
@@ -489,7 +559,12 @@ export async function importFile(file) {
           }),
       });
     }
-    return parsePdfPages(pages, fallback);
+    const result = parsePdfPages(pages, fallback);
+    return {
+      ...result,
+      title: titleCase(result.title),
+      artist: titleCase(result.artist),
+    };
   } finally {
     await loadingTask.destroy();
   }

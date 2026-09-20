@@ -189,7 +189,7 @@ test("catalog covers all chromatic roots and common extended families", () => {
   }
 });
 
-test("centered labels retain exact syllable anchors and avoid collisions", () => {
+test("labels always start at the syllable, including legacy centered documents", () => {
   const l = layout({
     ...base,
     chordAlign: "center",
@@ -198,7 +198,7 @@ test("centered labels retain exact syllable anchors and avoid collisions", () =>
   const row = l.pages[0].columns[0][0];
   assert.equal(row.lyric, "Una casa azul");
   assert.equal(row.marks[0].at, 6);
-  assert.equal(row.marks[0].x, 4);
+  assert.equal(row.marks[0].x, 6);
   assert.notEqual(row.marks[0].lane, row.marks[1].lane);
   const edge = layout({ ...base, chordAlign: "center", text: "[Emaj7]Casa" })
     .pages[0].columns[0][0];
@@ -215,4 +215,25 @@ test("blank titles stay blank in document layout and text round trips", () => {
     importText("{chordAlign: center}\n[C]Voz", "fallback").chordAlign,
     "center",
   );
+});
+
+test("document headers are uppercase without mutating editable names", () => {
+  const song = { ...base, title: "Alone Again", artist: "gilbert o’sullivan" };
+  const result = layout(song);
+  assert.deepEqual(result.titleLines, ["ALONE AGAIN"]);
+  assert.deepEqual(result.header.artistLines, ["GILBERT O’SULLIVAN"]);
+  assert.equal(song.title, "Alone Again");
+  const imported = importText(
+    "{title: ALONE AGAIN}\n{artist: GILBERT O’SULLIVAN}\n[C]Voz",
+    "fallback",
+  );
+  assert.equal(imported.title, "Alone Again");
+  assert.equal(imported.artist, "Gilbert O’sullivan");
+});
+
+test("custom chord marker is optional and doesn't alter lyrics", () => {
+  const song = { ...base, text: "[E]Voz", chordShapes: { E: { star: true } } };
+  assert.equal(layout(song).pages[0].columns[0][0].marks[0].chord, "E*");
+  song.chordShapes.E.star = false;
+  assert.equal(layout(song).pages[0].columns[0][0].marks[0].chord, "E");
 });
