@@ -128,22 +128,22 @@ for (const type of ["pdf", "docx", "txt"]) {
   await page.locator(`[data-export="${type}"]`).click();
   await (await download).saveAs(`artifacts/centered.${type}`);
 }
-await page.locator("#browse-chords").click();
-await page.locator("#chord-name").fill("Abm7b5");
+await page.locator('[data-section="chords"]').click();
+await page.locator('[data-mode="search"]').click();
+await page.locator("#catalog-search").fill("Abm7b5");
+await page.locator("#catalog-grid .chord-card").first().click();
 assert.ok(
-  (await page.locator("#position-count").textContent()).startsWith(
-    "Posición 1 de",
-  ),
+  (await page.locator("#chosen-position").textContent()).startsWith("1 /"),
 );
-await page.locator("#next-position").click();
+await page.locator("#chosen-next").click();
 assert.ok(
-  (await page.locator("#position-count").textContent()).startsWith(
-    "Posición 2 de",
-  ),
+  (await page.locator("#chosen-position").textContent()).startsWith("2 /"),
 );
 await page.screenshot({ path: "artifacts/chord-library.png" });
-await page.locator("#insert-library-chord").click();
+await page.locator("#insert-chosen").click();
 assert.ok((await source.inputValue()).endsWith("[Abm7b5]"));
+await page.locator('[data-mode="song"]').click();
+await page.locator('[data-section="document"]').click();
 await page.locator("#new").click();
 await page.locator("#blank").click();
 assert.equal(await page.locator("#title").inputValue(), "");
@@ -180,7 +180,7 @@ assert.equal(
   "ALONE AGAIN",
 );
 assert.equal(await page.locator("#title").inputValue(), "alone again");
-await page.locator(".dictionary-tray summary").click();
+await page.locator('[data-section="chords"]').click();
 await page
   .getByRole("button", { name: "Editar posición de Emaj7", exact: true })
   .click();
@@ -203,7 +203,7 @@ assert.equal(
   await sticker.evaluate((el) => parseFloat(el.style.left)),
   oldLeft + 5,
 );
-const resizer = sticker.locator(".resize-sticker");
+const resizer = sticker.locator(".resize-corner");
 await resizer.focus();
 const oldWidth = await sticker.evaluate((el) => parseFloat(el.style.width));
 await resizer.press("ArrowRight");

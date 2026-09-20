@@ -1,12 +1,17 @@
 import { chords, fingering, diagram } from "./music.js";
 import { PAGE } from "./layout.js";
-import { stickerGeometry, stickerSvg } from "./dictionary.js";
+import {
+  stickerGeometry,
+  stickerSvg,
+  MIN_STICKER_WIDTH,
+  MIN_STICKER_HEIGHT,
+} from "./dictionary.js";
 export function setupDictionary({ song, changed, renderPages, esc }) {
-  const tray = document.createElement("details");
+  const tray = document.createElement("section");
   tray.className = "dictionary-tray";
   tray.innerHTML =
-    '<summary>Diccionario en el folio</summary><p>Arrastra el conjunto o un acorde a la hoja. También puedes añadirlo con +.</p><div class="dictionary-items"></div>';
-  document.querySelector(".quick").after(tray);
+    '<h2>Los acordes de tu canción</h2><p>Arrastra el conjunto o un acorde a la hoja. También puedes añadirlo con +.</p><div class="dictionary-items chord-card-grid"></div>';
+  document.querySelector("#song-chords").append(tray);
   const dialog = document.createElement("dialog");
   dialog.id = "shape-dialog";
   dialog.innerHTML =
@@ -41,11 +46,7 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
       Number(el.value),
     );
   function valid(frets) {
-    const positive = frets.filter((n) => n > 0);
-    return (
-      frets.every((n) => Number.isInteger(n) && n >= -1 && n <= 24) &&
-      (!positive.length || Math.max(...positive) - Math.min(...positive) <= 4)
-    );
+    return frets.every((n) => Number.isInteger(n) && n >= -1 && n <= 24);
   }
   function preview() {
     const frets = values();
@@ -54,12 +55,12 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
       : "";
     dialog.querySelector(".shape-error").textContent = valid(frets)
       ? ""
-      : "Usa trastes entre −1 y 24 y una posición que abarque hasta cinco trastes.";
+      : "Usa trastes enteros entre −1 y 24.";
   }
   dialog.oninput = preview;
   dialog.querySelector(".cancel-shape").onclick = () => dialog.close();
   dialog.querySelector(".restore-shape").onclick = () => {
-    delete song().chordShapes[editingChord];
+    if (song().chordShapes) delete song().chordShapes[editingChord];
     changed();
     dialog.close();
     renderTray();
@@ -94,23 +95,81 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
     renderPages();
   }
   function constrain(sticker) {
-    let g = stickerGeometry(song(), sticker);
-    // Fit tall dictionaries on the page by giving them more columns.
-    while (g.height > PAGE.height && sticker.width < PAGE.width) {
-      sticker.width = Math.min(PAGE.width, sticker.width + 75);
-      g = stickerGeometry(song(), sticker);
-    }
+    const g = stickerGeometry(song(), sticker);
+    Object.assign(sticker, {
+      width: g.width,
+      height: g.height,
+      columns: g.columns,
+    });
     sticker.x = Math.max(0, Math.min(PAGE.width - g.width, sticker.x));
     sticker.y = Math.max(0, Math.min(PAGE.height - g.height, sticker.y));
   }
+  const frameDialog = document.createElement("dialog");
+  frameDialog.id = "sticker-layout-dialog";
+  frameDialog.innerHTML = `<h2>Distribuir los acordes</h2><p>Elige las columnas y el tamaño del cuadro. Los diagramas se ajustan sin deformarse.</p><form><div class="sticker-layout-fields"><label>Ancho (mm)<input name="width" type="number" step="0.1" required></label><label>Alto (mm)<input name="height" type="number" step="0.1" required></label><label>Columnas<input name="columns" type="number" min="1" step="1" required></label></div><p class="sticker-layout-summary"></p><div class="sticker-layout-preview"></div><div class="dialog-actions"><button type="button" class="cancel-layout">Cancelar</button><button class="primary">Aplicar</button></div></form>`;
+  document.body.append(frameDialog);
+  let layoutSticker, draft;
+  const toMm = (pt) => Math.round(((pt * 25.4) / 72) * 10) / 10;
+  const toPt = (mm) => (mm * 72) / 25.4;
+  function configure(sticker) {
+    layoutSticker = sticker;
+    draft = { ...sticker };
+    const g = stickerGeometry(song(), sticker);
+    for (const [name, min, max] of [
+      ["width", MIN_STICKER_WIDTH, PAGE.width - sticker.x],
+      ["height", MIN_STICKER_HEIGHT, PAGE.height - sticker.y],
+    ]) {
+      const input = frameDialog.querySelector(`[name=${name}]`);
+      input.min = Math.ceil(((min * 25.4) / 72) * 10) / 10;
+      input.max = Math.floor(((max * 25.4) / 72) * 10) / 10;
+      input.value = Math.min(
+        Number(input.max),
+        Math.max(Number(input.min), toMm(g[name])),
+      );
+    }
+    frameDialog.querySelector("[name=columns]").max = Math.max(
+      1,
+      g.names.length,
+    );
+    frameDialog.querySelector("[name=columns]").value = g.columns;
+    previewLayout();
+    frameDialog.showModal();
+  }
+  function previewLayout() {
+    if (!frameDialog.querySelector("form").checkValidity()) return;
+    for (const name of ["width", "height", "columns"]) {
+      const value = Number(frameDialog.querySelector(`[name=${name}]`).value);
+      draft[name] = name === "columns" ? value : toPt(value);
+    }
+    const g = stickerGeometry(song(), draft);
+    frameDialog.querySelector(".sticker-layout-summary").textContent =
+      `${g.names.length} acordes · ${g.columns} columnas × ${g.rows} filas`;
+    frameDialog.querySelector(".sticker-layout-preview").innerHTML = stickerSvg(
+      song(),
+      draft,
+    );
+  }
+  frameDialog.oninput = previewLayout;
+  frameDialog.querySelector(".cancel-layout").onclick = () =>
+    frameDialog.close();
+  frameDialog.querySelector("form").onsubmit = (event) => {
+    event.preventDefault();
+    if (!event.currentTarget.reportValidity()) return;
+    previewLayout();
+    Object.assign(layoutSticker, draft);
+    constrain(layoutSticker);
+    changed();
+    frameDialog.close();
+    renderPages();
+  };
   function renderTray() {
     const names = chords(song().text);
     tray.querySelector(".dictionary-items").innerHTML = names.length
-      ? `<div class="dictionary-item" draggable="true" data-all="true"><span>⠿ Todos (${names.length})</span><button class="add-sticker" aria-label="Añadir todos los diagramas">+</button></div>` +
+      ? `<div class="dictionary-item dictionary-all" draggable="true" data-all="true"><span>⠿ Todos (${names.length})</span><button class="add-sticker" aria-label="Añadir todos los diagramas">+</button></div>` +
         names
           .map(
             (name) =>
-              `<div class="dictionary-item" draggable="true" data-name="${esc(name)}"><span>⠿ ${esc(name)}${song().chordShapes?.[name]?.star ? "*" : ""}</span><button class="edit-shape" aria-label="Editar posición de ${esc(name)}">✎</button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}">+</button></div>`,
+              `<div class="dictionary-item chord-card" draggable="true" data-name="${esc(name)}"><button class="edit-shape" aria-label="Editar posición de ${esc(name)}"><strong>${esc(name)}${song().chordShapes?.[name]?.star ? "*" : ""}</strong>${diagram(name, 0, song().chordShapes?.[name]?.frets)}<span class="edit-hint">Editar posición</span></button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}" title="Añadir a la hoja">+</button></div>`,
           )
           .join("")
       : "<p>Añade acordes a la canción para crear tu diccionario.</p>";
@@ -169,7 +228,8 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
         );
       };
       el.innerHTML =
-        '<div class="sticker-image"></div><button class="remove-sticker" aria-label="Quitar diccionario">×</button><button class="resize-sticker" aria-label="Cambiar tamaño del diccionario; flechas para ajustar">↘</button>';
+        '<div class="sticker-image"></div><button class="configure-sticker" aria-label="Distribuir acordes: tamaño y columnas" title="Tamaño y columnas">⊞</button><button class="remove-sticker" aria-label="Quitar diccionario">×</button><button class="resize-sticker resize-width" data-resize="width" aria-label="Cambiar ancho del diccionario; flechas para ajustar" title="Cambiar ancho">↔</button><button class="resize-sticker resize-height" data-resize="height" aria-label="Cambiar alto del diccionario; flechas para ajustar" title="Cambiar alto">↕</button><button class="resize-sticker resize-corner" data-resize="both" aria-label="Cambiar tamaño del diccionario; flechas para ajustar" title="Cambiar ancho y alto">↘</button>';
+      el.querySelector(".configure-sticker").onclick = () => configure(sticker);
       draw();
       page.append(el);
       el.querySelector(".remove-sticker").onclick = () => {
@@ -180,60 +240,90 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
         renderPages();
       };
       el.onpointerdown = (event) => {
-        if (event.target.closest(".remove-sticker")) return;
+        if (
+          event.target.closest(".remove-sticker, .configure-sticker") ||
+          event.button !== 0
+        )
+          return;
         event.preventDefault();
         event.stopPropagation();
-        el.focus();
-        const resize = !!event.target.closest(".resize-sticker"),
-          scale = page.getBoundingClientRect().width / PAGE.width;
+        const handle = event.target.closest("[data-resize]");
+        (handle || el).focus();
+        const resize = handle?.dataset.resize;
+        const scale = page.getBoundingClientRect().width / PAGE.width;
         const x = event.clientX,
           y = event.clientY,
           start = { ...sticker };
         el.setPointerCapture(event.pointerId);
         el.onpointermove = (e) => {
-          if (resize)
-            sticker.width = Math.max(
-              65,
-              Math.min(
-                PAGE.width - start.x,
-                start.width + (e.clientX - x) / scale,
-              ),
-            );
-          else {
+          if (resize) {
+            if (resize !== "height")
+              sticker.width = Math.max(
+                MIN_STICKER_WIDTH,
+                Math.min(
+                  PAGE.width - start.x,
+                  start.width + (e.clientX - x) / scale,
+                ),
+              );
+            if (resize !== "width")
+              sticker.height = Math.max(
+                MIN_STICKER_HEIGHT,
+                Math.min(
+                  PAGE.height - start.y,
+                  start.height + (e.clientY - y) / scale,
+                ),
+              );
+          } else {
             sticker.x = start.x + (e.clientX - x) / scale;
             sticker.y = start.y + (e.clientY - y) / scale;
           }
           constrain(sticker);
           draw();
         };
-        el.onpointerup = () => {
+        const finish = () => {
+          if (!el.onpointermove) return;
           el.onpointermove = null;
           changed();
         };
-        el.onlostpointercapture = () => {
-          el.onpointermove = null;
-        };
+        el.onpointerup = finish;
+        el.onpointercancel = finish;
+        el.onlostpointercapture = finish;
       };
       el.onkeydown = (event) => {
-        if (event.target.closest(".remove-sticker")) return;
+        if (event.target.closest(".remove-sticker, .configure-sticker")) return;
         if (["Delete", "Backspace"].includes(event.key)) {
           event.preventDefault();
           el.querySelector(".remove-sticker").click();
           return;
         }
-        if (!event.key.startsWith("Arrow")) return;
+        if (
+          !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(
+            event.key,
+          )
+        )
+          return;
         event.preventDefault();
-        if (event.target.closest(".resize-sticker"))
-          sticker.width += ["ArrowRight", "ArrowDown"].includes(event.key)
-            ? 10
-            : -10;
-        else {
-          sticker.x +=
-            event.key === "ArrowRight" ? 5 : event.key === "ArrowLeft" ? -5 : 0;
-          sticker.y +=
-            event.key === "ArrowDown" ? 5 : event.key === "ArrowUp" ? -5 : 0;
+        const resize = event.target.closest("[data-resize]")?.dataset.resize;
+        const dx =
+          event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+        const dy =
+          event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0;
+        if (resize) {
+          const step = event.shiftKey ? 1 : 5;
+          if (resize !== "height")
+            sticker.width = Math.max(
+              MIN_STICKER_WIDTH,
+              Math.min(PAGE.width - sticker.x, sticker.width + dx * step),
+            );
+          if (resize !== "width")
+            sticker.height = Math.max(
+              MIN_STICKER_HEIGHT,
+              Math.min(PAGE.height - sticker.y, sticker.height + dy * step),
+            );
+        } else {
+          sticker.x += dx * 5;
+          sticker.y += dy * 5;
         }
-        sticker.width = Math.max(65, Math.min(PAGE.width, sticker.width));
         constrain(sticker);
         draw();
         changed();

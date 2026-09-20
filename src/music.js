@@ -1,4 +1,5 @@
 import guitar from "./data/guitar.json" with { type: "json" };
+import barreData from "./data/barres.json" with { type: "json" };
 export const NOTES = [
   "C",
   "C#",
@@ -16,25 +17,36 @@ export const NOTES = [
 const pitch = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 /** Normalize notation for lookup while preserving the author's spelling on the page. */
 export function normalizeChord(value) {
-  return value
-    .replace(/\*$/, "")
-    .replace(/♭/g, "b")
-    .replace(/♯/g, "#")
-    .replace(/[() ,]/g, "")
-    .replace(/Δ/g, "maj")
-    .replace(/ø7?/g, "m7b5")
-    .replace(/[°º]/g, "dim")
-    .replace(/^([A-G][#b]?)(?:min|-)/, "$1m")
-    .replace(/Maj|M(?=\d|$)/g, "maj")
-    .replace(/maj$/, "")
-    .replace(/6\/9/g, "69")
-    .replace(/\+(?=\d)/g, "aug")
-    .replace(/5\+$/, "aug")
-    .replace(/7\+$/, "aug7")
-    .replace(/\+$/, "aug");
+  return (
+    value
+      .replace(/\*$/, "")
+      .replace(/♭/g, "b")
+      .replace(/♯/g, "#")
+      // Cifra Club: 7M = major seventh; (5-)/(9-) lower that degree.
+      .replace(/7M/g, "maj7")
+      .replace(/5\+$/, "aug")
+      .replace(
+        /(5|9|11|13)([-+])/g,
+        (_, degree, sign) => (sign === "-" ? "b" : "#") + degree,
+      )
+      .replace(/7\(11\)/g, "7sus4")
+      .replace(/7\((9|13)\)/g, "$1")
+      .replace(/[() ,]/g, "")
+      .replace(/Δ/g, "maj")
+      .replace(/ø7?/g, "m7b5")
+      .replace(/[°º]/g, "dim")
+      .replace(/^([A-G][#b]?)(?:min|-)/, "$1m")
+      .replace(/Maj|M(?=\d|$)/g, "maj")
+      .replace(/maj$/, "")
+      .replace(/6\/9/g, "69")
+      .replace(/\+(?=\d)/g, "aug")
+      .replace(/5\+$/, "aug")
+      .replace(/7\+$/, "aug7")
+      .replace(/\+$/, "aug")
+  );
 }
 const notationRE =
-  /^[A-G][#b]?(?:(?:m|maj|dim|aug|sus|add)?(?:5|6|7|9|11|13|69)?(?:sus[24]|add(?:2|4|9|11|13)|[b#](?:5|9|11|13)|maj(?:7|9|11|13))*|alt|mmaj(?:7|9|11|13))(?:\/[A-G][#b]?)?$/;
+  /^[A-G][#b]?(?:(?:m|maj|dim|aug|sus|add)?(?:5|6|7|9|11|13|69)?(?:sus[24]|add(?:2|4|9|11|13)|[b#](?:5|9|11|13)|maj(?:7|9|11|13))*|alt|mmaj(?:7|9|11|13))(?:no[15])*(?:\/[A-G][#b]?)?$/;
 // Shared validator used by text, PDF and ChordPro importers.
 export const chordRE = {
   test: (value) => notationRE.test(normalizeChord(value)),
@@ -92,7 +104,7 @@ export function parseSong(text) {
     }
     let p = parseLine(lines[i], i);
     if (
-      p.marks.length &&
+      p.marks.length === 1 &&
       !p.lyric.trim() &&
       i + 1 < lines.length &&
       lines[i + 1].trim() &&
@@ -160,27 +172,53 @@ export function fingerings(chord) {
 export function fingering(chord) {
   return fingerings(chord)[0] || null;
 }
-export function diagram(c, position = 0, custom) {
+export function diagram(c, position = 0, custom, { ink = "#c9e79c" } = {}) {
   const f = custom || fingerings(c)[position];
   if (!f) return "<p>Posición no disponible para este acorde.</p>";
-  const min = Math.min(...f.filter((n) => n > 0)),
-    start = Math.max(...f) > 5 ? min : 1;
+  const positive = f.filter((n) => n > 0);
+  const min = positive.length ? Math.min(...positive) : 1,
+    start = Math.max(...f) > 5 ? min : 1,
+    rows = Math.max(5, Math.max(...f) - start + 1),
+    spacing = 90 / rows;
   let svg =
     '<svg viewBox="0 0 140 148" aria-label="Diagrama de acorde" role="img">';
   for (let i = 0; i < 6; i++)
     svg += `<path d="M${30 + i * 17} 30v90" stroke="currentColor" opacity=".45"/>`;
-  for (let i = 0; i < 6; i++)
-    svg += `<path d="M30 ${30 + i * 18}h85" stroke="currentColor" stroke-width="${i === 0 && start === 1 ? 3 : 1}" opacity=".6"/>`;
+  for (let i = 0; i <= rows; i++)
+    svg += `<path d="M30 ${30 + i * spacing}h85" stroke="currentColor" stroke-width="${i === 0 && start === 1 ? 3 : 1}" opacity=".6"/>`;
+  // Catalog metadata distinguishes a barre from separate fingers on one fret.
+  // For unknown custom shapes infer only a broad, closed-position barre.
+  const suggested =
+    barreData[f.join(",")] ??
+    (!f.includes(0) && f.filter((n) => n === min).length >= 2 ? [min] : []);
+  const barres = suggested.flatMap((fret) => {
+    const anchors = f.flatMap((n, i) => (n === fret ? [i] : []));
+    const from = anchors[0],
+      to = anchors.at(-1);
+    return anchors.length > 1 && f.slice(from, to + 1).every((n) => n >= fret)
+      ? [{ fret, from, to }]
+      : [];
+  });
+  for (const { fret, from, to } of barres) {
+    const y = 30 + (fret - start + 0.5) * spacing;
+    svg += `<path class="diagram-barre" d="M${30 + from * 17} ${y}H${30 + to * 17}" stroke="${ink}" stroke-width="${Math.min(12, spacing * 0.8)}" stroke-linecap="round"/>`;
+  }
   f.forEach((n, i) => {
     if (n <= 0)
       svg += `<text x="${30 + i * 17}" y="20" text-anchor="middle" fill="currentColor" font-size="13">${n < 0 ? "×" : "○"}</text>`;
-    else
-      svg += `<circle cx="${30 + i * 17}" cy="${30 + (n - start + 0.5) * 18}" r="6" fill="#c9e79c"/>`;
+    else if (!barres.some((b) => n === b.fret && i >= b.from && i <= b.to))
+      svg += `<circle cx="${30 + i * 17}" cy="${30 + (n - start + 0.5) * spacing}" r="${Math.min(6, spacing * 0.4)}" fill="${ink}"/>`;
   });
   if (start > 1)
     svg += `<text x="7" y="44" fill="currentColor" font-size="12">${start}</text>`;
   return (
     svg +
-    '<text x="72" y="141" text-anchor="middle" fill="currentColor" font-size="10">E A D G B e</text></svg>'
+    ["E", "A", "D", "G", "B", "e"]
+      .map(
+        (label, i) =>
+          `<text class="diagram-string-label" x="${30 + i * 17}" y="141" text-anchor="middle" fill="currentColor" font-size="10">${label}</text>`,
+      )
+      .join("") +
+    "</svg>"
   );
 }

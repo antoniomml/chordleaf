@@ -1,11 +1,6 @@
 /** UI-only workspace controls. The expanded editor moves the existing textarea,
  * so selection, undo history and autosave have a single source of truth. */
-export function setupEditorTools({
-  resizePages,
-  onChord,
-  diagram,
-  fingerings,
-}) {
+export function setupEditorTools({ resizePages }) {
   const $ = (selector) => document.querySelector(selector);
   const sourceArea = $("#source-area");
   const home = sourceArea.parentElement;
@@ -63,40 +58,4 @@ export function setupEditorTools({
   window.addEventListener("resize", () =>
     setWidth($(".editor-panel").clientWidth),
   );
-
-  let position = 0;
-  const library = $("#chord-library");
-  const name = $("#chord-name");
-  function draw() {
-    const positions = fingerings(name.value);
-    position = Math.max(0, Math.min(position, positions.length - 1));
-    $("#library-diagram").innerHTML = diagram(name.value, position);
-    $("#position-count").textContent = positions.length
-      ? `Posición ${position + 1} de ${positions.length}`
-      : "Sin posición en el catálogo";
-    $("#previous-position").disabled = position === 0;
-    $("#next-position").disabled = position >= positions.length - 1;
-    $("#insert-library-chord").disabled = !positions.length;
-  }
-  $("#browse-chords").onclick = () => {
-    library.showModal();
-    draw();
-  };
-  $("#close-library").onclick = () => library.close();
-  name.oninput = () => {
-    position = 0;
-    draw();
-  };
-  $("#previous-position").onclick = () => {
-    position--;
-    draw();
-  };
-  $("#next-position").onclick = () => {
-    position++;
-    draw();
-  };
-  $("#insert-library-chord").onclick = () => {
-    onChord(name.value);
-    library.close();
-  };
 }
