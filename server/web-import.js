@@ -9,7 +9,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
       signal,
       headers: {
         Accept: "text/html",
-        "User-Agent": "Chordi/0.0.1 (song import)",
+        "User-Agent": "Chordi/0.1.0 (song import)",
       },
     });
     if ([301, 302, 303, 307, 308].includes(response.status)) {

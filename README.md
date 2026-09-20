@@ -4,7 +4,7 @@
   <p><strong>Your song. Your chords. Everything in place.</strong></p>
   <p>A workspace for writing lyrics and chords, exploring guitar voicings,<br>and making a song sheet for your next rehearsal.</p>
   <p>
-    <a href="https://github.com/antoniomml/chordi/releases/tag/v0.0.1"><img src="https://img.shields.io/badge/version-0.0.1-c9e79c?style=flat-square&labelColor=263426" alt="Initial release 0.0.1"></a>
+    <a href="https://github.com/antoniomml/chordi/releases/tag/v0.1.0"><img src="https://img.shields.io/badge/version-0.1.0-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.1.0"></a>
     <a href="https://github.com/antoniomml/chordi/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordi/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
   </p>
   <p><a href="#a-small-studio-for-your-songs">Features</a> · <a href="docs/guide.md">User guide</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -20,7 +20,7 @@ It is for singers, guitarists and anyone preparing a rehearsal or organizing son
 
 | When you want to…             | chordi helps you…                                                      |
 | ----------------------------- | ---------------------------------------------------------------------- |
-| **Prepare a song**            | Start from a blank page or import TXT, PDF or Word.                    |
+| **Prepare a song**            | Start from a blank page, a website URL, or TXT, PDF or Word.           |
 | **Time a chord change**       | Anchor a chord to an exact letter without adding spaces to the lyrics. |
 | **Write comfortably**         | Resize the editor or open its expanded view.                           |
 | **Suit your voice**           | Transpose by semitones and adjust the capo.                            |
@@ -65,9 +65,9 @@ Songs and imported files are processed in your browser. Web imports send the son
 
 The interface loads its typeface from Google Fonts; your song text is not sent to that service.
 
-## A first release with room to grow
+## A release with room to grow
 
-**0.0.1** is the first tagged release. Current development changes are listed under **Unreleased** in the [changelog](CHANGELOG.md). Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet.
+**0.1.0** adds a chords workspace, public web imports and a tighter rehearsal sheet. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md).
 
 ## Take part
 

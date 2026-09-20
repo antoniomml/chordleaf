@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.1.0 · September 20, 2026
+
+A chords workspace, public web imports and rehearsal-sheet layout that keep more of the song on the page.
+
 - Restore diagram hover on instrumental chords by keeping chord hit targets above the separator text.
 - Give each new-song import option its own screen with Back navigation; reopen on a clean menu and ignore cancelled import results.
 
