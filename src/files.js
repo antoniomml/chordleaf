@@ -76,6 +76,10 @@ export async function exportSong(song, type) {
           pdf.setTextColor("#111111");
           pdf.text(row.lyric, row.x, row.y + l.size + row.lyricOffset);
         }
+      pdf.setFont("GoogleSansCode", "normal");
+      pdf.setFontSize(7);
+      pdf.setTextColor("#AAAAAA");
+      pdf.text("Chordi", PAGE.width / 2, PAGE.height - 12, { align: "center" });
       for (const sticker of stickers.filter((s) => s.page === i))
         pdf.addImage(
           sticker.png,
@@ -91,6 +95,8 @@ export async function exportSong(song, type) {
   }
   const {
     Document,
+    Footer,
+    AlignmentType,
     Packer,
     Paragraph,
     TextRun,
@@ -312,6 +318,24 @@ export async function exportSong(song, type) {
     ],
     sections: [
       {
+        footers: {
+          default: new Footer({
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 0, after: 0 },
+                children: [
+                  new TextRun({
+                    text: "Chordi",
+                    font: DOCUMENT_FONT,
+                    size: 14,
+                    color: "AAAAAA",
+                  }),
+                ],
+              }),
+            ],
+          }),
+        },
         properties: {
           page: {
             size: {
@@ -319,6 +343,7 @@ export async function exportSong(song, type) {
               height: Math.round(PAGE.height * 20),
             },
             margin: {
+              footer: 160,
               top: Math.round(l.margin * 20),
               bottom: Math.round(l.margin * 20),
               left: Math.round(l.margin * 20),
@@ -352,23 +377,37 @@ function alignText(lines) {
     const line = lines[i];
     const matches = [...line.matchAll(/\S+/g)];
     if (chordRow([{ text: line }])) {
+      // Brackets already express explicit chords. Preserve instrumental rows
+      // rather than attaching them to an unrelated following verse.
+      if (/\[[^\]]+\]/.test(line)) {
+        out.push(line);
+        continue;
+      }
       const next = lines[i + 1] || "";
       if (
         next.trim() &&
-        !next.trim().startsWith("{") &&
-        !/[|–—−-]/.test(line) &&
+        !/^\s*(?:\{.*\}|\[[^\]]+\])(?:\s|$)/.test(next) &&
+        !matches.some((m) => /^[|:–—−-]+$/.test(m[0])) &&
         !chordRow([{ text: next }])
       ) {
         let lyric = next;
-        for (const m of matches.reverse())
+        for (const m of matches.reverse()) {
+          const chord = m[0].replace(/[\[\]]/g, "");
+          if (!chordRE.test(chord)) continue;
           lyric =
             lyric.padEnd(m.index, " ").slice(0, m.index) +
-            `[${m[0]}]` +
+            `[${chord}]` +
             lyric.slice(m.index);
+        }
         out.push(lyric);
         i++;
       } else
-        out.push(line.replace(/\S+/g, (c) => (chordRE.test(c) ? `[${c}]` : c)));
+        out.push(
+          line.replace(/\S+/g, (c) => {
+            const name = c.replace(/[\[\]]/g, "");
+            return chordRE.test(name) ? `[${name}]` : c;
+          }),
+        );
     } else out.push(line);
   }
   return out.join("\n");
@@ -408,8 +447,16 @@ export function importText(text, fallback) {
             [s.x, s.y, s.width, s.page].every(Number.isFinite) &&
             s.x >= 0 &&
             s.y >= 0 &&
-            s.width >= 65 &&
+            s.width >= 28 &&
             s.width <= PAGE.width &&
+            (s.height === undefined ||
+              (Number.isFinite(s.height) &&
+                s.height >= 28 &&
+                s.height <= PAGE.height)) &&
+            (s.columns === undefined ||
+              (Number.isInteger(s.columns) &&
+                s.columns >= 1 &&
+                s.columns <= 1000)) &&
             Number.isInteger(s.page) &&
             s.page >= 0 &&
             (s.chords === "all" ||

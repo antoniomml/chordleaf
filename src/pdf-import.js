@@ -154,7 +154,15 @@ export function parsePdfPages(pages, fallback) {
   const all = [];
   for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
     const p = pages[pageIndex];
-    let items = p.items.filter((i) => i.text.trim());
+    let items = p.items.filter(
+      (i) =>
+        i.text.trim() &&
+        !(
+          /^(?:Chordi|Jordi)$/.test(i.text.trim()) &&
+          i.y > p.height - 24 &&
+          i.size <= 8
+        ),
+    );
     const initialRows = rowsOf(items);
     const metadataItems = new Set();
     for (const row of initialRows) {

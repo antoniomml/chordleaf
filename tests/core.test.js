@@ -237,3 +237,40 @@ test("custom chord marker is optional and doesn't alter lyrics", () => {
   song.chordShapes.E.star = false;
   assert.equal(layout(song).pages[0].columns[0][0].marks[0].chord, "E");
 });
+
+test("Cifra Club alterations and major sevenths retain their harmony", () => {
+  for (const [source, equivalent] of [
+    ["F#7M", "F#maj7"],
+    ["C#7M", "C#maj7"],
+    ["A#m7(5-)", "A#m7b5"],
+    ["C#7(9-)", "C#7b9"],
+    ["D#7(9)", "D#9"],
+    ["A#m7(9)", "A#m9"],
+    ["A#7(11)", "A#7sus4"],
+    ["F#5+", "F#aug"],
+  ]) {
+    assert.ok(chordRE.test(source), source);
+    assert.deepEqual(fingerings(source), fingerings(equivalent), source);
+    assert.ok(fingerings(source).length, source);
+    assert.ok(chordRE.test(transpose(`[${source}]`, 2).slice(1, -1)));
+  }
+  assert.notDeepEqual(fingerings("F#7M"), fingerings("F#7"));
+});
+test("alteration minus signs don't turn chord lines into lyrics", () => {
+  const imported = importText(
+    "A#m7(5-)    D#7(9-)\nUna mañana de canción",
+    "Test",
+  );
+  assert.equal(imported.text, "[A#m7(5-)]Una mañana d[D#7(9-)]e canción");
+  assert.equal(parseSong(imported.text)[0].lyric, "Una mañana de canción");
+});
+test("consecutive instrumental rows, bracketed chords and section labels stay separate", () => {
+  const text =
+    "F# F#5+ F#6 F7 A#m\nA#m7(5-) D#7(9-) G#m G#m7(5-)\n\n[C] [G]\n[Puente]\nUna canción";
+  const imported = importText(text, "Test").text;
+  assert.equal(
+    imported,
+    "[F#] [F#5+] [F#6] [F7] [A#m]\n[A#m7(5-)] [D#7(9-)] [G#m] [G#m7(5-)]\n\n[C] [G]\n[Puente]\nUna canción",
+  );
+  assert.ok(!imported.includes("[["));
+});
