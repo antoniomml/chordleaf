@@ -1,15 +1,15 @@
-name: Una idea para Chordi
-description: Propón algo que te ayude a escribir, ensayar o tocar.
+name: An idea for chordi
+description: Suggest something that helps you write, rehearse or play.
 body:
   - type: textarea
     id: need
     attributes:
-      label: ¿Qué te gustaría conseguir?
-      description: Cuenta en qué momento te ayudaría y cómo lo haces ahora.
+      label: What would you like to achieve?
+      description: Explain when it would help and how you do it today.
     validations:
       required: true
   - type: textarea
     id: idea
     attributes:
-      label: ¿Cómo imaginas la mejora?
-      description: Puedes añadir un boceto o un ejemplo inventado.
+      label: How do you imagine the improvement?
+      description: You can include a sketch or an invented example.

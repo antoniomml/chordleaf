@@ -1,25 +1,25 @@
-# Ayúdanos a hacer sitio a más canciones
+# Help make room for more songs
 
-[← Volver a Chordi](README.md)
+[← Back to chordi](README.md)
 
-No hace falta programar para aportar. Si un acorde no aparece, un documento se importa mal o un control resulta confuso, cuéntalo: los detalles del ensayo real ayudan a mejorar Chordi.
+You do not need to code to contribute. Missing chords, import problems and confusing controls are useful reports from real musical practice.
 
-## Contar un problema
+## Report a problem
 
-[Abre un informe](https://github.com/antoniomml/Chordi/issues/new?template=bug_report.yml) con lo que intentabas hacer, los pasos y el resultado esperado. Indica navegador y dispositivo. Si necesitas un ejemplo, utiliza dos o tres líneas inventadas y los nombres de los acordes afectados. No compartas documentos personales ni canciones ajenas completas.
+[Open an issue](https://github.com/antoniomml/chordi/issues/new?template=bug_report.yml) describing what you tried, reproduction steps and the expected result. Include your browser and device. Use two or three invented lines and the affected chord names; do not share personal documents or complete third-party lyrics.
 
-## Proponer una idea
+## Suggest an idea
 
-[Describe tu propuesta](https://github.com/antoniomml/Chordi/issues/new?template=feature_request.yml) desde el uso: qué te gustaría conseguir y en qué momento te ayudaría. Puedes aportar bocetos, mejoras de texto o sugerencias de accesibilidad.
+[Describe your proposal](https://github.com/antoniomml/chordi/issues/new?template=feature_request.yml) in terms of what you want to achieve and when it would help. Sketches, wording improvements and accessibility suggestions are welcome.
 
-## Trabajar en el código
+## Work on the code
 
-Sigue la [guía de desarrollo con pnpm](docs/development.md) y consulta [la arquitectura](docs/architecture.md). Prepara una rama para un cambio concreto y explica el problema, el resultado y cómo lo has comprobado.
+Follow the [pnpm development guide](docs/development.md) and read the [architecture](docs/architecture.md). Use a focused branch and explain the problem, resulting behavior and validation.
 
-- Mantén las transformaciones musicales y la composición independientes de los controles de interfaz.
-- Cubre los cambios de comportamiento con pruebas, especialmente anclas, importación y exportación.
-- Ejecuta `pnpm format:check`, `pnpm test`, `pnpm build` y `pnpm test:e2e` con Vite activo.
-- Usa exclusivamente pnpm y conserva su lockfile actualizado.
-- Mantén las atribuciones de datos y fuentes; evita credenciales, documentos privados y resultados generados.
+- Keep musical transformations and layout independent of UI controls.
+- Test behavior changes, especially anchors, harmony, imports and exports.
+- Run `pnpm format:check`, `pnpm test`, `pnpm build` and `pnpm test:e2e` with Vite running.
+- Use pnpm exclusively and keep its lockfile up to date.
+- Preserve data/font attribution; exclude credentials, private documents and generated results.
 
-La publicación como código abierto y la licencia del código propio están pendientes de decisión del propietario. Las licencias de terceros se conservan en [las atribuciones](THIRD_PARTY_NOTICES.md).
+Open-source publication and the license for original code await the owner's decision. Third-party licenses are retained in [the notices](THIRD_PARTY_NOTICES.md).

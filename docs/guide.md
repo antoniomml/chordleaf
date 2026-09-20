@@ -1,96 +1,104 @@
-# Tu primera canción en Chordi
+# Your first song in chordi
 
-[← Volver a Chordi](../README.md)
+[← Back to chordi](../README.md)
 
-Chordi tiene dos espacios: el editor, donde escribes, y la hoja, donde ves el resultado. Puedes ajustar la separación entre ambos o abrir el editor ampliado con el icono de flechas junto a **Letra y acordes**.
+The workspace has a compact navigation rail, an editing sidebar and a sheet preview. **Documento** (Document), **Tonalidad** (Key) and **Acordes** (Chords) switch the entire sidebar. Your text and cursor remain in place when you return to Document.
 
-## Empezar o traer una canción
+## Start or import a song
 
-Pulsa **Nueva canción** y elige **Empezar de cero**. El título comienza vacío; «Nombre de la canción» es solo una pista del campo y no aparece impreso. Añade el artista si lo necesitas.
+Choose **Nueva canción → Empezar de cero**. The title starts empty; its placeholder is not printed. Add an artist if needed. **Importar una canción** supports:
 
-Si ya tienes una canción, elige **Importar una canción**:
+| File                     | What to expect                                                                                                   |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| TXT, CHO, ChordPro       | Bracketed chords or chord lines above lyrics. Exported chordi TXT retains document settings and custom voicings. |
+| PDF with selectable text | Lyrics, chords, headers and columns recovered from their positions. Review the result.                           |
+| Word (.docx)             | Text and identifiable column structure. Review titles and alignment.                                             |
 
-| Archivo                     | Qué puedes esperar                                                                                                                      |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| TXT, CHO o ChordPro         | Letra y acordes entre corchetes, o líneas de acordes encima del verso. El TXT exportado por Chordi conserva los ajustes de composición. |
-| PDF con texto seleccionable | Recuperación de letra, acordes, encabezados y columnas a partir de su posición. Revisa el resultado.                                    |
-| Word (.docx)                | Recuperación del texto y de la estructura de columnas que pueda identificar. Revisa título y alineación.                                |
+Scanned PDFs need external OCR. Convert legacy `.doc` files to `.docx` first. Each song opens in a tab. Closing a song with unexported changes requires confirmation.
 
-Un PDF escaneado necesita reconocimiento de texto (OCR) antes de importarlo. Los archivos antiguos `.doc` deben convertirse a `.docx`.
+## Place a chord precisely
 
-Cada canción se abre en una pestaña. Si cierras una con cambios sin exportar, Chordi te pide confirmación antes de descartarla.
-
-## Poner el acorde justo ahí
-
-Escribe el nombre del acorde entre corchetes, inmediatamente antes de la letra donde debe sonar:
+Write its symbol in brackets immediately before the letter where it should sound:
 
 ```text
-[G]Vuelve a sonar, [D]vuelve a empezar.
-Una ca[Emaj7]sa junto al [Abm7b5]mar.
+[G]Let it ring, [D]start again.
+A mor[Emaj7]ning beside the [Abm7b5]sea.
 ```
 
-En `ca[Emaj7]sa`, el cambio queda en la **s**. Los corchetes no añaden espacio a la letra de la hoja.
+In `mor[Emaj7]ning`, the chord starts at **n**. Brackets take no space on the sheet. If long symbols collide, they stack vertically without moving the lyric anchor. Transposition, font size and columns preserve those anchors. A manual line break gives more control over long verses. Emoji and combining characters may not align like ordinary monospaced text.
 
-En **Alineación** puedes elegir:
+## Write comfortably
 
-- **Inicio de la letra:** el borde izquierdo del acorde coincide con la letra marcada.
-- **Centrado sobre la letra:** el centro del acorde coincide con el centro de esa letra. En el margen izquierdo, se limita el desplazamiento para mantener el acorde dentro de la hoja.
+Drag the vertical divider to resize the editor. Focus it with Tab and use Left/Right; Home or double-click restores its starting width. On mobile, the sidebar and sheet stack vertically.
 
-Si dos símbolos largos se pisan, Chordi los coloca en alturas distintas. No añade espacios a la letra ni cambia la sílaba marcada. El tamaño, el transporte y las columnas tampoco cambian el ancla musical.
+The expand icon beside **Letra y acordes** opens a larger editor with the same text, cursor and undo history. **Listo** or Escape returns to the document. Changes save while typing.
 
-Para versos largos, un salto manual te da más control sobre la composición. La alineación está pensada para letras y símbolos musicales habituales; los emojis y caracteres combinados pueden ocupar un ancho diferente.
+The preview's pencil enables editing directly on the sheet. Select a verse; Enter commits, Escape cancels and Shift+Enter adds a line break.
 
-## Escribir con comodidad
+## Browse, edit and print chord diagrams
 
-Arrastra la separación vertical para dar más espacio al editor o al documento. También puedes enfocar el separador con Tab y usar las flechas izquierda y derecha; Inicio o un doble clic restauran el ancho inicial. En móvil, el editor y la hoja se apilan.
+Open **Acordes → En canción**. Each card shows a chord name and its current guitar diagram. Click the card to edit the frets; the edit hint appears on hover or keyboard focus. Values run from low E to high e: `-1` is muted, `0` open, and positive values are frets. You can mark a custom voicing with an asterisk or restore the catalog shape.
 
-El icono de expansión abre una ventana grande con el mismo texto. **Listo** o Escape te devuelven al documento. Los cambios se guardan mientras escribes.
+Drag a card onto the sheet, or use its **+** button. **Todos** adds all song chords. Diagrams can be moved, resized or removed. Drag the right edge to change width, the bottom edge to change height, or the corner to change both. Column counts stay fixed while resizing, so making the frame smaller does not unexpectedly enlarge the diagrams. Select the grid button on a diagram group to set width and height in millimeters and choose its columns, with a live preview. Rows follow the number of chords; diagrams keep their proportions inside the frame.
 
-También puedes pulsar el lápiz de la vista del documento y seleccionar un verso para editarlo sobre la hoja. Enter confirma, Escape cancela y Shift+Enter añade un salto.
+Arrow keys move a focused diagram and Delete removes it. On a resize handle, Left/Right changes width and Up/Down changes height; hold Shift for smaller increments. Diagrams and custom positions are included in exports. Dots and barres stay green in the sidebar and print black on white in the document, PDF and Word.
 
-## Consultar y cambiar acordes
+**Buscar** searches 828 chords and 3,283 positions. Select a diagram to view alternative positions. Supported aliases include `EM7` / `EΔ7` for `Emaj7`, `A♭ø7` / `Abm7(b5)` for `Abm7b5`, `C6/9` for `C69`, and `Dm(maj7)` for `Dmmaj7`. A recognized symbol may still have no catalog voicing.
 
-**Explorar acordes** abre el catálogo de guitarra. Escribe un nombre y usa las flechas para recorrer sus posiciones. **Insertar acorde** lo añade donde dejaste el cursor en el editor.
+Read diagrams from low to high strings, `E A D G B e`: ○ is open, × is muted, dots mark frets. A number at the side marks the starting fret for higher positions.
 
-El diagrama se lee de la sexta cuerda a la primera: `E A D G B e`. Un círculo vacío indica cuerda al aire, una cruz indica que no se toca y los puntos marcan los trastes. Un número junto al diagrama indica el traste inicial cuando la posición está más arriba en el mástil.
+## Identify a chord on the fretboard
 
-Hay 828 entradas y 3.283 posiciones en afinación estándar. Se admiten nombres equivalentes, por ejemplo:
+![Interactive guitar chord identifier](images/chord-identifier.png)
 
-| Puedes escribir     | Equivale a |
-| ------------------- | ---------- |
-| `EM7` o `EΔ7`       | `Emaj7`    |
-| `A♭ø7` o `Abm7(b5)` | `Abm7b5`   |
-| `C6/9`              | `C69`      |
-| `Dm(maj7)`          | `Dmmaj7`   |
+Open **Acordes → Identificar** and place a dot on each string you want to play. The horizontal fretboard follows tablature orientation: frets increase left to right, the high e string is at the top and low E is at the bottom. Its size stays fixed when the sidebar gets wider; on a wide sidebar, interpretations appear beside it. Press the same dot again to mute it. The control beside each string name switches between **× Apagada** (muted) and **○ Al aire** (open), with contrasting backgrounds and visible labels. **− Traste 1 +** moves the visible five-fret window one fret at a time; selections outside that window remain saved and their fret numbers appear beside the string names. **Limpiar** mutes all strings.
 
-Reconocer un acorde no significa que exista una digitación en el catálogo. Cuando falta, se indica expresamente.
+The panel focuses on the fretboard and possible chord names. Exact interpretations come first, followed by incomplete voicings labelled `no5` (missing fifth).
 
-## Adaptar la canción a tu voz
+Names and fret numbers are relative to the capo. A short note indicates the active capo. The identifier covers a documented formula vocabulary, not every possible harmonic analysis. Read [the harmony model and its limits](harmony.md).
 
-Los botones de **Transportar** suben o bajan todos los acordes un semitono. Las etiquetas de secciones, como `[Estribillo]`, se mantienen.
+Select a result to retain that exact voicing. **Insertar en el cursor** adds it where you left the text cursor. Alternatively, choose a song chord under **Sustituir en la canción**, then choose all occurrences or a specific numbered occurrence with its line number. **Sustituir acorde** updates bracket tokens without changing lyrics. **Deshacer último cambio** restores the previous text, shapes and sheet diagrams; subsequent text changes invalidate that undo action. Custom shapes belong to a chord symbol, so every occurrence of that same symbol shares its voicing.
 
-La **cejilla** indica en qué traste se coloca. La cadena permite vincularla a los acordes: con el vínculo activo, subir un traste la cejilla baja los acordes un semitono para conservar la tonalidad que suena. Activar la cadena por sí solo no cambia los acordes.
+## Adapt the song to your voice
 
-La sección **Tonalidad** ofrece una estimación según los acordes escritos y muestra sus grados. Es una ayuda orientativa y no aparece en la exportación.
+In **Documento**, **Transportar** moves all chord symbols by a semitone. Section labels such as `[Estribillo]` remain unchanged.
 
-## Preparar la hoja
+**Cejilla** sets the capo fret. The chain links it to the chords: raising a linked capo by one fret lowers the chord symbols by one semitone to keep the sounding key. Enabling the chain alone changes no chords.
 
-Ajusta el tamaño de letra, los márgenes y una o dos columnas. **Ajustar a 1 página** intenta reducir el tamaño hasta un mínimo legible; una canción larga puede necesitar más páginas.
+**Tonalidad** estimates the key from the written chords and shows its degrees. This is guidance, not a definitive analysis, and is not printed.
 
-Para forzar el comienzo de otra columna, escribe `{column}` en una línea propia. Con una sola columna, equivale a un salto de página. El marcador no se imprime. Los pasajes instrumentales admiten barras y guiones:
+## Prepare the sheet
+
+Adjust font size, margins and one or two columns. **Ajustar a 1 página** attempts to fit the song by reducing font size to a readable minimum; a long song may still need multiple pages. Preview zoom changes only the view, not the exported layout.
+
+Write `{column}` on its own line to start another column, or another page in a single-column document. It is not printed. Instrumental passages can include separators:
 
 ```text
 [Emaj7] | [G#m7] - [E5+]
 ```
 
-## Guardar y compartir
+## Save and share
 
-| Elige…          | Para…                                                                              |
-| --------------- | ---------------------------------------------------------------------------------- |
-| **PDF**         | Imprimir o compartir una composición fija.                                         |
-| **Word · DOCX** | Seguir editando en un procesador de textos. El lector puede variar la composición. |
-| **Texto · TXT** | Conservar letra, anclas y ajustes para volver a abrirlos en Chordi.                |
+| Export      | Use it for                                                                     |
+| ----------- | ------------------------------------------------------------------------------ |
+| PDF         | Printing or sharing a fixed layout.                                            |
+| Word · DOCX | Further editing in a word processor; rendering may vary.                       |
+| Texto · TXT | Preserving lyrics, anchors, settings and custom diagrams for exact re-editing. |
 
-La vista previa, PDF y Word parten de las mismas posiciones. Al reimportar PDF o Word se reconstruyen a partir de su apariencia: revisa los cambios de acorde, especialmente si estaban centrados. El TXT es la mejor copia para continuar el trabajo exacto.
+Preview, PDF and Word share a layout model. Reimported PDF or Word reconstructs that model from appearance, so review chord placements. TXT is the best editing backup. Autosave belongs to this browser: export before changing devices or clearing browser data.
 
-El guardado automático pertenece a este navegador. No es una copia en la nube: exporta tus canciones antes de cambiar de dispositivo o borrar datos del navegador.
+## Import a song and fit the page
+
+**Nueva canción** always opens the initial menu: **Importar texto o archivo**, **Importar desde una web**, then **Empezar de cero**. Each import option opens its own screen; **← Volver** returns to the menu. Closing and reopening starts fresh. Paste lyrics with aligned chords or open TXT, ChordPro, text-based PDF or DOCX. Legacy `.doc` files must first be saved as `.docx`.
+
+For a web import, paste an HTTPS song URL from Cifra Club, LaCuerda or Ultimate Guitar. Chordi converts the accessible chord version into editable lyrics and anchored chords. Search pages, protected content and tablature-only versions are not supported. The source URL is kept with the working song. A running Chordi server is needed for this option.
+
+Every import tries one and two columns, 6–10 mm margins and 8–20 pt type, choosing the largest font that fits on one A4 page. Imported column/page breaks are reflowed. At equal font sizes, one column and 10 mm margins take preference. Longer songs keep all their content on multiple pages rather than shrinking below 8 pt. **Ajustar a 1 página** repeats this search; all document controls remain editable afterwards.
+
+The preview, PDF and Word documents include a small grey **Chordi** footer. Catalog diagrams use the original fingering's barre information, including full and partial barres; unknown custom shapes infer a conservative barre when possible.
+
+## Instrumental lines (intros and solos)
+
+Write `[Solo] [C] [G] [Am] [F]` on its own line. The sheet displays **[Solo] C – G – Am – F**, all on the same baseline. `[Intro]` works in the same way. A line with only several chords also works, even if written together as `[C][G][Am]`. Explicit bar lines and repeat signs such as `|: [C] | [G] :| x2` are preserved. Long sequences wrap between whole chords. The preview, PDF and Word share this layout.
+
+Bracketed sequences remain independent of the following lyric line. Plain imported chord rows above lyrics still attach to those lyrics; for an explicit standalone passage, use brackets and optionally a section label or bar separators.

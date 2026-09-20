@@ -1,7 +1,7 @@
-## Qué mejora
+## What improves
 
-Describe el problema y el resultado para quien usa Chordi.
+Describe the problem and the resulting behavior for someone using chordi.
 
-## Cómo se ha comprobado
+## Validation
 
-Indica las pruebas y, si cambia la interfaz, añade una captura con datos de ejemplo.
+Describe the checks performed. For interface changes, include a screenshot with demo data.

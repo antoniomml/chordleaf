@@ -1,73 +1,81 @@
-# Desarrollo
+# Development
 
-[← Volver a Chordi](../README.md) · [Arquitectura](architecture.md) · [Contribuir](../CONTRIBUTING.md)
+[← Back to chordi](../README.md) · [Architecture](architecture.md) · [Contributing](../CONTRIBUTING.md)
 
-## Preparar el entorno
+## Set up the environment
 
-Usamos **Node.js 22.13 o posterior** y **pnpm 12.5.1**, fijado en `package.json`. Instala pnpm siguiendo [su guía oficial](https://pnpm.io/installation). El único lockfile del proyecto es `pnpm-lock.yaml`.
+Use **Node.js 22.13 or later** and **pnpm 12.5.1**, pinned in `package.json`. Follow the [official pnpm installation guide](https://pnpm.io/installation). `pnpm-lock.yaml` is the project's only dependency lockfile.
 
 ```sh
-git clone https://github.com/antoniomml/Chordi.git
-cd Chordi
+git clone https://github.com/antoniomml/chordi.git
+cd chordi
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Abre la dirección que imprime Vite, normalmente `http://localhost:5173`. Mientras el repositorio sea privado, necesitas acceso para clonarlo.
+Open the URL printed by Vite, normally `http://localhost:5173`. Access is required to clone a private repository.
 
-## Comandos
+## Commands
 
-| Comando                 | Resultado                                                         |
-| ----------------------- | ----------------------------------------------------------------- |
-| `pnpm dev`              | Servidor de desarrollo con recarga automática.                    |
-| `pnpm build`            | Aplicación estática en `dist/`.                                   |
-| `pnpm preview`          | Revisión local de la compilación.                                 |
-| `pnpm test`             | Pruebas unitarias del modelo musical, composición e importación.  |
-| `pnpm test:e2e`         | Pruebas de navegador; necesita un servidor activo.                |
-| `pnpm format`           | Formatea código y documentación.                                  |
-| `pnpm format:check`     | Comprueba el formato sin modificar archivos.                      |
-| `pnpm docs:screenshots` | Regenera las capturas de documentación con la canción de ejemplo. |
+| Command                 | Purpose                                                |
+| ----------------------- | ------------------------------------------------------ |
+| `pnpm dev`              | Development server with automatic reload.              |
+| `pnpm build`            | Static application in `dist/`.                         |
+| `pnpm preview`          | Local preview of the production build.                 |
+| `pnpm test`             | Unit tests for music, harmony, layout and imports.     |
+| `pnpm test:e2e`         | Browser checks; requires a running server.             |
+| `pnpm format`           | Format code and documentation.                         |
+| `pnpm format:check`     | Check formatting without modifying files.              |
+| `pnpm docs:screenshots` | Refresh documentation screenshots using the demo song. |
 
-Para comprobar la interfaz y las exportaciones:
+To check the interface and exports:
 
 ```sh
 pnpm exec playwright install chromium
 pnpm dev
-# En otra terminal:
+# In another terminal:
 pnpm test:e2e
 ```
 
-Las pruebas usan Chromium y escriben archivos en `artifacts/`, excluido de Git. Puedes cambiar el servidor mediante `CHORDI_URL`. Las capturas públicas de `docs/images/` se crean en un contexto limpio, sin datos del navegador del usuario.
+Browser tests use Chromium and write ignored files under `artifacts/`. Override the server URL with `CHORDI_URL`. Public screenshots under `docs/images/` use a clean browser context without personal data.
 
-Para revisar un PDF de referencia que tengas localmente:
+To inspect a local reference PDF:
 
 ```sh
-CHORDI_REFERENCE_PDF="/ruta/al/original.pdf" pnpm exec node tests/reference-pdf.mjs
+CHORDI_REFERENCE_PDF="/path/to/original.pdf" pnpm exec node tests/reference-pdf.mjs
 ```
 
-No incluyas ese documento ni sus resultados en el repositorio.
+Do not commit that document or its generated outputs.
 
-## Dependencias y pnpm
+## Dependencies and pnpm
 
-Añade o actualiza dependencias mediante `pnpm add`, `pnpm add -D` o `pnpm update`. Incluye los cambios de `package.json` y `pnpm-lock.yaml` en el mismo commit. Evita generar lockfiles de otros gestores.
+Use `pnpm add`, `pnpm add -D` or `pnpm update`. Commit changes to `package.json` and `pnpm-lock.yaml` together; do not generate another package manager's lockfile.
 
-`pnpm-workspace.yaml` define la política de scripts de instalación: permite el de esbuild, necesario para el compilador de Vite, y desactiva el de core-js. Revisa cualquier nueva dependencia que requiera scripts antes de ampliar esa lista. La configuración sigue el [modelo `allowBuilds` de pnpm](https://github.com/pnpm/pnpm.io/blob/main/docs/migration.md).
+`pnpm-workspace.yaml` allows esbuild's required install script and disables core-js's script. Review new dependencies before extending that list. The configuration follows [pnpm's `allowBuilds` model](https://github.com/pnpm/pnpm.io/blob/main/docs/migration.md).
 
-CI instala la versión de pnpm declarada, usa `--frozen-lockfile` y ejecuta formato, pruebas unitarias, compilación y navegador en Linux. Las bibliotecas de PDF y Word se cargan bajo demanda; Vite puede avisar del tamaño de alguno de sus paquetes de exportación.
+CI installs the declared pnpm version with `--frozen-lockfile`, then runs formatting, unit tests, the build and browser tests on Linux. PDF and Word libraries load on demand; Vite may report large export bundles.
 
-## Qué pertenece al repositorio
+## Repository contents
 
-Incluye código, pruebas con ejemplos inventados, documentación, capturas de demostración, fuentes con licencia y el catálogo atribuido. `node_modules/`, `dist/`, informes, archivos personales y configuración local no deben versionarse. Las reglas están en `.gitignore`.
+Commit code, tests with invented examples, documentation, demo screenshots, licensed fonts and the attributed chord catalog. Exclude `node_modules/`, `dist/`, reports, personal files and local configuration, as defined in `.gitignore`.
 
-La aplicación anterior se eliminó del árbol actual. Los commits históricos conservan su contenido: eliminarlos requeriría una operación explícita de reescritura de historial.
+The previous application was removed from the current tree. Historical commits retain it; removing that history requires a separate explicit history rewrite.
 
-## Versiones
+## Releases
 
-La primera versión etiquetada es **`v0.0.1`**. Antes de preparar otra:
+The first tagged release is **`v0.0.1`**. Before another release:
 
-1. Actualiza `version` en `package.json` y añade sus cambios a `CHANGELOG.md`.
-2. Ejecuta instalación congelada, formato, pruebas, compilación y pruebas de navegador.
-3. Crea un commit y una etiqueta anotada `vX.Y.Z` que apunte a él.
-4. Sube el commit y esa etiqueta; publica las notas de la versión en GitHub.
+1. Update `version` in `package.json` and add its changes to `CHANGELOG.md`.
+2. Run frozen installation, formatting, tests, build and browser checks.
+3. Create a commit and an annotated `vX.Y.Z` tag pointing to it.
+4. Push the commit and tag, then publish release notes on GitHub.
 
-`private: true` en `package.json` evita publicar el paquete accidentalmente en un registro; no controla la visibilidad del repositorio GitHub. La licencia del código propio sigue pendiente de elección antes de anunciarlo como código abierto.
+`private: true` in `package.json` prevents accidental registry publication; it does not control GitHub repository visibility. A license for the original code must be chosen before announcing an open-source release.
+
+## Web imports and production
+
+`pnpm dev` and `pnpm preview` include `/api/import-web`. For a built application with the same endpoint, run `pnpm build` followed by `pnpm start` (Node.js, default `127.0.0.1:3000`; configure `HOST` and `PORT` as needed). Put a normal HTTPS reverse proxy in front for a public deployment. Hosting `dist/` alone does not enable web downloads.
+
+The endpoint accepts HTTPS song URLs from Cifra Club, LaCuerda and Ultimate Guitar only. Redirects are checked against the same host allowlist, downloads time out after 18 seconds, and HTML is limited to 3 MiB. No accounts, cookies or credentials are forwarded. The browser extracts song text from inert HTML; downloaded scripts are never run. Sites can block downloads or change their markup; inaccessible versions produce an error and the file/text import remains available.
+
+`CHORDI_LIVE_IMPORTS=1 node tests/import-browser.mjs` additionally exercises public song URLs through the running server. Regular CI uses invented fixtures and does not depend on third-party availability.

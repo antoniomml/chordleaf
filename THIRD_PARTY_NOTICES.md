@@ -1,17 +1,17 @@
-# Atribuciones de terceros
+# Third-party notices
 
-## Posiciones de guitarra
+## Guitar positions
 
-`src/data/guitar.json` deriva de [`tombatossals/chords-db`](https://github.com/tombatossals/chords-db), archivo `lib/guitar.json`, descargado el 20 de septiembre de 2026. Copyright © 2016 David Rubert. Licencia MIT, reproducida íntegramente en [`src/data/LICENSE.chords-db`](src/data/LICENSE.chords-db).
+`src/data/guitar.json` and `src/data/barres.json` derive from [`tombatossals/chords-db`](https://github.com/tombatossals/chords-db), file `lib/guitar.json`, downloaded September 20, 2026. Copyright © 2016 David Rubert. Its MIT license is reproduced in full in [`src/data/LICENSE.chords-db`](src/data/LICENSE.chords-db).
 
-La transformación conserva los trastes de todas las posiciones, convirtiéndolos a trastes absolutos y normalizando raíces y bajos por clase de altura. No se incluyen nombres de dedos ni cejillas de la fuente original. El script de actualización está en `scripts/import-chords.mjs`. Las posiciones se ejecutan localmente; no se consulta ningún servicio en uso normal.
+The transformation retains the frets of all positions, converting them to absolute fret numbers and normalizing roots and basses by pitch class. Barre annotations are retained by absolute fret pattern in `src/data/barres.json`; finger numbers are not included. The update script is `scripts/import-chords.mjs`. Positions are processed locally; normal use does not query a service.
 
-## Fuente del documento
+The web distribution also includes the catalog license at `public/licenses/chords-db.txt`, linked from the chord browser.
 
-Google Sans Code: licencia SIL Open Font License incluida en [`public/fonts/OFL-GoogleSansCode.txt`](public/fonts/OFL-GoogleSansCode.txt).
+## Document font
 
-## Dependencias
+Google Sans Code uses the SIL Open Font License included in [`public/fonts/OFL-GoogleSansCode.txt`](public/fonts/OFL-GoogleSansCode.txt).
 
-Las versiones exactas están en `pnpm-lock.yaml`. Cada paquete conserva su licencia. Este documento no sustituye esas licencias ni concede una licencia al código propio de Chordi.
+## Dependencies
 
-La distribución web incluye también la licencia del catálogo en `public/licenses/chords-db.txt`, accesible desde el explorador de acordes.
+Exact versions appear in `pnpm-lock.yaml`. Each package retains its own license. This document does not replace those licenses or grant a license to chordi's original application code.

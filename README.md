@@ -1,84 +1,84 @@
 <div align="center">
-  <img src="public/logo.svg" width="76" height="76" alt="Logo de Chordi">
-  <h1>Chordi</h1>
-  <p><strong>Tu canción. Tus acordes. Todo en su sitio.</strong></p>
-  <p>Un espacio para preparar letras y acordes, encontrar cómo tocarlos<br>y llevarte una hoja lista para el próximo ensayo.</p>
+  <img src="public/logo.svg" width="76" height="76" alt="chordi logo">
+  <h1>chordi</h1>
+  <p><strong>Your song. Your chords. Everything in place.</strong></p>
+  <p>A workspace for writing lyrics and chords, exploring guitar voicings,<br>and making a song sheet for your next rehearsal.</p>
   <p>
-    <a href="https://github.com/antoniomml/Chordi/releases/tag/v0.0.1"><img src="https://img.shields.io/badge/versión-0.0.1-c9e79c?style=flat-square&labelColor=263426" alt="Versión inicial 0.0.1"></a>
-    <a href="https://github.com/antoniomml/Chordi/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/Chordi/actions/workflows/checks.yml/badge.svg" alt="Comprobaciones automáticas"></a>
+    <a href="https://github.com/antoniomml/chordi/releases/tag/v0.0.1"><img src="https://img.shields.io/badge/version-0.0.1-c9e79c?style=flat-square&labelColor=263426" alt="Initial release 0.0.1"></a>
+    <a href="https://github.com/antoniomml/chordi/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordi/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
   </p>
-  <p><a href="#un-pequeño-estudio-para-tus-canciones">Qué puedes hacer</a> · <a href="docs/guide.md">Guía de uso</a> · <a href="CHANGELOG.md">Novedades</a> · <a href="CONTRIBUTING.md">Participar</a></p>
+  <p><a href="#a-small-studio-for-your-songs">Features</a> · <a href="docs/guide.md">User guide</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
 </div>
 
-![Chordi: editor de letra y acordes a la izquierda y hoja de canción a la derecha](docs/images/workspace.png)
+![chordi: lyrics and chord editor beside a song sheet](docs/images/workspace.png)
 
-## Un pequeño estudio para tus canciones
+## A small studio for your songs
 
-Preparar una canción debería dejarte tiempo para tocarla. Chordi reúne la letra, los acordes y el documento final en una misma pantalla: escribe un verso, mueve un cambio de acorde hasta la sílaba adecuada y comprueba cómo quedará en la hoja.
+Preparing a song should leave time to play it. chordi brings lyrics, chords and the finished document together: write a verse, place each chord on the right syllable, and check the printed layout as you go.
 
-Está pensado para quien canta, toca la guitarra, prepara un ensayo o quiere tener sus canciones ordenadas. No necesitas saber programar para usar la interfaz.
+It is for singers, guitarists and anyone preparing a rehearsal or organizing songs. The application interface is in Spanish; project documentation is in English.
 
-| Para cuando quieres…            | Chordi te ayuda a…                                                          |
-| ------------------------------- | --------------------------------------------------------------------------- |
-| **Preparar una canción**        | Empezar con una hoja en blanco o importar un archivo TXT, PDF o Word.       |
-| **Clavar el cambio de acorde**  | Colocar cada acorde en una letra concreta, al inicio o centrado sobre ella. |
-| **Escribir con espacio**        | Ajustar el ancho del editor o ampliarlo en una ventana grande.              |
-| **Llevarla a tu voz**           | Transportar los acordes por semitonos y ajustar la cejilla.                 |
-| **Encontrar una posición**      | Explorar 828 acordes y 3.283 posiciones de guitarra en afinación estándar.  |
-| **Preparar la hoja para tocar** | Elegir tamaño de letra, márgenes y una o dos columnas con vista previa A4.  |
-| **Compartir el resultado**      | Descargar un PDF, un documento Word editable o el texto con sus acordes.    |
+| When you want to…             | chordi helps you…                                                      |
+| ----------------------------- | ---------------------------------------------------------------------- |
+| **Prepare a song**            | Start from a blank page or import TXT, PDF or Word.                    |
+| **Time a chord change**       | Anchor a chord to an exact letter without adding spaces to the lyrics. |
+| **Write comfortably**         | Resize the editor or open its expanded view.                           |
+| **Suit your voice**           | Transpose by semitones and adjust the capo.                            |
+| **Find a voicing**            | Browse 828 chords and 3,283 standard-tuning guitar positions.          |
+| **Name a shape**              | Place notes on a fretboard and compare harmonic interpretations.       |
+| **Try an alternative**        | Insert a voicing or replace one or all occurrences of a song chord.    |
+| **Prepare a rehearsal sheet** | Choose font size, margins and one or two columns in an A4 preview.     |
+| **Share the result**          | Export PDF, editable Word or text with chord anchors.                  |
 
-## Del primer verso a la hoja de ensayo
+## From the first verse to rehearsal
 
-**1. Dale nombre a tu canción.** Pulsa **Nueva canción** y empieza de cero o importa un archivo. Puedes tener varias canciones abiertas en pestañas.
+**1. Name your song.** Choose **Nueva canción** to start from scratch or import a file. Several songs can stay open in separate tabs.
 
-**2. Escribe la letra y coloca los acordes.** Pon el acorde entre corchetes justo donde cambia la armonía:
+**2. Write lyrics and add chords.** Put each chord in brackets at the point where the harmony changes:
 
 ```text
-[G]Guardo la luz de [D]esta mañana
-[C]en las cuerdas de mi [G]guitarra.
+[G]Keep the light of [D]this new morning
+[C]in the strings of my [G]guitar.
 ```
 
-Los corchetes desaparecen de la hoja: solo verás los acordes encima de la letra. Para afinar un cambio dentro de una palabra, escribe `ca[G]sa`: el acorde queda anclado a la **s**.
+The printed sheet shows chords above the lyrics, without brackets. For a change inside a word, `mor[G]ning` anchors the chord to the **n**.
 
-**3. Hazla cómoda para tocar.** Prueba otra tonalidad, consulta una posición de guitarra y ajusta el documento. Cuando esté listo, pulsa **Exportar**.
+**3. Make it comfortable to play.** The **Documento**, **Tonalidad** and **Acordes** sections each occupy the whole sidebar. Adjust the document, inspect the estimated key or work with guitar chords. When ready, choose **Exportar**.
 
-[Descubre los controles y los pequeños detalles en la guía de uso →](docs/guide.md)
+[Explore the controls in the user guide →](docs/guide.md)
 
-## Ese acorde también tiene sitio
+## Give every chord a place
 
-Mayores, menores, séptimas, disminuidos, extensiones e inversiones: el explorador permite escribir un nombre como `Emaj7`, `Abm7b5` o `C/G`, recorrer sus posiciones e insertar el acorde en la canción.
+The **Acordes** section shows the song's chords as a three-column grid of diagrams. Select a card to edit its voicing, or drag a diagram onto the sheet. The search covers major, minor, seventh, diminished, suspended, extended and slash chords.
 
-<div align="center">
-  <img src="docs/images/chord-library.png" width="430" alt="Explorador de Abm7b5 con diagrama de guitarra y controles para recorrer sus posiciones">
-</div>
+![The guitar chord workspace](docs/images/chord-library.png)
 
-Las digitaciones proceden de un catálogo abierto incluido en la aplicación. Si un símbolo no tiene una posición disponible, Chordi te lo indica. La tonalidad sugerida es una orientación musical; tú decides cómo interpretar la canción.
+The interactive fretboard calculates sounding notes and the lowest pitch. Its formula-based identifier compares exact matches, inversions and explicitly labelled omissions. For example, the same notes can suggest C6 or Am7/C. Interpretations depend on context; the tool does not claim to enumerate every possible chord name. See [the harmony model](docs/harmony.md).
 
-## Tu música se queda contigo
+Choose an interpretation to insert it at the text cursor or replace a specific occurrence or all occurrences of an existing chord. The chosen voicing is saved with the song.
 
-Las canciones y los archivos que importas se procesan en tu navegador. No hay cuentas ni un servidor que reciba tus canciones. Los cambios se guardan automáticamente en ese navegador para que puedas seguir trabajando.
+## Your music stays with you
 
-**Exporta una copia de lo que quieras conservar.** El guardado del navegador no sincroniza dispositivos y puede desaparecer si borras sus datos. Para seguir editando con precisión, guarda también el TXT de Chordi.
+Songs and imported files are processed in your browser. Web imports send the song URL to the Chordi server, which downloads the public page; your edited songs are not uploaded. There are no accounts. Changes are saved automatically in that browser.
 
-La interfaz carga su tipografía desde Google Fonts; el texto de tus canciones no se envía a ese servicio.
+**Export a copy of anything you want to keep.** Browser storage does not sync devices and can disappear when browser data is cleared. Export chordi TXT to preserve precise editing data.
 
-## Una primera versión para seguir creciendo
+The interface loads its typeface from Google Fonts; your song text is not sent to that service.
 
-**0.0.1** es la primera versión etiquetada de Chordi. Ya puedes editar, transportar, consultar acordes e importar y exportar canciones. Aún hay detalles que conviene revisar al traer un documento: los PDF escaneados necesitan reconocimiento de texto previo y las maquetaciones complejas pueden requerir ajustes. Word también puede variar según el lector y las fuentes instaladas.
+## A first release with room to grow
 
-La transcripción de letra y acordes desde audio es una idea para más adelante; todavía no está disponible. Consulta [las novedades y limitaciones de esta versión](CHANGELOG.md).
+**0.0.1** is the first tagged release. Current development changes are listed under **Unreleased** in the [changelog](CHANGELOG.md). Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet.
 
-## Forma parte de Chordi
+## Take part
 
-Una idea de músico, una explicación que falta o un fallo al colocar un acorde también son buenas aportaciones. Puedes [contar un problema](https://github.com/antoniomml/Chordi/issues/new?template=bug_report.yml) o [proponer una mejora](https://github.com/antoniomml/Chordi/issues/new?template=feature_request.yml). Utiliza ejemplos breves inventados cuando compartas una canción.
+Musical ideas, missing explanations and awkward controls are all useful contributions. [Report an issue](https://github.com/antoniomml/chordi/issues/new?template=bug_report.yml) or [suggest a feature](https://github.com/antoniomml/chordi/issues/new?template=feature_request.yml), using short invented song examples.
 
-Para ejecutar tu propia copia o trabajar en el proyecto, sigue [la guía de desarrollo con pnpm](docs/development.md). No hay una instancia pública anunciada todavía.
+To run your own copy, follow [the pnpm development guide](docs/development.md). No public hosted instance has been announced.
 
 ---
 
 <div align="center">
-  <p><strong>Hecho para tocar.</strong></p>
-  <p><a href="docs/guide.md">Guía de uso</a> · <a href="docs/architecture.md">Arquitectura</a> · <a href="THIRD_PARTY_NOTICES.md">Créditos y atribuciones</a></p>
-  <sub>La licencia del código propio está pendiente de elección antes de su publicación como código abierto. Los datos y las fuentes conservan sus respectivas licencias.</sub>
+  <p><strong>Made to play.</strong></p>
+  <p><a href="docs/guide.md">User guide</a> · <a href="docs/architecture.md">Architecture</a> · <a href="THIRD_PARTY_NOTICES.md">Credits</a></p>
+  <sub>A license for the original application code has not yet been selected. Third-party data and fonts retain their respective licenses.</sub>
 </div>

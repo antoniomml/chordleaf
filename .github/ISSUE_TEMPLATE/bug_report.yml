@@ -1,22 +1,22 @@
-name: Algo no funciona
-description: Cuéntanos qué pasó al preparar tu canción.
+name: Something is not working
+description: Tell us what happened while preparing your song.
 body:
   - type: textarea
     id: problem
     attributes:
-      label: ¿Qué intentabas hacer y qué pasó?
-      description: Incluye lo que esperabas que ocurriera.
+      label: What were you trying to do, and what happened?
+      description: Include the result you expected.
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Pasos para reproducirlo
-      description: Si hace falta, usa un ejemplo breve inventado con los acordes afectados. Evita documentos personales o letras ajenas completas.
+      label: Steps to reproduce
+      description: If needed, use a short invented example with the affected chords. Avoid personal documents or complete third-party lyrics.
     validations:
       required: true
   - type: input
     id: environment
     attributes:
-      label: Navegador y dispositivo
-      placeholder: Por ejemplo, Firefox en Windows o Safari en iPhone.
+      label: Browser and device
+      placeholder: For example, Firefox on Windows or Safari on iPhone.
