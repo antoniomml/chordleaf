@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Add English and Spanish UI selection without translating song content.
+- Prepare Vercel functions, security headers and an explicit web-import activation switch.
+- Validate restored song data, bound imports and preserve damaged sessions for recovery.
+- Self-host DM Sans; remove third-party font requests.
+- Improve keyboard access, contrast, dialog names and small-screen controls.
+- Add page metadata and optional canonical URL, robots and sitemap generation.
+- Run browser checks against production builds; add security and localization regressions.
+- Add deployment, privacy, security and production-audit documentation.
+
 ## 0.1.0 · September 20, 2026
 
 A chords workspace, public web imports and rehearsal-sheet layout that keep more of the song on the page.
@@ -54,4 +63,4 @@ First tagged release: a local workspace for preparing lyrics and chords, from th
 
 ### Known limitations
 
-Storage is local with no device synchronization. Scanned PDFs need prior OCR; review alignment after PDF or Word import. Key estimation is advisory and the catalog cannot cover every fingering. Audio transcription is not available. A license for original code and a public hosted instance are pending.
+Storage is local with no device synchronization. Scanned PDFs need prior OCR; review alignment after PDF or Word import. Key estimation is advisory and the catalog cannot cover every fingering. Audio transcription is not available. The original code is MIT licensed. A protected Vercel deployment is available; a public launch is pending.

@@ -1,3 +1,4 @@
+import { t } from "./i18n.js";
 import guitar from "./data/guitar.json" with { type: "json" };
 import { chords, diagram, normalizeChord, NOTES, pc } from "./music.js";
 import { identifyChord, replaceChord } from "./harmony.js";
@@ -6,7 +7,7 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
   const host = document.createElement("section");
   host.id = "chords-panel";
   host.hidden = true;
-  host.innerHTML = `<div class="panel-title"><span>Tu mesa de acordes</span><span class="muted">03</span></div>
+  host.innerHTML = t`<div class="panel-title"><span>Tu mesa de acordes</span><span class="muted">03</span></div>
     <div class="chord-modes" role="tablist" aria-label="Herramientas de acordes"><button role="tab" id="mode-song" aria-controls="song-chords" data-mode="song" aria-selected="true">En canción</button><button role="tab" id="mode-search" aria-controls="search-chords" tabindex="-1" data-mode="search" aria-selected="false">Buscar</button><button role="tab" id="mode-identify" aria-controls="identify-chords" tabindex="-1" data-mode="identify" aria-selected="false">Identificar</button></div>
     <div id="song-chords" role="tabpanel" aria-labelledby="mode-song"></div>
     <div id="search-chords" role="tabpanel" aria-labelledby="mode-search" hidden><label class="field">BUSCAR ACORDE<input id="catalog-search" type="search" placeholder="C, Emaj7, Abm7b5, C/G…" autocomplete="off"></label><p class="chord-help">Busca por nombre. Pulsa un diagrama para recorrer sus posiciones y usarlo en la canción.</p><p id="search-count" role="status"></p><div id="catalog-grid" class="chord-card-grid"></div><button id="more-chords">Mostrar más</button><p class="chord-help">828 acordes · 3283 posiciones · E A D G B e<br>Datos de <a href="https://github.com/tombatossals/chords-db">chords-db</a> · <a href="/licenses/chords-db.txt">MIT</a></p></div>
@@ -91,13 +92,15 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
       }
     }
     $("#search-count").textContent = matches.length
-      ? `${matches.length} acordes · ${Math.min(searchLimit, matches.length)} visibles`
-      : "Sin resultados. Prueba otro nombre o dibuja la posición en Identificar.";
+      ? t`${matches.length} acordes · ${Math.min(searchLimit, matches.length)} visibles`
+      : t(
+          "Sin resultados. Prueba otro nombre o dibuja la posición en Identificar.",
+        );
     $("#catalog-grid").innerHTML = matches
       .slice(0, searchLimit)
       .map(
         (c, i) =>
-          `<button class="chord-card" data-result="${i}" aria-label="Usar ${esc(c.name)}"><strong>${esc(c.name)}</strong>${diagram(c.name)}<small>${c.positions.length} posiciones</small></button>`,
+          t`<button class="chord-card" data-result="${i}" aria-label="Usar ${esc(c.name)}"><strong>${esc(c.name)}</strong>${diagram(c.name)}<small>${c.positions.length} posiciones</small></button>`,
       )
       .join("");
     $("#more-chords").hidden = matches.length <= searchLimit;
@@ -108,7 +111,7 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
           choose(
             c.name,
             c.positions,
-            "Posición del catálogo en afinación estándar.",
+            t("Posición del catálogo en afinación estándar."),
           );
         }),
     );
@@ -128,11 +131,11 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
       [5, 4, 3, 2, 1, 0]
         .map((string) => {
           const f = frets[string];
-          return `<div class="guitar-string" style="--string-weight:${0.7 + (5 - string) * 0.22}px"><span class="string-name">${labels[string]}</span><button class="open-string ${f < 0 ? "is-muted" : f === 0 ? "is-open" : "is-fretted"}" data-string="${string}" data-fret="-1" aria-label="Cuerda ${string + 1}: ${f < 0 ? "apagada; poner al aire" : f === 0 ? "al aire; silenciar" : `traste ${f}; silenciar`}" aria-pressed="${f === 0}" title="${f > 0 ? `Traste ${f} · pulsa para silenciar` : f === 0 ? "Al aire · pulsa para silenciar" : "Apagada · pulsa para poner al aire"}"><span class="string-state-symbol" aria-hidden="true">${f < 0 ? "×" : f === 0 ? "○" : f}</span><span class="string-state-label" aria-hidden="true">${f < 0 ? "Apagada" : f === 0 ? "Al aire" : "Traste"}</span></button>${Array.from(
+          return t`<div class="guitar-string" style="--string-weight:${0.7 + (5 - string) * 0.22}px"><span class="string-name">${labels[string]}</span><button class="open-string ${f < 0 ? "is-muted" : f === 0 ? "is-open" : "is-fretted"}" data-string="${string}" data-fret="-1" aria-label="Cuerda ${string + 1}: ${f < 0 ? t("apagada; poner al aire") : f === 0 ? t("al aire; silenciar") : t`traste ${f}; silenciar`}" aria-pressed="${f === 0}" title="${f > 0 ? t`Traste ${f} · pulsa para silenciar` : f === 0 ? t("Al aire · pulsa para silenciar") : t("Apagada · pulsa para poner al aire")}"><span class="string-state-symbol" aria-hidden="true">${f < 0 ? "×" : f === 0 ? "○" : f}</span><span class="string-state-label" aria-hidden="true">${f < 0 ? t("Apagada") : f === 0 ? t("Al aire") : t("Traste")}</span></button>${Array.from(
             { length: 5 },
             (_, i) => {
               const fret = first + i;
-              return `<button class="fret-point ${f === fret ? "pressed" : ""} ${i === 0 && first === 1 ? "at-nut" : ""}" data-string="${string}" data-fret="${fret}" aria-label="Cuerda ${string + 1}, traste ${fret}" aria-pressed="${f === fret}"><span>${f === fret ? "●" : ""}</span></button>`;
+              return t`<button class="fret-point ${f === fret ? "pressed" : ""} ${i === 0 && first === 1 ? "at-nut" : ""}" data-string="${string}" data-fret="${fret}" aria-label="Cuerda ${string + 1}, traste ${fret}" aria-pressed="${f === fret}"><span>${f === fret ? "●" : ""}</span></button>`;
             },
           ).join("")}</div>`;
         })
@@ -164,16 +167,16 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
     const result = identifyChord(frets);
     $("#interpretation-count").textContent = result.matches.length || "";
     $("#capo-notes").textContent = song().capo
-      ? `Trastes y nombres relativos a la cejilla ${song().capo}.`
-      : "Afinación estándar · E A D G B e";
+      ? t`Trastes y nombres relativos a la cejilla ${song().capo}.`
+      : t("Afinación estándar · E A D G B e");
     $("#chord-results").innerHTML = result.matches.length
       ? result.matches
           .map(
             (m, i) =>
-              `<button class="chord-match" data-match="${i}" aria-pressed="false"><strong>${esc(m.symbol)}</strong><span>${m.exact ? "Completo" : m.missing.map((n) => (n === 0 ? "Sin raíz" : "Sin quinta")).join(" · ")} · ${esc(m.notes.join(" · "))}</span></button>`,
+              `<button class="chord-match" data-match="${i}" aria-pressed="false"><strong>${esc(m.symbol)}</strong><span>${m.exact ? t("Completo") : m.missing.map((n) => (n === 0 ? t("Sin raíz") : t("Sin quinta"))).join(" · ")} · ${esc(m.notes.join(" · "))}</span></button>`,
           )
           .join("")
-      : `<p class="chord-help">${result.pitches.length < 2 ? "Los nombres aparecerán aquí al formar una posición." : "No hay coincidencias en las fórmulas disponibles. Prueba otra posición."}</p>`;
+      : `<p class="chord-help">${result.pitches.length < 2 ? t("Los nombres aparecerán aquí al formar una posición.") : t("No hay coincidencias en las fórmulas disponibles. Prueba otra posición.")}</p>`;
     host.querySelectorAll("[data-match]").forEach(
       (b) =>
         (b.onclick = () => {
@@ -184,7 +187,7 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
           choose(
             m.symbol,
             [[...frets]],
-            `${m.exact ? "Todas las notas del acorde están presentes." : "Omisiones indicadas en el nombre: no1 = sin raíz; no5 = sin quinta."} Notas: ${m.notes.join(" · ")}.`,
+            t`${m.exact ? t("Todas las notas del acorde están presentes.") : t("Omisiones indicadas en el nombre: no1 = sin raíz; no5 = sin quinta.")} Notas: ${m.notes.join(" · ")}.`,
           );
         }),
     );
@@ -195,7 +198,7 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
   ]) {
     $("#" + id).onclick = () => {
       first = Math.max(1, Math.min(20, first + offset));
-      $("#first-fret").textContent = `Traste ${first}`;
+      $("#first-fret").textContent = t`Traste ${first}`;
       drawFretboard();
     };
   }
@@ -257,11 +260,11 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
       (m) => normalizeChord(m[1]) === normalizeChord(from),
     );
     $("#replace-occurrence").innerHTML =
-      `<option value="all">Todas (${locations.length})</option>` +
+      t`<option value="all">Todas (${locations.length})</option>` +
       locations
         .map(
           (m, i) =>
-            `<option value="${i}">Solo ${i + 1} · línea ${song().text.slice(0, m.index).split("\n").length}</option>`,
+            t`<option value="${i}">Solo ${i + 1} · línea ${song().text.slice(0, m.index).split("\n").length}</option>`,
         )
         .join("");
   }
@@ -318,8 +321,8 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
     updateTargets();
     notify(
       replacing
-        ? "Acorde sustituido. Puedes deshacer el cambio."
-        : "Acorde y posición añadidos a la canción.",
+        ? t("Acorde sustituido. Puedes deshacer el cambio.")
+        : t("Acorde y posición añadidos a la canción."),
     );
   }
   $("#insert-chosen").onclick = () => apply(false);
@@ -329,7 +332,7 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
     if (undo.after !== snapshot()) {
       undo = null;
       updateTargets();
-      notify("Hay cambios posteriores; se conservan tus últimas ediciones.");
+      notify(t("Hay cambios posteriores; se conservan tus últimas ediciones."));
       return;
     }
     const { text, chordShapes, chordStickers } = undo;
@@ -338,7 +341,7 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
     changed();
     refresh();
     updateTargets();
-    notify("Cambio de acorde deshecho.");
+    notify(t("Cambio de acorde deshecho."));
   };
   return {
     refresh() {

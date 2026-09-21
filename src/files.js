@@ -1,3 +1,11 @@
+import { validateDocxArchive } from "./docx-limits.js";
+import { t } from "./i18n.js";
+import {
+  songMetadata,
+  MAX_FILE_BYTES,
+  MAX_TEXT_LENGTH,
+  MAX_PDF_PAGES,
+} from "./song-state.js";
 import { stickerPng, stickerGeometry } from "./dictionary.js";
 import { layout, PAGE } from "./layout.js";
 import { chordRE } from "./music.js";
@@ -14,7 +22,7 @@ export function txt(song) {
   return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordi: ${JSON.stringify({ chordShapes: song.chordShapes || {}, chordStickers: song.chordStickers || [] })}}\n\n${song.text}`;
 }
 export async function exportSong(song, type) {
-  const name = (song.title || "Canción").replace(/[\\/:*?"<>|]/g, "-");
+  const name = (song.title || t("Canción")).replace(/[\\/:*?"<>|]/g, "-");
   if (type === "txt") {
     download(
       new Blob([txt(song)], { type: "text/plain;charset=utf-8" }),
@@ -78,7 +86,7 @@ export async function exportSong(song, type) {
         }
       pdf.setFont("GoogleSansCode", "normal");
       pdf.setFontSize(7);
-      pdf.setTextColor("#AAAAAA");
+      pdf.setTextColor("#727272");
       pdf.text("Chordi", PAGE.width / 2, PAGE.height - 12, { align: "center" });
       for (const sticker of stickers.filter((s) => s.page === i))
         pdf.addImage(
@@ -329,7 +337,7 @@ export async function exportSong(song, type) {
                     text: "Chordi",
                     font: DOCUMENT_FONT,
                     size: 14,
-                    color: "AAAAAA",
+                    color: "727272",
                   }),
                 ],
               }),
@@ -421,6 +429,12 @@ export function titleCase(value = "") {
     );
 }
 export function importText(text, fallback) {
+  if (text.length > MAX_TEXT_LENGTH)
+    throw new Error(
+      t(
+        "El texto es demasiado largo. Importa hasta 50.000 caracteres por canción.",
+      ),
+    );
   let song = { title: fallback, artist: "", capo: 0 },
     lines = text.replace(/\r/g, "").split("\n");
   lines = lines.filter((line) => {
@@ -428,43 +442,7 @@ export function importText(text, fallback) {
     if (metadata) {
       try {
         const data = JSON.parse(metadata[1]);
-        song.chordShapes = Object.fromEntries(
-          Object.entries(data.chordShapes || {}).filter(
-            ([name, shape]) =>
-              chordRE.test(name) &&
-              Array.isArray(shape?.frets) &&
-              shape.frets.length === 6 &&
-              shape.frets.every(
-                (n) => Number.isInteger(n) && n >= -1 && n <= 24,
-              ),
-          ),
-        );
-        song.chordStickers = (
-          Array.isArray(data.chordStickers) ? data.chordStickers : []
-        ).filter(
-          (s) =>
-            s &&
-            [s.x, s.y, s.width, s.page].every(Number.isFinite) &&
-            s.x >= 0 &&
-            s.y >= 0 &&
-            s.width >= 28 &&
-            s.width <= PAGE.width &&
-            (s.height === undefined ||
-              (Number.isFinite(s.height) &&
-                s.height >= 28 &&
-                s.height <= PAGE.height)) &&
-            (s.columns === undefined ||
-              (Number.isInteger(s.columns) &&
-                s.columns >= 1 &&
-                s.columns <= 1000)) &&
-            Number.isInteger(s.page) &&
-            s.page >= 0 &&
-            (s.chords === "all" ||
-              (Array.isArray(s.chords) &&
-                s.chords.every(
-                  (c) => typeof c === "string" && chordRE.test(c),
-                ))),
-        );
+        Object.assign(song, songMetadata(data));
       } catch {
         /* Ignore malformed optional editor metadata. */
       }
@@ -493,15 +471,19 @@ export function importText(text, fallback) {
   return song;
 }
 export async function importFile(file) {
+  if (file.size > MAX_FILE_BYTES)
+    throw new Error(t("El archivo es demasiado grande. El límite es 10 MiB."));
   const ext = file.name.split(".").pop().toLowerCase(),
     fallback = file.name.replace(/\.[^.]+$/, "");
   if (ext === "txt" || ext === "cho" || ext === "chordpro")
     return importText(await file.text(), fallback);
   if (ext === "docx") {
+    const buffer = await file.arrayBuffer();
+    validateDocxArchive(buffer);
     const mammoth = await import("mammoth");
     const result = await mammoth.convertToHtml(
       {
-        arrayBuffer: await file.arrayBuffer(),
+        arrayBuffer: buffer,
       },
       { ignoreEmptyParagraphs: false },
     );
@@ -553,13 +535,16 @@ export async function importFile(file) {
       title: titleCase(title),
       artist: titleCase(artist),
       columns,
-      notice:
+      notice: t(
         "Word importado. Revisa el título y la alineación de los acordes.",
+      ),
     };
   }
   if (ext !== "pdf")
     throw Error(
-      "Selecciona un archivo TXT, PDF o DOCX. Para un .doc antiguo, guárdalo primero como DOCX.",
+      t(
+        "Selecciona un archivo TXT, PDF o DOCX. Para un .doc antiguo, guárdalo primero como DOCX.",
+      ),
     );
   const pdfjs = await import("pdfjs-dist");
   pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -567,9 +552,13 @@ export async function importFile(file) {
     import.meta.url,
   ).href;
   const loadingTask = pdfjs.getDocument({ data: await file.arrayBuffer() });
-  const pdf = await loadingTask.promise;
   const pages = [];
   try {
+    const pdf = await loadingTask.promise;
+    if (pdf.numPages > MAX_PDF_PAGES)
+      throw new Error(
+        t("El PDF es demasiado largo. Importa hasta 50 páginas."),
+      );
     for (let n = 1; n <= pdf.numPages; n++) {
       const page = await pdf.getPage(n),
         viewport = page.getViewport({ scale: 1 }),

@@ -1,7 +1,10 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+const page = await browser.newPage({
+  locale: "es-ES",
+  viewport: { width: 1440, height: 1000 },
+});
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 try {
@@ -19,43 +22,66 @@ try {
   assert.equal(await page.locator(".page").count(), 1);
   assert.equal(await page.locator(".sheet-brand").textContent(), "Chordi");
   await page.screenshot({ path: "artifacts/import-fit.png" });
-  const parsed = await page.evaluate(async () => {
-    const { parseWebSong } = await import("/src/web-import.js");
-    const cifra = parseWebSong(
-      "<title>Prueba - Artista - Cifra Club</title><h1>Prueba</h1><a><h2>Artista</h2></a><pre data-chord-content><div>[Intro] <b>C</b>  <b>G</b>\n\n<b>C</b>     <b>G</b>\nLuz del día</div></pre>",
-      "https://www.cifraclub.com/artista/prueba/",
+  async function parseThroughUI(html, url) {
+    await page.route("**/api/import-web?**", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ html, url }),
+      }),
     );
-    const cuerda = parseWebSong(
-      '<title>PRUEBA: Acordes y Letra (Artista)</title><div class="rtBody"><pre>INTRO: <a>C</a> - <a>G</a>\n\n<a>C</a>     <a>G</a>\nLuz del día</pre></div>',
-      "https://acordes.lacuerda.net/artista/prueba",
+    await page.locator("#new").click();
+    await page.locator("#web").click();
+    await page.locator("#web-url").fill(url);
+    await page.locator("#web-submit").click();
+    await page.waitForFunction(
+      () =>
+        !document.querySelector("#new-dialog").open ||
+        !document.querySelector("#import-error").hidden,
     );
-    const data = {
-      store: {
-        page: {
-          data: {
-            tab: { song_name: "Prueba", artist_name: "Artista" },
-            tab_view: {
-              meta: { capo: 2 },
-              wiki_tab: {
-                content: "[tab][ch]C[/ch]     [ch]G[/ch]\nLuz del día[/tab]",
-              },
+    const invalid = await page.locator("#import-error").isVisible();
+    const result = invalid
+      ? null
+      : await page.evaluate(() => {
+          const workspace = JSON.parse(localStorage.getItem("chordi-v1"));
+          return workspace.songs.find((s) => s.id === workspace.active);
+        });
+    if (invalid) await page.locator(".dialog-close").click();
+    await page.unroute("**/api/import-web?**");
+    return result;
+  }
+  const cifra = await parseThroughUI(
+    "<title>Prueba - Artista - Cifra Club</title><h1>Prueba</h1><a><h2>Artista</h2></a><pre data-chord-content><div>[Intro] <b>C</b>  <b>G</b>\n\n<b>C</b>     <b>G</b>\nLuz del día</div></pre>",
+    "https://www.cifraclub.com/artista/prueba/",
+  );
+  const cuerda = await parseThroughUI(
+    '<title>PRUEBA: Acordes y Letra (Artista)</title><div class="rtBody"><pre>INTRO: <a>C</a> - <a>G</a>\n\n<a>C</a>     <a>G</a>\nLuz del día</pre></div>',
+    "https://acordes.lacuerda.net/artista/prueba",
+  );
+  const data = {
+    store: {
+      page: {
+        data: {
+          tab: { song_name: "Prueba", artist_name: "Artista" },
+          tab_view: {
+            meta: { capo: 2 },
+            wiki_tab: {
+              content: "[tab][ch]C[/ch]     [ch]G[/ch]\nLuz del día[/tab]",
             },
           },
         },
       },
-    };
-    const ug = parseWebSong(
-      `<div class="js-store" data-content="${JSON.stringify(data).replace(/"/g, "&quot;")}"></div>`,
-      "https://tabs.ultimate-guitar.com/tab/artista/prueba-chords-1",
-    );
-    let invalid = false;
-    try {
-      parseWebSong("<h1>Access denied</h1>", "https://www.cifraclub.com/a/b/");
-    } catch {
-      invalid = true;
-    }
-    return { cifra, cuerda, ug, invalid };
-  });
+    },
+  };
+  const ug = await parseThroughUI(
+    `<div class="js-store" data-content="${JSON.stringify(data).replace(/"/g, "&quot;")}"></div>`,
+    "https://tabs.ultimate-guitar.com/tab/artista/prueba-chords-1",
+  );
+  const invalid = !(await parseThroughUI(
+    "<h1>Access denied</h1>",
+    "https://www.cifraclub.com/a/b/",
+  ));
+  const parsed = { cifra, cuerda, ug, invalid };
   for (const s of [parsed.cifra, parsed.cuerda, parsed.ug]) {
     assert.equal(s.title, "Prueba");
     assert.equal(s.artist, "Artista");

@@ -12,6 +12,12 @@ The web distribution also includes the catalog license at `public/licenses/chord
 
 Google Sans Code uses the SIL Open Font License included in [`public/fonts/OFL-GoogleSansCode.txt`](public/fonts/OFL-GoogleSansCode.txt).
 
+## Interface font
+
+DM Sans is self-hosted as variable WOFF2 files from the official Google Fonts CSS service, retrieved September 21, 2026. Copyright 2014 The DM Sans Project Authors. The SIL Open Font License is included in [`public/fonts/OFL-DMSans.txt`](public/fonts/OFL-DMSans.txt). Latin and Latin Extended subsets preserve the existing interface typography without external requests.
+
+Source: [Google Fonts DM Sans](https://github.com/google/fonts/tree/main/ofl/dmsans). Fonts are distributed unchanged under their own license.
+
 ## Dependencies
 
-Exact versions appear in `pnpm-lock.yaml`. Each package retains its own license. This document does not replace those licenses or grant a license to chordi's original application code.
+Exact versions appear in `pnpm-lock.yaml`. Each package retains its own license. This document does not replace those licenses. Chordi's original application code is licensed under the MIT license in LICENSE.

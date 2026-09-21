@@ -1,14 +1,42 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#171a19" />
-    <title>Chordi · Tu música, en papel</title>
+    <title>Chordi · Your music, on paper</title>
+    <meta
+      name="description"
+      content="Write lyrics and chords, explore guitar shapes, transpose songs and export rehearsal sheets as PDF, Word or text. Free browser workspace in English and Spanish."
+    />
+    <meta property="og:title" content="Chordi · Your music, on paper" />
+    <meta
+      property="og:description"
+      content="A browser workspace for lyrics, guitar chords and rehearsal sheets. Available in English and Spanish."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/logo.svg" />
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <main>
+        <h1>Chordi — your music, on paper</h1>
+        <p>
+          Write lyrics and chords, explore guitar positions, transpose songs and
+          prepare rehearsal sheets.
+        </p>
+        <p>
+          Import TXT, PDF or Word and export an editable song sheet. Your songs
+          stay in your browser.
+        </p>
+        <p><a href="/en/">English</a> · <a href="/es/">Español</a></p>
+        <noscript
+          >Enable JavaScript to open the song editor. Activa JavaScript para
+          abrir el editor.</noscript
+        >
+      </main>
+    </div>
     <script type="module" src="/src/app.js"></script>
   </body>
 </html>

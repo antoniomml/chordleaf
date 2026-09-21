@@ -1,3 +1,4 @@
+import { t } from "./i18n.js";
 import { importText, titleCase } from "./files.js";
 import { chordRE, chords } from "./music.js";
 import { songUrl } from "./web-sources.js";
@@ -88,12 +89,16 @@ export function parseWebSong(html, sourceUrl) {
   }
   if (!text.trim())
     throw new Error(
-      "La web no ofrece una versión de texto accesible de esta canción. Prueba otro enlace o importa un archivo.",
+      t(
+        "La web no ofrece una versión de texto accesible de esta canción. Prueba otro enlace o importa un archivo.",
+      ),
     );
-  const result = importText(text, title || "Canción importada");
+  const result = importText(text, title || t("Canción importada"));
   if (!chords(result.text).length)
     throw new Error(
-      "No se han encontrado acordes en este enlace. Abre una versión de acordes, no una tablatura o una página de búsqueda.",
+      t(
+        "No se han encontrado acordes en este enlace. Abre una versión de acordes, no una tablatura o una página de búsqueda.",
+      ),
     );
   return {
     ...result,
@@ -113,15 +118,19 @@ export async function importWebSong(value) {
     );
   } catch {
     throw new Error(
-      "No se pudo conectar con la web. Comprueba la conexión y vuelve a intentarlo.",
+      t(
+        "No se pudo conectar con la web. Comprueba la conexión y vuelve a intentarlo.",
+      ),
     );
   }
   if (!response.headers.get("content-type")?.includes("application/json"))
     throw new Error(
-      "La importación web necesita el servidor de Chordi. Puedes importar un archivo en esta instalación.",
+      t(
+        "La importación web necesita el servidor de Chordi. Puedes importar un archivo en esta instalación.",
+      ),
     );
   const data = await response.json();
   if (!response.ok)
-    throw new Error(data.error || "No se pudo descargar la canción.");
+    throw new Error(data.error || t("No se pudo descargar la canción."));
   return parseWebSong(data.html, data.url);
 }

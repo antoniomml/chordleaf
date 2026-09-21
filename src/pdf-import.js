@@ -1,3 +1,4 @@
+import { t } from "./i18n.js";
 import { chordRE } from "./music.js";
 const separatorRE = /^[|:–—−\-]+$/;
 const cleanChord = (t) => t.replace(/[\[\]]/g, "");
@@ -247,7 +248,9 @@ export function parsePdfPages(pages, fallback) {
   }
   if (!all.join("").trim())
     throw Error(
-      "Este PDF no tiene texto seleccionable. Necesita reconocimiento OCR antes de importarlo.",
+      t(
+        "Este PDF no tiene texto seleccionable. Necesita reconocimiento OCR antes de importarlo.",
+      ),
     );
   return {
     title: title || fallback,
@@ -257,7 +260,8 @@ export function parsePdfPages(pages, fallback) {
     fontSize,
     margin,
     text: all.join("\n").trimEnd(),
-    notice:
+    notice: t(
       "PDF importado. Se han conservado el orden de las columnas y los saltos; puedes corregirlos en el editor con {column}.",
+    ),
   };
 }

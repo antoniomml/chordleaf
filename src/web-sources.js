@@ -1,3 +1,4 @@
+import { t } from "./i18n.js";
 export const WEB_HOSTS = new Set([
   "cifraclub.com",
   "www.cifraclub.com",
@@ -13,7 +14,7 @@ export function songUrl(value) {
   try {
     url = new URL(value);
   } catch {
-    throw new Error("Introduce un enlace completo, empezando por https://.");
+    throw new Error(t("Introduce un enlace completo, empezando por https://."));
   }
   if (
     url.protocol !== "https:" ||
@@ -23,7 +24,7 @@ export function songUrl(value) {
     !WEB_HOSTS.has(url.hostname)
   )
     throw new Error(
-      "Usa un enlace HTTPS de Cifra Club, LaCuerda o Ultimate Guitar.",
+      t("Usa un enlace HTTPS de Cifra Club, LaCuerda o Ultimate Guitar."),
     );
   url.hash = "";
   return url;

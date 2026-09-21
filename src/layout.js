@@ -12,7 +12,7 @@ function wrapText(text, capacity) {
   lines.push(rest);
   return lines;
 }
-export function layout(song) {
+export function layout(song, parsed = parseSong(song.text)) {
   const margin = (song.margin * 72) / 25.4,
     size = song.fontSize,
     cw = size * 0.6,
@@ -51,7 +51,7 @@ export function layout(song) {
       ? chord + "*"
       : chord;
   const rows = [];
-  for (const line of parseSong(song.text)) {
+  for (const line of parsed) {
     if (line.break) {
       rows.push(line);
       continue;
@@ -217,12 +217,13 @@ export function layout(song) {
 // comfortable 10 mm margin; never shrink below 8 pt or force excess pages away.
 export function fitToPage(song) {
   const text = song.text.replace(/^\s*\{(?:column|new_page)\}\s*$/gm, "");
+  const parsed = parseSong(text);
   let best;
   for (let fontSize = 20; fontSize >= 8; fontSize -= 0.5) {
     for (const columns of [1, 2]) {
       for (const margin of [10, 9, 8, 7, 6]) {
         const candidate = { ...song, text, fontSize, columns, margin };
-        const pages = layout(candidate).pages.length;
+        const pages = layout(candidate, parsed).pages.length;
         if (pages === 1) return { text, fontSize, columns, margin };
         if (!best || pages < best.pages)
           best = { text, fontSize, columns, margin, pages };

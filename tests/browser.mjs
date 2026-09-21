@@ -3,7 +3,10 @@ import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 await mkdir("artifacts", { recursive: true });
 const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+const page = await browser.newPage({
+  locale: "es-ES",
+  viewport: { width: 1440, height: 1000 },
+});
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.CHORDI_URL || "http://localhost:5173");

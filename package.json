@@ -4,29 +4,32 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0",
+    "preview": "vite preview",
     "test": "node --test tests/*.test.js",
-    "test:e2e": "node tests/browser.mjs && node tests/chords-browser.mjs && node tests/workspace-browser.mjs && node tests/import-browser.mjs && node tests/instrumental-browser.mjs && node tests/new-song-browser.mjs",
-    "format": "prettier --write src tests scripts server vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
+    "test:e2e": "node tests/browser.mjs && node tests/chords-browser.mjs && node tests/workspace-browser.mjs && node tests/import-browser.mjs && node tests/instrumental-browser.mjs && node tests/new-song-browser.mjs && node tests/readiness-browser.mjs",
+    "format": "prettier --write src tests scripts build server api vercel.json vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
     "docs:screenshots": "node scripts/docs-screenshots.mjs",
-    "format:check": "prettier --check src tests scripts server vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
-    "start": "node server/start.js"
+    "format:check": "prettier --check src tests scripts build server api vercel.json vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
+    "start": "node server/start.js",
+    "check": "pnpm format:check && pnpm test && pnpm build",
+    "test:compatibility": "node tests/compatibility-browser.mjs"
   },
   "dependencies": {
     "docx": "^9.5.1",
     "jspdf": "^4.2.1",
     "mammoth": "^1.10.0",
-    "pdfjs-dist": "^6.3.289",
-    "vite": "^7.1.7"
+    "pdfjs-dist": "^6.3.289"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "prettier": "^3.9.8"
+    "prettier": "^3.9.8",
+    "vite": "^7.1.7"
   },
   "engines": {
-    "node": ">=22.13.0"
+    "node": "24.x"
   },
-  "packageManager": "pnpm@12.5.1"
+  "packageManager": "pnpm@12.5.1",
+  "license": "MIT"
 }

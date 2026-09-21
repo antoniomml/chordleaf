@@ -1,6 +1,6 @@
 # Architecture
 
-chordi is a browser application built with ES modules and Vite. It needs no backend. Songs live in memory and are saved to `localStorage` under `chordi-v1`; exports provide portable backups.
+chordi is a browser application built with ES modules and Vite. Editing and file import/export work without a backend. Importing a public website uses a small Node.js endpoint, shared by the local server and the Vercel function. Songs live in memory and are saved to `localStorage` under `chordi-v1`; exports provide portable backups.
 
 ## Modules
 
@@ -44,3 +44,21 @@ The identifier is independent of the fingering catalog. It calculates MIDI pitch
 Unit tests cover import, anchors, harmony, specific voicings and pagination. Browser tests exercise editing, section isolation, dialogs, chord replacement, responsive layouts and all three exports. `artifacts/` and `output/` are ignored local outputs.
 
 Keep model transformations separate from UI controls. Audio transcription remains future work and requires decisions about models, privacy, cost and manual review before introducing services or credentials.
+
+## Language and untrusted data
+
+`src/i18n.js` and `src/locales/en.js` translate UI literals into English; Spanish is the source locale. The browser language chooses the initial interface and the explicit EN / ES selection is saved separately under `chordi-language`. Switching saves the workspace and reloads; if storage fails, it keeps the current language and document. In tagged templates, only literal segments are translated. Interpolated titles, lyrics and chord symbols are preserved and HTML callers still escape user content. Add new copy to the English catalog and use `t` for labels, status messages and templates.
+
+`src/song-state.js` rebuilds known data fields when restoring storage or reading TXT metadata. It validates fret shapes, numeric settings and safe IDs. New imports are bounded to 10 MiB per file, 50 PDF pages and 50,000 text characters; existing song text is not truncated on restore. Malformed workspace JSON is not overwritten and can be downloaded for recovery.
+
+`api/import-web.js` awaits `server/web-import.js`. The same handler supplies development, production preview and the standalone server. Vercel serves `dist/` through its CDN; it does not run `pnpm start`. `vercel.json` and `server/security.js` share security headers. The CSP allows inline styles for generated sheet geometry, but no inline scripts, remote scripts or remote connections from the browser.
+
+## Production readiness modules
+
+- `src/ui/shell.html`: static, bilingual application shell; user values never enter this template.
+- `src/i18n.js` and `src/locales/en.js`: source-literal translations; interpolated song text is not translated. `/en/` and `/es/` select the interface language.
+- `src/workspace-session.js`: exclusive Web Lock acquired before loading storage. The owner saves and releases on page exit; restored back/forward pages reload before editing.
+- `src/workspace-backup.js`: versioned JSON backup and additive restore, with fresh song identifiers and known-field sanitization.
+- `src/fit-song.js` and `src/fit-worker.js`: bounded auto-fit in a dedicated worker. Each search parses the song once; editing during a pending fit prevents stale results from being applied.
+- `src/docx-limits.js`: ZIP central-directory preflight limits declared expanded content to 32 MiB and 2,000 entries. It rejects encrypted and unsupported archives; it is not a complete malicious-parser sandbox.
+- `build/metadata.js`: static English/Spanish entry pages, canonical URLs, language links, social metadata and sitemap.
