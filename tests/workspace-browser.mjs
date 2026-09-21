@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage({
+    locale: "es-ES",
     viewport: { width: 1440, height: 900 },
   });
   const errors = [];

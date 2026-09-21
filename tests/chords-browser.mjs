@@ -5,6 +5,7 @@ await mkdir("artifacts", { recursive: true });
 const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage({
+    locale: "es-ES",
     viewport: { width: 1440, height: 1000 },
   });
   const errors = [];

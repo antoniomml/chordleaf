@@ -1,3 +1,4 @@
+import { securityHeaders } from "./security.js";
 import { songUrl } from "../src/web-sources.js";
 const MAX_BYTES = 3 * 1024 * 1024;
 export async function fetchSongPage(value, fetcher = fetch) {
@@ -55,27 +56,60 @@ export async function fetchSongPage(value, fetcher = fetch) {
     "La web redirige demasiadas veces. Copia el enlace final de la canción.",
   );
 }
-export function webImportMiddleware(req, res, next) {
+export async function webImportMiddleware(req, res, next) {
   const request = new URL(req.url, "http://localhost");
   if (request.pathname !== "/api/import-web") return next();
+  securityHeaders(res);
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
     res.statusCode = 405;
     res.end(JSON.stringify({ error: "Método no permitido." }));
     return;
   }
-  fetchSongPage(request.searchParams.get("url"))
-    .then((data) => res.end(JSON.stringify(data)))
-    .catch((error) => {
-      res.statusCode = 422;
-      res.end(
-        JSON.stringify({
-          error:
-            error.name === "TimeoutError"
-              ? "La web ha tardado demasiado. Vuelve a intentarlo."
-              : error.message,
-        }),
-      );
-    });
+  // Public Vercel imports stay off until the operator configures WAF limits.
+  if (
+    process.env.CHORDI_WEB_IMPORT_ENABLED === "false" ||
+    (process.env.VERCEL && process.env.CHORDI_WEB_IMPORT_ENABLED !== "true")
+  ) {
+    res.statusCode = 503;
+    res.end(
+      JSON.stringify({
+        error:
+          "La importación web no está disponible. Importa un archivo o pega el texto.",
+      }),
+    );
+    return;
+  }
+  if (req.headers?.["sec-fetch-site"] === "cross-site") {
+    res.statusCode = 403;
+    res.end(
+      JSON.stringify({ error: "Abre Chordi para importar una canción." }),
+    );
+    return;
+  }
+  if (req.url.length > 4096) {
+    res.statusCode = 414;
+    res.end(JSON.stringify({ error: "El enlace es demasiado largo." }));
+    return;
+  }
+  try {
+    const data = await fetchSongPage(request.searchParams.get("url"));
+    const body = JSON.stringify(data);
+    // JSON escaping can make a 3 MiB HTML page exceed Vercel's response limit.
+    if (Buffer.byteLength(body) > 4 * 1024 * 1024)
+      throw new Error("La página es demasiado grande para importarla.");
+    res.end(body);
+  } catch (error) {
+    res.statusCode = 422;
+    res.end(
+      JSON.stringify({
+        error:
+          error.name === "TimeoutError"
+            ? "La web ha tardado demasiado. Vuelve a intentarlo."
+            : error.message,
+      }),
+    );
+  }
 }

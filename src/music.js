@@ -1,3 +1,4 @@
+import { t } from "./i18n.js";
 import guitar from "./data/guitar.json" with { type: "json" };
 import barreData from "./data/barres.json" with { type: "json" };
 export const NOTES = [
@@ -153,7 +154,7 @@ export function keyInfo(text) {
         minor,
         scale,
         score,
-        name: NOTES[root] + (minor ? " menor" : " mayor"),
+        name: NOTES[root] + (minor ? t(" menor") : t(" mayor")),
         degrees: minor
           ? ["i", "ii°", "III", "iv", "v", "VI", "VII"]
           : ["I", "ii", "iii", "IV", "V", "vi", "vii°"],
@@ -174,14 +175,15 @@ export function fingering(chord) {
 }
 export function diagram(c, position = 0, custom, { ink = "#c9e79c" } = {}) {
   const f = custom || fingerings(c)[position];
-  if (!f) return "<p>Posición no disponible para este acorde.</p>";
+  if (!f) return t("<p>Posición no disponible para este acorde.</p>");
   const positive = f.filter((n) => n > 0);
   const min = positive.length ? Math.min(...positive) : 1,
     start = Math.max(...f) > 5 ? min : 1,
     rows = Math.max(5, Math.max(...f) - start + 1),
     spacing = 90 / rows;
-  let svg =
-    '<svg viewBox="0 0 140 148" aria-label="Diagrama de acorde" role="img">';
+  let svg = t(
+    '<svg viewBox="0 0 140 148" aria-label="Diagrama de acorde" role="img">',
+  );
   for (let i = 0; i < 6; i++)
     svg += `<path d="M${30 + i * 17} 30v90" stroke="currentColor" opacity=".45"/>`;
   for (let i = 0; i <= rows; i++)

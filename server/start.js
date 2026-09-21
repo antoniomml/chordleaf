@@ -3,6 +3,7 @@ import { createReadStream } from "node:fs";
 import { stat, realpath } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { securityHeaders } from "./security.js";
 import { webImportMiddleware } from "./web-import.js";
 const root = await realpath(fileURLToPath(new URL("../dist", import.meta.url)));
 const types = {
@@ -16,8 +17,10 @@ const types = {
   ".ttf": "font/ttf",
   ".txt": "text/plain; charset=utf-8",
   ".json": "application/json",
+  ".xml": "application/xml",
 };
 const server = createServer((req, res) => {
+  securityHeaders(res);
   webImportMiddleware(req, res, async () => {
     try {
       if (!["GET", "HEAD"].includes(req.method)) {
@@ -28,7 +31,10 @@ const server = createServer((req, res) => {
         new URL(req.url, "http://localhost").pathname,
       );
       const file = await realpath(
-        resolve(root, "." + (pathname === "/" ? "/index.html" : pathname)),
+        resolve(
+          root,
+          "." + (pathname.endsWith("/") ? pathname + "index.html" : pathname),
+        ),
       );
       if (!file.startsWith(root + sep) || !(await stat(file)).isFile())
         throw new Error("Not found");
@@ -37,6 +43,12 @@ const server = createServer((req, res) => {
         types[extname(file)] || "application/octet-stream",
       );
       res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader(
+        "Cache-Control",
+        pathname.startsWith("/assets/")
+          ? "public, max-age=31536000, immutable"
+          : "no-cache",
+      );
       if (req.method === "HEAD") res.end();
       else
         createReadStream(file)

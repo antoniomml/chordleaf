@@ -13,3 +13,7 @@ coverage/
 playwright-report/
 test-results/
 .pnpm-store/
+
+# Vercel project linkage and local deployment output
+.vercel/
+.vercel

@@ -16,7 +16,7 @@
 
 Preparing a song should leave time to play it. chordi brings lyrics, chords and the finished document together: write a verse, place each chord on the right syllable, and check the printed layout as you go.
 
-It is for singers, guitarists and anyone preparing a rehearsal or organizing songs. The application interface is in Spanish; project documentation is in English.
+It is for singers, guitarists and anyone preparing a rehearsal or organizing songs. The interface is available in **English and Spanish**. Use **EN / ES** in the top bar; your songs keep their original language. Project documentation is in English.
 
 | When you want to…             | chordi helps you…                                                      |
 | ----------------------------- | ---------------------------------------------------------------------- |
@@ -32,7 +32,7 @@ It is for singers, guitarists and anyone preparing a rehearsal or organizing son
 
 ## From the first verse to rehearsal
 
-**1. Name your song.** Choose **Nueva canción** to start from scratch or import a file. Several songs can stay open in separate tabs.
+**1. Name your song.** Choose **New song** to start from scratch or import a file. Several songs can stay open in separate tabs.
 
 **2. Write lyrics and add chords.** Put each chord in brackets at the point where the harmony changes:
 
@@ -43,13 +43,13 @@ It is for singers, guitarists and anyone preparing a rehearsal or organizing son
 
 The printed sheet shows chords above the lyrics, without brackets. For a change inside a word, `mor[G]ning` anchors the chord to the **n**.
 
-**3. Make it comfortable to play.** The **Documento**, **Tonalidad** and **Acordes** sections each occupy the whole sidebar. Adjust the document, inspect the estimated key or work with guitar chords. When ready, choose **Exportar**.
+**3. Make it comfortable to play.** The **Document**, **Key** and **Chords** sections each occupy the whole sidebar. Adjust the document, inspect the estimated key or work with guitar chords. When ready, choose **Export**.
 
 [Explore the controls in the user guide →](docs/guide.md)
 
 ## Give every chord a place
 
-The **Acordes** section shows the song's chords as a three-column grid of diagrams. Select a card to edit its voicing, or drag a diagram onto the sheet. The search covers major, minor, seventh, diminished, suspended, extended and slash chords.
+The **Chords** section shows the song's chords as a three-column grid of diagrams. Select a card to edit its voicing, or drag a diagram onto the sheet. The search covers major, minor, seventh, diminished, suspended, extended and slash chords.
 
 ![The guitar chord workspace](docs/images/chord-library.png)
 
@@ -63,7 +63,7 @@ Songs and imported files are processed in your browser. Web imports send the son
 
 **Export a copy of anything you want to keep.** Browser storage does not sync devices and can disappear when browser data is cleared. Export chordi TXT to preserve precise editing data.
 
-The interface loads its typeface from Google Fonts; your song text is not sent to that service.
+Both interface and document fonts are served by the app itself. There are no third-party font requests or analytics scripts. See [privacy and storage](docs/privacy.md).
 
 ## A release with room to grow
 
@@ -73,12 +73,14 @@ The interface loads its typeface from Google Fonts; your song text is not sent t
 
 Musical ideas, missing explanations and awkward controls are all useful contributions. [Report an issue](https://github.com/antoniomml/chordi/issues/new?template=bug_report.yml) or [suggest a feature](https://github.com/antoniomml/chordi/issues/new?template=feature_request.yml), using short invented song examples.
 
-To run your own copy, follow [the pnpm development guide](docs/development.md). No public hosted instance has been announced.
+To run your own copy, follow [the development guide](docs/development.md). To put it online, use the [step-by-step Vercel guide](docs/deployment.md). No public hosted instance has been announced.
+
+The [production readiness audit](docs/audit.md) separates completed improvements from the remaining launch decisions. Web imports on Vercel stay off until their public endpoint has been protected and explicitly enabled.
 
 ---
 
 <div align="center">
   <p><strong>Made to play.</strong></p>
-  <p><a href="docs/guide.md">User guide</a> · <a href="docs/architecture.md">Architecture</a> · <a href="THIRD_PARTY_NOTICES.md">Credits</a></p>
-  <sub>A license for the original application code has not yet been selected. Third-party data and fonts retain their respective licenses.</sub>
+  <p><a href="docs/guide.md">User guide</a> · <a href="docs/deployment.md">Deploy</a> · <a href="docs/architecture.md">Architecture</a> · <a href="THIRD_PARTY_NOTICES.md">Credits</a></p>
+  <sub>Original application code is MIT licensed. See <a href="LICENSE">LICENSE</a>. Third-party data and fonts retain their respective licenses.</sub>
 </div>

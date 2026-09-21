@@ -1,4 +1,5 @@
-import { chords, fingering, diagram } from "./music.js";
+import { t } from "./i18n.js";
+import { chords, fingering, diagram, chordRE } from "./music.js";
 import { PAGE } from "./layout.js";
 import {
   stickerGeometry,
@@ -9,20 +10,23 @@ import {
 export function setupDictionary({ song, changed, renderPages, esc }) {
   const tray = document.createElement("section");
   tray.className = "dictionary-tray";
-  tray.innerHTML =
-    '<h2>Los acordes de tu canción</h2><p>Arrastra el conjunto o un acorde a la hoja. También puedes añadirlo con +.</p><div class="dictionary-items chord-card-grid"></div>';
+  tray.innerHTML = t(
+    '<h2>Los acordes de tu canción</h2><p>Arrastra el conjunto o un acorde a la hoja. También puedes añadirlo con +.</p><div class="dictionary-items chord-card-grid"></div>',
+  );
   document.querySelector("#song-chords").append(tray);
   const dialog = document.createElement("dialog");
   dialog.id = "shape-dialog";
-  dialog.innerHTML =
-    '<h2>Editar posición</h2><p>De la cuerda grave E a la aguda e. −1 = apagada, 0 = al aire.</p><form><div class="fret-inputs"></div><label class="star-choice"><input type="checkbox" name="star" checked> Marcar con asterisco en la canción</label><p class="shape-error" role="status"></p><div class="shape-preview"></div><div class="dialog-actions"><button type="button" class="restore-shape">Restaurar</button><button type="button" class="cancel-shape">Cancelar</button><button class="primary">Guardar</button></div></form>';
+  dialog.setAttribute("aria-labelledby", "shape-heading");
+  dialog.innerHTML = t(
+    '<h2 id="shape-heading">Editar posición</h2><p>De la cuerda grave E a la aguda e. −1 = apagada, 0 = al aire.</p><form><div class="fret-inputs"></div><label class="star-choice"><input type="checkbox" name="star" checked> Marcar con asterisco en la canción</label><p class="shape-error" role="status"></p><div class="shape-preview"></div><div class="dialog-actions"><button type="button" class="restore-shape">Restaurar</button><button type="button" class="cancel-shape">Cancelar</button><button class="primary">Guardar</button></div></form>',
+  );
   document.body.append(dialog);
   let editingChord;
   function edit(name) {
     editingChord = name;
     const shape = song().chordShapes?.[name];
     const frets = shape?.frets || fingering(name) || [-1, 0, 2, 2, 2, 0];
-    dialog.querySelector("h2").textContent = `Posición de ${name}`;
+    dialog.querySelector("h2").textContent = t`Posición de ${name}`;
     dialog.querySelector(".fret-inputs").innerHTML = [
       "E",
       "A",
@@ -33,7 +37,7 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
     ]
       .map(
         (label, i) =>
-          `<label>${label}<input required type="number" min="-1" max="24" step="1" value="${frets[i]}" aria-label="Traste cuerda ${i + 1}"></label>`,
+          t`<label>${label}<input required type="number" min="-1" max="24" step="1" value="${frets[i]}" aria-label="Traste cuerda ${i + 1}"></label>`,
       )
       .join("");
     dialog.querySelector("[name=star]").checked = shape?.star ?? true;
@@ -55,7 +59,7 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
       : "";
     dialog.querySelector(".shape-error").textContent = valid(frets)
       ? ""
-      : "Usa trastes enteros entre −1 y 24.";
+      : t("Usa trastes enteros entre −1 y 24.");
   }
   dialog.oninput = preview;
   dialog.querySelector(".cancel-shape").onclick = () => dialog.close();
@@ -106,7 +110,8 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
   }
   const frameDialog = document.createElement("dialog");
   frameDialog.id = "sticker-layout-dialog";
-  frameDialog.innerHTML = `<h2>Distribuir los acordes</h2><p>Elige las columnas y el tamaño del cuadro. Los diagramas se ajustan sin deformarse.</p><form><div class="sticker-layout-fields"><label>Ancho (mm)<input name="width" type="number" step="0.1" required></label><label>Alto (mm)<input name="height" type="number" step="0.1" required></label><label>Columnas<input name="columns" type="number" min="1" step="1" required></label></div><p class="sticker-layout-summary"></p><div class="sticker-layout-preview"></div><div class="dialog-actions"><button type="button" class="cancel-layout">Cancelar</button><button class="primary">Aplicar</button></div></form>`;
+  frameDialog.setAttribute("aria-labelledby", "sticker-heading");
+  frameDialog.innerHTML = t`<h2 id="sticker-heading">Distribuir los acordes</h2><p>Elige las columnas y el tamaño del cuadro. Los diagramas se ajustan sin deformarse.</p><form><div class="sticker-layout-fields"><label>Ancho (mm)<input name="width" type="number" step="0.1" required></label><label>Alto (mm)<input name="height" type="number" step="0.1" required></label><label>Columnas<input name="columns" type="number" min="1" step="1" required></label></div><p class="sticker-layout-summary"></p><div class="sticker-layout-preview"></div><div class="dialog-actions"><button type="button" class="cancel-layout">Cancelar</button><button class="primary">Aplicar</button></div></form>`;
   document.body.append(frameDialog);
   let layoutSticker, draft;
   const toMm = (pt) => Math.round(((pt * 25.4) / 72) * 10) / 10;
@@ -143,7 +148,7 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
     }
     const g = stickerGeometry(song(), draft);
     frameDialog.querySelector(".sticker-layout-summary").textContent =
-      `${g.names.length} acordes · ${g.columns} columnas × ${g.rows} filas`;
+      t`${g.names.length} acordes · ${g.columns} columnas × ${g.rows} filas`;
     frameDialog.querySelector(".sticker-layout-preview").innerHTML = stickerSvg(
       song(),
       draft,
@@ -165,14 +170,14 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
   function renderTray() {
     const names = chords(song().text);
     tray.querySelector(".dictionary-items").innerHTML = names.length
-      ? `<div class="dictionary-item dictionary-all" draggable="true" data-all="true"><span>⠿ Todos (${names.length})</span><button class="add-sticker" aria-label="Añadir todos los diagramas">+</button></div>` +
+      ? t`<div class="dictionary-item dictionary-all" draggable="true" data-all="true"><span>⠿ Todos (${names.length})</span><button class="add-sticker" aria-label="Añadir todos los diagramas">+</button></div>` +
         names
           .map(
             (name) =>
-              `<div class="dictionary-item chord-card" draggable="true" data-name="${esc(name)}"><button class="edit-shape" aria-label="Editar posición de ${esc(name)}"><strong>${esc(name)}${song().chordShapes?.[name]?.star ? "*" : ""}</strong>${diagram(name, 0, song().chordShapes?.[name]?.frets)}<span class="edit-hint">Editar posición</span></button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}" title="Añadir a la hoja">+</button></div>`,
+              t`<div class="dictionary-item chord-card" draggable="true" data-name="${esc(name)}"><button class="edit-shape" aria-label="Editar posición de ${esc(name)}"><strong>${esc(name)}${song().chordShapes?.[name]?.star ? "*" : ""}</strong>${diagram(name, 0, song().chordShapes?.[name]?.frets)}<span class="edit-hint">Editar posición</span></button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}" title="Añadir a la hoja">+</button></div>`,
           )
           .join("")
-      : "<p>Añade acordes a la canción para crear tu diccionario.</p>";
+      : t("<p>Añade acordes a la canción para crear tu diccionario.</p>");
     tray.querySelectorAll(".dictionary-item").forEach((el) => {
       const names = el.dataset.all ? "all" : [el.dataset.name];
       el.ondragstart = (event) => {
@@ -200,8 +205,23 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
         event.preventDefault();
         const box = page.getBoundingClientRect(),
           scale = box.width / PAGE.width;
+        let names;
+        try {
+          names = JSON.parse(raw);
+        } catch {
+          return;
+        }
+        if (
+          names !== "all" &&
+          (!Array.isArray(names) ||
+            names.length > 1000 ||
+            !names.every(
+              (n) => typeof n === "string" && n.length <= 80 && chordRE.test(n),
+            ))
+        )
+          return;
         add(
-          JSON.parse(raw),
+          names,
           i,
           (event.clientX - box.left) / scale,
           (event.clientY - box.top) / scale,
@@ -217,7 +237,7 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
       el.tabIndex = 0;
       el.setAttribute(
         "aria-label",
-        "Diccionario de acordes. Flechas para mover; Suprimir para quitar.",
+        t("Diccionario de acordes. Flechas para mover; Suprimir para quitar."),
       );
       const draw = () => {
         const g = stickerGeometry(song(), sticker);
@@ -227,8 +247,9 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
           sticker,
         );
       };
-      el.innerHTML =
-        '<div class="sticker-image"></div><button class="configure-sticker" aria-label="Distribuir acordes: tamaño y columnas" title="Tamaño y columnas">⊞</button><button class="remove-sticker" aria-label="Quitar diccionario">×</button><button class="resize-sticker resize-width" data-resize="width" aria-label="Cambiar ancho del diccionario; flechas para ajustar" title="Cambiar ancho">↔</button><button class="resize-sticker resize-height" data-resize="height" aria-label="Cambiar alto del diccionario; flechas para ajustar" title="Cambiar alto">↕</button><button class="resize-sticker resize-corner" data-resize="both" aria-label="Cambiar tamaño del diccionario; flechas para ajustar" title="Cambiar ancho y alto">↘</button>';
+      el.innerHTML = t(
+        '<div class="sticker-image"></div><button class="configure-sticker" aria-label="Distribuir acordes: tamaño y columnas" title="Tamaño y columnas">⊞</button><button class="remove-sticker" aria-label="Quitar diccionario">×</button><button class="resize-sticker resize-width" data-resize="width" aria-label="Cambiar ancho del diccionario; flechas para ajustar" title="Cambiar ancho">↔</button><button class="resize-sticker resize-height" data-resize="height" aria-label="Cambiar alto del diccionario; flechas para ajustar" title="Cambiar alto">↕</button><button class="resize-sticker resize-corner" data-resize="both" aria-label="Cambiar tamaño del diccionario; flechas para ajustar" title="Cambiar ancho y alto">↘</button>',
+      );
       el.querySelector(".configure-sticker").onclick = () => configure(sticker);
       draw();
       page.append(el);

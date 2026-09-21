@@ -1,3 +1,4 @@
+import { t } from "./i18n.js";
 // Self-hosted OFL font: the same family is used on paper and on screen.
 export const DOCUMENT_FONT = "Google Sans Code";
 let binaries;
@@ -6,10 +7,13 @@ export function fontBinaries() {
     ["Regular", "Bold"].map(async (style) => {
       const response = await fetch(`/fonts/GoogleSansCode-${style}.ttf`);
       if (!response.ok)
-        throw new Error("No se pudo cargar la fuente del documento.");
+        throw new Error(t("No se pudo cargar la fuente del documento."));
       return new Uint8Array(await response.arrayBuffer());
     }),
-  ));
+  ).catch((error) => {
+    binaries = undefined;
+    throw error;
+  }));
 }
 export async function registerPdfFonts(pdf) {
   const fonts = await fontBinaries();

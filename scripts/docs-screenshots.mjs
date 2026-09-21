@@ -5,6 +5,7 @@ await mkdir(new URL("../docs/images/", import.meta.url), { recursive: true });
 const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage({
+    locale: "en-US",
     viewport: { width: 1440, height: 1000 },
     deviceScaleFactor: 1,
   });

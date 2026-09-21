@@ -2,11 +2,13 @@
 
 [← Back to chordi](../README.md)
 
-The workspace has a compact navigation rail, an editing sidebar and a sheet preview. **Documento** (Document), **Tonalidad** (Key) and **Acordes** (Chords) switch the entire sidebar. Your text and cursor remain in place when you return to Document.
+Use **EN / ES** in the top bar to choose English or Spanish. The app starts in your browser language (English for languages other than Spanish). This guide uses the English control labels. Changing the interface does not translate songs.
+
+The workspace has a compact navigation rail, an editing sidebar and a sheet preview. **Document**, **Key** and **Chords** switch the entire sidebar. Your text and cursor remain in place when you return to Document.
 
 ## Start or import a song
 
-Choose **Nueva canción → Empezar de cero**. The title starts empty; its placeholder is not printed. Add an artist if needed. **Importar una canción** supports:
+Choose **New song → Start from scratch**. The title starts empty; its placeholder is not printed. Add an artist if needed. **Import text or a file** supports:
 
 | File                     | What to expect                                                                                                   |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
@@ -14,7 +16,7 @@ Choose **Nueva canción → Empezar de cero**. The title starts empty; its place
 | PDF with selectable text | Lyrics, chords, headers and columns recovered from their positions. Review the result.                           |
 | Word (.docx)             | Text and identifiable column structure. Review titles and alignment.                                             |
 
-Scanned PDFs need external OCR. Convert legacy `.doc` files to `.docx` first. Each song opens in a tab. Closing a song with unexported changes requires confirmation.
+Imports accept up to **10 MiB per file**, **50 PDF pages** and **50,000 text characters per song**. Large or complex documents can still take longer to process. Scanned PDFs need external OCR. Convert legacy `.doc` files to `.docx` first. Each song opens in a tab. Closing a song with unexported changes requires confirmation.
 
 ## Place a chord precisely
 
@@ -31,19 +33,19 @@ In `mor[Emaj7]ning`, the chord starts at **n**. Brackets take no space on the sh
 
 Drag the vertical divider to resize the editor. Focus it with Tab and use Left/Right; Home or double-click restores its starting width. On mobile, the sidebar and sheet stack vertically.
 
-The expand icon beside **Letra y acordes** opens a larger editor with the same text, cursor and undo history. **Listo** or Escape returns to the document. Changes save while typing.
+The expand icon beside **Lyrics and chords** opens a larger editor with the same text, cursor and undo history. **Done** or Escape returns to the document. Changes save while typing.
 
 The preview's pencil enables editing directly on the sheet. Select a verse; Enter commits, Escape cancels and Shift+Enter adds a line break.
 
 ## Browse, edit and print chord diagrams
 
-Open **Acordes → En canción**. Each card shows a chord name and its current guitar diagram. Click the card to edit the frets; the edit hint appears on hover or keyboard focus. Values run from low E to high e: `-1` is muted, `0` open, and positive values are frets. You can mark a custom voicing with an asterisk or restore the catalog shape.
+Open **Chords → In song**. Each card shows a chord name and its current guitar diagram. Click the card to edit the frets; the edit hint appears on hover or keyboard focus. Values run from low E to high e: `-1` is muted, `0` open, and positive values are frets. You can mark a custom voicing with an asterisk or restore the catalog shape.
 
 Drag a card onto the sheet, or use its **+** button. **Todos** adds all song chords. Diagrams can be moved, resized or removed. Drag the right edge to change width, the bottom edge to change height, or the corner to change both. Column counts stay fixed while resizing, so making the frame smaller does not unexpectedly enlarge the diagrams. Select the grid button on a diagram group to set width and height in millimeters and choose its columns, with a live preview. Rows follow the number of chords; diagrams keep their proportions inside the frame.
 
 Arrow keys move a focused diagram and Delete removes it. On a resize handle, Left/Right changes width and Up/Down changes height; hold Shift for smaller increments. Diagrams and custom positions are included in exports. Dots and barres stay green in the sidebar and print black on white in the document, PDF and Word.
 
-**Buscar** searches 828 chords and 3,283 positions. Select a diagram to view alternative positions. Supported aliases include `EM7` / `EΔ7` for `Emaj7`, `A♭ø7` / `Abm7(b5)` for `Abm7b5`, `C6/9` for `C69`, and `Dm(maj7)` for `Dmmaj7`. A recognized symbol may still have no catalog voicing.
+**Search** searches 828 chords and 3,283 positions. Select a diagram to view alternative positions. Supported aliases include `EM7` / `EΔ7` for `Emaj7`, `A♭ø7` / `Abm7(b5)` for `Abm7b5`, `C6/9` for `C69`, and `Dm(maj7)` for `Dmmaj7`. A recognized symbol may still have no catalog voicing.
 
 Read diagrams from low to high strings, `E A D G B e`: ○ is open, × is muted, dots mark frets. A number at the side marks the starting fret for higher positions.
 
@@ -51,25 +53,25 @@ Read diagrams from low to high strings, `E A D G B e`: ○ is open, × is muted,
 
 ![Interactive guitar chord identifier](images/chord-identifier.png)
 
-Open **Acordes → Identificar** and place a dot on each string you want to play. The horizontal fretboard follows tablature orientation: frets increase left to right, the high e string is at the top and low E is at the bottom. Its size stays fixed when the sidebar gets wider; on a wide sidebar, interpretations appear beside it. Press the same dot again to mute it. The control beside each string name switches between **× Apagada** (muted) and **○ Al aire** (open), with contrasting backgrounds and visible labels. **− Traste 1 +** moves the visible five-fret window one fret at a time; selections outside that window remain saved and their fret numbers appear beside the string names. **Limpiar** mutes all strings.
+Open **Chords → Identify** and place a dot on each string you want to play. The horizontal fretboard follows tablature orientation: frets increase left to right, the high e string is at the top and low E is at the bottom. Its size stays fixed when the sidebar gets wider; on a wide sidebar, interpretations appear beside it. Press the same dot again to mute it. The control beside each string name switches between **× Muted** (muted) and **○ Open** (open), with contrasting backgrounds and visible labels. **− Fret 1 +** moves the visible five-fret window one fret at a time; selections outside that window remain saved and their fret numbers appear beside the string names. **Clear** mutes all strings.
 
 The panel focuses on the fretboard and possible chord names. Exact interpretations come first, followed by incomplete voicings labelled `no5` (missing fifth).
 
 Names and fret numbers are relative to the capo. A short note indicates the active capo. The identifier covers a documented formula vocabulary, not every possible harmonic analysis. Read [the harmony model and its limits](harmony.md).
 
-Select a result to retain that exact voicing. **Insertar en el cursor** adds it where you left the text cursor. Alternatively, choose a song chord under **Sustituir en la canción**, then choose all occurrences or a specific numbered occurrence with its line number. **Sustituir acorde** updates bracket tokens without changing lyrics. **Deshacer último cambio** restores the previous text, shapes and sheet diagrams; subsequent text changes invalidate that undo action. Custom shapes belong to a chord symbol, so every occurrence of that same symbol shares its voicing.
+Select a result to retain that exact voicing. **Insert at cursor** adds it where you left the text cursor. Alternatively, choose a song chord under **Replace in song**, then choose all occurrences or a specific numbered occurrence with its line number. **Replace chord** updates bracket tokens without changing lyrics. **Undo last change** restores the previous text, shapes and sheet diagrams; subsequent text changes invalidate that undo action. Custom shapes belong to a chord symbol, so every occurrence of that same symbol shares its voicing.
 
 ## Adapt the song to your voice
 
-In **Documento**, **Transportar** moves all chord symbols by a semitone. Section labels such as `[Estribillo]` remain unchanged.
+In **Document**, **Transpose** moves all chord symbols by a semitone. Section labels such as `[Estribillo]` remain unchanged.
 
-**Cejilla** sets the capo fret. The chain links it to the chords: raising a linked capo by one fret lowers the chord symbols by one semitone to keep the sounding key. Enabling the chain alone changes no chords.
+**Capo** sets the capo fret. The chain links it to the chords: raising a linked capo by one fret lowers the chord symbols by one semitone to keep the sounding key. Enabling the chain alone changes no chords.
 
-**Tonalidad** estimates the key from the written chords and shows its degrees. This is guidance, not a definitive analysis, and is not printed.
+**Key** estimates the key from the written chords and shows its degrees. This is guidance, not a definitive analysis, and is not printed.
 
 ## Prepare the sheet
 
-Adjust font size, margins and one or two columns. **Ajustar a 1 página** attempts to fit the song by reducing font size to a readable minimum; a long song may still need multiple pages. Preview zoom changes only the view, not the exported layout.
+Adjust font size, margins and one or two columns. **Fit to one page** attempts to fit the song by reducing font size to a readable minimum; a long song may still need multiple pages. Preview zoom changes only the view, not the exported layout.
 
 Write `{column}` on its own line to start another column, or another page in a single-column document. It is not printed. Instrumental passages can include separators:
 
@@ -89,11 +91,11 @@ Preview, PDF and Word share a layout model. Reimported PDF or Word reconstructs 
 
 ## Import a song and fit the page
 
-**Nueva canción** always opens the initial menu: **Importar texto o archivo**, **Importar desde una web**, then **Empezar de cero**. Each import option opens its own screen; **← Volver** returns to the menu. Closing and reopening starts fresh. Paste lyrics with aligned chords or open TXT, ChordPro, text-based PDF or DOCX. Legacy `.doc` files must first be saved as `.docx`.
+**New song** always opens the initial menu: **Import text or a file**, **Import from a website**, then **Start from scratch**. Each import option opens its own screen; **← Back** returns to the menu. Closing and reopening starts fresh. Paste lyrics with aligned chords or open TXT, ChordPro, text-based PDF or DOCX. Legacy `.doc` files must first be saved as `.docx`.
 
 For a web import, paste an HTTPS song URL from Cifra Club, LaCuerda or Ultimate Guitar. Chordi converts the accessible chord version into editable lyrics and anchored chords. Search pages, protected content and tablature-only versions are not supported. The source URL is kept with the working song. A running Chordi server is needed for this option.
 
-Every import tries one and two columns, 6–10 mm margins and 8–20 pt type, choosing the largest font that fits on one A4 page. Imported column/page breaks are reflowed. At equal font sizes, one column and 10 mm margins take preference. Longer songs keep all their content on multiple pages rather than shrinking below 8 pt. **Ajustar a 1 página** repeats this search; all document controls remain editable afterwards.
+Every import tries one and two columns, 6–10 mm margins and 8–20 pt type, choosing the largest font that fits on one A4 page. Imported column/page breaks are reflowed. At equal font sizes, one column and 10 mm margins take preference. Longer songs keep all their content on multiple pages rather than shrinking below 8 pt. **Fit to one page** repeats this search; all document controls remain editable afterwards.
 
 The preview, PDF and Word documents include a small grey **Chordi** footer. Catalog diagrams use the original fingering's barre information, including full and partial barres; unknown custom shapes infer a conservative barre when possible.
 
@@ -102,3 +104,15 @@ The preview, PDF and Word documents include a small grey **Chordi** footer. Cata
 Write `[Solo] [C] [G] [Am] [F]` on its own line. The sheet displays **[Solo] C – G – Am – F**, all on the same baseline. `[Intro]` works in the same way. A line with only several chords also works, even if written together as `[C][G][Am]`. Explicit bar lines and repeat signs such as `|: [C] | [G] :| x2` are preserved. Long sequences wrap between whole chords. The preview, PDF and Word share this layout.
 
 Bracketed sequences remain independent of the following lyric line. Plain imported chord rows above lyrics still attach to those lyrics; for an explicit standalone passage, use brackets and optionally a section label or bar separators.
+
+## Recover a damaged browser session
+
+If saved data cannot be read, Chordi leaves the original browser storage untouched and shows **Recover data**. Download that JSON file and keep it private; it can contain your songs. Export any new work as TXT before leaving. Ask for help using an invented example rather than posting the recovery file publicly. Once you have recovered or backed up everything you need, clear this site's stored data in your browser settings to start a clean session. Recovery JSON is a diagnostic backup, not a supported song-import format.
+
+Chordi allows one active editor per browser profile and origin. A second browser tab asks you to close the first before continuing, preventing stale windows from overwriting saved songs. The song tabs inside Chordi are safe to use together. An up-to-date HTTPS browser with Web Locks support is required.
+
+## Full workspace backups
+
+Choose **Export → Workspace backup · JSON** to save all open songs, layouts and custom chord shapes. To restore, choose **New song → Import text or file → Open file** and select the JSON backup. Restored songs become new tabs; existing songs are preserved. The versioned format currently supports up to 500 songs and 10 MiB per import. Future unsupported versions are rejected rather than guessed.
+
+Export a workspace backup before moving between a preview address and your final domain: browser storage does not move between websites. Keep the backup somewhere safe; it contains your song content.

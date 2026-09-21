@@ -1,25 +1,9 @@
-# Help make room for more songs
+# Contributing to Chordi
 
-[← Back to chordi](README.md)
+You do not need to write code to help. Report confusing controls, suggest clearer explanations, or share an idea through the repository's issue templates. Use a short invented song example instead of private or copyrighted material.
 
-You do not need to code to contribute. Missing chords, import problems and confusing controls are useful reports from real musical practice.
+For code changes, start with the [development guide](docs/development.md). Use Node.js 24 and the pinned pnpm version. Keep documentation and code identifiers in English, and update both English and Spanish interface copy. Preserve user song content exactly.
 
-## Report a problem
+Before opening a pull request, run `pnpm check`, the browser suites and `pnpm test:compatibility` against a built local server. Explain the user-visible change and relevant validation. Include a screenshot with demo data when the interface changes.
 
-[Open an issue](https://github.com/antoniomml/chordi/issues/new?template=bug_report.yml) describing what you tried, reproduction steps and the expected result. Include your browser and device. Use two or three invented lines and the affected chord names; do not share personal documents or complete third-party lyrics.
-
-## Suggest an idea
-
-[Describe your proposal](https://github.com/antoniomml/chordi/issues/new?template=feature_request.yml) in terms of what you want to achieve and when it would help. Sketches, wording improvements and accessibility suggestions are welcome.
-
-## Work on the code
-
-Follow the [pnpm development guide](docs/development.md) and read the [architecture](docs/architecture.md). Use a focused branch and explain the problem, resulting behavior and validation.
-
-- Keep musical transformations and layout independent of UI controls.
-- Test behavior changes, especially anchors, harmony, imports and exports.
-- Run `pnpm format:check`, `pnpm test`, `pnpm build` and `pnpm test:e2e` with Vite running.
-- Use pnpm exclusively and keep its lockfile up to date.
-- Preserve data/font attribution; exclude credentials, private documents and generated results.
-
-Open-source publication and the license for original code await the owner's decision. Third-party licenses are retained in [the notices](THIRD_PARTY_NOTICES.md).
+Changes should keep editing local, avoid unnecessary dependencies and preserve accessible keyboard controls. Security concerns belong in the private reporting process described in [SECURITY.md](SECURITY.md), not a public issue. Contributions to original application code are covered by the [MIT license](LICENSE).
