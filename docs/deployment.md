@@ -2,7 +2,7 @@
 
 [← Back to Chordi](../README.md) · [Launch priorities](audit.md)
 
-Chordi uses a static Vite frontend and one Node.js function for importing public song pages. No database, authentication provider or secret API key is required. The repository includes deployment configuration. A protected deployment is available at https://chordi-black.vercel.app; access requires the owner’s Vercel account.
+Chordi uses a static Vite frontend and one Node.js function for importing public song pages. No database, authentication provider or secret API key is required. The repository includes deployment configuration. The production alias is https://chordi-black.vercel.app. The current review build is linked from [pull request #1](https://github.com/antoniomml/chordi/pull/1); access requires the owner’s Vercel account.
 
 ## 1. Check the code
 

@@ -56,7 +56,7 @@ Use `pnpm add`, `pnpm add -D` or `pnpm update`. Commit changes to `package.json`
 
 `pnpm-workspace.yaml` allows esbuild's required install script and disables core-js's script. Review new dependencies before extending that list. The configuration follows [pnpm's `allowBuilds` model](https://github.com/pnpm/pnpm.io/blob/main/docs/migration.md).
 
-CI installs the declared pnpm version with `--frozen-lockfile`, then runs formatting, unit tests, the build, a high-severity dependency audit and browser tests against the built Node server on Linux. PDF and Word libraries load on demand; Vite may report large export bundles.
+CI installs the declared pnpm version with `--frozen-lockfile`, then runs formatting, unit tests, the build, a high-severity dependency audit and Chromium, Firefox and WebKit browser tests against the built Node server on Linux. PDF and Word libraries load on demand; Vite may report large export bundles.
 
 ## Repository contents
 
@@ -92,3 +92,5 @@ For the same compiled assets and headers used in production, build, run `PORT=51
 The audit in [audit.md](audit.md) used temporary Lighthouse and axe installations, not additional application dependencies. Re-run those tools on a protected Vercel preview before launch. Local timings and automated accessibility checks are not field performance measurements or a complete accessibility certification.
 
 Environment variables are documented in [.env.example](../.env.example). Vite reads `SITE_URL` during builds. The Node import handler reads its process environment: export `CHORDI_WEB_IMPORT_ENABLED=false` in your shell when testing disabled imports locally. Do not prefix secrets with `VITE_`; those variables are exposed to browser bundles.
+
+For the cross-browser persistence/backup suite, install the engines with `pnpm exec playwright install chromium firefox webkit`, then run `pnpm test:compatibility` against the built server. `CHORDI_BROWSERS=chromium,webkit` narrows local diagnosis; CI deliberately runs all three engines.

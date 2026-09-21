@@ -61,7 +61,7 @@ Choose an interpretation to insert it at the text cursor or replace a specific o
 
 Songs and imported files are processed in your browser. Web imports send the song URL to the Chordi server, which downloads the public page; your edited songs are not uploaded. There are no accounts. Changes are saved automatically in that browser.
 
-**Export a copy of anything you want to keep.** Browser storage does not sync devices and can disappear when browser data is cleared. Export chordi TXT to preserve precise editing data.
+**Export a copy of anything you want to keep.** Browser storage does not sync devices and can disappear when browser data is cleared. Choose **Export → Workspace backup · JSON** to preserve all open songs and settings, or export chordi TXT for an individual song.
 
 Both interface and document fonts are served by the app itself. There are no third-party font requests or analytics scripts. See [privacy and storage](docs/privacy.md).
 
