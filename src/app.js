@@ -103,7 +103,7 @@ function toast(message) {
   $("#toast").classList.add("visible");
   setTimeout(() => $("#toast").classList.remove("visible"), 6500);
 }
-$("#app").innerHTML = t(shell);
+$("#app").innerHTML = t(shell.replace(/\s+/g, " "));
 function renderTabs() {
   $("#tabs").innerHTML =
     songs

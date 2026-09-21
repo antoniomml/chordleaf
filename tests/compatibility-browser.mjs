@@ -17,8 +17,12 @@ for (const engine of [chromium, firefox, webkit].filter(
     await second
       .getByRole("heading", { name: "Your workspace is open in another tab" })
       .waitFor();
-    await page.close();
     await second.getByRole("button", { name: "Try again" }).click();
+    await second
+      .getByRole("button", { name: "Waiting for the other tab to close…" })
+      .waitFor();
+    assert.equal(await second.locator("#source").count(), 0);
+    await page.close();
     await second.locator("#source").waitFor();
     assert.equal(
       await second.locator("#source").inputValue(),

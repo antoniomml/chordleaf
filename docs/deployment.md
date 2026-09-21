@@ -67,3 +67,7 @@ Promote the reviewed preview only after the applicable launch priorities are res
 - Firewall rule: exact path `/api/import-web`, 10 requests per IP per 60 seconds, fixed window, HTTP 429 after the limit.
 - `SITE_URL` can use `https://chordi-black.vercel.app` until a custom domain is chosen.
 - GitHub branch protection is unavailable for the current private repository/account plan. Keep changes on a review branch; enable required checks when the repository becomes public or the account supports private protections.
+
+The protected preview was tested end to end with Cifra Club, LaCuerda and Ultimate Guitar: each returned a page that parsed into an editable song. Provider availability can change; retain the text/file fallback. Production imports are still off, while preview imports are enabled behind authentication and the firewall.
+
+The account currently uses Hobby, which has usage caps rather than paid overages. Vercel documents automatic usage notifications for all plans. No paid upgrade, spending increase or billing-setting change was made. Review the owner's usage dashboard before a public launch; if moving to a paid plan, configure its spending limit first. See [Vercel usage notifications](https://vercel.com/docs/pricing/manage-and-optimize-usage) and [plan limits](https://vercel.com/pricing).

@@ -3,21 +3,26 @@ import { t } from "./i18n.js";
 /** Hold one editor lease per origin. Locks disappear automatically on crashes. */
 export async function openWorkspaceSession(root) {
   const lease = { held: false, release() {} };
+  let waitForOwner = false;
   while (!lease.held) {
     if (navigator.locks) {
       await new Promise((resolve, reject) => {
         navigator.locks
-          .request("chordi-workspace", { ifAvailable: true }, async (lock) => {
-            if (!lock) return resolve();
-            lease.held = true;
-            await new Promise((release) => {
-              lease.release = () => {
-                lease.held = false;
-                release();
-              };
-              resolve();
-            });
-          })
+          .request(
+            "chordi-workspace",
+            waitForOwner ? {} : { ifAvailable: true },
+            async (lock) => {
+              if (!lock) return resolve();
+              lease.held = true;
+              await new Promise((release) => {
+                lease.release = () => {
+                  lease.held = false;
+                  release();
+                };
+                resolve();
+              });
+            },
+          )
           .catch(reject);
       });
       if (lease.held) return lease;
@@ -43,6 +48,11 @@ export async function openWorkspaceSession(root) {
     await new Promise((resolve) =>
       retry.addEventListener("click", resolve, { once: true }),
     );
+    // Closing a browser window can release its lock asynchronously. After an
+    // explicit retry, queue for ownership instead of racing another probe.
+    waitForOwner = true;
+    retry.disabled = true;
+    retry.textContent = t("Esperando a que se cierre la otra pestaña…");
   }
   return lease;
 }

@@ -16,6 +16,10 @@ try {
   await page.locator(".page").waitFor();
   assert.equal(await page.locator("html").getAttribute("lang"), "en");
   assert.match(await page.locator("#new").innerText(), /New song/);
+  assert.match(
+    await page.locator(".source-help").innerText(),
+    /Without lyrics/,
+  );
   const metrics = await page.evaluate(() => ({
     navigation: performance.getEntriesByType("navigation")[0].toJSON(),
     resources: performance.getEntriesByType("resource").map((r) => ({

@@ -1,5 +1,7 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Esperando a que se cierre la otra pestaña…":
+    "Waiting for the other tab to close…",
   "No se pudo ajustar la canción. Prueba con los controles del documento.":
     "The song could not be fitted. Try the document controls.",
   "El documento Word está dañado o supera los límites de descompresión.":
