@@ -14,6 +14,7 @@ A bilingual workspace with safer local data, portable backups and verified Verce
 - Extract document/key render helpers and remove 24 superseded CSS declarations; twelve screenshot comparisons remain pixel-identical.
 - Add static English/Spanish URLs, language links and a share image.
 - Verify Chromium, Firefox and WebKit workflows in CI and all three web providers on Vercel.
+- Update build tooling to Vite 8.3.0; retain the same four application dependencies.
 
 - Add English and Spanish UI selection without translating song content.
 - Prepare Vercel functions, security headers and an explicit web-import activation switch.

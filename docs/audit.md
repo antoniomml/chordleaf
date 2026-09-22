@@ -46,7 +46,7 @@ Vercel's first deployment was automatically assigned to production. **All projec
 - Additional Chromium, Firefox and WebKit workflow checks passed in GitHub Actions on Linux: exclusive editing, takeover, persistence, backup restore and language switching.
 - Frozen install, dependency audit, formatting, build, 65 unit tests, seven Chromium suites and the three-engine compatibility suite passed in hosted CI on Node.js 24.20.0. No reported dependency advisories.
 - Earlier local Lighthouse mobile: performance 90, accessibility 100, best practices 100, SEO 100; FCP 2.3 seconds, LCP 3.3 seconds, TBT 10 ms, CLS 0. These predate the final follow-up features and are not field metrics or a fresh score for the deployed build.
-- The initial build warned about optional export chunk sizes. The 0.2.0 main bundle remains roughly 66 kB gzip; the 523 kB Word worker loads only when importing DOCX.
+- The initial build warned about optional export chunk sizes. The 0.2.0 main bundle remains roughly 66 kB gzip; the 522 kB Word worker loads only when importing DOCX.
 - Ignored `artifacts/` contains local reports and synthetic export samples. No personal songs are committed.
 
 ## Scope and limits
@@ -68,3 +68,5 @@ Word parsing now runs in a dedicated worker, skips embedded images, limits retur
 Three additional unit cases exercise cumulative PDF limits, oversized fragments/items and oversized songs in backups (68 unit tests total). Cross-browser checks cover real DOCX import plus a deliberately stalled decoder for cancellation and timeout. Existing PDF/Word export and reimport regressions remain in the full browser suite. Twelve screenshots across Document, Key, Chords and New Song at 1440, 768 and 390 pixels matched byte-for-byte before and after CSS cleanup.
 
 Private publication is intentional. Required branch protection and GitHub private vulnerability reporting remain unavailable under the current private-repository plan; revisit them if visibility or plan changes. No paid upgrade or visibility change was made.
+
+The Vite 8.3.0 dependency update was reviewed and merged separately, then tested together with the import changes. The observed local production build dropped from approximately 2.0 seconds to 0.37 seconds; these are individual development-machine measurements, not website load-time claims. No application dependency was added.
