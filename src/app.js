@@ -1,3 +1,5 @@
+import { escapeHtml as esc } from "./ui/html.js";
+import { renderDocumentSettings, renderKeySettings } from "./ui/settings.js";
 import { fitSong } from "./fit-song.js";
 import { serializeWorkspace, restoreWorkspace } from "./workspace-backup.js";
 import { openWorkspaceSession } from "./workspace-session.js";
@@ -18,19 +20,7 @@ import {
 import { layout, PAGE } from "./layout.js";
 import { importWebSong } from "./web-import.js";
 import { exportSong, importFile, importText, download } from "./files.js";
-const $ = (s) => document.querySelector(s),
-  esc = (s) =>
-    String(s).replace(
-      /[&<>"']/g,
-      (c) =>
-        ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#39;",
-        })[c],
-    );
+const $ = (s) => document.querySelector(s);
 const example = `[G]Hay un lugar al [D]otro lado\n[Em]donde el tiempo va [C]despacio.\n[G]Guardo la luz de [D]esta mañana\n[C]en las cuerdas de mi [G]guitarra.\n\n[Em]Y si la noche nos [C]encuentra,\n[G]que nos encuentre al [D]caminar.\n[Em]Con una canción [C]pequeña\n[G]y tantas cosas por [D]contar.\n\n[G]Vuelve a sonar, [D]vuelve a empezar,\n[Em]cada camino nos [C]trae hasta aquí.\n[G]Vuelve a sonar, [D]sin preguntar,\n[C]hoy esta canción es [G]para ti.\n\n[G]Dejo una puerta [D]siempre abierta,\n[Em]un verso a medio [C]terminar.\n[G]Que lo complete [D]quien lo sienta,\n[C]que lo acompañe el [G]mar.`;
 document.documentElement.lang = getLocale();
 const workspaceSession = await openWorkspaceSession($("#app"));
@@ -157,12 +147,10 @@ function renderSettings() {
     return;
   }
   if (section === "key") {
-    $("#settings").innerHTML =
-      t`<div class="panel-title"><span>Tu brújula musical</span><span>♯</span></div><p class="section-caption">TONALIDAD PROBABLE</p><div class="key-name">${key ? key.name : t("Aún sin acordes")}<span>${key ? t("Estimación · según los acordes escritos") : t("Añade acordes para analizar la canción")}</span></div>${key ? t`<div class="degrees">${key.scale.map((c, i) => `<button class="chord degree" data-chord="${c}"><small>${key.degrees[i]}</small>${c}</button>`).join("")}</div><p class="key-note">Con cejilla ${s.capo}, suena en <strong>${keyInfo(transpose(s.text, s.capo))?.name}</strong>.</p>` : ""}<div class="info-box">Esta guía es solo para ti. La tonalidad y sus grados no aparecen en la hoja ni en las exportaciones.</div>`;
+    $("#settings").innerHTML = renderKeySettings(s, key);
     return;
   }
-  $("#settings").innerHTML =
-    t`<div class="panel-title"><span>El documento</span><span class="muted">01</span></div><label class="field">TÍTULO<input id="title" value="${esc(s.title)}" maxlength="90" placeholder="Nombre de la canción"></label><label class="field">ARTISTA<input id="artist" value="${esc(s.artist)}" maxlength="100" placeholder="Nombre del artista"></label><div class="settings-row"><label class="field">TAMAÑO <div class="number-unit"><input id="fontSize" type="number" min="7" max="20" step="0.5" value="${s.fontSize}"><span>pt</span></div></label><label class="field">MÁRGENES <div class="number-unit"><input id="margin" type="number" min="5" max="35" step="1" value="${s.margin}"><span>mm</span></div></label><label class="field">COLUMNAS<div class="segmented"><button data-columns="1" class="${s.columns === 1 ? "selected" : ""}">1</button><button data-columns="2" class="${s.columns === 2 ? "selected" : ""}">2</button></div></label></div><div class="music-controls"><div><label>TRANSPORTAR</label><div class="stepper"><button id="transpose-down" aria-label="Bajar un semitono">−</button><span>${key ? key.name.replace(t(" mayor"), "").replace(t(" menor"), "m") : "—"}</span><button id="transpose-up" aria-label="Subir un semitono">＋</button></div></div><button id="link" class="chain ${s.linked ? "linked" : ""}" aria-label="Vincular cejilla y acordes" aria-pressed="${s.linked}" title="${s.linked ? t("Mantener la tonalidad que suena") : t("La cejilla solo cambia la indicación")}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m10 14 4-4m-6 6-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2 2 1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0" transform="translate(1 -1)"/></svg></button><div><label>CEJILLA</label><div class="stepper"><button id="capo-down" aria-label="Bajar cejilla">−</button><input id="capo" type="number" min="0" max="12" value="${s.capo}" aria-label="Cejilla"><button id="capo-up" aria-label="Subir cejilla">＋</button></div></div></div><p class="link-help">${s.linked ? t("Enlazados · cambiar la cejilla conserva la tonalidad que suena.") : t("Independientes · la cejilla solo cambia la indicación.")}</p>`;
+  $("#settings").innerHTML = renderDocumentSettings(s, key);
   for (const name of ["title", "artist", "fontSize", "margin"])
     $("#" + name).addEventListener(
       name === "title" || name === "artist" ? "input" : "change",
@@ -406,8 +394,11 @@ document.querySelectorAll("[data-section]").forEach(
       renderSettings();
     }),
 );
-let importGeneration = 0;
+let importGeneration = 0,
+  importController;
 function importScreen(screen) {
+  importController?.abort();
+  importController = new AbortController();
   importGeneration++;
   $("#new-menu").hidden = screen !== "menu";
   $("#text-import").hidden = screen !== "text";
@@ -452,6 +443,7 @@ function openNewSong() {
 $("#new").onclick = openNewSong;
 $("#import-back").onclick = () => importScreen("menu");
 $("#new-dialog").addEventListener("close", () => {
+  importController?.abort();
   importGeneration++;
 });
 $(".dialog-close").onclick = () => $("#new-dialog").close();
@@ -474,7 +466,7 @@ async function acceptImport(data) {
       ),
     );
   const s = create({ ...data, dirty: true });
-  Object.assign(s, await fitSong(s));
+  Object.assign(s, await fitSong(s, { signal: importController.signal }));
   if (generation !== importGeneration || !$("#new-dialog").open) return;
   songs.push(s);
   active = s.id;
@@ -522,7 +514,9 @@ $("#web-import").onsubmit = async (e) => {
   $("#web-submit").disabled = true;
   $("#web-submit").textContent = t("Importando…");
   try {
-    const data = await importWebSong($("#web-url").value.trim());
+    const data = await importWebSong($("#web-url").value.trim(), {
+      signal: importController.signal,
+    });
     if (generation !== importGeneration || !$("#new-dialog").open) return;
     await acceptImport(data);
     $("#web-url").value = "";
@@ -539,6 +533,9 @@ $("#web-import").onsubmit = async (e) => {
 $("#file").onchange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
+  importController?.abort();
+  importController = new AbortController();
+  const signal = importController.signal;
   const generation = importGeneration;
   $("#choose-file").disabled = true;
   $("#paste-import").disabled = true;
@@ -558,7 +555,7 @@ $("#file").onchange = async (e) => {
       toast(t("Copia restaurada como nuevas pestañas."));
       return;
     }
-    const data = await importFile(file);
+    const data = await importFile(file, { signal });
     if (generation !== importGeneration || !$("#new-dialog").open) return;
     await acceptImport(data);
   } catch (error) {

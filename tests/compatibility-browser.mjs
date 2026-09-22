@@ -1,5 +1,28 @@
+import { Document, Paragraph, Packer } from "docx";
 import { chromium, firefox, webkit } from "@playwright/test";
 import assert from "node:assert/strict";
+const wordFile = {
+  name: "worker-check.docx",
+  mimeType:
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  buffer: await Packer.toBuffer(
+    new Document({
+      sections: [{ children: [new Paragraph("[C]Worker import song")] }],
+    }),
+  ),
+};
+function workerClosed(worker) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error("Import worker was not terminated")),
+      5000,
+    );
+    worker.once("close", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+  });
+}
 const url = process.env.CHORDI_URL || "http://localhost:5173";
 for (const engine of [chromium, firefox, webkit].filter(
   (engine) =>
@@ -52,8 +75,49 @@ for (const engine of [chromium, firefox, webkit].filter(
     await second.reload();
     await second.locator("#source").waitFor();
     assert.equal(await second.locator(".tab").count(), 2);
+    await second.locator("#new").click();
+    await second.locator("#import").click();
+    await second.locator("#file").setInputFiles(wordFile);
+    await second.waitForFunction(
+      () => document.querySelectorAll(".tab").length === 3,
+    );
+    assert.match(
+      await second.locator("#source").inputValue(),
+      /Worker import song/,
+    );
+    // A decoder that never replies must be terminated by both cancel and timeout.
+    await second.route("**/docx-worker-*.js", (route) =>
+      route.fulfill({
+        contentType: "text/javascript",
+        body: "self.onmessage = () => {};",
+      }),
+    );
+    await second.locator("#new").click();
+    await second.locator("#import").click();
+    let started = second.waitForEvent("worker");
+    await second.locator("#file").setInputFiles(wordFile);
+    let worker = await started;
+    const closed = workerClosed(worker);
+    await second.keyboard.press("Escape");
+    await closed;
+    assert.equal(await second.locator(".tab").count(), 3);
+    await second.clock.install();
+    await second.locator("#new").click();
+    await second.locator("#import").click();
+    started = second.waitForEvent("worker");
+    await second.locator("#file").setInputFiles(wordFile);
+    worker = await started;
+    const timedOut = workerClosed(worker);
+    await second.clock.fastForward(16000);
+    await timedOut;
+    await second.locator("#import-error").waitFor();
+    assert.match(
+      await second.locator("#import-error").innerText(),
+      /tardado demasiado/,
+    );
+    assert.equal(await second.locator(".tab").count(), 3);
     console.log(
-      `${engine.name()}: persistence, exclusive editing, backups and languages passed`,
+      `${engine.name()}: persistence, exclusive editing, backups, languages and cancellable Word import passed`,
     );
   } finally {
     await browser.close();

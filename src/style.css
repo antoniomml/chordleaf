@@ -58,10 +58,6 @@ a:focus-visible {
   outline: 2px solid var(--green);
   outline-offset: 3px;
 }
-button:disabled {
-  opacity: 0.5;
-  cursor: wait;
-}
 input,
 textarea {
   color: inherit;
@@ -106,7 +102,6 @@ button.primary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 27px;
   border-bottom: 1px solid var(--border);
   gap: 20px;
 }
@@ -114,15 +109,10 @@ button.primary {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 27px;
   letter-spacing: -1.5px;
   font-weight: 650;
   text-decoration: none;
   color: #e9ebdf;
-}
-.brand img {
-  width: 34px;
-  height: 34px;
 }
 .brand > span {
   font-size: 9px;
@@ -293,7 +283,6 @@ main {
   min-width: 0;
 }
 #settings {
-  padding: 22px 23px 0;
   flex-shrink: 0;
 }
 .panel-title {
@@ -422,7 +411,6 @@ main {
 #source-area {
   display: flex;
   flex-direction: column;
-  min-height: 160px;
   flex: 1;
 }
 .source-heading {
@@ -430,7 +418,6 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 17px 23px 12px;
   color: #9ba78f;
   font-size: 9px;
   letter-spacing: 1.4px;
@@ -574,8 +561,6 @@ main {
 }
 .page {
   position: relative;
-  background: #fffef9;
-  color: #30332e;
   transform-origin: top left;
   overflow: hidden;
 }
@@ -583,7 +568,6 @@ main {
   position: absolute;
   height: 64px;
   border-bottom: 1px solid #d7dacd;
-  display: flex;
   justify-content: space-between;
   gap: 12px;
 }
@@ -595,27 +579,17 @@ main {
   font:
     700 27px/1.12 Arial,
     sans-serif;
-  margin: 0 0 9px;
-  letter-spacing: -0.7px;
   overflow-wrap: anywhere;
   max-height: none;
-  overflow: hidden;
 }
 .sheet-header p {
   font:
     10px/1.3 Arial,
     sans-serif;
-  color: #73766d;
-  margin: 0;
 }
 .sheet-header > span {
-  font:
-    8px/1.6 Arial,
-    sans-serif;
-  letter-spacing: 1.5px;
   white-space: nowrap;
   padding-top: 4px;
-  color: #7a836d;
 }
 .sheet-header b {
   font-size: 12px;
@@ -1204,11 +1178,8 @@ button:disabled {
   opacity: 0.35;
 }
 .dictionary-tray {
-  padding: 10px 20px;
   border-top: 1px solid var(--border);
   font-size: 11px;
-  max-height: 180px;
-  overflow: auto;
   flex-shrink: 0;
 }
 .dictionary-tray summary {
@@ -1217,7 +1188,6 @@ button:disabled {
 }
 .dictionary-tray p {
   color: #a7b29c;
-  font-size: 10px;
   line-height: 1.5;
   margin: 8px 0;
 }

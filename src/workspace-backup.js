@@ -1,4 +1,4 @@
-import { createSong, MAX_FILE_BYTES } from "./song-state.js";
+import { createSong, MAX_FILE_BYTES, MAX_TEXT_LENGTH } from "./song-state.js";
 import { t } from "./i18n.js";
 
 export function serializeWorkspace(songs, active) {
@@ -24,6 +24,12 @@ export function restoreWorkspace(text) {
     )
   )
     throw new Error(t("La copia no es compatible o está dañada."));
+  if (data.songs.some((song) => song.text.length > MAX_TEXT_LENGTH))
+    throw new Error(
+      t(
+        "La copia contiene una canción de más de 50.000 caracteres. Divídela antes de restaurarla.",
+      ),
+    );
   // Merge as new tabs: never replace existing work, even when IDs overlap.
   const songs = data.songs.map((s) =>
     createSong({ ...s, id: crypto.randomUUID(), dirty: true }),

@@ -108,15 +108,21 @@ export function parseWebSong(html, sourceUrl) {
     sourceUrl: url.href,
   };
 }
-export async function importWebSong(value) {
+export async function importWebSong(value, { signal } = {}) {
+  signal?.throwIfAborted();
   const url = songUrl(value);
   let response;
   try {
     response = await fetch(
       `/api/import-web?url=${encodeURIComponent(url.href)}`,
-      { signal: AbortSignal.timeout(25000) },
+      {
+        signal: signal
+          ? AbortSignal.any([signal, AbortSignal.timeout(25000)])
+          : AbortSignal.timeout(25000),
+      },
     );
   } catch {
+    signal?.throwIfAborted();
     throw new Error(
       t(
         "No se pudo conectar con la web. Comprueba la conexión y vuelve a intentarlo.",
