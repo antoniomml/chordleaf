@@ -64,6 +64,32 @@ try {
     "https://acordes.lacuerda.net/TXT/artista/prueba.txt",
     "text/plain",
   );
+  const cuerdaAligned = await parseThroughUI(
+    '<title>PRUEBA, Artista: Acordes</title><div id="tH1"><h1><a>Prueba</a></h1><h2><a>Artista</a></h2></div><div id="t_body"><pre>INTRO:  <a>Bm9</a> <a>Em7</a> <a>F#4/7</a>\n\n          <a>Bm9</a>                 <a>A4</a>\n          Suena la luz de mi canción</pre></div>',
+    "https://acordes.lacuerda.net/artista/prueba",
+  );
+  assert.equal(
+    cuerdaAligned.text.split("\n")[0],
+    "INTRO:  [Bm9] [Em7] [F#7sus4]",
+  );
+  assert.match(cuerdaAligned.text, /^\[Bm9\]Suena la luz/m);
+  assert.ok(!cuerdaAligned.text.split("\n").some((line) => /^ +\S/.test(line)));
+  assert.deepEqual(
+    await page
+      .locator('.song-line[data-line="0"] .sheet-chord')
+      .evaluateAll((marks) => marks.map((mark) => mark.style.top)),
+    ["0px", "0px", "0px"],
+  );
+  const cuerdaAlignedTxt = await parseThroughUI(
+    "=====================================================================\n| ARTISTA: Artista                                                   |\n| CANCION: PRUEBA                                                    |\n=====================================================================\n\nINTRO:  Bm9 Em7 F#4/7\n\n          Bm9            A4\n          Suena la luz de mi canción",
+    "https://acordes.lacuerda.net/TXT/artista/prueba.txt",
+    "text/plain",
+  );
+  assert.equal(
+    cuerdaAlignedTxt.text.split("\n")[0],
+    "INTRO:  [Bm9] [Em7] [F#7sus4]",
+  );
+  assert.match(cuerdaAlignedTxt.text, /^\[Bm9\]Suena la luz/m);
   const data = {
     store: {
       page: {

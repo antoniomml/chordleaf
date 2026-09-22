@@ -4,6 +4,7 @@
 
 - Rename the product from Chordi to Chordleaf across the application, exports, documentation, metadata and generated artwork.
 - Migrate existing browser data and language preferences on first save, while keeping legacy workspace backups and TXT metadata importable.
+- Recognize LaCuerda chord shorthand in HTML and TXT imports, keep multi-chord intros on one instrumental line, and remove source-page indentation from lyrics.
 
 ## 0.3.0 · September 22, 2026
 

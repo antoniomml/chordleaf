@@ -28,6 +28,33 @@ function laCuerdaPlainText(value) {
   const start = dividers[1] === undefined ? 0 : dividers[1] + 1;
   return lines.slice(start).join("\n").trim();
 }
+function laCuerdaChord(value) {
+  const chord = value
+    .replace(/^FA#7(?=\/A#|$)/, "F#7")
+    .replace(/^([A-G][#b]?)4\/7$/, (_, root) => `${root}7sus4`)
+    .replace(/^([A-G][#b]?)4$/, (_, root) => `${root}sus4`)
+    .replace(/^([A-G][#b]?m7)\/5b$/, (_, base) => `${base}b5`);
+  return chordRE.test(chord) ? chord : value;
+}
+function laCuerdaNotation(text) {
+  return text.replace(
+    /(?<!\S)(?:FA#7(?:\/A#)?|[A-G][#b]?(?:4(?:\/7)?|m7\/5b))(?!\S)/g,
+    laCuerdaChord,
+  );
+}
+function markSectionChords(text) {
+  return text
+    .split("\n")
+    .map((line) => {
+      const m = line.match(
+        /^(\s*(?:\[(?:Intro|Final|Solo)\]|(?:INTRO|FINAL|SOLO)\s*:)\s*)(.*)$/i,
+      );
+      return m
+        ? m[1] + m[2].replace(/\S+/g, (c) => (chordRE.test(c) ? `[${c}]` : c))
+        : line;
+    })
+    .join("\n");
+}
 
 export function parseWebSong(html, sourceUrl, contentType = "text/html") {
   const url = songUrl(sourceUrl);
@@ -68,8 +95,11 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
     if (pre) {
       // Mark chords on mixed lines (Intro: C - G) without changing spacing on chord rows.
       for (const el of pre.querySelectorAll("b, a")) {
-        const value = el.textContent.trim();
+        const original = el.textContent.trim();
+        const value = laCuerda ? laCuerdaChord(original) : original;
         if (!chordRE.test(value)) continue;
+        if (value !== original)
+          el.textContent = el.textContent.replace(original, value);
         const line = el.parentNode.textContent;
         if (
           el.parentNode !== pre &&
@@ -79,21 +109,10 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
           el.textContent = `[${value}]`;
       }
       text = preText(pre);
-      // Mixed section/chord lines are instrumental, not sung lyrics.
-      text = text
-        .split("\n")
-        .map((line) => {
-          const m = line.match(
-            /^(\s*(?:\[(?:Intro|Final|Solo)\]|(?:INTRO|FINAL|SOLO)\s*:)\s*)(.*)$/i,
-          );
-          return m
-            ? m[1] +
-                m[2].replace(/\S+/g, (c) => (chordRE.test(c) ? `[${c}]` : c))
-            : line;
-        })
-        .join("\n");
+      if (laCuerda) text = laCuerdaNotation(text);
     }
     if (laCuerda) {
+      if (plainText) text = laCuerdaNotation(text);
       if (plainText) {
         title = html.match(/^\|\s*CANCION:\s*(.*?)\s*\|?\s*$/im)?.[1] || "";
         artist = html.match(/^\|\s*ARTISTA:\s*(.*?)\s*\|?\s*$/im)?.[1] || "";
@@ -111,6 +130,13 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
       artist = doc.querySelector("h1 + a h2, .t2 a")?.textContent.trim() || "";
       if (!artist) artist = doc.title.match(/ - (.*?) - Cifra Club/)?.[1] || "";
     }
+    // Mixed section/chord lines are instrumental, including LaCuerda TXT.
+    text = markSectionChords(text);
+    if (laCuerda)
+      text = text
+        .split("\n")
+        .map((line) => line.trimStart())
+        .join("\n");
     const capoMatch = text.match(
       /(?:capo|cejilla|capotraste)\s*[:=]?\s*(\d+)/i,
     );
@@ -123,6 +149,11 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
       ),
     );
   const result = importText(text, title || t("Canción importada"));
+  if (url.hostname.includes("lacuerda.net"))
+    result.text = result.text
+      .split("\n")
+      .map((line) => line.trimStart())
+      .join("\n");
   if (!chords(result.text).length)
     throw new Error(
       t(
