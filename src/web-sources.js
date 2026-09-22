@@ -8,6 +8,7 @@ export const WEB_HOSTS = new Set([
   "lacuerda.net",
   "www.lacuerda.net",
   "tabs.ultimate-guitar.com",
+  "es.ultimate-guitar.com",
 ]);
 export function songUrl(value) {
   let url;

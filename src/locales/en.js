@@ -327,6 +327,15 @@ export default {
     "No position available for this chord.",
   "Diagrama de acorde": "Chord diagram",
   "Sin posición": "No position",
+  "Faltan posiciones de acordes": "Chord positions missing",
+  "Estos acordes no tienen una posición de guitarra. Define cómo tocarlos o añádelos sin ellos.":
+    "These chords have no guitar position. Define how to play them or add the others without them.",
+  "Añadir solo los disponibles": "Add available chords only",
+  " · Definir posición": " · Define position",
+  "Falta posición · pulsa para definirla":
+    "Position missing · choose to define it",
+  "Indica al menos una cuerda que suene y usa trastes enteros entre −1 y 24.":
+    "Choose at least one sounding string and use whole-numbered frets from −1 to 24.",
   "El texto es demasiado largo. Importa hasta 50.000 caracteres por canción.":
     "The text is too long. Import up to 50,000 characters per song.",
   "El archivo es demasiado grande. El límite es 10 MiB.":

@@ -1,10 +1,15 @@
 # chordleaf changelog
 
-## Unreleased
+## 0.4.0 · September 22, 2026
 
 - Rename the product from Chordi to Chordleaf across the application, exports, documentation, metadata and generated artwork.
 - Migrate existing browser data and language preferences on first save, while keeping legacy workspace backups and TXT metadata importable.
 - Recognize LaCuerda chord shorthand in HTML and TXT imports, keep multi-chord intros on one instrumental line, and remove source-page indentation from lyrics.
+- Accept Spanish Ultimate Guitar URLs and verify a real localized song import.
+- Remove LaCuerda's six-string fingering legends and TXT footer from imported lyrics.
+- Place chord-diagram blocks above printed chords. Ask for a custom position or omit unsupported diagrams instead of printing “No position”.
+- Give the three new-song choices matching SVG icons on desktop and mobile.
+- Recheck dependency advisories, repository history, tracked content and demo images before public release preparation.
 
 ## 0.3.0 · September 22, 2026
 

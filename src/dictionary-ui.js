@@ -4,6 +4,8 @@ import { PAGE } from "./layout.js";
 import {
   stickerGeometry,
   stickerSvg,
+  stickerChords,
+  unresolvedChords,
   MIN_STICKER_WIDTH,
   MIN_STICKER_HEIGHT,
 } from "./dictionary.js";
@@ -22,10 +24,10 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
   );
   document.body.append(dialog);
   let editingChord;
-  function edit(name) {
+  function edit(name, afterSave, afterCancel) {
     editingChord = name;
     const shape = song().chordShapes?.[name];
-    const frets = shape?.frets || fingering(name) || [-1, 0, 2, 2, 2, 0];
+    const frets = shape?.frets || fingering(name) || [-1, -1, -1, -1, -1, -1];
     dialog.querySelector("h2").textContent = t`Posición de ${name}`;
     dialog.querySelector(".fret-inputs").innerHTML = [
       "E",
@@ -43,6 +45,25 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
     dialog.querySelector("[name=star]").checked = shape?.star ?? true;
     dialog.querySelector(".shape-error").textContent = "";
     preview();
+    dialog.querySelector(".cancel-shape").onclick = () => {
+      dialog.close();
+      afterCancel?.();
+    };
+    dialog.querySelector("form").onsubmit = (event) => {
+      event.preventDefault();
+      const frets = values();
+      if (!valid(frets)) return;
+      song().chordShapes ||= {};
+      song().chordShapes[editingChord] = {
+        frets,
+        star: dialog.querySelector("[name=star]").checked,
+      };
+      changed();
+      dialog.close();
+      renderTray();
+      renderPages();
+      afterSave?.();
+    };
     dialog.showModal();
   }
   const values = () =>
@@ -50,7 +71,10 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
       Number(el.value),
     );
   function valid(frets) {
-    return frets.every((n) => Number.isInteger(n) && n >= -1 && n <= 24);
+    return (
+      frets.some((n) => n >= 0) &&
+      frets.every((n) => Number.isInteger(n) && n >= -1 && n <= 24)
+    );
   }
   function preview() {
     const frets = values();
@@ -59,10 +83,11 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
       : "";
     dialog.querySelector(".shape-error").textContent = valid(frets)
       ? ""
-      : t("Usa trastes enteros entre −1 y 24.");
+      : t(
+          "Indica al menos una cuerda que suene y usa trastes enteros entre −1 y 24.",
+        );
   }
   dialog.oninput = preview;
-  dialog.querySelector(".cancel-shape").onclick = () => dialog.close();
   dialog.querySelector(".restore-shape").onclick = () => {
     if (song().chordShapes) delete song().chordShapes[editingChord];
     changed();
@@ -70,24 +95,19 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
     renderTray();
     renderPages();
   };
-  dialog.querySelector("form").onsubmit = (event) => {
-    event.preventDefault();
-    const frets = values();
-    if (!valid(frets)) return;
-    song().chordShapes ||= {};
-    song().chordShapes[editingChord] = {
-      frets,
-      star: dialog.querySelector("[name=star]").checked,
-    };
-    changed();
-    dialog.close();
-    renderTray();
-    renderPages();
-  };
-  function add(names, page = 0, x = 28, y = 620) {
+  const missingDialog = document.createElement("dialog");
+  missingDialog.id = "missing-shapes-dialog";
+  missingDialog.setAttribute("aria-labelledby", "missing-shapes-heading");
+  missingDialog.innerHTML = t`<h2 id="missing-shapes-heading">Faltan posiciones de acordes</h2><p>Estos acordes no tienen una posición de guitarra. Define cómo tocarlos o añádelos sin ellos.</p><div class="missing-shapes-list"></div><div class="dialog-actions"><button type="button" class="cancel-missing">Cancelar</button><button type="button" class="omit-missing primary">Añadir solo los disponibles</button></div>`;
+  document.body.append(missingDialog);
+  missingDialog.querySelector(".cancel-missing").onclick = () =>
+    missingDialog.close();
+  function addResolved(names, page, x, y) {
+    const available = stickerChords(song(), { chords: names });
+    if (!available.length) return;
     const sticker = {
       id: crypto.randomUUID(),
-      chords: names,
+      chords: names === "all" ? "all" : available,
       page,
       x,
       y,
@@ -97,6 +117,31 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
     (song().chordStickers ||= []).push(sticker);
     changed();
     renderPages();
+  }
+  function add(names, page = 0, x = 28, y = 620) {
+    const missing = unresolvedChords(song(), names);
+    if (!missing.length) return addResolved(names, page, x, y);
+    missingDialog.querySelector(".missing-shapes-list").innerHTML = missing
+      .map(
+        (name, i) =>
+          t`<button type="button" data-missing="${i}">${esc(name)} · Definir posición</button>`,
+      )
+      .join("");
+    missingDialog.querySelectorAll("[data-missing]").forEach((button) => {
+      button.onclick = () => {
+        missingDialog.close();
+        edit(
+          missing[Number(button.dataset.missing)],
+          () => add(names, page, x, y),
+          () => add(names, page, x, y),
+        );
+      };
+    });
+    missingDialog.querySelector(".omit-missing").onclick = () => {
+      missingDialog.close();
+      addResolved(names, page, x, y);
+    };
+    missingDialog.showModal();
   }
   function constrain(sticker) {
     const g = stickerGeometry(song(), sticker);
@@ -174,7 +219,7 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
         names
           .map(
             (name) =>
-              t`<div class="dictionary-item chord-card" draggable="true" data-name="${esc(name)}"><button class="edit-shape" aria-label="Editar posición de ${esc(name)}"><strong>${esc(name)}${song().chordShapes?.[name]?.star ? "*" : ""}</strong>${diagram(name, 0, song().chordShapes?.[name]?.frets)}</button><div class="chord-card-actions"><button class="edit-shape-text" aria-label="Editar ${esc(name)}">Editar</button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}">Añadir</button></div></div>`,
+              t`<div class="dictionary-item chord-card" draggable="true" data-name="${esc(name)}"><button class="edit-shape" aria-label="Editar posición de ${esc(name)}"><strong>${esc(name)}${song().chordShapes?.[name]?.star ? "*" : ""}</strong>${unresolvedChords(song(), [name]).length ? t('<span class="missing-shape">Falta posición · pulsa para definirla</span>') : diagram(name, 0, song().chordShapes?.[name]?.frets)}</button><div class="chord-card-actions"><button class="edit-shape-text" aria-label="Editar ${esc(name)}">Editar</button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}">Añadir</button></div></div>`,
           )
           .join("")
       : t("<p>Añade acordes a la canción para crear tu diccionario.</p>");

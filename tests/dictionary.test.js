@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { stickerGeometry, stickerSvg } from "../src/dictionary.js";
+import {
+  stickerChords,
+  stickerGeometry,
+  stickerSvg,
+  unresolvedChords,
+} from "../src/dictionary.js";
 import { txt, importText } from "../src/files.js";
 import { diagram } from "../src/music.js";
 const song = {
@@ -111,4 +116,19 @@ test("printed dots and barres are black while editor diagrams stay green", () =>
   assert.doesNotMatch(printed, /#c9e79c|#fffef9/);
   assert.match(diagram("F"), /stroke="#c9e79c"/);
   assert.match(diagram("C"), /fill="#c9e79c"/);
+});
+
+test("a sticker omits unknown positions until a player defines them", () => {
+  const withUnknown = { ...song, text: "[C] [F#7/A#] [A7/C#]" };
+  const sticker = { chords: "all", width: 180 };
+  assert.deepEqual(unresolvedChords(withUnknown, "all"), ["F#7/A#", "A7/C#"]);
+  assert.deepEqual(stickerChords(withUnknown, sticker), ["C"]);
+  const printed = stickerSvg(withUnknown, sticker);
+  assert.match(printed, />C</);
+  assert.doesNotMatch(printed, /F#7\/A#|A7\/C#|Sin posición/);
+
+  withUnknown.chordShapes = { "F#7/A#": { frets: [-1, 1, 2, 3, 2, 2] } };
+  assert.deepEqual(unresolvedChords(withUnknown, "all"), ["A7/C#"]);
+  assert.deepEqual(stickerChords(withUnknown, sticker), ["C", "F#7/A#"]);
+  assert.match(stickerSvg(withUnknown, sticker), /F#7\/A#/);
 });

@@ -4,7 +4,7 @@
   <p><strong>Your song. Your chords. Everything in place.</strong></p>
   <p>A workspace for writing lyrics and chords, exploring guitar voicings,<br>and making a song sheet for your next rehearsal.</p>
   <p>
-    <a href="https://github.com/antoniomml/chordleaf/releases/tag/v0.3.0"><img src="https://img.shields.io/badge/version-0.3.0-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.3.0"></a>
+    <a href="https://github.com/antoniomml/chordleaf/releases/tag/v0.4.0"><img src="https://img.shields.io/badge/version-0.4.0-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.4.0"></a>
     <a href="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
   </p>
   <p><a href="#a-small-studio-for-your-songs">Features</a> · <a href="docs/guide.md">User guide</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -67,7 +67,7 @@ Both interface and document fonts are served by the app itself. There are no thi
 
 ## A release with room to grow
 
-**0.3.0** opens on a clean new-song state, fixes both HTML and TXT imports from LaCuerda, and refines language, export and chord-diagram controls. It retains the bilingual workspace, complete backups, bounded imports and protected Vercel hosting introduced in 0.2.0. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md).
+**0.4.0** accepts localized Spanish Ultimate Guitar links, removes LaCuerda fingering tables from imported lyrics, and makes missing diagram positions an explicit choice. It also fixes diagram stacking and gives the new-song choices matching vector icons. Chordleaf retains its bilingual workspace, complete backups, bounded imports and protected Vercel hosting. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md).
 
 ## Take part
 
@@ -75,7 +75,7 @@ Musical ideas, missing explanations and awkward controls are all useful contribu
 
 To run your own copy, follow [the development guide](docs/development.md). To put it online, use the [step-by-step Vercel guide](docs/deployment.md). No public hosted instance has been announced.
 
-The [production readiness audit](docs/audit.md) separates completed improvements from the remaining launch decisions. Web imports on Vercel stay off until their public endpoint has been protected and explicitly enabled.
+The [production readiness audit](docs/audit.md) separates completed improvements from the remaining launch decisions. Web imports are enabled on the protected review deployment behind a firewall; opening that endpoint to the public requires another availability and usage review.
 
 ---
 

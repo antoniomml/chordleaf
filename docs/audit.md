@@ -6,11 +6,13 @@
 
 ## Current decision
 
-The application is suitable for a protected review deployment. The original code now has the owner-approved MIT license. English and Spanish are supported, while repository documentation remains English. The owner has explicitly chosen to keep both GitHub and Vercel private for this release.
+The application is suitable for a protected review deployment. The original code has the owner-approved MIT license. English and Spanish are supported, while repository documentation remains English. The 0.4.0 tag prepares for a later public release; GitHub and Vercel visibility remain unchanged.
 
 Vercel's first deployment was automatically assigned to production. **All project deployments are now protected with Vercel Authentication**, including the production alias at `https://chordleaf-app.vercel.app`. An unauthenticated request redirects to sign-in. `chordleaf.com` has been selected as the intended custom domain but still needs to be registered and connected. The initial review was merged in [pull request #1](https://github.com/antoniomml/chordleaf/pull/1).
 
 ## Remaining priorities
+
+The owner deferred the final domain and intensive real-device/mobile acceptance to a later version. Keep the hosted deployment protected while those release decisions are open.
 
 | Priority | Action before the relevant release                                         | Evidence / limitation                                                                                                                                                                                                                                                                                                                                                           |
 | -------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -19,6 +21,14 @@ Vercel's first deployment was automatically assigned to production. **All projec
 | P2       | Choose the final public origin and register Search Console after launch.   | Static `/en/` and `/es/` pages, reciprocal language links, a social image and sitemap are implemented. `SITE_URL` supports the temporary Vercel alias and a later custom domain.                                                                                                                                                                                                |
 | P2       | Continue profiling unusually large or hostile documents.                   | Word and auto-fit use terminable workers; PDF parsing has cancellation, timeout and cumulative text/geometry budgets. These are not a complete hostile-document sandbox. Low-end phone profiling remains useful.                                                                                                                                                                |
 | P2       | Consolidate remaining UI render helpers and CSS incrementally.             | The static shell and document/key render helpers were extracted. Removed 24 superseded CSS declarations with twelve pixel-identical desktop/tablet/mobile screenshots. Continue gradual extraction when changing features.                                                                                                                                                      |
+
+## 0.4.0 pre-public repository review
+
+The current tree contains no committed `.env`, backup, imported song, generated report or local Vercel configuration. The four published images were visually reviewed and contain the invented demo song or Chordleaf artwork. The original legacy application remains reachable in older commits; it was inspected for obvious private material and is not part of the current tree. Rewriting published history was unnecessary because the checks below found no secret to remove.
+
+Gitleaks 8.30.1 was downloaded from its official release and matched its published SHA-256 checksum. The full reachable history (24 commits; 20 patch commits scanned by Gitleaks) produced no findings. The release changes and final tree were checked again before tagging. `pnpm audit --audit-level=high` reported no known advisories. Automated scanners cannot prove that every possible secret, personal detail or rights issue is absent; contributors should still avoid real songs and private files in issues and fixtures.
+
+The import regression review used the owner-provided Spanish Ultimate Guitar URL and both LaCuerda versions of the Alejandro Sanz song in ignored local artifacts only. Tests committed to this repository use invented short examples. All five live imports passed locally; public-provider availability may change independently of Chordleaf.
 
 ## Completed changes
 

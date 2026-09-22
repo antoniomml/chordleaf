@@ -1,8 +1,17 @@
-import { t } from "./i18n.js";
-import { chords, diagram } from "./music.js";
+import { chords, diagram, fingering } from "./music.js";
 import { PAGE } from "./layout.js";
+export function unresolvedChords(song, names) {
+  const selected = names === "all" ? chords(song.text) : names;
+  return selected.filter(
+    (name) => !song.chordShapes?.[name]?.frets && !fingering(name),
+  );
+}
 export function stickerChords(song, sticker) {
-  return sticker.chords === "all" ? chords(song.text) : sticker.chords;
+  const selected =
+    sticker.chords === "all" ? chords(song.text) : sticker.chords;
+  return selected.filter(
+    (name) => song.chordShapes?.[name]?.frets || fingering(name),
+  );
 }
 export const MIN_STICKER_WIDTH = 28;
 export const MIN_STICKER_HEIGHT = 28;
@@ -57,7 +66,7 @@ export function stickerSvg(song, sticker) {
     .map((name, i) => {
       const shape = song.chordShapes?.[name];
       const svg = diagram(name, 0, shape?.frets, { ink: "#000" });
-      return `<g transform="translate(${(i % columns) * cellWidth + (cellWidth - cell) / 2} ${Math.floor(i / columns) * rowHeight + (rowHeight - cell * 1.2) / 2})"><text x="${cell / 2}" y="${cell * 0.16}" text-anchor="middle" font-family="monospace" font-size="${cell * 0.15}" font-weight="bold">${escape(name)}${shape?.star && !name.endsWith("*") ? "*" : ""}</text>${svg.startsWith("<svg") ? svg.replace("<svg ", `<svg x="0" y="${cell * 0.2}" width="${cell}" height="${cell}" `) : t`<text x="8" y="40" font-size="10">Sin posición</text>`}</g>`;
+      return `<g transform="translate(${(i % columns) * cellWidth + (cellWidth - cell) / 2} ${Math.floor(i / columns) * rowHeight + (rowHeight - cell * 1.2) / 2})"><text x="${cell / 2}" y="${cell * 0.16}" text-anchor="middle" font-family="monospace" font-size="${cell * 0.15}" font-weight="bold">${escape(name)}${shape?.star && !name.endsWith("*") ? "*" : ""}</text>${svg.replace("<svg ", `<svg x="0" y="${cell * 0.2}" width="${cell}" height="${cell}" `)}</g>`;
     })
     .join("")}</svg>`;
 }

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { songUrl } from "../src/web-sources.js";
 import { fetchSongPage } from "../server/web-import.js";
+import { stripLaCuerdaFretGrids } from "../src/web-import.js";
 test("only supported public HTTPS hosts are accepted", () => {
   for (const url of [
     "http://acordes.lacuerda.net/a",
@@ -14,6 +15,35 @@ test("only supported public HTTPS hosts are accepted", () => {
   ])
     assert.throws(() => songUrl(url));
   assert.equal(songUrl("https://www.cifraclub.com/a/b/#x").hash, "");
+  assert.equal(
+    songUrl("https://es.ultimate-guitar.com/tab/artist/song-chords-123")
+      .hostname,
+    "es.ultimate-guitar.com",
+  );
+  assert.throws(() =>
+    songUrl(
+      "https://es.ultimate-guitar.com.evil.test/tab/artist/song-chords-123",
+    ),
+  );
+});
+test("LaCuerda fingering legends are removed without touching the song", () => {
+  const grid =
+    "C     G\n" +
+    [1, 2, 3, 4, 5, 6].map((string) => `${string}-0   ${string}-X`).join("\n");
+  assert.equal(
+    stripLaCuerdaFretGrids("[C]Una línea\n\nCORO:\n\n" + grid),
+    "[C]Una línea",
+  );
+  assert.equal(
+    stripLaCuerdaFretGrids("[C]Una línea\n\n" + grid + "\n\n[G]Otra línea"),
+    "[C]Una línea\n\n[G]Otra línea",
+  );
+  assert.equal(
+    stripLaCuerdaFretGrids(
+      "[C]Una línea\n" + grid.split("\n").slice(0, 5).join("\n"),
+    ),
+    "[C]Una línea\n" + grid.split("\n").slice(0, 5).join("\n"),
+  );
 });
 test("redirects are validated before another request", async () => {
   let count = 0;

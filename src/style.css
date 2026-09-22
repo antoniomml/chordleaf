@@ -815,9 +815,21 @@ dialog .choice {
   padding: 19px 15px;
   margin-top: 14px;
 }
-.choice > span {
-  font-size: 26px;
+.choice-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #536d42;
+  border-radius: 9px;
+  background: #c9e79c0d;
   color: var(--green);
+}
+.choice-icon svg {
+  display: block;
+  width: 22px;
+  height: 22px;
 }
 .choice div {
   flex: 1;
@@ -1265,9 +1277,32 @@ button:disabled {
 }
 .chord-sticker {
   position: absolute;
+  z-index: 2;
   cursor: grab;
   touch-action: none;
   outline: 1px solid transparent;
+}
+.missing-shape {
+  display: block;
+  max-width: 130px;
+  margin: 14px auto;
+  color: #c9e79c;
+  font-size: 11px;
+  line-height: 1.4;
+}
+#missing-shapes-dialog {
+  width: min(420px, 92vw);
+}
+.missing-shapes-list {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0;
+}
+.missing-shapes-list button {
+  padding: 11px 13px;
+  border: 1px solid #46553b;
+  border-radius: 7px;
+  text-align: left;
 }
 .chord-sticker:hover,
 .chord-sticker:focus-within {

@@ -90,6 +90,22 @@ try {
     "INTRO:  [Bm9] [Em7] [F#7sus4]",
   );
   assert.match(cuerdaAlignedTxt.text, /^\[Bm9\]Suena la luz/m);
+  const grid =
+    "C     G\n" +
+    [1, 2, 3, 4, 5, 6].map((string) => `${string}-0   ${string}-X`).join("\n");
+  const cuerdaGrid = await parseThroughUI(
+    `<title>PRUEBA, Artista: Acordes</title><div id="tH1"><h1><a>Prueba</a></h1><h2><a>Artista</a></h2></div><div id="t_body"><pre><a>C</a>\nLuz del día\n\nCORO:\n\n${grid}</pre></div>`,
+    "https://acordes.lacuerda.net/artista/prueba",
+  );
+  const cuerdaGridTxt = await parseThroughUI(
+    `=====================================================================\n| ARTISTA: Artista |\n| CANCION: PRUEBA |\n=====================================================================\n\nC\nLuz del día\n\nCORO:\n\n${grid}\n\n=========================== lacuerda.net ============================\nPie de la web`,
+    "https://acordes.lacuerda.net/TXT/artista/prueba.txt",
+    "text/plain",
+  );
+  for (const imported of [cuerdaGrid, cuerdaGridTxt]) {
+    assert.match(imported.text, /Luz del día/);
+    assert.doesNotMatch(imported.text, /1-0|6-X|CORO:|Pie de la web/);
+  }
   const data = {
     store: {
       page: {
@@ -109,17 +125,28 @@ try {
     `<div class="js-store" data-content="${JSON.stringify(data).replace(/"/g, "&quot;")}"></div>`,
     "https://tabs.ultimate-guitar.com/tab/artista/prueba-chords-1",
   );
+  const ugEs = await parseThroughUI(
+    `<div class="js-store" data-content="${JSON.stringify(data).replace(/"/g, "&quot;")}"></div>`,
+    "https://es.ultimate-guitar.com/tab/artista/prueba-chords-1",
+  );
   const invalid = !(await parseThroughUI(
     "<h1>Access denied</h1>",
     "https://www.cifraclub.com/a/b/",
   ));
-  const parsed = { cifra, cuerda, cuerdaTxt, ug, invalid };
-  for (const s of [parsed.cifra, parsed.cuerda, parsed.cuerdaTxt, parsed.ug]) {
+  const parsed = { cifra, cuerda, cuerdaTxt, ug, ugEs, invalid };
+  for (const s of [
+    parsed.cifra,
+    parsed.cuerda,
+    parsed.cuerdaTxt,
+    parsed.ug,
+    parsed.ugEs,
+  ]) {
     assert.equal(s.title, "Prueba");
     assert.equal(s.artist, "Artista");
     assert.ok(s.text.includes("[C]Luz de[G]l día"), s.text);
   }
   assert.equal(parsed.ug.capo, 2);
+  assert.equal(parsed.ugEs.capo, 2);
   assert.ok(parsed.cuerda.text.includes("INTRO: [C] - [G]"));
   assert.ok(parsed.invalid);
   await page.route("**/api/import-web?**", (route) =>
@@ -155,6 +182,10 @@ try {
         "ug",
         "https://tabs.ultimate-guitar.com/tab/coldplay/fix-you-chords-202594",
       ],
+      [
+        "ug-es",
+        "https://es.ultimate-guitar.com/tab/viva-suecia/hablar-de-nada-chords-5067583",
+      ],
     ]) {
       if (!(await page.locator("#web-url").isVisible()))
         await page.locator("#web").click();
@@ -177,8 +208,14 @@ try {
           "cuerda-html": /Amiga M[ií]a/i,
           "cuerda-txt": /Amiga M[ií]a/i,
           ug: /Fix You/i,
+          "ug-es": /Hablar De Nada/i,
         }[name],
       );
+      if (name.startsWith("cuerda")) {
+        const source = await page.locator("#source").inputValue();
+        assert.doesNotMatch(source, /(?:^|\n)\s*1-(?:\d|X)/);
+        assert.doesNotMatch(source, /lacuerda\.net/i);
+      }
       console.log(
         name,
         await page.locator("#title").inputValue(),

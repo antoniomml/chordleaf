@@ -26,7 +26,14 @@ function laCuerdaPlainText(value) {
     .map((line, index) => (/^={20,}\s*$/.test(line) ? index : -1))
     .filter((index) => index >= 0);
   const start = dividers[1] === undefined ? 0 : dividers[1] + 1;
-  return lines.slice(start).join("\n").trim();
+  const footer = lines.findIndex(
+    (line, index) =>
+      index >= start && /^={10,}\s*lacuerda\.net\s*={10,}\s*$/i.test(line),
+  );
+  return lines
+    .slice(start, footer < 0 ? undefined : footer)
+    .join("\n")
+    .trim();
 }
 function laCuerdaChord(value) {
   const chord = value
@@ -41,6 +48,56 @@ function laCuerdaNotation(text) {
     /(?<!\S)(?:FA#7(?:\/A#)?|[A-G][#b]?(?:4(?:\/7)?|m7\/5b))(?!\S)/g,
     laCuerdaChord,
   );
+}
+// Some LaCuerda sheets append a six-row fingering legend. It is a diagram,
+// not another verse or chord sequence, so keep it out of the editable song.
+export function stripLaCuerdaFretGrids(text) {
+  const lines = text.split("\n");
+  for (let i = 0; i <= lines.length - 6; i++) {
+    const counts = Array.from({ length: 6 }, (_, row) => {
+      const value = lines[i + row].trim();
+      const cells =
+        value.match(new RegExp(`${row + 1}-(?:X|\\d{1,2})`, "gi")) || [];
+      return cells.length &&
+        value
+          .replace(new RegExp(`${row + 1}-(?:X|\\d{1,2})`, "gi"), "")
+          .trim() === ""
+        ? cells.length
+        : 0;
+    });
+    if (!counts[0] || !counts.every((count) => count === counts[0])) continue;
+    let start = i;
+    const heading = lines[i - 1]?.trim().split(/\s+/) || [];
+    if (
+      heading.length === counts[0] &&
+      heading.every((name) => chordRE.test(name))
+    )
+      start--;
+    lines.splice(start, i + 6 - start);
+    while (
+      start > 0 &&
+      start < lines.length &&
+      !lines[start - 1].trim() &&
+      !lines[start].trim()
+    )
+      lines.splice(start, 1);
+    if (
+      lines.slice(start).every((line) => !line.trim()) &&
+      /^(?:INTRO|CORO|ESTRIBILLO|SOLO|FINAL|PUENTE)\s*:?$/i.test(
+        lines
+          .slice(0, start)
+          .findLast((line) => line.trim())
+          ?.trim() || "",
+      )
+    ) {
+      const section = lines.findLastIndex(
+        (line, index) => index < start && line.trim(),
+      );
+      lines.splice(section);
+    }
+    i = Math.max(-1, start - 1);
+  }
+  return lines.join("\n").replace(/\n+$/, "");
 }
 function markSectionChords(text) {
   return text
@@ -63,7 +120,11 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
     title = "",
     artist = "",
     capo = 0;
-  if (url.hostname === "tabs.ultimate-guitar.com") {
+  if (
+    ["tabs.ultimate-guitar.com", "es.ultimate-guitar.com"].includes(
+      url.hostname,
+    )
+  ) {
     let data;
     try {
       data = JSON.parse(
@@ -137,6 +198,7 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
         .split("\n")
         .map((line) => line.trimStart())
         .join("\n");
+    if (laCuerda) text = stripLaCuerdaFretGrids(text);
     const capoMatch = text.match(
       /(?:capo|cejilla|capotraste)\s*[:=]?\s*(\d+)/i,
     );
