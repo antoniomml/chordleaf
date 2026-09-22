@@ -1,8 +1,8 @@
-# Deploy Chordi on Vercel
+# Deploy Chordleaf on Vercel
 
-[← Back to Chordi](../README.md) · [Launch priorities](audit.md)
+[← Back to Chordleaf](../README.md) · [Launch priorities](audit.md)
 
-Chordi uses a static Vite frontend and one Node.js function for importing public song pages. No database, authentication provider or secret API key is required. The repository includes deployment configuration. The production alias is https://chordi-black.vercel.app. The current review build is linked from [pull request #1](https://github.com/antoniomml/chordi/pull/1); access requires the owner’s Vercel account.
+Chordleaf uses a static Vite frontend and one Node.js function for importing public song pages. No database, authentication provider or secret API key is required. The repository includes deployment configuration. The protected production deployment is available at https://chordleaf-app.vercel.app. The intended custom domain, `chordleaf.com`, has not yet been registered. The current review build is linked from [pull request #1](https://github.com/antoniomml/chordleaf/pull/1); access requires the owner’s Vercel account.
 
 ## 1. Check the code
 
@@ -34,13 +34,13 @@ The build uses this value for the canonical URL, Open Graph URL and a bilingual 
 
 ## 4. Protect and enable web imports
 
-On Vercel, web imports return **503** until `CHORDI_WEB_IMPORT_ENABLED=true` is set. Pasting text and importing local files still work. This is intentional: a public fetch endpoint can create bandwidth and function costs even when its destinations are allowlisted.
+On Vercel, web imports return **503** until `CHORDLEAF_WEB_IMPORT_ENABLED=true` is set. Pasting text and importing local files still work. This is intentional: a public fetch endpoint can create bandwidth and function costs even when its destinations are allowlisted.
 
 Before enabling it:
 
 1. Add a Vercel Firewall rate-limit rule for the exact path `/api/import-web`. Start conservatively (for example, 10 requests per client IP per minute), then review legitimate usage and your plan's available controls. Return 429 when the limit is exceeded.
 2. Configure usage/budget notifications and review function errors and invocation counts.
-3. Set `CHORDI_WEB_IMPORT_ENABLED=true` only in the environments where those controls are ready, then redeploy.
+3. Set `CHORDLEAF_WEB_IMPORT_ENABLED=true` only in the environments where those controls are ready, then redeploy.
 4. Test one supported URL from each provider. Public sites can block data-center traffic even when imports work locally. Do not bypass their access controls; retain file/text import as the fallback.
 
 To stop imports quickly, set the variable to `false` and redeploy. A browser-origin check is defense in depth, not a distributed rate limiter; scripts can forge request headers. The code deliberately does not pretend that an in-memory counter protects independently scaled functions.
@@ -62,10 +62,10 @@ Promote the reviewed preview only after the applicable launch priorities are res
 
 ## Current hosted configuration
 
-- Project: `chordi`, Node.js `24.x`, Vercel Hobby.
+- Project: `chordleaf`, Node.js `24.x`, Vercel Hobby.
 - All deployments require Vercel Authentication, including the production alias. Vercel assigned the first deployment to production automatically; it is protected and has not been publicly launched.
 - Firewall rule: exact path `/api/import-web`, 10 requests per IP per 60 seconds, fixed window, HTTP 429 after the limit.
-- `SITE_URL` can use `https://chordi-black.vercel.app` until a custom domain is chosen.
+- `SITE_URL` currently uses `https://chordleaf-app.vercel.app`. Replace it with `https://chordleaf.com` after the domain has been registered and connected.
 - GitHub branch protection is unavailable for the current private repository/account plan. Keep changes on a review branch; enable required checks when the repository becomes public or the account supports private protections.
 
 The protected preview was tested end to end with Cifra Club, LaCuerda and Ultimate Guitar: each returned a page that parsed into an editable song. Provider availability can change; retain the text/file fallback. Production and preview imports are enabled behind authentication and the firewall.

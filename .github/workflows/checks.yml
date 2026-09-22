@@ -28,7 +28,7 @@ jobs:
       - name: Browser tests
         run: |
           mkdir -p artifacts
-          PORT=5173 pnpm start > /tmp/chordi-server.log 2>&1 &
+          PORT=5173 pnpm start > /tmp/chordleaf-server.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
           for attempt in {1..30}; do

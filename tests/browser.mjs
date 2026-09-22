@@ -9,11 +9,11 @@ const page = await browser.newPage({
 });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
-await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
 await page.locator("#empty-new").click();
 await page.locator("#blank").click();
 await page.locator("#title").fill("Al otro lado");
-await page.locator("#artist").fill("Canción de ejemplo · Chordi");
+await page.locator("#artist").fill("Canción de ejemplo · Chordleaf");
 await page
   .locator("#source")
   .fill(

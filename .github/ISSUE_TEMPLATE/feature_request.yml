@@ -1,4 +1,4 @@
-name: An idea for chordi
+name: An idea for chordleaf
 description: Suggest something that helps you write, rehearse or play.
 body:
   - type: textarea

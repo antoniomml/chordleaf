@@ -11,7 +11,7 @@ try {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   const response = await page.goto(
-    process.env.CHORDI_URL || "http://localhost:5173",
+    process.env.CHORDLEAF_URL || "http://localhost:5173",
   );
   await page
     .getByRole("heading", { name: "No songs are open.", exact: true })
@@ -98,17 +98,20 @@ try {
   const recovery = await browser.newPage({ locale: "en-US" });
   recovery.on("pageerror", (error) => errors.push(error.message));
   await recovery.addInitScript(() =>
-    localStorage.setItem("chordi-v1", "{broken workspace"),
+    localStorage.setItem("chordleaf-v1", "{broken workspace"),
   );
-  await recovery.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await recovery.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await recovery.locator("#recover").waitFor();
   assert.equal(
-    await recovery.evaluate(() => localStorage.getItem("chordi-v1")),
+    await recovery.evaluate(() => localStorage.getItem("chordleaf-v1")),
     "{broken workspace",
   );
   const recovered = recovery.waitForEvent("download");
   await recovery.locator("#recover").click();
-  assert.equal((await recovered).suggestedFilename(), "chordi-recovery.json");
+  assert.equal(
+    (await recovered).suggestedFilename(),
+    "chordleaf-recovery.json",
+  );
   await recovery.close();
   const unavailable = await browser.newPage({ locale: "en-US" });
   await unavailable.addInitScript(() => {
@@ -116,7 +119,7 @@ try {
       throw new DOMException("Storage full", "QuotaExceededError");
     };
   });
-  await unavailable.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await unavailable.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await unavailable.locator("#empty-new").click();
   await unavailable.locator("#blank").click();
   await unavailable.locator("#source").fill("[C]Unsaved work");

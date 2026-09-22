@@ -10,8 +10,8 @@ export function setupLanguagePicker({ persist, toast }) {
   document.documentElement.lang = getLocale();
   document.title =
     getLocale() === "en"
-      ? "Chordi · Your music, on paper"
-      : "Chordi · Tu música, en papel";
+      ? "Chordleaf · Your music, on paper"
+      : "Chordleaf · Tu música, en papel";
 
   function close({ focus = false } = {}) {
     menu.hidden = true;
@@ -37,7 +37,7 @@ export function setupLanguagePicker({ persist, toast }) {
         return;
       }
       try {
-        localStorage.setItem("chordi-language", option.dataset.language);
+        localStorage.setItem("chordleaf-language", option.dataset.language);
         state.switching = true;
         location.assign(`/${option.dataset.language}/`);
       } catch {

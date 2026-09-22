@@ -182,7 +182,7 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
       const names = el.dataset.all ? "all" : [el.dataset.name];
       el.ondragstart = (event) => {
         event.dataTransfer.setData(
-          "application/chordi-chords",
+          "application/chordleaf-chords",
           JSON.stringify(names),
         );
         event.dataTransfer.effectAllowed = "copy";
@@ -199,11 +199,13 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
     const pages = [...document.querySelectorAll(".page")];
     pages.forEach((page, i) => {
       page.ondragover = (event) => {
-        if ([...event.dataTransfer.types].includes("application/chordi-chords"))
+        if (
+          [...event.dataTransfer.types].includes("application/chordleaf-chords")
+        )
           event.preventDefault();
       };
       page.ondrop = (event) => {
-        const raw = event.dataTransfer.getData("application/chordi-chords");
+        const raw = event.dataTransfer.getData("application/chordleaf-chords");
         if (!raw) return;
         event.preventDefault();
         const box = page.getBoundingClientRect(),

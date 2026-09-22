@@ -1,11 +1,11 @@
-// Optional live regression: CHORDI_URL=http://127.0.0.1:5180 node tests/cifra-comparison.mjs
+// Optional live regression: CHORDLEAF_URL=http://127.0.0.1:5180 node tests/cifra-comparison.mjs
 // Only aggregate diagnostics are printed; downloaded song text is not committed.
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage();
-  await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   const report = await page.evaluate(async () => {
     const { parseWebSong } = await import("/src/web-import.js");
     const { parseSong, fingerings, chordRE } = await import("/src/music.js");

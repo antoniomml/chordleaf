@@ -1,17 +1,17 @@
 {
-  "name": "chordi",
+  "name": "chordleaf",
   "version": "0.3.0",
   "description": "A local-first workspace for lyrics, guitar chords and printable rehearsal sheets.",
   "private": true,
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/antoniomml/chordi.git"
+    "url": "git+https://github.com/antoniomml/chordleaf.git"
   },
   "bugs": {
-    "url": "https://github.com/antoniomml/chordi/issues"
+    "url": "https://github.com/antoniomml/chordleaf/issues"
   },
-  "homepage": "https://github.com/antoniomml/chordi#readme",
+  "homepage": "https://github.com/antoniomml/chordleaf#readme",
   "keywords": [
     "chords",
     "guitar",

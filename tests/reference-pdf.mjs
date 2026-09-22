@@ -3,15 +3,15 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { parseSong } from "../src/music.js";
-const input = process.env.CHORDI_REFERENCE_PDF;
-if (!input) throw Error("Set CHORDI_REFERENCE_PDF to the reference PDF.");
+const input = process.env.CHORDLEAF_REFERENCE_PDF;
+if (!input) throw Error("Set CHORDLEAF_REFERENCE_PDF to the reference PDF.");
 await fs.mkdir("artifacts/alone-review", { recursive: true });
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 try {
-  await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await page.locator("#new").click();
   await page.locator("#file").setInputFiles(input);
   await page.waitForFunction(() => !document.querySelector("#new-dialog").open);
@@ -48,7 +48,7 @@ try {
   );
   assert.equal([...source.matchAll(/\[E5\+\]/g)].length, 4);
   await page.screenshot({
-    path: "artifacts/alone-review/chordi-corrected.png",
+    path: "artifacts/alone-review/chordleaf-corrected.png",
     fullPage: true,
   });
   for (const type of ["pdf", "docx", "txt"]) {

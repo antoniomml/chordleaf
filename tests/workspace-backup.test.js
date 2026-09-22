@@ -25,10 +25,20 @@ test("workspace restore rejects malformed and future formats", () => {
   for (const value of [
     "{}",
     "null",
-    '{"format":"chordi-workspace","version":2,"songs":[]}',
-    '{"format":"chordi-workspace","version":1,"songs":[null]}',
+    '{"format":"chordleaf-workspace","version":2,"songs":[]}',
+    '{"format":"chordleaf-workspace","version":1,"songs":[null]}',
   ])
     assert.throws(() => restoreWorkspace(value));
+});
+
+test("workspace restore accepts legacy Chordi backups", () => {
+  const legacy = JSON.stringify({
+    format: "chordi-workspace",
+    version: 1,
+    active: "legacy",
+    songs: [{ id: "legacy", text: "[G]Legacy song" }],
+  });
+  assert.equal(restoreWorkspace(legacy).songs[0].text, "[G]Legacy song");
 });
 
 test("workspace restore rejects oversized songs without truncating the backup", () => {

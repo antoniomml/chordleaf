@@ -21,6 +21,7 @@ test("UI literals translate but interpolated song content does not", () => {
       margin: 10,
     };
     assert.ok(txt(song).includes("{title: Nueva canción}"));
+    assert.ok(txt(song).includes("{chordleaf:"));
     assert.ok(txt(song).endsWith("[C]Cerrar"));
   } finally {
     setLocale("es");

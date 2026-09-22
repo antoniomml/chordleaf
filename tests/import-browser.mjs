@@ -8,7 +8,7 @@ const page = await browser.newPage({
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 try {
-  await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await page.locator("#new").click();
   assert.deepEqual(
     await page.locator("#new-dialog .choice strong").allTextContents(),
@@ -21,7 +21,7 @@ try {
   await page.locator("#paste-import").click();
   await page.locator(".page").waitFor();
   assert.equal(await page.locator(".page").count(), 1);
-  assert.equal(await page.locator(".sheet-brand").textContent(), "Chordi");
+  assert.equal(await page.locator(".sheet-brand").textContent(), "Chordleaf");
   await page.screenshot({ path: "artifacts/import-fit.png" });
   async function parseThroughUI(html, url, contentType = "text/html") {
     await page.route("**/api/import-web?**", (route) =>
@@ -44,7 +44,7 @@ try {
     const result = invalid
       ? null
       : await page.evaluate(() => {
-          const workspace = JSON.parse(localStorage.getItem("chordi-v1"));
+          const workspace = JSON.parse(localStorage.getItem("chordleaf-v1"));
           return workspace.songs.find((s) => s.id === workspace.active);
         });
     if (invalid) await page.locator(".dialog-close").click();
@@ -114,7 +114,7 @@ try {
   );
   await page.unroute("**/api/import-web?**");
   await page.screenshot({ path: "artifacts/import-dialog.png" });
-  if (process.env.CHORDI_LIVE_IMPORTS) {
+  if (process.env.CHORDLEAF_LIVE_IMPORTS) {
     for (const [name, url] of [
       ["cifra", "https://www.cifraclub.com/chris-klafford/imagine/"],
       [

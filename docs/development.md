@@ -1,14 +1,14 @@
 # Development
 
-[← Back to chordi](../README.md) · [Architecture](architecture.md) · [Contributing](../CONTRIBUTING.md)
+[← Back to chordleaf](../README.md) · [Architecture](architecture.md) · [Contributing](../CONTRIBUTING.md)
 
 ## Set up the environment
 
 Use **Node.js 24 LTS** and **pnpm 12.5.1**, pinned in `package.json`. Follow the [official pnpm installation guide](https://pnpm.io/installation). `pnpm-lock.yaml` is the project's only dependency lockfile.
 
 ```sh
-git clone https://github.com/antoniomml/chordi.git
-cd chordi
+git clone https://github.com/antoniomml/chordleaf.git
+cd chordleaf
 pnpm install --frozen-lockfile
 pnpm dev
 ```
@@ -40,12 +40,12 @@ pnpm dev
 pnpm test:e2e
 ```
 
-Browser tests use Chromium and write ignored files under `artifacts/`. Override the server URL with `CHORDI_URL`. Public screenshots under `docs/images/` use a clean browser context without personal data.
+Browser tests use Chromium and write ignored files under `artifacts/`. Override the server URL with `CHORDLEAF_URL`. Public screenshots under `docs/images/` use a clean browser context without personal data.
 
 To inspect a local reference PDF:
 
 ```sh
-CHORDI_REFERENCE_PDF="/path/to/original.pdf" pnpm exec node tests/reference-pdf.mjs
+CHORDLEAF_REFERENCE_PDF="/path/to/original.pdf" pnpm exec node tests/reference-pdf.mjs
 ```
 
 Do not commit that document or its generated outputs.
@@ -79,11 +79,11 @@ The current tagged release is **`v0.3.0`**. Before another release:
 
 `pnpm dev` and `pnpm preview` include `/api/import-web`. For a built application with the same endpoint, run `pnpm build` followed by `pnpm start` (Node.js, default `127.0.0.1:3000`; configure `HOST` and `PORT` as needed). Put a normal HTTPS reverse proxy in front for a public deployment. Hosting `dist/` alone does not enable web downloads.
 
-For Vercel, follow [Deployment](deployment.md); the endpoint is disabled until explicitly enabled after firewall configuration. Local `dev`, `preview` and `start` enable it unless the process environment sets `CHORDI_WEB_IMPORT_ENABLED=false`.
+For Vercel, follow [Deployment](deployment.md); the endpoint is disabled until explicitly enabled after firewall configuration. Local `dev`, `preview` and `start` enable it unless the process environment sets `CHORDLEAF_WEB_IMPORT_ENABLED=false`.
 
 The endpoint accepts HTTPS song URLs from Cifra Club, LaCuerda and Ultimate Guitar only. Redirects are checked against the same host allowlist, downloads time out after 18 seconds, and HTML is limited to 3 MiB. No accounts, cookies or credentials are forwarded. The browser extracts song text from inert HTML; downloaded scripts are never run. Sites can block downloads or change their markup; inaccessible versions produce an error and the file/text import remains available.
 
-`CHORDI_LIVE_IMPORTS=1 node tests/import-browser.mjs` additionally exercises public song URLs through the running server. Regular CI uses invented fixtures and does not depend on third-party availability.
+`CHORDLEAF_LIVE_IMPORTS=1 node tests/import-browser.mjs` additionally exercises public song URLs through the running server. Regular CI uses invented fixtures and does not depend on third-party availability.
 
 ## Production parity and optional audits
 
@@ -91,6 +91,6 @@ For the same compiled assets and headers used in production, build, run `PORT=51
 
 The audit in [audit.md](audit.md) used temporary Lighthouse and axe installations, not additional application dependencies. Re-run those tools on a protected Vercel preview before launch. Local timings and automated accessibility checks are not field performance measurements or a complete accessibility certification.
 
-Environment variables are documented in [.env.example](../.env.example). Vite reads `SITE_URL` during builds. The Node import handler reads its process environment: export `CHORDI_WEB_IMPORT_ENABLED=false` in your shell when testing disabled imports locally. Do not prefix secrets with `VITE_`; those variables are exposed to browser bundles.
+Environment variables are documented in [.env.example](../.env.example). Vite reads `SITE_URL` during builds. The Node import handler reads its process environment: export `CHORDLEAF_WEB_IMPORT_ENABLED=false` in your shell when testing disabled imports locally. Do not prefix secrets with `VITE_`; those variables are exposed to browser bundles.
 
-For the cross-browser persistence/backup suite, install the engines with `pnpm exec playwright install chromium firefox webkit`, then run `pnpm test:compatibility` against the built server. `CHORDI_BROWSERS=chromium,webkit` narrows local diagnosis; CI deliberately runs all three engines.
+For the cross-browser persistence/backup suite, install the engines with `pnpm exec playwright install chromium firefox webkit`, then run `pnpm test:compatibility` against the built server. `CHORDLEAF_BROWSERS=chromium,webkit` narrows local diagnosis; CI deliberately runs all three engines.

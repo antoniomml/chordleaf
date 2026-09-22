@@ -2,13 +2,13 @@
 
 **Updated:** September 22, 2026. Baseline: `39bf11b`, plus the production-readiness changes.
 
-[← Back to Chordi](../README.md) · [Deployment guide](deployment.md) · [Security policy](../SECURITY.md)
+[← Back to Chordleaf](../README.md) · [Deployment guide](deployment.md) · [Security policy](../SECURITY.md)
 
 ## Current decision
 
 The application is suitable for a protected review deployment. The original code now has the owner-approved MIT license. English and Spanish are supported, while repository documentation remains English. The owner has explicitly chosen to keep both GitHub and Vercel private for this release.
 
-Vercel's first deployment was automatically assigned to production. **All project deployments are now protected with Vercel Authentication**, including the production alias. An unauthenticated request redirects to sign-in. No custom domain has been selected. The initial review was merged in [pull request #1](https://github.com/antoniomml/chordi/pull/1).
+Vercel's first deployment was automatically assigned to production. **All project deployments are now protected with Vercel Authentication**, including the production alias at `https://chordleaf-app.vercel.app`. An unauthenticated request redirects to sign-in. `chordleaf.com` has been selected as the intended custom domain but still needs to be registered and connected. The initial review was merged in [pull request #1](https://github.com/antoniomml/chordleaf/pull/1).
 
 ## Remaining priorities
 
@@ -59,7 +59,7 @@ Follow [the deployment guide](deployment.md) for runtime, environment variables,
 
 The protected preview returned 200 for `/`, `/en/`, `/es/` and `/sitemap.xml`, with Spanish initial metadata on `/es/`; source paths and unknown routes returned 404. Cifra Club, LaCuerda and Ultimate Guitar each parsed into an editable song through the deployed function. Changing language and reloading preserved a synthetic edited song. No provider lyrics were added to repository fixtures.
 
-The cross-browser CI run found and resolved a WebKit timing issue: lock release can lag behind window closure. A waiting tab now queues for ownership after an explicit retry rather than requiring another click. The final automated browser step passed in [GitHub Actions](https://github.com/antoniomml/chordi/actions/runs/35647847238).
+The cross-browser CI run found and resolved a WebKit timing issue: lock release can lag behind window closure. A waiting tab now queues for ownership after an explicit retry rather than requiring another click. The final automated browser step passed in [GitHub Actions](https://github.com/antoniomml/chordleaf/actions/runs/35647847238).
 
 ### 0.2.0 follow-up
 

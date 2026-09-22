@@ -8,7 +8,7 @@ try {
   });
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
   await page
@@ -96,7 +96,8 @@ try {
   await page.waitForTimeout(450);
   const saved = await page.evaluate(
     () =>
-      JSON.parse(localStorage.getItem("chordi-v1")).songs[0].chordStickers[0],
+      JSON.parse(localStorage.getItem("chordleaf-v1")).songs[0]
+        .chordStickers[0],
   );
   assert.equal(saved.columns, 6);
   // Keep the small frame on TXT import; PDF/Word use the same geometry.

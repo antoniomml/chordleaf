@@ -5,7 +5,8 @@ let locale =
     : "es";
 try {
   const saved = globalThis.document
-    ? globalThis.localStorage?.getItem("chordi-language")
+    ? (globalThis.localStorage?.getItem("chordleaf-language") ??
+      globalThis.localStorage?.getItem("chordi-language"))
     : null;
   if (["en", "es"].includes(saved)) locale = saved;
 } catch {

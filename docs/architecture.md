@@ -1,6 +1,6 @@
 # Architecture
 
-chordi is a browser application built with ES modules and Vite. Editing and file import/export work without a backend. Importing a public website uses a small Node.js endpoint, shared by the local server and the Vercel function. Songs live in memory and are saved to `localStorage` under `chordi-v1`; exports provide portable backups.
+chordleaf is a browser application built with ES modules and Vite. Editing and file import/export work without a backend. Importing a public website uses a small Node.js endpoint, shared by the local server and the Vercel function. Songs live in memory and are saved to `localStorage` under `chordleaf-v1`; legacy `chordi-v1` data is migrated on the next save. Exports provide portable backups.
 
 ## Modules
 
@@ -47,7 +47,7 @@ Keep model transformations separate from UI controls. Audio transcription remain
 
 ## Language and untrusted data
 
-`src/i18n.js` and `src/locales/en.js` translate UI literals into English; Spanish is the source locale. The browser language chooses the initial interface and the explicit EN / ES selection is saved separately under `chordi-language`. Switching saves the workspace and reloads; if storage fails, it keeps the current language and document. In tagged templates, only literal segments are translated. Interpolated titles, lyrics and chord symbols are preserved and HTML callers still escape user content. Add new copy to the English catalog and use `t` for labels, status messages and templates.
+`src/i18n.js` and `src/locales/en.js` translate UI literals into English; Spanish is the source locale. The browser language chooses the initial interface and the explicit EN / ES selection is saved separately under `chordleaf-language`; the previous `chordi-language` key remains readable for migration. Switching saves the workspace and reloads; if storage fails, it keeps the current language and document. In tagged templates, only literal segments are translated. Interpolated titles, lyrics and chord symbols are preserved and HTML callers still escape user content. Add new copy to the English catalog and use `t` for labels, status messages and templates.
 
 `src/song-state.js` rebuilds known data fields when restoring storage or reading TXT metadata. It validates fret shapes, numeric settings and safe IDs. New imports are bounded to 10 MiB per file, 50 PDF pages and 50,000 text characters; existing song text is not truncated on restore. Malformed workspace JSON is not overwritten and can be downloaded for recovery.
 

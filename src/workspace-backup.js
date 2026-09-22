@@ -3,7 +3,7 @@ import { t } from "./i18n.js";
 
 export function serializeWorkspace(songs, active) {
   return JSON.stringify(
-    { format: "chordi-workspace", version: 1, active, songs },
+    { format: "chordleaf-workspace", version: 1, active, songs },
     null,
     2,
   );
@@ -14,7 +14,7 @@ export function restoreWorkspace(text) {
     throw new Error(t("La copia supera el límite de 10 MiB."));
   const data = JSON.parse(text);
   if (
-    data?.format !== "chordi-workspace" ||
+    !["chordleaf-workspace", "chordi-workspace"].includes(data?.format) ||
     data.version !== 1 ||
     !Array.isArray(data.songs) ||
     !data.songs.length ||

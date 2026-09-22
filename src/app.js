@@ -26,7 +26,8 @@ document.documentElement.lang = getLocale();
 const workspaceSession = await openWorkspaceSession($("#app"));
 let songs, active, recoveryRaw, storedRaw;
 try {
-  storedRaw = localStorage.getItem("chordi-v1");
+  storedRaw =
+    localStorage.getItem("chordleaf-v1") ?? localStorage.getItem("chordi-v1");
   const stored = JSON.parse(storedRaw);
   if (
     storedRaw &&
@@ -66,7 +67,7 @@ function persist() {
     return false;
   }
   try {
-    localStorage.setItem("chordi-v1", JSON.stringify({ songs, active }));
+    localStorage.setItem("chordleaf-v1", JSON.stringify({ songs, active }));
     $("#save-state").textContent = t("Guardado en este navegador");
     return true;
   } catch {
@@ -246,7 +247,7 @@ function renderPages() {
           )
           .join(
             "",
-          )}<span class="sheet-brand">Chordi</span><span class="sheet-page">${i + 1}</span></article></div>`,
+          )}<span class="sheet-brand">Chordleaf</span><span class="sheet-page">${i + 1}</span></article></div>`,
     )
     .join("");
   $("#pencil").classList.toggle("selected", editing);
@@ -578,7 +579,7 @@ $("#file").onchange = async (e) => {
 $("#workspace-backup").onclick = () => {
   download(
     new Blob([serializeWorkspace(songs, active)], { type: "application/json" }),
-    "chordi-workspace.json",
+    "chordleaf-workspace.json",
   );
   $("#export-menu").hidden = true;
 };
@@ -722,7 +723,7 @@ if (recoveryRaw) {
   $("#recover").onclick = () => {
     download(
       new Blob([recoveryRaw], { type: "application/json" }),
-      "chordi-recovery.json",
+      "chordleaf-recovery.json",
     );
     toast(
       t(

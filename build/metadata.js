@@ -3,7 +3,7 @@ const copy = {
     title: "Your music, on paper",
     description:
       "Write lyrics and chords, explore guitar shapes, transpose songs and export rehearsal sheets as PDF, Word or text. Free browser workspace in English and Spanish.",
-    heading: "Chordi — your music, on paper",
+    heading: "Chordleaf — your music, on paper",
     intro:
       "Write lyrics and chords, explore guitar positions, transpose songs and prepare rehearsal sheets.",
     privacy:
@@ -13,7 +13,7 @@ const copy = {
     title: "Tu música, en papel",
     description:
       "Escribe letras y acordes, explora posiciones de guitarra, transporta canciones y exporta hojas de ensayo en PDF, Word o texto. Gratis, en español e inglés.",
-    heading: "Chordi — tu música, en papel",
+    heading: "Chordleaf — tu música, en papel",
     intro:
       "Escribe letras y acordes, explora posiciones de guitarra, transporta canciones y prepara hojas de ensayo.",
     privacy:
@@ -22,7 +22,7 @@ const copy = {
 };
 export function metadataPlugin(site) {
   return {
-    name: "chordi-public-metadata",
+    name: "chordleaf-public-metadata",
     generateBundle: {
       order: "post",
       handler(_options, bundle) {
@@ -35,7 +35,7 @@ export function metadataPlugin(site) {
             .replace('<html lang="en">', `<html lang="${locale}">`)
             .replace(
               /<title>.*?<\/title>/s,
-              `<title>Chordi · ${c.title}</title>`,
+              `<title>Chordleaf · ${c.title}</title>`,
             )
             .replace(
               /(<meta\s+name="description"\s+content=")[^"]*(")/s,
@@ -43,7 +43,7 @@ export function metadataPlugin(site) {
             )
             .replace(
               /(<meta\s+property="og:title"\s+content=")[^"]*(")/s,
-              `$1Chordi · ${c.title}$2`,
+              `$1Chordleaf · ${c.title}$2`,
             )
             .replace(
               /(<meta\s+property="og:description"\s+content=")[^"]*(")/s,

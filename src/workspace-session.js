@@ -9,7 +9,7 @@ export async function openWorkspaceSession(root) {
       await new Promise((resolve, reject) => {
         navigator.locks
           .request(
-            "chordi-workspace",
+            "chordleaf-workspace",
             waitForOwner ? {} : { ifAvailable: true },
             async (lock) => {
               if (!lock) return resolve();
@@ -38,7 +38,7 @@ export async function openWorkspaceSession(root) {
           "Cierra la otra pestaña y vuelve a intentarlo para proteger tus canciones.",
         )
       : t(
-          "Abre Chordi por HTTPS en un navegador actualizado para guardar tus canciones de forma segura.",
+          "Abre Chordleaf por HTTPS en un navegador actualizado para guardar tus canciones de forma segura.",
         );
     const retry = document.createElement("button");
     retry.className = "primary";

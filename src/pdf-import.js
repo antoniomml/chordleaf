@@ -159,7 +159,7 @@ export function parsePdfPages(pages, fallback) {
       (i) =>
         i.text.trim() &&
         !(
-          /^(?:Chordi|Jordi)$/.test(i.text.trim()) &&
+          /^(?:Chordleaf|Chordi|Jordi)$/.test(i.text.trim()) &&
           i.y > p.height - 24 &&
           i.size <= 8
         ),

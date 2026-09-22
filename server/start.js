@@ -64,7 +64,7 @@ server.listen(
   process.env.HOST || "127.0.0.1",
   () => {
     console.log(
-      `Chordi: http://${process.env.HOST || "127.0.0.1"}:${server.address().port}`,
+      `Chordleaf: http://${process.env.HOST || "127.0.0.1"}:${server.address().port}`,
     );
   },
 );

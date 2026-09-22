@@ -1,24 +1,24 @@
 <div align="center">
-  <img src="public/logo.svg" width="76" height="76" alt="chordi logo">
-  <h1>chordi</h1>
+  <img src="public/logo.svg" width="76" height="76" alt="chordleaf logo">
+  <h1>chordleaf</h1>
   <p><strong>Your song. Your chords. Everything in place.</strong></p>
   <p>A workspace for writing lyrics and chords, exploring guitar voicings,<br>and making a song sheet for your next rehearsal.</p>
   <p>
-    <a href="https://github.com/antoniomml/chordi/releases/tag/v0.3.0"><img src="https://img.shields.io/badge/version-0.3.0-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.3.0"></a>
-    <a href="https://github.com/antoniomml/chordi/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordi/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
+    <a href="https://github.com/antoniomml/chordleaf/releases/tag/v0.3.0"><img src="https://img.shields.io/badge/version-0.3.0-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.3.0"></a>
+    <a href="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
   </p>
   <p><a href="#a-small-studio-for-your-songs">Features</a> · <a href="docs/guide.md">User guide</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
 </div>
 
-![chordi: lyrics and chord editor beside a song sheet](docs/images/workspace.png)
+![chordleaf: lyrics and chord editor beside a song sheet](docs/images/workspace.png)
 
 ## A small studio for your songs
 
-Preparing a song should leave time to play it. chordi brings lyrics, chords and the finished document together: write a verse, place each chord on the right syllable, and check the printed layout as you go.
+Preparing a song should leave time to play it. chordleaf brings lyrics, chords and the finished document together: write a verse, place each chord on the right syllable, and check the printed layout as you go.
 
 It is for singers, guitarists and anyone preparing a rehearsal or organizing songs. The interface is available in **English and Spanish**. Use **EN / ES** in the top bar; your songs keep their original language. Project documentation is in English.
 
-| When you want to…             | chordi helps you…                                                      |
+| When you want to…             | chordleaf helps you…                                                   |
 | ----------------------------- | ---------------------------------------------------------------------- |
 | **Prepare a song**            | Start from a blank page, a website URL, or TXT, PDF or Word.           |
 | **Time a chord change**       | Anchor a chord to an exact letter without adding spaces to the lyrics. |
@@ -59,9 +59,9 @@ Choose an interpretation to insert it at the text cursor or replace a specific o
 
 ## Your music stays with you
 
-Songs and imported files are processed in your browser. Web imports send the song URL to the Chordi server, which downloads the public page; your edited songs are not uploaded. There are no accounts. Changes are saved automatically in that browser.
+Songs and imported files are processed in your browser. Web imports send the song URL to the Chordleaf server, which downloads the public page; your edited songs are not uploaded. There are no accounts. Changes are saved automatically in that browser.
 
-**Export a copy of anything you want to keep.** Browser storage does not sync devices and can disappear when browser data is cleared. Choose **Export → Workspace backup · JSON** to preserve all open songs and settings, or export chordi TXT for an individual song.
+**Export a copy of anything you want to keep.** Browser storage does not sync devices and can disappear when browser data is cleared. Choose **Export → Workspace backup · JSON** to preserve all open songs and settings, or export chordleaf TXT for an individual song.
 
 Both interface and document fonts are served by the app itself. There are no third-party font requests or analytics scripts. See [privacy and storage](docs/privacy.md).
 
@@ -71,7 +71,7 @@ Both interface and document fonts are served by the app itself. There are no thi
 
 ## Take part
 
-Musical ideas, missing explanations and awkward controls are all useful contributions. [Report an issue](https://github.com/antoniomml/chordi/issues/new?template=bug_report.yml) or [suggest a feature](https://github.com/antoniomml/chordi/issues/new?template=feature_request.yml), using short invented song examples.
+Musical ideas, missing explanations and awkward controls are all useful contributions. [Report an issue](https://github.com/antoniomml/chordleaf/issues/new?template=bug_report.yml) or [suggest a feature](https://github.com/antoniomml/chordleaf/issues/new?template=feature_request.yml), using short invented song examples.
 
 To run your own copy, follow [the development guide](docs/development.md). To put it online, use the [step-by-step Vercel guide](docs/deployment.md). No public hosted instance has been announced.
 

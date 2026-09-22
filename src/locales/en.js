@@ -28,8 +28,8 @@ export default {
     "Your workspace is open in another tab",
   "Cierra la otra pestaña y vuelve a intentarlo para proteger tus canciones.":
     "Close the other tab and try again to protect your songs.",
-  "Abre Chordi por HTTPS en un navegador actualizado para guardar tus canciones de forma segura.":
-    "Open Chordi over HTTPS in an up-to-date browser to save your songs safely.",
+  "Abre Chordleaf por HTTPS en un navegador actualizado para guardar tus canciones de forma segura.":
+    "Open Chordleaf over HTTPS in an up-to-date browser to save your songs safely.",
   "Volver a intentar": "Try again",
   "Vista del documento": "Document preview",
   "Recuperar datos": "Recover data",
@@ -316,8 +316,8 @@ export default {
     "No chords found at this link. Open a chord version, rather than a tab or search page.",
   "No se pudo conectar con la web. Comprueba la conexión y vuelve a intentarlo.":
     "Could not connect. Check your connection and try again.",
-  "La importación web necesita el servidor de Chordi. Puedes importar un archivo en esta instalación.":
-    "Web import needs the Chordi server. You can import a file in this installation.",
+  "La importación web necesita el servidor de Chordleaf. Puedes importar un archivo en esta instalación.":
+    "Web import needs the Chordleaf server. You can import a file in this installation.",
   "No se pudo descargar la canción.": "Could not download the song.",
   "Introduce un enlace completo, empezando por https://.":
     "Enter a complete link, starting with https://.",
@@ -335,7 +335,8 @@ export default {
     "The PDF is too long. Import up to 50 pages.",
   "La importación web no está disponible. Importa un archivo o pega el texto.":
     "Web import is unavailable. Import a file or paste text.",
-  "Abre Chordi para importar una canción.": "Open Chordi to import a song.",
+  "Abre Chordleaf para importar una canción.":
+    "Open Chordleaf to import a song.",
   "El enlace es demasiado largo.": "The link is too long.",
   "La página es demasiado grande para importarla.":
     "The page is too large to import.",

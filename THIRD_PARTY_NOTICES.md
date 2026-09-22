@@ -20,4 +20,4 @@ Source: [Google Fonts DM Sans](https://github.com/google/fonts/tree/main/ofl/dms
 
 ## Dependencies
 
-Exact versions appear in `pnpm-lock.yaml`. Each package retains its own license. This document does not replace those licenses. Chordi's original application code is licensed under the MIT license in LICENSE.
+Exact versions appear in `pnpm-lock.yaml`. Each package retains its own license. This document does not replace those licenses. Chordleaf's original application code is licensed under the MIT license in LICENSE.

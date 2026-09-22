@@ -10,7 +10,7 @@ try {
   });
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
   const source = page.locator("#source");
@@ -106,7 +106,7 @@ try {
   );
   await page.waitForTimeout(450);
   let stored = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("chordi-v1")),
+    JSON.parse(localStorage.getItem("chordleaf-v1")),
   );
   assert.deepEqual(stored.songs[0].chordShapes.C6.frets, [-1, 3, 2, 2, 1, 3]);
   await page.locator('[data-section="document"]').click();

@@ -6,7 +6,7 @@ try {
     locale: "es-ES",
     viewport: { width: 1440, height: 1000 },
   });
-  await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
   await page.locator("#title").fill("Pasaje instrumental");

@@ -47,6 +47,13 @@ test("valid legacy data and original song text are preserved", () => {
   const text = "a".repeat(MAX_TEXT_LENGTH + 1);
   assert.equal(createSong({ text }).text, text);
   assert.equal(songMetadata(null).chordStickers.length, 0);
+  assert.equal(
+    importText(
+      '{chordi: {"chordShapes":{"C":{"frets":[0,3,2,0,1,0]}}}}\n[C]Legacy',
+      "Legacy",
+    ).chordShapes.C.frets.join(","),
+    "0,3,2,0,1,0",
+  );
 });
 test("oversized imports are rejected before file decoding", async () => {
   await assert.rejects(importFile({ size: MAX_FILE_BYTES + 1 }), /10 MiB/);
@@ -66,10 +73,10 @@ test("Vercel adapter rejects unsupported methods and applies security headers", 
 test("web imports require explicit activation on Vercel", async () => {
   const previous = {
     VERCEL: process.env.VERCEL,
-    CHORDI_WEB_IMPORT_ENABLED: process.env.CHORDI_WEB_IMPORT_ENABLED,
+    CHORDLEAF_WEB_IMPORT_ENABLED: process.env.CHORDLEAF_WEB_IMPORT_ENABLED,
   };
   process.env.VERCEL = "1";
-  delete process.env.CHORDI_WEB_IMPORT_ENABLED;
+  delete process.env.CHORDLEAF_WEB_IMPORT_ENABLED;
   try {
     const res = response();
     await handler(
@@ -81,7 +88,7 @@ test("web imports require explicit activation on Vercel", async () => {
       res,
     );
     assert.equal(res.statusCode, 503);
-    process.env.CHORDI_WEB_IMPORT_ENABLED = "true";
+    process.env.CHORDLEAF_WEB_IMPORT_ENABLED = "true";
     const crossSite = response();
     await handler(
       {

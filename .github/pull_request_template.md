@@ -1,6 +1,6 @@
 ## What improves
 
-Describe the problem and the resulting behavior for someone using chordi.
+Describe the problem and the resulting behavior for someone using chordleaf.
 
 ## Validation
 

@@ -8,7 +8,7 @@ try {
   });
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   assert.equal(await page.locator("#empty-state").isVisible(), true);
   assert.equal(await page.locator(".tab").count(), 0);
   assert.equal(await page.locator(".page").count(), 0);

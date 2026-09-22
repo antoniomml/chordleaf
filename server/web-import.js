@@ -10,7 +10,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
       signal,
       headers: {
         Accept: "text/html, text/plain;q=0.9",
-        "User-Agent": "Chordi/0.3.0 (song import)",
+        "User-Agent": "Chordleaf/0.3.0 (song import)",
       },
     });
     if ([301, 302, 303, 307, 308].includes(response.status)) {
@@ -78,10 +78,10 @@ export async function webImportMiddleware(req, res, next) {
     return;
   }
   // Public Vercel imports stay off until the operator configures WAF limits.
-  if (
-    process.env.CHORDI_WEB_IMPORT_ENABLED === "false" ||
-    (process.env.VERCEL && process.env.CHORDI_WEB_IMPORT_ENABLED !== "true")
-  ) {
+  const enabled =
+    process.env.CHORDLEAF_WEB_IMPORT_ENABLED ??
+    process.env.CHORDI_WEB_IMPORT_ENABLED;
+  if (enabled === "false" || (process.env.VERCEL && enabled !== "true")) {
     res.statusCode = 503;
     res.end(
       JSON.stringify({
@@ -94,7 +94,7 @@ export async function webImportMiddleware(req, res, next) {
   if (req.headers?.["sec-fetch-site"] === "cross-site") {
     res.statusCode = 403;
     res.end(
-      JSON.stringify({ error: "Abre Chordi para importar una canción." }),
+      JSON.stringify({ error: "Abre Chordleaf para importar una canción." }),
     );
     return;
   }

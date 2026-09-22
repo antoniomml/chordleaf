@@ -20,7 +20,7 @@ export function download(blob, name) {
   setTimeout(() => URL.revokeObjectURL(a.href), 30000);
 }
 export function txt(song) {
-  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordi: ${JSON.stringify({ chordShapes: song.chordShapes || {}, chordStickers: song.chordStickers || [] })}}\n\n${song.text}`;
+  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordleaf: ${JSON.stringify({ chordShapes: song.chordShapes || {}, chordStickers: song.chordStickers || [] })}}\n\n${song.text}`;
 }
 export async function exportSong(song, type) {
   const name = (song.title || t("Canción")).replace(/[\\/:*?"<>|]/g, "-");
@@ -47,7 +47,7 @@ export async function exportSong(song, type) {
     pdf.setProperties({
       title: song.title,
       author: song.artist,
-      creator: "Chordi",
+      creator: "Chordleaf",
     });
     l.pages.forEach((page, i) => {
       if (i) pdf.addPage();
@@ -88,7 +88,9 @@ export async function exportSong(song, type) {
       pdf.setFont("GoogleSansCode", "normal");
       pdf.setFontSize(7);
       pdf.setTextColor("#727272");
-      pdf.text("Chordi", PAGE.width / 2, PAGE.height - 12, { align: "center" });
+      pdf.text("Chordleaf", PAGE.width / 2, PAGE.height - 12, {
+        align: "center",
+      });
       for (const sticker of stickers.filter((s) => s.page === i))
         pdf.addImage(
           sticker.png,
@@ -335,7 +337,7 @@ export async function exportSong(song, type) {
                 spacing: { before: 0, after: 0 },
                 children: [
                   new TextRun({
-                    text: "Chordi",
+                    text: "Chordleaf",
                     font: DOCUMENT_FONT,
                     size: 14,
                     color: "727272",
@@ -439,7 +441,7 @@ export function importText(text, fallback) {
   let song = { title: fallback, artist: "", capo: 0 },
     lines = text.replace(/\r/g, "").split("\n");
   lines = lines.filter((line) => {
-    const metadata = line.match(/^\{chordi: (.*)\}$/);
+    const metadata = line.match(/^\{(?:chordleaf|chordi): (.*)\}$/);
     if (metadata) {
       try {
         const data = JSON.parse(metadata[1]);

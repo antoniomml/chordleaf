@@ -1,4 +1,4 @@
-# Contributing to Chordi
+# Contributing to Chordleaf
 
 You do not need to write code to help. Report confusing controls, suggest clearer explanations, or share an idea through the repository's issue templates. Use a short invented song example instead of private or copyrighted material.
 

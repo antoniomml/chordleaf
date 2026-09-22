@@ -18,7 +18,7 @@ export default defineConfig({
   plugins: [
     metadataPlugin(site),
     {
-      name: "chordi-web-import",
+      name: "chordleaf-web-import",
       configureServer(server) {
         server.middlewares.use(webImportMiddleware);
       },

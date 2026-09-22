@@ -23,11 +23,11 @@ function workerClosed(worker) {
     });
   });
 }
-const url = process.env.CHORDI_URL || "http://localhost:5173";
+const url = process.env.CHORDLEAF_URL || "http://localhost:5173";
 for (const engine of [chromium, firefox, webkit].filter(
   (engine) =>
-    !process.env.CHORDI_BROWSERS ||
-    process.env.CHORDI_BROWSERS.split(",").includes(engine.name()),
+    !process.env.CHORDLEAF_BROWSERS ||
+    process.env.CHORDLEAF_BROWSERS.split(",").includes(engine.name()),
 )) {
   const browser = await engine.launch();
   try {

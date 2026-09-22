@@ -1,6 +1,6 @@
-# Your first song in chordi
+# Your first song in chordleaf
 
-[← Back to chordi](../README.md)
+[← Back to chordleaf](../README.md)
 
 Use **EN / ES** in the top bar to choose English or Spanish. The app starts in your browser language (English for languages other than Spanish). This guide uses the English control labels. Changing the interface does not translate songs.
 
@@ -8,13 +8,13 @@ The workspace has a compact navigation rail, an editing sidebar and a sheet prev
 
 ## Start or import a song
 
-Chordi opens without a sample song. Choose the large **New song** action, then **Start from scratch**. The title starts empty; its placeholder is not printed. Add an artist if needed. **Import text or a file** supports:
+Chordleaf opens without a sample song. Choose the large **New song** action, then **Start from scratch**. The title starts empty; its placeholder is not printed. Add an artist if needed. **Import text or a file** supports:
 
-| File                     | What to expect                                                                                                   |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| TXT, CHO, ChordPro       | Bracketed chords or chord lines above lyrics. Exported chordi TXT retains document settings and custom voicings. |
-| PDF with selectable text | Lyrics, chords, headers and columns recovered from their positions. Review the result.                           |
-| Word (.docx)             | Text and identifiable column structure. Review titles and alignment.                                             |
+| File                     | What to expect                                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| TXT, CHO, ChordPro       | Bracketed chords or chord lines above lyrics. Exported chordleaf TXT retains document settings and custom voicings. |
+| PDF with selectable text | Lyrics, chords, headers and columns recovered from their positions. Review the result.                              |
+| Word (.docx)             | Text and identifiable column structure. Review titles and alignment.                                                |
 
 Imports accept up to **10 MiB per file**, **50 PDF pages** and **50,000 text characters per song**. Large or complex documents can still take longer to process. Scanned PDFs need external OCR. Convert legacy `.doc` files to `.docx` first. Each song opens in a tab. Closing a song with unexported changes requires confirmation.
 
@@ -93,11 +93,11 @@ Preview, PDF and Word share a layout model. Reimported PDF or Word reconstructs 
 
 **New song** always opens the initial menu: **Import text or a file**, **Import from a website**, then **Start from scratch**. Each import option opens its own screen; **← Back** returns to the menu. Closing and reopening starts fresh. Paste lyrics with aligned chords or open TXT, ChordPro, text-based PDF or DOCX. Legacy `.doc` files must first be saved as `.docx`.
 
-For a web import, paste an HTTPS song URL from Cifra Club, LaCuerda or Ultimate Guitar. Chordi converts the accessible chord version into editable lyrics and anchored chords. LaCuerda supports both its normal chord page and its `/TXT/` link. Integrations are maintained per provider rather than per song, so a provider markup change can require an adapter update. Search pages, protected content and tablature-only versions are not supported. The source URL is kept with the working song. A running Chordi server is needed for this option.
+For a web import, paste an HTTPS song URL from Cifra Club, LaCuerda or Ultimate Guitar. Chordleaf converts the accessible chord version into editable lyrics and anchored chords. LaCuerda supports both its normal chord page and its `/TXT/` link. Integrations are maintained per provider rather than per song, so a provider markup change can require an adapter update. Search pages, protected content and tablature-only versions are not supported. The source URL is kept with the working song. A running Chordleaf server is needed for this option.
 
 Every import tries one and two columns, 6–10 mm margins and 8–20 pt type, choosing the largest font that fits on one A4 page. Imported column/page breaks are reflowed. At equal font sizes, one column and 10 mm margins take preference. Longer songs keep all their content on multiple pages rather than shrinking below 8 pt. **Fit to one page** repeats this search; all document controls remain editable afterwards.
 
-The preview, PDF and Word documents include a small grey **Chordi** footer. Catalog diagrams use the original fingering's barre information, including full and partial barres; unknown custom shapes infer a conservative barre when possible.
+The preview, PDF and Word documents include a small grey **Chordleaf** footer. Catalog diagrams use the original fingering's barre information, including full and partial barres; unknown custom shapes infer a conservative barre when possible.
 
 ## Instrumental lines (intros and solos)
 
@@ -107,9 +107,9 @@ Bracketed sequences remain independent of the following lyric line. Plain import
 
 ## Recover a damaged browser session
 
-If saved data cannot be read, Chordi leaves the original browser storage untouched and shows **Recover data**. Download that JSON file and keep it private; it can contain your songs. Export any new work as TXT before leaving. Ask for help using an invented example rather than posting the recovery file publicly. Once you have recovered or backed up everything you need, clear this site's stored data in your browser settings to start a clean session. Recovery JSON is a diagnostic backup, not a supported song-import format.
+If saved data cannot be read, Chordleaf leaves the original browser storage untouched and shows **Recover data**. Download that JSON file and keep it private; it can contain your songs. Export any new work as TXT before leaving. Ask for help using an invented example rather than posting the recovery file publicly. Once you have recovered or backed up everything you need, clear this site's stored data in your browser settings to start a clean session. Recovery JSON is a diagnostic backup, not a supported song-import format.
 
-Chordi allows one active editor per browser profile and origin. A second browser tab asks you to close the first before continuing, preventing stale windows from overwriting saved songs. The song tabs inside Chordi are safe to use together. An up-to-date HTTPS browser with Web Locks support is required.
+Chordleaf allows one active editor per browser profile and origin. A second browser tab asks you to close the first before continuing, preventing stale windows from overwriting saved songs. The song tabs inside Chordleaf are safe to use together. An up-to-date HTTPS browser with Web Locks support is required.
 
 ## Full workspace backups
 

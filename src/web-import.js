@@ -161,7 +161,7 @@ export async function importWebSong(value, { signal } = {}) {
   if (!response.headers.get("content-type")?.includes("application/json"))
     throw new Error(
       t(
-        "La importación web necesita el servidor de Chordi. Puedes importar un archivo en esta instalación.",
+        "La importación web necesita el servidor de Chordleaf. Puedes importar un archivo en esta instalación.",
       ),
     );
   const data = await response.json();
