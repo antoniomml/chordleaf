@@ -13,6 +13,13 @@ try {
   const response = await page.goto(
     process.env.CHORDI_URL || "http://localhost:5173",
   );
+  await page
+    .getByRole("heading", { name: "No songs are open.", exact: true })
+    .waitFor();
+  assert.equal(await page.locator(".page").count(), 0);
+  assert.equal(await page.locator("#export").isDisabled(), true);
+  await page.locator("#empty-new").click();
+  await page.locator("#blank").click();
   await page.locator(".page").waitFor();
   assert.equal(await page.locator("html").getAttribute("lang"), "en");
   assert.match(await page.locator("#new").innerText(), /New song/);
@@ -34,11 +41,17 @@ try {
   const lyrics = "[C]Guardar esta canción\n[G]Sin traducción";
   await page.locator("#source").fill(lyrics);
   assert.equal(await page.locator(".sheet-header img").count(), 0);
-  await page.locator("#language").selectOption("es");
+  await page.locator("#language").click();
+  await page.locator('[data-language="es"]').click();
   await page.waitForFunction(() => document.documentElement.lang === "es");
   assert.equal(await page.locator("#source").inputValue(), lyrics);
   assert.match(await page.locator("#new").innerText(), /Nueva canción/);
-  await page.locator("#language").selectOption("en");
+  await page.locator("#language").press("ArrowDown");
+  assert.equal(await page.locator("#language-menu").isVisible(), true);
+  await page.locator('[data-language="es"]').press("Escape");
+  assert.equal(await page.locator("#language-menu").isVisible(), false);
+  await page.locator("#language").click();
+  await page.locator('[data-language="en"]').click();
   await page.waitForFunction(() => document.documentElement.lang === "en");
   assert.equal(await page.locator("#source").inputValue(), lyrics);
   await page.locator('[data-section="chords"]').click();
@@ -104,8 +117,11 @@ try {
     };
   });
   await unavailable.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await unavailable.locator("#empty-new").click();
+  await unavailable.locator("#blank").click();
   await unavailable.locator("#source").fill("[C]Unsaved work");
-  await unavailable.locator("#language").selectOption("es");
+  await unavailable.locator("#language").click();
+  await unavailable.locator('[data-language="es"]').click();
   assert.equal(await unavailable.locator("html").getAttribute("lang"), "en");
   assert.equal(
     await unavailable.locator("#source").inputValue(),

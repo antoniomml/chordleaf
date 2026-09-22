@@ -94,9 +94,6 @@ button.primary {
   border-radius: 7px;
   padding: 10px 15px;
 }
-.outline span {
-  margin-left: 15px;
-}
 .topbar {
   height: 62px;
   display: flex;
@@ -143,7 +140,7 @@ button.primary {
 .export-wrap {
   position: relative;
 }
-.menu {
+.chrome-menu {
   position: absolute;
   right: 0;
   top: 45px;
@@ -155,17 +152,43 @@ button.primary {
   border-radius: 9px;
   box-shadow: 0 12px 30px #0005;
 }
-.menu button {
+.chrome-menu button {
   display: block;
   text-align: left;
   width: 100%;
   padding: 11px;
   border-radius: 5px;
 }
-.menu small {
+.chrome-menu small {
   display: block;
   color: var(--muted);
   margin-top: 4px;
+}
+#export {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+}
+#export svg,
+#language svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+}
+#export .export-icon {
+  width: 17px;
+  height: 17px;
+}
+#export .chevron,
+#language svg {
+  width: 10px;
+  height: 7px;
+  margin-left: 3px;
 }
 .tabs {
   height: 38px;
@@ -231,6 +254,38 @@ button.primary {
   padding: 0 18px;
   color: #909888;
   font-size: 20px;
+}
+#empty-state {
+  min-height: calc(100dvh - 62px);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+  padding: 48px 24px;
+  background:
+    radial-gradient(circle at 50% 42%, #c9e79c12, transparent 34%), #1b1f1c;
+}
+#empty-state img {
+  width: 62px;
+  height: 62px;
+  margin-bottom: 18px;
+}
+#empty-state h1 {
+  margin: 4px 0 10px;
+  color: #edf2e7;
+  font-size: clamp(28px, 4vw, 46px);
+  letter-spacing: -1.5px;
+}
+#empty-state > p:not(.eyebrow) {
+  max-width: 440px;
+  margin: 0 0 26px;
+  color: #9eaa99;
+  font-size: 14px;
+  line-height: 1.6;
+}
+#empty-state .primary {
+  min-width: 170px;
+  padding: 13px 18px;
 }
 main {
   display: flex;
@@ -1386,29 +1441,54 @@ button:disabled {
   padding: 0;
   background: transparent;
 }
-.edit-hint {
+.chord-card-actions {
+  width: calc(100% - 10px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 3px 5px 2px;
+  padding-top: 6px;
+  border-top: 1px solid #3b4738;
+}
+.dictionary-item.chord-card .chord-card-actions button {
+  padding: 6px 2px;
+  border-radius: 5px;
+  color: #aebca3;
   font-size: 9px;
-  color: #c9e79c;
-  opacity: 0;
 }
-.chord-card:hover .edit-hint,
-.chord-card:focus-within .edit-hint {
-  opacity: 1;
-}
-.dictionary-item.chord-card .add-sticker {
-  min-width: 28px;
-  min-height: 28px;
-  position: absolute;
-  right: 3px;
-  bottom: 3px;
-  border-radius: 50%;
+.dictionary-item.chord-card .chord-card-actions .add-sticker {
+  color: #d5e9bc;
   background: #354130;
 }
 .dictionary-all {
   grid-column: 1 / -1;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 5px;
-  padding: 9px 12px;
+  padding: 12px 13px;
+  cursor: grab;
+  background: #293126;
+  border-color: #667957;
+}
+.dictionary-all > div {
+  display: grid;
+  gap: 3px;
+}
+.dictionary-all strong {
+  color: #dcebc9;
+  font-size: 12px;
+}
+.dictionary-all span {
+  color: #94a388;
+  font-size: 9px;
+}
+.dictionary-all .add-sticker {
+  padding: 7px 9px;
+  border: 1px solid #71865f;
+  border-radius: 5px;
+  color: var(--green);
+  font-size: 9px;
+  white-space: nowrap;
 }
 #more-chords {
   width: 100%;
@@ -1843,13 +1923,44 @@ button:disabled {
   color: #c9e79c;
 }
 
+.language-wrap {
+  position: relative;
+}
 #language {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   color: var(--green);
   background: #222920;
   border: 1px solid var(--border);
   border-radius: 6px;
   min-height: 32px;
-  padding: 4px;
+  min-width: 55px;
+  padding: 4px 8px;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+}
+.language-menu {
+  top: 39px;
+  right: 0;
+  width: 158px;
+  z-index: 30;
+}
+.language-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #cdd8c4;
+}
+.language-menu button[aria-checked="true"] {
+  background: #c9e79c12;
+  color: var(--green);
+}
+.language-menu small {
+  margin: 0;
+  font-size: 9px;
+  letter-spacing: 1px;
 }
 select:focus-visible {
   outline: 2px solid var(--green);

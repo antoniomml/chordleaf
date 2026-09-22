@@ -11,7 +11,7 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
   const tray = document.createElement("section");
   tray.className = "dictionary-tray";
   tray.innerHTML = t(
-    '<h2>Los acordes de tu canción</h2><p>Arrastra el conjunto o un acorde a la hoja. También puedes añadirlo con +.</p><div class="dictionary-items chord-card-grid"></div>',
+    '<h2>Los acordes de tu canción</h2><p>Arrastra un acorde a la hoja o usa la acción Añadir. Puedes colocar el conjunto completo de una vez.</p><div class="dictionary-items chord-card-grid"></div>',
   );
   document.querySelector("#song-chords").append(tray);
   const dialog = document.createElement("dialog");
@@ -170,11 +170,11 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
   function renderTray() {
     const names = chords(song().text);
     tray.querySelector(".dictionary-items").innerHTML = names.length
-      ? t`<div class="dictionary-item dictionary-all" draggable="true" data-all="true"><span>⠿ Todos (${names.length})</span><button class="add-sticker" aria-label="Añadir todos los diagramas">+</button></div>` +
+      ? t`<div class="dictionary-item dictionary-all" draggable="true" data-all="true"><div><strong>Todos los acordes</strong><span>${names.length} diagramas en un bloque</span></div><button class="add-sticker" aria-label="Añadir todos los diagramas">Añadir a la hoja</button></div>` +
         names
           .map(
             (name) =>
-              t`<div class="dictionary-item chord-card" draggable="true" data-name="${esc(name)}"><button class="edit-shape" aria-label="Editar posición de ${esc(name)}"><strong>${esc(name)}${song().chordShapes?.[name]?.star ? "*" : ""}</strong>${diagram(name, 0, song().chordShapes?.[name]?.frets)}<span class="edit-hint">Editar posición</span></button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}" title="Añadir a la hoja">+</button></div>`,
+              t`<div class="dictionary-item chord-card" draggable="true" data-name="${esc(name)}"><button class="edit-shape" aria-label="Editar posición de ${esc(name)}"><strong>${esc(name)}${song().chordShapes?.[name]?.star ? "*" : ""}</strong>${diagram(name, 0, song().chordShapes?.[name]?.frets)}</button><div class="chord-card-actions"><button class="edit-shape-text" aria-label="Editar ${esc(name)}">Editar</button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}">Añadir</button></div></div>`,
           )
           .join("")
       : t("<p>Añade acordes a la canción para crear tu diccionario.</p>");
@@ -190,6 +190,9 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
       el.querySelector(".add-sticker").onclick = () => add(names);
       if (el.querySelector(".edit-shape"))
         el.querySelector(".edit-shape").onclick = () => edit(el.dataset.name);
+      if (el.querySelector(".edit-shape-text"))
+        el.querySelector(".edit-shape-text").onclick = () =>
+          edit(el.dataset.name);
     });
   }
   function render() {

@@ -1,4 +1,5 @@
 import { escapeHtml as esc } from "./ui/html.js";
+import { setupLanguagePicker } from "./ui/language.js";
 import { renderDocumentSettings, renderKeySettings } from "./ui/settings.js";
 import { fitSong } from "./fit-song.js";
 import { serializeWorkspace, restoreWorkspace } from "./workspace-backup.js";
@@ -21,7 +22,6 @@ import { layout, PAGE } from "./layout.js";
 import { importWebSong } from "./web-import.js";
 import { exportSong, importFile, importText, download } from "./files.js";
 const $ = (s) => document.querySelector(s);
-const example = `[G]Hay un lugar al [D]otro lado\n[Em]donde el tiempo va [C]despacio.\n[G]Guardo la luz de [D]esta mañana\n[C]en las cuerdas de mi [G]guitarra.\n\n[Em]Y si la noche nos [C]encuentra,\n[G]que nos encuentre al [D]caminar.\n[Em]Con una canción [C]pequeña\n[G]y tantas cosas por [D]contar.\n\n[G]Vuelve a sonar, [D]vuelve a empezar,\n[Em]cada camino nos [C]trae hasta aquí.\n[G]Vuelve a sonar, [D]sin preguntar,\n[C]hoy esta canción es [G]para ti.\n\n[G]Dejo una puerta [D]siempre abierta,\n[Em]un verso a medio [C]terminar.\n[G]Que lo complete [D]quien lo sienta,\n[C]que lo acompañe el [G]mar.`;
 document.documentElement.lang = getLocale();
 const workspaceSession = await openWorkspaceSession($("#app"));
 let songs, active, recoveryRaw, storedRaw;
@@ -48,15 +48,8 @@ try {
 } catch {
   recoveryRaw = storedRaw;
 }
-if (!songs?.length)
-  songs = [
-    create({
-      title: "Al otro lado",
-      artist: "Canción de ejemplo · Chordi",
-      text: example,
-    }),
-  ];
-if (!songs.some((s) => s.id === active)) active = songs[0].id;
+if (!songs) songs = [];
+if (!songs.some((s) => s.id === active)) active = songs[0]?.id ?? null;
 let zoom = 1;
 let section = "document",
   editing = false,
@@ -82,6 +75,7 @@ function persist() {
   }
 }
 function changed() {
+  if (!song()) return;
   song().dirty = true;
   $("#save-state").textContent = t("Guardando…");
   clearTimeout(saveTimer);
@@ -102,8 +96,10 @@ function renderTabs() {
           t`<div class="tab ${s.id === active ? "active" : ""}"><button class="tab-select" data-id="${s.id}"><span class="tab-icon">♫</span><span>${esc(s.title || t("Nueva canción"))}</span>${s.dirty ? t('<i title="Cambios sin exportar"></i>') : ""}</button><button class="tab-close" data-close="${s.id}" aria-label="Cerrar ${esc(s.title)}">×</button></div>`,
       )
       .join("") +
-    t('<button id="tab-plus" aria-label="Nueva canción">＋</button>');
-  $("#tab-plus").onclick = openNewSong;
+    (songs.length
+      ? t('<button id="tab-plus" aria-label="Nueva canción">＋</button>')
+      : "");
+  if ($("#tab-plus")) $("#tab-plus").onclick = openNewSong;
   document.querySelectorAll("[data-id]").forEach(
     (b) =>
       (b.onclick = () => {
@@ -126,8 +122,7 @@ function closeSong(id) {
 }
 function removeSong(id) {
   songs = songs.filter((s) => s.id !== id);
-  if (!songs.length) songs = [create()];
-  if (active === id) active = songs[0].id;
+  if (active === id) active = songs[0]?.id ?? null;
   render();
   persist();
 }
@@ -362,6 +357,15 @@ function resetView() {
 }
 function render() {
   renderTabs();
+  const empty = !song();
+  $("#tabs").hidden = empty;
+  $("#empty-state").hidden = !empty;
+  $("main").hidden = empty;
+  $("#export").disabled = empty;
+  if (empty) {
+    observer?.disconnect();
+    return;
+  }
   renderSettings();
   renderSource();
   renderPages();
@@ -441,6 +445,7 @@ function openNewSong() {
   $("#import").focus();
 }
 $("#new").onclick = openNewSong;
+$("#empty-new").onclick = openNewSong;
 $("#import-back").onclick = () => importScreen("menu");
 $("#new-dialog").addEventListener("close", () => {
   importController?.abort();
@@ -660,10 +665,11 @@ document.addEventListener("pointerover", (e) => {
 document.addEventListener("pointerout", (e) => {
   if (e.target.closest("[data-chord]")) tooltip.hidden = true;
 });
+const languagePicker = setupLanguagePicker({ persist, toast });
 window.addEventListener("resize", resizePages);
 window.addEventListener("beforeunload", (e) => {
   persist();
-  if (!switchingLanguage && songs.some((s) => s.dirty)) {
+  if (!languagePicker.switching && songs.some((s) => s.dirty)) {
     e.preventDefault();
     e.returnValue = "";
   }
@@ -711,29 +717,6 @@ window.addEventListener("pagehide", () => {
 window.addEventListener("pageshow", (event) => {
   if (event.persisted) location.reload();
 });
-
-let switchingLanguage = false;
-document.documentElement.lang = getLocale();
-document.title =
-  getLocale() === "en"
-    ? "Chordi · Your music, on paper"
-    : "Chordi · Tu música, en papel";
-$("#language").value = getLocale();
-$("#language").onchange = () => {
-  if (!persist()) {
-    $("#language").value = getLocale();
-    return;
-  }
-  try {
-    localStorage.setItem("chordi-language", $("#language").value);
-    switchingLanguage = true;
-    location.assign(`/${$("#language").value}/`);
-  } catch {
-    $("#language").value = getLocale();
-    toast(t("No se pudo guardar · exporta una copia"));
-  }
-};
-
 if (recoveryRaw) {
   $("#recover").hidden = false;
   $("#recover").onclick = () => {

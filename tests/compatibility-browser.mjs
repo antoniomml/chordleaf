@@ -34,6 +34,8 @@ for (const engine of [chromium, firefox, webkit].filter(
     const context = await browser.newContext({ locale: "en-US" });
     const page = await context.newPage();
     await page.goto(url);
+    await page.locator("#empty-new").click();
+    await page.locator("#blank").click();
     await page.locator("#source").fill("[C]Keep my changes\n[G]Across windows");
     const second = await context.newPage();
     await second.goto(url);
@@ -70,7 +72,8 @@ for (const engine of [chromium, firefox, webkit].filter(
       await second.locator("#source").inputValue(),
       "[C]Keep my changes\n[G]Across windows",
     );
-    await second.locator("#language").selectOption("es");
+    await second.locator("#language").click();
+    await second.locator('[data-language="es"]').click();
     await second.waitForFunction(() => document.documentElement.lang === "es");
     await second.reload();
     await second.locator("#source").waitFor();

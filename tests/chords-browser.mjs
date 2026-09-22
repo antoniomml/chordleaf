@@ -11,6 +11,8 @@ try {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await page.locator("#empty-new").click();
+  await page.locator("#blank").click();
   const source = page.locator("#source");
   const original = "[G]One [D]two\n[G]Three [Gmaj7]four";
   await source.fill(original);

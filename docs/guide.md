@@ -8,7 +8,7 @@ The workspace has a compact navigation rail, an editing sidebar and a sheet prev
 
 ## Start or import a song
 
-Choose **New song → Start from scratch**. The title starts empty; its placeholder is not printed. Add an artist if needed. **Import text or a file** supports:
+Chordi opens without a sample song. Choose the large **New song** action, then **Start from scratch**. The title starts empty; its placeholder is not printed. Add an artist if needed. **Import text or a file** supports:
 
 | File                     | What to expect                                                                                                   |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
@@ -41,7 +41,7 @@ The preview's pencil enables editing directly on the sheet. Select a verse; Ente
 
 Open **Chords → In song**. Each card shows a chord name and its current guitar diagram. Click the card to edit the frets; the edit hint appears on hover or keyboard focus. Values run from low E to high e: `-1` is muted, `0` open, and positive values are frets. You can mark a custom voicing with an asterisk or restore the catalog shape.
 
-Drag a card onto the sheet, or use its **+** button. **Todos** adds all song chords. Diagrams can be moved, resized or removed. Drag the right edge to change width, the bottom edge to change height, or the corner to change both. Column counts stay fixed while resizing, so making the frame smaller does not unexpectedly enlarge the diagrams. Select the grid button on a diagram group to set width and height in millimeters and choose its columns, with a live preview. Rows follow the number of chords; diagrams keep their proportions inside the frame.
+Drag a card onto the sheet, or use its compact **Add** action. **All chords → Add to sheet** places every song chord in one clearly labelled block. Diagrams can be moved, resized or removed. Drag the right edge to change width, the bottom edge to change height, or the corner to change both. Column counts stay fixed while resizing, so making the frame smaller does not unexpectedly enlarge the diagrams. Select the grid button on a diagram group to set width and height in millimeters and choose its columns, with a live preview. Rows follow the number of chords; diagrams keep their proportions inside the frame.
 
 Arrow keys move a focused diagram and Delete removes it. On a resize handle, Left/Right changes width and Up/Down changes height; hold Shift for smaller increments. Diagrams and custom positions are included in exports. Dots and barres stay green in the sidebar and print black on white in the document, PDF and Word.
 
@@ -93,7 +93,7 @@ Preview, PDF and Word share a layout model. Reimported PDF or Word reconstructs 
 
 **New song** always opens the initial menu: **Import text or a file**, **Import from a website**, then **Start from scratch**. Each import option opens its own screen; **← Back** returns to the menu. Closing and reopening starts fresh. Paste lyrics with aligned chords or open TXT, ChordPro, text-based PDF or DOCX. Legacy `.doc` files must first be saved as `.docx`.
 
-For a web import, paste an HTTPS song URL from Cifra Club, LaCuerda or Ultimate Guitar. Chordi converts the accessible chord version into editable lyrics and anchored chords. Search pages, protected content and tablature-only versions are not supported. The source URL is kept with the working song. A running Chordi server is needed for this option.
+For a web import, paste an HTTPS song URL from Cifra Club, LaCuerda or Ultimate Guitar. Chordi converts the accessible chord version into editable lyrics and anchored chords. LaCuerda supports both its normal chord page and its `/TXT/` link. Integrations are maintained per provider rather than per song, so a provider markup change can require an adapter update. Search pages, protected content and tablature-only versions are not supported. The source URL is kept with the working song. A running Chordi server is needed for this option.
 
 Every import tries one and two columns, 6–10 mm margins and 8–20 pt type, choosing the largest font that fits on one A4 page. Imported column/page breaks are reflowed. At equal font sizes, one column and 10 mm margins take preference. Longer songs keep all their content on multiple pages rather than shrinking below 8 pt. **Fit to one page** repeats this search; all document controls remain editable afterwards.
 

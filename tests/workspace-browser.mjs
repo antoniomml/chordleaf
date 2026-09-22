@@ -9,6 +9,8 @@ try {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  await page.locator("#empty-new").click();
+  await page.locator("#blank").click();
   await page
     .locator("#source")
     .fill("[C][D][E][F][G][A][B][Am][Dm][Em][G7][C7]");

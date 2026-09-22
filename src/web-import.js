@@ -20,7 +20,16 @@ function preText(root) {
   }
   return read(root).replace(/\u00a0/g, " ");
 }
-export function parseWebSong(html, sourceUrl) {
+function laCuerdaPlainText(value) {
+  const lines = value.replace(/\r/g, "").split("\n");
+  const dividers = lines
+    .map((line, index) => (/^={20,}\s*$/.test(line) ? index : -1))
+    .filter((index) => index >= 0);
+  const start = dividers[1] === undefined ? 0 : dividers[1] + 1;
+  return lines.slice(start).join("\n").trim();
+}
+
+export function parseWebSong(html, sourceUrl, contentType = "text/html") {
   const url = songUrl(sourceUrl);
   const doc = new DOMParser().parseFromString(html, "text/html");
   let text = "",
@@ -42,9 +51,20 @@ export function parseWebSong(html, sourceUrl) {
       capo = Number(data.tab_view.meta?.capo) || 0;
     }
   } else {
-    const pre = doc.querySelector(
-      "pre[data-chord-content], .cifra_cnt pre, .rtBody pre, pre",
-    );
+    const laCuerda = url.hostname.includes("lacuerda.net");
+    const plainText =
+      contentType === "text/plain" || url.pathname.endsWith(".txt");
+    const pre = plainText
+      ? null
+      : laCuerda
+        ? doc.querySelector("#t_body pre") ||
+          doc.querySelector(
+            ".rtBody pre, pre[data-chord-content], pre:not(#tCode)",
+          )
+        : doc.querySelector(
+            "pre[data-chord-content], .cifra_cnt pre, .rtBody pre, pre",
+          );
+    if (plainText && laCuerda) text = laCuerdaPlainText(html);
     if (pre) {
       // Mark chords on mixed lines (Intro: C - G) without changing spacing on chord rows.
       for (const el of pre.querySelectorAll("b, a")) {
@@ -73,10 +93,19 @@ export function parseWebSong(html, sourceUrl) {
         })
         .join("\n");
     }
-    if (url.hostname.includes("lacuerda.net")) {
-      const names = doc.title.match(/^(.*?):.*\(([^()]*)\)\s*$/);
-      title = names?.[1] || "";
-      artist = names?.[2] || "";
+    if (laCuerda) {
+      if (plainText) {
+        title = html.match(/^\|\s*CANCION:\s*(.*?)\s*\|?\s*$/im)?.[1] || "";
+        artist = html.match(/^\|\s*ARTISTA:\s*(.*?)\s*\|?\s*$/im)?.[1] || "";
+      } else {
+        title = doc.querySelector("#tH1 h1 a")?.textContent.trim() || "";
+        artist = doc.querySelector("#tH1 h2 a")?.textContent.trim() || "";
+        if (!title || !artist) {
+          const names = doc.title.match(/^(.*?),\s*(.*?):\s*Acordes/i);
+          title ||= names?.[1] || "";
+          artist ||= names?.[2] || "";
+        }
+      }
     } else {
       title = doc.querySelector("h1")?.textContent.trim() || "";
       artist = doc.querySelector("h1 + a h2, .t2 a")?.textContent.trim() || "";
@@ -138,5 +167,5 @@ export async function importWebSong(value, { signal } = {}) {
   const data = await response.json();
   if (!response.ok)
     throw new Error(data.error || t("No se pudo descargar la canción."));
-  return parseWebSong(data.html, data.url);
+  return parseWebSong(data.html, data.url, data.contentType);
 }

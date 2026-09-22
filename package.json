@@ -1,8 +1,23 @@
 {
   "name": "chordi",
-  "version": "0.2.0",
+  "version": "0.3.0",
+  "description": "A local-first workspace for lyrics, guitar chords and printable rehearsal sheets.",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antoniomml/chordi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/antoniomml/chordi/issues"
+  },
+  "homepage": "https://github.com/antoniomml/chordi#readme",
+  "keywords": [
+    "chords",
+    "guitar",
+    "songbook",
+    "sheet-music"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",

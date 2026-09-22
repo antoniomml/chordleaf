@@ -9,6 +9,9 @@ try {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+  assert.equal(await page.locator("#empty-state").isVisible(), true);
+  assert.equal(await page.locator(".tab").count(), 0);
+  assert.equal(await page.locator(".page").count(), 0);
   async function menu() {
     assert.equal(await page.locator("#new-menu").isVisible(), true);
     for (const selector of [
@@ -19,7 +22,7 @@ try {
     ])
       assert.equal(await page.locator(selector).isVisible(), false, selector);
   }
-  await page.locator("#new").click();
+  await page.locator("#empty-new").click();
   await menu();
   await page.locator("#web").click();
   assert.equal(await page.locator("#new-menu").isVisible(), false);

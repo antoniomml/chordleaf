@@ -72,4 +72,4 @@ The protected preview was tested end to end with Cifra Club, LaCuerda and Ultima
 
 The account currently uses Hobby, which has usage caps rather than paid overages. Vercel documents automatic usage notifications for all plans. No paid upgrade, spending increase or billing-setting change was made. Review the owner's usage dashboard before a public launch; if moving to a paid plan, configure its spending limit first. See [Vercel usage notifications](https://vercel.com/docs/pricing/manage-and-optimize-usage) and [plan limits](https://vercel.com/pricing).
 
-For the 0.2.0 release, the owner explicitly retained private GitHub visibility and authentication on all Vercel deployments. Merging and tagging this release does not authorize removing those controls.
+For the 0.3.0 release, the owner explicitly retained private GitHub visibility and authentication on all Vercel deployments. Deploying and tagging this release does not authorize removing those controls.

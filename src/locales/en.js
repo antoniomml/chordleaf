@@ -73,6 +73,10 @@ export default {
   "Editar directamente la hoja": "Edit on the sheet",
   "Página 1 de 1": "Page 1 of 1",
   "Tu próxima canción empieza aquí.": "Your next song starts here.",
+  "TU MÚSICA, EN PAPEL": "YOUR MUSIC, ON PAPER",
+  "No hay canciones abiertas.": "No songs are open.",
+  "Crea una canción en blanco o importa los acordes que ya tienes.":
+    "Start with a blank song or import chords you already have.",
   "Cerrar editor ampliado": "Close expanded editor",
   "Cerrar y descartar": "Close and discard",
   Cerrar: "Close",
@@ -251,8 +255,8 @@ export default {
     "There are newer changes; your latest edits have been preserved.",
   "Cambio de acorde deshecho.": "Chord change undone.",
   "Los acordes de tu canción": "Your song chords",
-  "Arrastra el conjunto o un acorde a la hoja. También puedes añadirlo con +.":
-    "Drag the group or a chord onto the sheet. You can also add it with +.",
+  "Arrastra un acorde a la hoja o usa la acción Añadir. Puedes colocar el conjunto completo de una vez.":
+    "Drag a chord onto the sheet or use Add. You can place the complete set at once.",
   "Editar posición": "Edit position",
   "De la cuerda grave E a la aguda e. −1 = apagada, 0 = al aire.":
     "From low E to high e. −1 = muted, 0 = open.",
@@ -275,6 +279,10 @@ export default {
   " columnas × ": " columns × ",
   " filas": " rows",
   "Todos (": "All (",
+  "Todos los acordes": "All chords",
+  " diagramas en un bloque": " diagrams in one block",
+  Editar: "Edit",
+  Añadir: "Add",
   "Añadir todos los diagramas": "Add all diagrams",
   "Editar posición de ": "Edit position of ",
   "Añadir diagrama de ": "Add diagram of ",

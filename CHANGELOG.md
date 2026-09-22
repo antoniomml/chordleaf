@@ -1,5 +1,12 @@
 # chordi changelog
 
+## 0.3.0 · September 22, 2026
+
+- Start new browser workspaces with a focused empty state instead of a preloaded example song.
+- Import both the normal HTML and `/TXT/` variants of LaCuerda chord pages, with provider-specific parsing and live regression coverage.
+- Replace the native language select and misaligned export glyphs with consistent, accessible menus and vector icons.
+- Clarify the in-song chord dictionary: compact per-card Edit/Add actions no longer cover diagrams, and the full-set action is explicit.
+
 ## 0.2.0 · September 22, 2026
 
 A bilingual workspace with safer local data, portable backups and verified Vercel hosting.

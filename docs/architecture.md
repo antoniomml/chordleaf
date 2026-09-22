@@ -53,9 +53,12 @@ Keep model transformations separate from UI controls. Audio transcription remain
 
 `api/import-web.js` awaits `server/web-import.js`. The same handler supplies development, production preview and the standalone server. Vercel serves `dist/` through its CDN; it does not run `pnpm start`. `vercel.json` and `server/security.js` share security headers. The CSP allows inline styles for generated sheet geometry, but no inline scripts, remote scripts or remote connections from the browser.
 
+Web extraction is provider-specific, not song-specific. `src/web-import.js` reads the structured Ultimate Guitar payload, known Cifra Club containers, and LaCuerda's real `#t_body` sheet container. LaCuerda `/TXT/` responses are accepted as `text/plain` only on allowlisted LaCuerda hosts; their metadata header is separated from the chord sheet before normal text import. Downloaded markup remains inert and is never mounted.
+
 ## Production readiness modules
 
 - `src/ui/shell.html`: static, bilingual application shell; user values never enter this template.
+- `src/ui/language.js`: accessible language menu, persistence and route switching.
 - `src/i18n.js` and `src/locales/en.js`: source-literal translations; interpolated song text is not translated. `/en/` and `/es/` select the interface language.
 - `src/workspace-session.js`: exclusive Web Lock acquired before loading storage. The owner saves and releases on page exit; restored back/forward pages reload before editing.
 - `src/workspace-backup.js`: versioned JSON backup and additive restore, with fresh song identifiers and known-field sanitization.

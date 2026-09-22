@@ -10,6 +10,15 @@ const page = await browser.newPage({
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 await page.goto(process.env.CHORDI_URL || "http://localhost:5173");
+await page.locator("#empty-new").click();
+await page.locator("#blank").click();
+await page.locator("#title").fill("Al otro lado");
+await page.locator("#artist").fill("Canción de ejemplo · Chordi");
+await page
+  .locator("#source")
+  .fill(
+    "[G]Hay un lugar al [D]otro lado\n[Em]donde el tiempo va [C]despacio.\n[G]Guardo la luz de [D]esta mañana\n[C]en las cuerdas de mi [G]guitarra.",
+  );
 await page.locator(".page").waitFor();
 await page.screenshot({ path: "artifacts/desktop.png", fullPage: true });
 const source = page.locator("#source"),

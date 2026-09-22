@@ -31,7 +31,9 @@ test("redirects are validated before another request", async () => {
 test("blocked, oversized and non-HTML responses fail clearly", async () => {
   for (const response of [
     new Response("blocked", { status: 403 }),
-    new Response("not html"),
+    new Response("not html", {
+      headers: { "content-type": "application/json" },
+    }),
     new Response("x".repeat(3 * 1024 * 1024 + 1), {
       headers: { "content-type": "text/html" },
     }),
@@ -49,4 +51,27 @@ test("a public HTML page is returned with its final URL", async () => {
       }),
   );
   assert.equal(data.html, "<pre>C\nLuz</pre>");
+  assert.equal(data.contentType, "text/html");
+});
+test("LaCuerda plain-text chord sheets are accepted", async () => {
+  const data = await fetchSongPage(
+    "https://acordes.lacuerda.net/TXT/artista/cancion.txt",
+    async () =>
+      new Response("C     G\nLuz del día", {
+        headers: { "content-type": "text/plain; charset=utf-8" },
+      }),
+  );
+  assert.equal(data.contentType, "text/plain");
+  assert.match(data.html, /Luz del día/);
+});
+test("plain text stays rejected for providers that do not expose chord TXT", async () => {
+  await assert.rejects(
+    fetchSongPage(
+      "https://www.cifraclub.com/a/b/",
+      async () =>
+        new Response("C     G\nLuz", {
+          headers: { "content-type": "text/plain" },
+        }),
+    ),
+  );
 });

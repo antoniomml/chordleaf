@@ -9,8 +9,8 @@ export async function fetchSongPage(value, fetcher = fetch) {
       redirect: "manual",
       signal,
       headers: {
-        Accept: "text/html",
-        "User-Agent": "Chordi/0.1.0 (song import)",
+        Accept: "text/html, text/plain;q=0.9",
+        "User-Agent": "Chordi/0.3.0 (song import)",
       },
     });
     if ([301, 302, 303, 307, 308].includes(response.status)) {
@@ -26,7 +26,14 @@ export async function fetchSongPage(value, fetcher = fetch) {
         `La web no permite descargar esta canción (HTTP ${response.status}). Prueba otro enlace o importa un archivo.`,
       );
     }
-    if (!response.headers.get("content-type")?.includes("text/html")) {
+    const contentType = response.headers.get("content-type") || "";
+    if (
+      !contentType.includes("text/html") &&
+      !(
+        url.hostname.includes("lacuerda.net") &&
+        contentType.includes("text/plain")
+      )
+    ) {
       await response.body?.cancel();
       throw new Error("El enlace no es una página de acordes.");
     }
@@ -47,10 +54,12 @@ export async function fetchSongPage(value, fetcher = fetch) {
     }
     const bytes = Buffer.concat(chunks);
     const charset =
-      response.headers
-        .get("content-type")
-        .match(/charset\s*=\s*["']?([\w-]+)/i)?.[1] || "utf-8";
-    return { url: url.href, html: new TextDecoder(charset).decode(bytes) };
+      contentType.match(/charset\s*=\s*["']?([\w-]+)/i)?.[1] || "utf-8";
+    return {
+      url: url.href,
+      html: new TextDecoder(charset).decode(bytes),
+      contentType: contentType.split(";")[0].trim().toLowerCase(),
+    };
   }
   throw new Error(
     "La web redirige demasiadas veces. Copia el enlace final de la canción.",

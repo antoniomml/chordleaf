@@ -3,15 +3,46 @@
     ><img src="/logo.svg" alt="" />chordi<span>ESTUDIO DE CANCIONES</span></a
   >
   <div class="top-actions">
-    <button id="recover" hidden>Recuperar datos</button
-    ><select id="language" aria-label="Idioma">
-      <option value="es">ES</option>
-      <option value="en">EN</option></select
-    ><span class="local-badge"><i></i> Tu música se queda contigo</span
+    <button id="recover" hidden>Recuperar datos</button>
+    <div class="language-wrap">
+      <button
+        id="language"
+        class="chrome-button"
+        aria-label="Idioma"
+        aria-haspopup="menu"
+        aria-expanded="false"
+      >
+        <span id="language-label">ES</span
+        ><svg viewBox="0 0 12 8" aria-hidden="true">
+          <path d="m1 1 5 5 5-5" />
+        </svg>
+      </button>
+      <div
+        id="language-menu"
+        class="chrome-menu language-menu"
+        role="menu"
+        hidden
+      >
+        <button data-language="es" role="menuitemradio" aria-checked="false">
+          <span>Español</span><small>ES</small>
+        </button>
+        <button data-language="en" role="menuitemradio" aria-checked="false">
+          <span>English</span><small>EN</small>
+        </button>
+      </div>
+    </div>
+    <span class="local-badge"><i></i> Tu música se queda contigo</span
     ><button id="new" class="primary">＋ Nueva canción</button>
     <div class="export-wrap">
-      <button id="export" class="outline">↓ Exportar <span>⌄</span></button>
-      <div id="export-menu" class="menu" hidden>
+      <button id="export" class="outline">
+        <svg class="export-icon" viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M9 2v9m-4-4 4 4 4-4M3 15h12" /></svg
+        ><span class="export-label">Exportar</span
+        ><svg class="chevron" viewBox="0 0 12 8" aria-hidden="true">
+          <path d="m1 1 5 5 5-5" />
+        </svg>
+      </button>
+      <div id="export-menu" class="chrome-menu menu" hidden>
         <button id="workspace-backup">
           Copia completa · JSON <small>Todas las canciones y ajustes</small>
         </button>
@@ -26,6 +57,13 @@
   </div>
 </header>
 <nav id="tabs" class="tabs" aria-label="Canciones abiertas"></nav>
+<section id="empty-state" hidden>
+  <img src="/logo.svg" alt="" />
+  <p class="eyebrow">TU MÚSICA, EN PAPEL</p>
+  <h1>No hay canciones abiertas.</h1>
+  <p>Crea una canción en blanco o importa los acordes que ya tienes.</p>
+  <button id="empty-new" class="primary">＋ Nueva canción</button>
+</section>
 <main>
   <aside class="rail">
     <button data-section="document" class="selected" title="Editar documento">

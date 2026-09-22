@@ -19,15 +19,16 @@ try {
     .locator("#import-text")
     .fill("{title: Prueba}\n" + "G      D\nVuelve la mañana\n".repeat(30));
   await page.locator("#paste-import").click();
+  await page.locator(".page").waitFor();
   assert.equal(await page.locator(".page").count(), 1);
   assert.equal(await page.locator(".sheet-brand").textContent(), "Chordi");
   await page.screenshot({ path: "artifacts/import-fit.png" });
-  async function parseThroughUI(html, url) {
+  async function parseThroughUI(html, url, contentType = "text/html") {
     await page.route("**/api/import-web?**", (route) =>
       route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ html, url }),
+        body: JSON.stringify({ html, url, contentType }),
       }),
     );
     await page.locator("#new").click();
@@ -55,8 +56,13 @@ try {
     "https://www.cifraclub.com/artista/prueba/",
   );
   const cuerda = await parseThroughUI(
-    '<title>PRUEBA: Acordes y Letra (Artista)</title><div class="rtBody"><pre>INTRO: <a>C</a> - <a>G</a>\n\n<a>C</a>     <a>G</a>\nLuz del día</pre></div>',
+    '<title>PRUEBA, Artista: Acordes</title><div id="tH1"><h1><a>Prueba</a></h1><h2><a>Artista</a></h2></div><pre id="tCode"></pre><div id="t_body"><pre>INTRO: <a>C</a> - <a>G</a>\n\n<a>C</a>     <a>G</a>\nLuz del día</pre></div>',
     "https://acordes.lacuerda.net/artista/prueba",
+  );
+  const cuerdaTxt = await parseThroughUI(
+    "=====================================================================\n| ARTISTA: Artista                                                   |\n| CANCION: PRUEBA                                                    |\n=====================================================================\n\nC     G\nLuz del día",
+    "https://acordes.lacuerda.net/TXT/artista/prueba.txt",
+    "text/plain",
   );
   const data = {
     store: {
@@ -81,8 +87,8 @@ try {
     "<h1>Access denied</h1>",
     "https://www.cifraclub.com/a/b/",
   ));
-  const parsed = { cifra, cuerda, ug, invalid };
-  for (const s of [parsed.cifra, parsed.cuerda, parsed.ug]) {
+  const parsed = { cifra, cuerda, cuerdaTxt, ug, invalid };
+  for (const s of [parsed.cifra, parsed.cuerda, parsed.cuerdaTxt, parsed.ug]) {
     assert.equal(s.title, "Prueba");
     assert.equal(s.artist, "Artista");
     assert.ok(s.text.includes("[C]Luz de[G]l día"), s.text);
@@ -111,7 +117,14 @@ try {
   if (process.env.CHORDI_LIVE_IMPORTS) {
     for (const [name, url] of [
       ["cifra", "https://www.cifraclub.com/chris-klafford/imagine/"],
-      ["cuerda", "https://acordes.lacuerda.net/no_te_va_gustar/la_cuerda"],
+      [
+        "cuerda-html",
+        "https://acordes.lacuerda.net/alejandro_sanz/amiga_mia.shtml",
+      ],
+      [
+        "cuerda-txt",
+        "https://acordes.lacuerda.net/TXT/alejandro_sanz/amiga_mia.txt",
+      ],
       [
         "ug",
         "https://tabs.ultimate-guitar.com/tab/coldplay/fix-you-chords-202594",
@@ -133,7 +146,12 @@ try {
       );
       assert.match(
         await page.locator("#title").inputValue(),
-        { cifra: /Imagine/i, cuerda: /La Cuerda/i, ug: /Fix You/i }[name],
+        {
+          cifra: /Imagine/i,
+          "cuerda-html": /Amiga M[ií]a/i,
+          "cuerda-txt": /Amiga M[ií]a/i,
+          ug: /Fix You/i,
+        }[name],
       );
       console.log(
         name,

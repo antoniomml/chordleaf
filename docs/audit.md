@@ -65,7 +65,11 @@ The cross-browser CI run found and resolved a WebKit timing issue: lock release 
 
 Word parsing now runs in a dedicated worker, skips embedded images, limits returned markup and terminates after cancellation or 15 seconds. PDF decoding is destroyed on cancellation/timeout; text and geometry budgets apply before proportional-font measurements. Web download requests and auto-fit workers are cancelled when leaving the import flow.
 
-Three additional unit cases exercise cumulative PDF limits, oversized fragments/items and oversized songs in backups (68 unit tests total). Cross-browser checks cover real DOCX import plus a deliberately stalled decoder for cancellation and timeout. Existing PDF/Word export and reimport regressions remain in the full browser suite. Twelve screenshots across Document, Key, Chords and New Song at 1440, 768 and 390 pixels matched byte-for-byte before and after CSS cleanup.
+Five additional unit cases exercise cumulative PDF limits, oversized fragments/items, oversized songs in backups and LaCuerda plain-text response policy (70 unit tests total). Cross-browser checks cover real DOCX import plus a deliberately stalled decoder for cancellation and timeout. Existing PDF/Word export and reimport regressions remain in the full browser suite. Twelve screenshots across Document, Key, Chords and New Song at 1440, 768 and 390 pixels matched byte-for-byte before and after CSS cleanup.
+
+### 0.3.0 release review
+
+Version 0.3.0 removes the preloaded sample song, clarifies chord-diagram actions and gives language/export controls consistent application chrome. Language-menu behavior now lives in a focused UI module with keyboard navigation and Escape handling. Live local acceptance imported the same Alejandro Sanz song through both LaCuerda HTML and `/TXT/` URLs, alongside Cifra Club and Ultimate Guitar. The HTML failure was caused by LaCuerda placing an empty utility `<pre>` before the actual `#t_body` sheet; the provider adapter now selects the real sheet explicitly.
 
 Private publication is intentional. Required branch protection and GitHub private vulnerability reporting remain unavailable under the current private-repository plan; revisit them if visibility or plan changes. No paid upgrade or visibility change was made.
 
