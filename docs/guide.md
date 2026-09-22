@@ -113,6 +113,12 @@ Chordi allows one active editor per browser profile and origin. A second browser
 
 ## Full workspace backups
 
-Choose **Export → Workspace backup · JSON** to save all open songs, layouts and custom chord shapes. To restore, choose **New song → Import text or file → Open file** and select the JSON backup. Restored songs become new tabs; existing songs are preserved. The versioned format currently supports up to 500 songs and 10 MiB per import. Future unsupported versions are rejected rather than guessed.
+Choose **Export → Workspace backup · JSON** to save all open songs, layouts and custom chord shapes. To restore, choose **New song → Import text or file → Open file** and select the JSON backup. Restored songs become new tabs; existing songs are preserved. The versioned format currently supports up to 500 songs, 50,000 characters per song and 10 MiB per import. Future unsupported versions are rejected rather than guessed.
 
 Export a workspace backup before moving between a preview address and your final domain: browser storage does not move between websites. Keep the backup somewhere safe; it contains your song content.
+
+## Cancelling complex imports
+
+Use **Back**, **Close** or **Escape** to cancel an import. Word decoding and automatic fitting run in dedicated workers that are terminated on cancellation. Browser web requests are aborted; the server still applies its own download timeout. Word and PDF imports stop after 15 seconds if parsing has not completed.
+
+Word imports ignore embedded images, allow at most 32 MiB of declared expanded ZIP content and 2 MiB of generated markup. PDF imports accept at most 50,000 text characters, 20,000 text items and 2,000 characters in any one text fragment. These checks protect ordinary use; they are not a complete hostile-document sandbox. For complex files, split the document or import its text instead.

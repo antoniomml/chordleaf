@@ -62,3 +62,5 @@ Keep model transformations separate from UI controls. Audio transcription remain
 - `src/fit-song.js` and `src/fit-worker.js`: bounded auto-fit in a dedicated worker. Each search parses the song once; editing during a pending fit prevents stale results from being applied.
 - `src/docx-limits.js`: ZIP central-directory preflight limits declared expanded content to 32 MiB and 2,000 entries. It rejects encrypted and unsupported archives; it is not a complete malicious-parser sandbox.
 - `build/metadata.js`: static English/Spanish entry pages, canonical URLs, language links, social metadata and sitemap.
+
+The `src/ui/settings.js` render helpers and shared `src/ui/html.js` escaping utility keep presentation separate from application event/state wiring. `src/docx-import.js` owns the Word worker lifecycle; `src/docx-worker.js` validates and converts the archive without decoding images. `src/import-limits.js` applies cumulative PDF text/geometry budgets before canvas measurements. The import dialog aborts its current operation when closing or navigating back.

@@ -1,5 +1,16 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "La copia contiene una canción de más de 50.000 caracteres. Divídela antes de restaurarla.":
+    "The backup contains a song longer than 50,000 characters. Split it before restoring.",
+  "El PDF contiene demasiado texto o fragmentos demasiado largos. Usa TXT o divide el documento.":
+    "The PDF contains too much text or unusually long fragments. Use TXT or split the document.",
+  "La importación ha tardado demasiado. Prueba con TXT o un documento más sencillo.":
+    "Import took too long. Try TXT or a simpler document.",
+  "El documento Word contiene demasiado texto o formato.":
+    "The Word document contains too much text or formatting.",
+  "No se pudo leer el documento Word.": "The Word document could not be read.",
+  "El PDF contiene demasiado texto. Importa hasta 50.000 caracteres.":
+    "The PDF contains too much text. Import up to 50,000 characters.",
   "Esperando a que se cierre la otra pestaña…":
     "Waiting for the other tab to close…",
   "No se pudo ajustar la canción. Prueba con los controles del documento.":

@@ -30,3 +30,10 @@ test("workspace restore rejects malformed and future formats", () => {
   ])
     assert.throws(() => restoreWorkspace(value));
 });
+
+test("workspace restore rejects oversized songs without truncating the backup", () => {
+  const song = createSong({ text: "x".repeat(50001) });
+  const backup = serializeWorkspace([song], song.id);
+  assert.throws(() => restoreWorkspace(backup), /50.000/);
+  assert.equal(JSON.parse(backup).songs[0].text.length, 50001);
+});

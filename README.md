@@ -4,7 +4,7 @@
   <p><strong>Your song. Your chords. Everything in place.</strong></p>
   <p>A workspace for writing lyrics and chords, exploring guitar voicings,<br>and making a song sheet for your next rehearsal.</p>
   <p>
-    <a href="https://github.com/antoniomml/chordi/releases/tag/v0.1.0"><img src="https://img.shields.io/badge/version-0.1.0-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.1.0"></a>
+    <a href="https://github.com/antoniomml/chordi/releases/tag/v0.2.0"><img src="https://img.shields.io/badge/version-0.2.0-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.2.0"></a>
     <a href="https://github.com/antoniomml/chordi/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordi/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
   </p>
   <p><a href="#a-small-studio-for-your-songs">Features</a> · <a href="docs/guide.md">User guide</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -67,7 +67,7 @@ Both interface and document fonts are served by the app itself. There are no thi
 
 ## A release with room to grow
 
-**0.1.0** adds a chords workspace, public web imports and a tighter rehearsal sheet. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md).
+**0.2.0** adds English/Spanish controls, complete workspace backups, safer imports and protected Vercel hosting. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md).
 
 ## Take part
 

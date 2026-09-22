@@ -1,4 +1,5 @@
-import { validateDocxArchive } from "./docx-limits.js";
+import { countPdfContent } from "./import-limits.js";
+import { decodeDocx } from "./docx-import.js";
 import { t } from "./i18n.js";
 import {
   songMetadata,
@@ -470,7 +471,8 @@ export function importText(text, fallback) {
   song.artist = titleCase(song.artist);
   return song;
 }
-export async function importFile(file) {
+export async function importFile(file, { signal } = {}) {
+  signal?.throwIfAborted();
   if (file.size > MAX_FILE_BYTES)
     throw new Error(t("El archivo es demasiado grande. El límite es 10 MiB."));
   const ext = file.name.split(".").pop().toLowerCase(),
@@ -479,15 +481,9 @@ export async function importFile(file) {
     return importText(await file.text(), fallback);
   if (ext === "docx") {
     const buffer = await file.arrayBuffer();
-    validateDocxArchive(buffer);
-    const mammoth = await import("mammoth");
-    const result = await mammoth.convertToHtml(
-      {
-        arrayBuffer: buffer,
-      },
-      { ignoreEmptyParagraphs: false },
-    );
-    const html = new DOMParser().parseFromString(result.value, "text/html");
+    signal?.throwIfAborted();
+    const value = await decodeDocx(buffer, { signal });
+    const html = new DOMParser().parseFromString(value, "text/html");
     const lines = [];
     let columns = 1;
     function readParagraphs(root) {
@@ -551,7 +547,19 @@ export async function importFile(file) {
     "pdfjs-dist/build/pdf.worker.min.mjs",
     import.meta.url,
   ).href;
-  const loadingTask = pdfjs.getDocument({ data: await file.arrayBuffer() });
+  const buffer = await file.arrayBuffer();
+  signal?.throwIfAborted();
+  const loadingTask = pdfjs.getDocument({ data: buffer });
+  let timedOut = false;
+  const cancel = () => {
+    loadingTask.destroy().catch(() => {});
+  };
+  signal?.addEventListener("abort", cancel, { once: true });
+  const timer = setTimeout(() => {
+    timedOut = true;
+    cancel();
+  }, 15000);
+  const budget = { characters: 0, items: 0 };
   const pages = [];
   try {
     const pdf = await loadingTask.promise;
@@ -563,6 +571,8 @@ export async function importFile(file) {
       const page = await pdf.getPage(n),
         viewport = page.getViewport({ scale: 1 }),
         content = await page.getTextContent();
+      signal?.throwIfAborted();
+      countPdfContent(content, budget);
       const measure = document.createElement("canvas").getContext("2d");
       pages.push({
         width: viewport.width,
@@ -601,7 +611,18 @@ export async function importFile(file) {
       title: titleCase(result.title),
       artist: titleCase(result.artist),
     };
+  } catch (error) {
+    signal?.throwIfAborted();
+    if (timedOut)
+      throw new Error(
+        t(
+          "La importación ha tardado demasiado. Prueba con TXT o un documento más sencillo.",
+        ),
+      );
+    throw error;
   } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", cancel);
     await loadingTask.destroy();
   }
 }

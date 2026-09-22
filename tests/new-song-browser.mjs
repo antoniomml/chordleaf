@@ -81,11 +81,13 @@ try {
   await page.locator("#web-submit").click();
   await request;
   const before = await page.locator(".tab").count();
+  const cancelled = page.waitForEvent("requestfailed", (request) =>
+    request.url().includes("/api/import-web?"),
+  );
   await page.locator("#import-back").click();
   await menu();
-  const response = page.waitForResponse("**/api/import-web?**");
+  await cancelled;
   release();
-  await response;
   await page.waitForTimeout(100);
   await menu();
   assert.equal(await page.locator(".tab").count(), before);
