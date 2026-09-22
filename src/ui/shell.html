@@ -65,12 +65,25 @@
   <button id="empty-new" class="primary">＋ Nueva canción</button>
 </section>
 <main>
-  <aside class="rail">
-    <button data-section="document" class="selected" title="Editar documento">
+  <nav class="rail" aria-label="Secciones de la canción">
+    <button
+      data-section="document"
+      class="selected"
+      title="Editar documento"
+      aria-controls="editor-panel"
+    >
       ▤<span>Documento</span></button
-    ><button data-section="key" title="Consultar tonalidad">
+    ><button
+      data-section="key"
+      title="Consultar tonalidad"
+      aria-controls="editor-panel"
+    >
       ♯<span>Tonalidad</span></button
-    ><button data-section="chords" title="Explorar y crear acordes">
+    ><button
+      data-section="chords"
+      title="Explorar y crear acordes"
+      aria-controls="editor-panel"
+    >
       <svg
         width="24"
         height="24"
@@ -86,9 +99,32 @@
         <circle cx="16.5" cy="13" r="1.8" fill="currentColor" /></svg
       ><span>Acordes</span>
     </button>
-  </aside>
+    <button
+      class="mobile-preview-tab"
+      data-mobile-view="preview"
+      aria-label="Vista previa"
+      title="Vista previa"
+      aria-controls="preview-panel"
+    >
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M7 3.5h8l3 3V20.5H7z" />
+        <path d="M15 3.5v3h3M9.5 11h6M9.5 14h6M9.5 17h4" />
+      </svg>
+      <span>Vista previa</span>
+    </button>
+  </nav>
   <section class="workspace">
-    <div class="editor-panel">
+    <div id="editor-panel" class="editor-panel">
       <div id="settings"></div>
       <div id="source-area">
         <div class="source-heading">
@@ -141,7 +177,7 @@
       aria-valuemax="760"
       aria-valuenow="365"
     ></div>
-    <section class="preview-panel">
+    <section id="preview-panel" class="preview-panel">
       <div class="preview-toolbar">
         <div>
           <span class="tiny-dot"></span> VISTA DEL DOCUMENTO

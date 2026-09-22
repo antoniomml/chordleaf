@@ -53,6 +53,7 @@ if (!songs) songs = [];
 if (!songs.some((s) => s.id === active)) active = songs[0]?.id ?? null;
 let zoom = 1;
 let section = "document",
+  mobileView = "editor",
   editing = false,
   currentPage = 1,
   observer,
@@ -130,11 +131,7 @@ function removeSong(id) {
 function renderSettings() {
   const s = song(),
     key = keyInfo(s.text);
-  document
-    .querySelectorAll("[data-section]")
-    .forEach((b) =>
-      b.classList.toggle("selected", b.dataset.section === section),
-    );
+  updateNavigation();
   $("#source-area").hidden = section !== "document";
   $("#settings").hidden = section === "chords";
   $("#chords-panel").hidden = section !== "chords";
@@ -186,6 +183,27 @@ function renderSettings() {
     changed();
     renderSettings();
   };
+}
+function updateNavigation() {
+  const mobile = window.matchMedia("(max-width: 760px)").matches;
+  $("main").dataset.mobileView = mobileView;
+  document.querySelectorAll(".rail button").forEach((button) => {
+    const selected = button.dataset.mobileView
+      ? mobile && mobileView === "preview"
+      : button.dataset.section === section &&
+        (!mobile || mobileView === "editor");
+    button.classList.toggle("selected", selected);
+    if (selected) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  });
+  const pencil = $("#pencil");
+  const pencilLabel = t(
+    mobile ? "Editar letra y acordes" : "Editar directamente la hoja",
+  );
+  pencil.title = pencilLabel;
+  pencil.setAttribute("aria-label", pencilLabel);
+  if (mobile) pencil.removeAttribute("aria-pressed");
+  else pencil.setAttribute("aria-pressed", String(editing));
 }
 function transposeSong(n) {
   const s = song();
@@ -251,7 +269,9 @@ function renderPages() {
     )
     .join("");
   $("#pencil").classList.toggle("selected", editing);
-  $("#pencil").setAttribute("aria-pressed", editing);
+  if (window.matchMedia("(max-width: 760px)").matches)
+    $("#pencil").removeAttribute("aria-pressed");
+  else $("#pencil").setAttribute("aria-pressed", editing);
   $("#editing-hint").textContent = editing
     ? t("Pulsa un verso para editar letra y acordes.")
     : t("Tu próxima canción empieza aquí.");
@@ -337,7 +357,9 @@ function editLine(el) {
   };
 }
 function resizePages() {
-  const available = $("#pages-scroll").clientWidth - 64,
+  const width = $("#pages-scroll").clientWidth;
+  if (!width) return;
+  const available = width - 64,
     scale = Math.max(0.2, Math.min(1.08, available / PAGE.width)) * zoom;
   $("#zoom-reset").textContent = Math.round(zoom * 100) + "%";
   $("#zoom-out").disabled = zoom <= 0.5;
@@ -396,9 +418,17 @@ document.querySelectorAll("[data-section]").forEach(
   (b) =>
     (b.onclick = () => {
       section = b.dataset.section;
+      mobileView = "editor";
       renderSettings();
     }),
 );
+$("[data-mobile-view='preview']").onclick = () => {
+  if (document.activeElement instanceof HTMLElement)
+    document.activeElement.blur();
+  mobileView = "preview";
+  updateNavigation();
+  resizePages();
+};
 let importGeneration = 0,
   importController;
 function importScreen(screen) {
@@ -620,6 +650,14 @@ document.addEventListener("click", (e) => {
   }
 });
 $("#pencil").onclick = () => {
+  if (window.matchMedia("(max-width: 760px)").matches) {
+    if (editing) {
+      editing = false;
+      renderPages();
+    }
+    $("#expand-editor").click();
+    return;
+  }
   editing = !editing;
   renderPages();
 };
@@ -667,7 +705,14 @@ document.addEventListener("pointerout", (e) => {
   if (e.target.closest("[data-chord]")) tooltip.hidden = true;
 });
 const languagePicker = setupLanguagePicker({ persist, toast });
-window.addEventListener("resize", resizePages);
+window.addEventListener("resize", () => {
+  if (editing && window.matchMedia("(max-width: 760px)").matches) {
+    editing = false;
+    renderPages();
+  }
+  updateNavigation();
+  resizePages();
+});
 window.addEventListener("beforeunload", (e) => {
   persist();
   if (!languagePicker.switching && songs.some((s) => s.dirty)) {

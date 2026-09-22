@@ -19,7 +19,7 @@ export function setupEditorTools({ resizePages }) {
     const input = $("#source");
     selection = [input.selectionStart, input.selectionEnd];
     home.append(sourceArea);
-    input.focus();
+    if (home.getClientRects().length) input.focus();
     input.setSelectionRange(...selection);
   });
 
@@ -55,7 +55,11 @@ export function setupEditorTools({ resizePages }) {
     );
   };
   splitter.ondblclick = () => setWidth(365);
-  window.addEventListener("resize", () =>
-    setWidth($(".editor-panel").clientWidth),
-  );
+  window.addEventListener("resize", () => {
+    if (window.matchMedia("(max-width: 760px)").matches) return;
+    const savedWidth = parseFloat(
+      workspace.style.getPropertyValue("--editor-width"),
+    );
+    setWidth(savedWidth || $(".editor-panel").clientWidth);
+  });
 }
