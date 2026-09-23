@@ -1,6 +1,6 @@
 # Production readiness audit
 
-**Updated:** September 23, 2026. Baseline: `39bf11b`, plus the production-readiness and public-launch changes.
+**Historical launch review, updated:** September 23, 2026. Baseline: `39bf11b`, plus the production-readiness and public-launch changes. For the latest full assessment, see [the September 23 public audit](public-audit-2026-09-23.md).
 
 [← Back to Chordleaf](../README.md) · [Deployment guide](deployment.md) · [Security policy](../SECURITY.md)
 
@@ -20,7 +20,7 @@ Continue real-device and human accessibility checks, monitor public web-import u
 - Vercel Authentication changed from **All Deployments** to **Standard Protection**. Production is public and previews remain protected.
 - GitHub is public. Dependency graph, vulnerability and malware alerts, Dependabot security updates, private vulnerability reporting and CodeQL default setup are enabled. Actions use read-only workflow tokens and full-length SHA-pinned actions. An active `main` ruleset requires a PR, resolved review threads and up-to-date `app` and `Vercel` checks, and blocks force pushes and deletion.
 - Vercel's `/api/import-web` rule remains active at 10 requests per IP per 60 seconds, returning 429. Project data sharing for model training is off. Web imports are enabled in Production and Preview; review public usage and provider availability.
-- Google Search Console verified the Domain property through a Vercel DNS TXT record. The former `www` sitemap was marked correct with two discovered pages; the apex sitemap needs to be submitted after the domain change.
+- Google Search Console verified the Domain property through a Vercel DNS TXT record. The apex sitemap was submitted and marked correct with two discovered pages before the subsequent SEO update; indexing is pending.
 
 The first CodeQL scan found three partial LaCuerda hostname checks and one request-forgery alert. [Pull request #5](https://github.com/antoniomml/chordleaf/pull/5) replaced the substring checks with exact hostname matches; the next `main` scan closed all three alerts. The remaining request-forgery alert was reviewed and dismissed as a false positive with the reason recorded in GitHub: `songUrl` accepts only HTTPS URLs whose host exactly matches a fixed allowlist, rejects credentials and nonstandard ports, and revalidates every manually handled redirect before another fetch. No CodeQL alerts remain open after that review.
 
@@ -28,7 +28,7 @@ The first CodeQL scan found three partial LaCuerda hostname checks and one reque
 | -------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | P1       | Monitor public web-import usage and providers. | The firewall limits `/api/import-web` to 10 requests/IP/minute. All three providers worked on a protected preview, but availability and usage can change. Keep text/file import as a fallback. |
 | P1       | Perform human accessibility and device checks. | Automated browser and earlier axe checks do not replace a real iPhone, keyboard use at 200% zoom and a screen-reader session.                                                                  |
-| P2       | Watch indexing in Search Console.              | The Domain property is verified and the sitemap is correct with two discovered pages; Google has not yet reported indexing for this new property.                                              |
+| P2       | Watch indexing in Search Console.              | The Domain property is verified and the apex sitemap is correct; Google has not yet reported indexing for this new property.                                                                   |
 | P2       | Profile unusually large or hostile documents.  | Word and auto-fit use terminable workers; PDF parsing has cancellation, timeout and cumulative text/geometry budgets. These are not a complete hostile-document sandbox.                       |
 | P2       | Consolidate UI render helpers and CSS.         | The static shell and document/key render helpers were extracted. Continue gradual extraction when changing features.                                                                           |
 
