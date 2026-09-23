@@ -67,15 +67,15 @@ Both interface and document fonts are served by the app itself. There are no thi
 
 ## A release with room to grow
 
-**0.4.0** accepts localized Spanish Ultimate Guitar links, removes LaCuerda fingering tables from imported lyrics, and makes missing diagram positions an explicit choice. It also fixes diagram stacking and gives the new-song choices matching vector icons. Chordleaf retains its bilingual workspace, complete backups, bounded imports and protected Vercel hosting. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md).
+**0.4.0** accepts localized Spanish Ultimate Guitar links, removes LaCuerda fingering tables from imported lyrics, and makes missing diagram positions an explicit choice. It also fixes diagram stacking and gives the new-song choices matching vector icons. Chordleaf retains its bilingual workspace, complete backups, bounded imports and protected Vercel previews. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md).
 
 ## Take part
 
 Musical ideas, missing explanations and awkward controls are all useful contributions. [Report an issue](https://github.com/antoniomml/chordleaf/issues/new?template=bug_report.yml) or [suggest a feature](https://github.com/antoniomml/chordleaf/issues/new?template=feature_request.yml), using short invented song examples.
 
-To run your own copy, follow [the development guide](docs/development.md). To put it online, use the [step-by-step Vercel guide](docs/deployment.md). The custom domain is [www.chordleaf.com](https://www.chordleaf.com/); the hosted deployment currently requires Vercel authentication while public launch checks are completed.
+To run your own copy, follow [the development guide](docs/development.md). To put it online, use the [step-by-step Vercel guide](docs/deployment.md). Try the public app at [www.chordleaf.com](https://www.chordleaf.com/). Preview deployments still require Vercel authentication.
 
-The [production readiness audit](docs/audit.md) separates completed improvements from the remaining launch decisions. Web imports are enabled on the protected review deployment behind a firewall; opening that endpoint to the public requires another availability and usage review.
+The [production readiness audit](docs/audit.md) records the launch checks and remaining limitations. Public web imports are enabled behind a Vercel rate limit; provider availability and usage need ongoing review. Report security issues [privately](SECURITY.md).
 
 ---
 

@@ -2,7 +2,7 @@
 
 [← Back to Chordleaf](../README.md) · [Launch priorities](audit.md)
 
-Chordleaf uses a static Vite frontend and one Node.js function for importing public song pages. No database, authentication provider or secret API key is required. The repository includes deployment configuration. The custom domain is `https://www.chordleaf.com/`, with `https://chordleaf.com/` configured to redirect to it. The production deployment still requires Vercel authentication; anonymous visitors and search engines cannot access it until deployment protection is changed.
+Chordleaf uses a static Vite frontend and one Node.js function for importing public song pages. No database, authentication provider or secret API key is required. The repository includes deployment configuration. The public production domain is `https://www.chordleaf.com/`, with `https://chordleaf.com/` redirecting to it. Vercel Standard Protection keeps preview deployments behind authentication.
 
 ## 1. Check the code
 
@@ -63,13 +63,14 @@ Promote the reviewed preview only after the applicable launch priorities are res
 ## Current hosted configuration
 
 - Project: `chordleaf`, Node.js `24.x`, Vercel Hobby.
-- All deployments require Vercel Authentication, including the production alias. Vercel assigned the first deployment to production automatically; it is protected and has not been publicly launched.
+- Production is publicly accessible. Standard Protection requires Vercel Authentication for preview deployments; an anonymous preview request redirects to sign-in.
 - Firewall rule: exact path `/api/import-web`, 10 requests per IP per 60 seconds, fixed window, HTTP 429 after the limit.
-- Both `chordleaf.com` and `www.chordleaf.com` are connected; the apex redirects to `www`. Production `SITE_URL` is `https://www.chordleaf.com` and is scoped to Production only. The site remains protected by Vercel Authentication pending public-launch approval.
-- GitHub branch protection is unavailable for the current private repository/account plan. Keep changes on a review branch; enable required checks when the repository becomes public or the account supports private protections.
+- Both `chordleaf.com` and `www.chordleaf.com` are connected; the apex redirects to `www`. Production `SITE_URL` is `https://www.chordleaf.com` and is scoped to Production only.
+- The public GitHub repository has an active `main` ruleset requiring a pull request, resolved review threads, up-to-date `app` and `Vercel` checks, and blocking force pushes and deletion.
+- The `chordleaf.com` Domain property is verified in Google Search Console with a Vercel DNS TXT record. `https://www.chordleaf.com/sitemap.xml` was submitted and reported as correct, with two discovered pages.
 
-The protected preview was tested end to end with Cifra Club, LaCuerda and Ultimate Guitar: each returned a page that parsed into an editable song. Provider availability can change; retain the text/file fallback. Production and preview imports are enabled behind authentication and the firewall.
+The protected preview was tested end to end with Cifra Club, LaCuerda and Ultimate Guitar: each returned a page that parsed into an editable song. Provider availability can change; retain the text/file fallback. Production web imports are public and preview imports require authentication; both have the firewall rule.
 
-The account currently uses Hobby, which has usage caps rather than paid overages. Vercel documents automatic usage notifications for all plans. No paid upgrade, spending increase or billing-setting change was made. Review the owner's usage dashboard before a public launch; if moving to a paid plan, configure its spending limit first. See [Vercel usage notifications](https://vercel.com/docs/pricing/manage-and-optimize-usage) and [plan limits](https://vercel.com/pricing).
+The account currently uses Hobby, which has usage caps rather than paid overages. Vercel documents automatic usage notifications for all plans. No paid upgrade, spending increase or billing-setting change was made. Review the owner's usage dashboard regularly; if moving to a paid plan, configure its spending limit first. See [Vercel usage notifications](https://vercel.com/docs/pricing/manage-and-optimize-usage) and [plan limits](https://vercel.com/pricing).
 
-The 0.4.0 tag prepares the repository for a later public release. GitHub visibility and Vercel deployment protection remain separate launch decisions; the tag does not change either setting.
+The 0.4.0 tag predates the public launch. GitHub visibility and Vercel deployment protection were changed separately after the release tag.
