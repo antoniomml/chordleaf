@@ -37,7 +37,7 @@ Custom shapes are keyed by the song's chord symbol. They travel with TXT metadat
 
 ## Harmonic identification
 
-The identifier is independent of the fingering catalog. It calculates MIDI pitches from standard tuning and selected frets, deduplicates pitch classes, finds the actual lowest pitch and compares every chromatic root against explicit formulas. It never discards extra sounding notes to force a match. See [the model, supported vocabulary and limits](harmony.md).
+The identifier is independent of the fingering catalog. It calculates MIDI pitches from standard tuning and selected frets, deduplicates pitch classes, finds the actual lowest pitch and compares every chromatic root against explicit formulas. It never discards extra sounding notes to force a match. See [the model, supported vocabulary and limits](https://github.com/antoniomml/chordleaf/wiki/Harmony-model).
 
 ## Verification and evolution
 

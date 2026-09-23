@@ -45,7 +45,7 @@ The printed sheet shows chords above the lyrics, without brackets. For a change 
 
 **3. Make it comfortable to play.** The **Document**, **Key** and **Chords** sections each occupy the whole sidebar. Adjust the document, inspect the estimated key or work with guitar chords. When ready, choose **Export**.
 
-[Explore the controls in the user guide →](docs/guide.md)
+[Explore the controls in the user guide →](https://github.com/antoniomml/chordleaf/wiki/User-guide)
 
 ## Give every chord a place
 
@@ -53,7 +53,7 @@ The **Chords** section shows the song's chords as a three-column grid of diagram
 
 ![The guitar chord workspace](docs/images/chord-library.png)
 
-The interactive fretboard calculates sounding notes and the lowest pitch. Its formula-based identifier compares exact matches, inversions and explicitly labelled omissions. For example, the same notes can suggest C6 or Am7/C. Interpretations depend on context; the tool does not claim to enumerate every possible chord name. See [the harmony model](docs/harmony.md).
+The interactive fretboard calculates sounding notes and the lowest pitch. Its formula-based identifier compares exact matches, inversions and explicitly labelled omissions. For example, the same notes can suggest C6 or Am7/C. Interpretations depend on context; the tool does not claim to enumerate every possible chord name. See [the harmony model](https://github.com/antoniomml/chordleaf/wiki/Harmony-model).
 
 Choose an interpretation to insert it at the text cursor or replace a specific occurrence or all occurrences of an existing chord. The chosen voicing is saved with the song.
 
@@ -63,7 +63,7 @@ Songs and imported files are processed in your browser. Web imports send the son
 
 **Export a copy of anything you want to keep.** Browser storage does not sync devices and can disappear when browser data is cleared. Choose **Export → Workspace backup · JSON** to preserve all open songs and settings, or export chordleaf TXT for an individual song.
 
-Both interface and document fonts are served by the app itself. There are no third-party font requests or analytics scripts. See [privacy and storage](docs/privacy.md).
+Both interface and document fonts are served by the app itself. There are no third-party font requests or analytics scripts. See [privacy and storage](https://github.com/antoniomml/chordleaf/wiki/Privacy-and-storage).
 
 ## A release with room to grow
 
@@ -75,12 +75,12 @@ Musical ideas, missing explanations and awkward controls are all useful contribu
 
 To run your own copy, follow [the development guide](docs/development.md). To put it online, use the [step-by-step Vercel guide](docs/deployment.md). Try the public app at [chordleaf.com](https://chordleaf.com/). Preview deployments still require Vercel authentication.
 
-The [user wiki](https://github.com/antoniomml/chordleaf/wiki) has an illustrated guide, answers to common questions, chord theory and storage guidance. Development, architecture and deployment instructions remain versioned in this repository. Report security issues [privately](SECURITY.md).
+The [user wiki](https://github.com/antoniomml/chordleaf/wiki) is the home for the illustrated guide, common questions, chord theory and storage guidance. The screenshots it uses and the development, architecture and deployment instructions remain in this repository. Report security issues [privately](SECURITY.md).
 
 ---
 
 <div align="center">
   <p><strong>Made to play.</strong></p>
-  <p><a href="docs/guide.md">User guide</a> · <a href="docs/deployment.md">Deploy</a> · <a href="docs/architecture.md">Architecture</a> · <a href="THIRD_PARTY_NOTICES.md">Credits</a></p>
+  <p><a href="https://github.com/antoniomml/chordleaf/wiki/User-guide">User guide</a> · <a href="docs/deployment.md">Deploy</a> · <a href="docs/architecture.md">Architecture</a> · <a href="THIRD_PARTY_NOTICES.md">Credits</a></p>
   <sub>Original application code is MIT licensed. See <a href="LICENSE">LICENSE</a>. Third-party data and fonts retain their respective licenses.</sub>
 </div>
