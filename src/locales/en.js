@@ -1,5 +1,16 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Revisar acorde": "Review chord",
+  "Acordes por revisar": "Chords to review",
+  "Sin acordes detectados": "No chords detected",
+  "Acorde correcto": "Correct chord",
+  "Guardar acorde": "Save chord",
+  "Corrige el acorde o déjalo pendiente para más tarde.":
+    "Correct the chord or leave it for later.",
+  "Acorde no reconocido. Prueba otra escritura o déjalo pendiente.":
+    "Chord not recognized. Try another spelling or leave it for later.",
+  "No se detectaron acordes; revisa el texto importado.":
+    "No chords were detected; review the imported text.",
   "La copia contiene una canción de más de 50.000 caracteres. Divídela antes de restaurarla.":
     "The backup contains a song longer than 50,000 characters. Split it before restoring.",
   "El PDF contiene demasiado texto o fragmentos demasiado largos. Usa TXT o divide el documento.":

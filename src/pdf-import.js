@@ -1,13 +1,15 @@
 import { t } from "./i18n.js";
-import { chordRE } from "./music.js";
+import { chordRE, unresolvedChordRE } from "./music.js";
 const separatorRE = /^[|:–—−\-]+$/;
 const cleanChord = (t) => t.replace(/[\[\]]/g, "");
+const chordToken = (t) =>
+  chordRE.test(cleanChord(t)) || unresolvedChordRE.test(cleanChord(t));
 const tokens = (t) => [...t.matchAll(/\S+/g)];
 export function chordRow(items) {
   const ts = items.flatMap((i) => tokens(i.text));
   return (
-    ts.some((t) => chordRE.test(cleanChord(t[0]))) &&
-    ts.every((t) => chordRE.test(cleanChord(t[0])) || separatorRE.test(t[0]))
+    ts.some((t) => chordToken(t[0])) &&
+    ts.every((t) => chordToken(t[0]) || separatorRE.test(t[0]))
   );
 }
 function rowsOf(items) {

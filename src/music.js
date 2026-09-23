@@ -52,6 +52,7 @@ const notationRE =
 export const chordRE = {
   test: (value) => notationRE.test(normalizeChord(value)),
 };
+export const unresolvedChordRE = /^\?[^\[\]\n]{1,40}$/;
 export function pc(n) {
   return (
     ((pitch[n[0]] ?? 0) +
@@ -89,6 +90,13 @@ export function parseLine(raw, index = 0) {
   while ((m = re.exec(raw))) {
     lyric += raw.slice(end, m.index);
     if (chordRE.test(m[1])) marks.push({ at: lyric.length, chord: m[1] });
+    else if (unresolvedChordRE.test(m[1]))
+      marks.push({
+        at: lyric.length,
+        chord: m[1].slice(1),
+        issue: true,
+        rawIndex: m.index,
+      });
     else lyric += m[0];
     end = re.lastIndex;
   }

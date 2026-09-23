@@ -27,6 +27,20 @@ test("inline chords preserve lyrics and anchors", () => {
     { at: 5, chord: "D" },
   ]);
 });
+test("unresolved chord markers remain visible at their lyric position", () => {
+  const [line] = parseSong("[C]Hola [?H7]mundo");
+  assert.equal(line.lyric, "Hola mundo");
+  assert.deepEqual(line.marks[1], {
+    at: 5,
+    chord: "H7",
+    issue: true,
+    rawIndex: 8,
+  });
+  assert.deepEqual(chords("[C]Hola [?H7]mundo"), ["C"]);
+  assert.equal(transpose("[?H7]", 2), "[?H7]");
+  const imported = importText("C     [?H7]\nLuz del día", "Prueba");
+  assert.match(imported.text, /\[C\]Luz de\[\?H7\]l día/);
+});
 test("separate chord line attaches to following verse", () => {
   const [line] = parseSong("    [G]\nYo era el árbol,");
   assert.equal(line.lyric, "Yo era el árbol,");

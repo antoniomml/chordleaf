@@ -1,5 +1,12 @@
 # chordleaf changelog
 
+## 0.5.1 · September 23, 2026
+
+- Open imported songs even when chord notation is uncertain; show unresolved chords in the sheet and let readers correct them without leaving the preview.
+- Keep malformed chord tokens aligned with lyrics in supported web sources, and show a compact notice when no chords are detected.
+- Recognize Spanish LaCuerda chord names, punctuation and written capo positions, including El Kanka's “Payaso”.
+- Open imported songs in the preview on mobile and verify correction flows at desktop and phone widths.
+
 ## 0.5.0 · September 23, 2026
 
 - Add accessible names for untitled preview headings and announce the selected document column count.
