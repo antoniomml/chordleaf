@@ -9,7 +9,7 @@ import {
 } from "./song-state.js";
 import { stickerPng, stickerGeometry } from "./dictionary.js";
 import { layout, PAGE } from "./layout.js";
-import { chordRE } from "./music.js";
+import { chordRE, unresolvedChordRE } from "./music.js";
 import { parsePdfPages, chordRow } from "./pdf-import.js";
 import { registerPdfFonts, DOCUMENT_FONT, fontBinaries } from "./fonts.js";
 export function download(blob, name) {
@@ -390,7 +390,7 @@ function alignText(lines) {
     if (chordRow([{ text: line }])) {
       // Brackets already express explicit chords. Preserve instrumental rows
       // rather than attaching them to an unrelated following verse.
-      if (/\[[^\]]+\]/.test(line)) {
+      if (/\[[^\]]+\]/.test(line) && !/\[\?/.test(line)) {
         out.push(line);
         continue;
       }
@@ -404,7 +404,7 @@ function alignText(lines) {
         let lyric = next;
         for (const m of matches.reverse()) {
           const chord = m[0].replace(/[\[\]]/g, "");
-          if (!chordRE.test(chord)) continue;
+          if (!chordRE.test(chord) && !unresolvedChordRE.test(chord)) continue;
           lyric =
             lyric.padEnd(m.index, " ").slice(0, m.index) +
             `[${chord}]` +
@@ -416,7 +416,9 @@ function alignText(lines) {
         out.push(
           line.replace(/\S+/g, (c) => {
             const name = c.replace(/[\[\]]/g, "");
-            return chordRE.test(name) ? `[${name}]` : c;
+            return chordRE.test(name) || unresolvedChordRE.test(name)
+              ? `[${name}]`
+              : c;
           }),
         );
     } else out.push(line);

@@ -185,6 +185,7 @@
           <span class="paper-label">A4</span>
         </div>
         <div class="preview-actions">
+          <button id="issue-count" class="issue-count" hidden></button>
           <div class="zoom-controls">
             <button id="zoom-out" aria-label="Alejar documento">−</button
             ><button id="zoom-reset" title="Ajustar al ancho">100%</button
@@ -202,6 +203,18 @@
           </button>
         </div>
       </div>
+      <form id="issue-editor" class="issue-editor" hidden>
+        <div class="issue-editor-heading">
+          <strong>Revisar acorde</strong>
+          <button type="button" id="issue-close" aria-label="Cerrar">×</button>
+        </div>
+        <label for="issue-value">Acorde correcto</label>
+        <input id="issue-value" autocomplete="off" spellcheck="false" />
+        <p id="issue-message" role="status">
+          Corrige el acorde o déjalo pendiente para más tarde.
+        </p>
+        <button type="submit" class="primary">Guardar acorde</button>
+      </form>
       <div
         id="pages-scroll"
         tabindex="0"

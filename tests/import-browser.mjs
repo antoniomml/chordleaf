@@ -90,6 +90,58 @@ try {
     "INTRO:  [Bm9] [Em7] [F#7sus4]",
   );
   assert.match(cuerdaAlignedTxt.text, /^\[Bm9\]Suena la luz/m);
+  const cuerdaSpanish = await parseThroughUI(
+    '<title>PAYASO, El Kanka: Acordes</title><div id="tH1"><h1><a>Payaso</a></h1><h2><a>El Kanka</a></h2></div><div id="t_body"><pre>- Capo en segundo traste -\n\n<a>MIm</a>         <a>SI7</a>       <a>MIm</a>\nMe dicen que soy un payaso,\n<a>MI7</a>.                   <a>LAm</a>\nporque no les tomo en serio,\n<a>DO</a> .          <a>SI7</a>\nque siempre seré un payaso,</pre></div>',
+    "https://acordes.lacuerda.net/kanka/payaso.shtml",
+  );
+  assert.equal(cuerdaSpanish.title, "Payaso");
+  assert.equal(cuerdaSpanish.artist, "El Kanka");
+  assert.equal(cuerdaSpanish.capo, 2);
+  assert.match(
+    cuerdaSpanish.text,
+    /\[Em\]Me dicen qu\[B7\]e soy un \[Em\]payaso/,
+  );
+  assert.match(cuerdaSpanish.text, /\[E7\]porque no les tomo en\[Am\] serio/);
+  assert.match(cuerdaSpanish.text, /\[C\]que siempre \[B7\]seré un payaso/);
+  assert.doesNotMatch(cuerdaSpanish.text, /Capo en segundo traste/);
+  assert.doesNotMatch(cuerdaSpanish.text, /MIm|SI7|MI7|LAm|DO|\[E7\.\]/);
+  const unresolved = await parseThroughUI(
+    '<title>PRUEBA, Artista: Acordes</title><div id="tH1"><h1><a>Prueba</a></h1><h2><a>Artista</a></h2></div><div id="t_body"><pre><a>C</a>     <a>H7</a>\nLuz del día</pre></div>',
+    "https://acordes.lacuerda.net/artista/prueba",
+  );
+  assert.match(unresolved.text, /\[C\]Luz de\[\?H7\]l día/);
+  assert.equal(await page.locator(".unresolved-chord").count(), 1);
+  assert.match(await page.locator("#issue-count").textContent(), /1/);
+  await page.locator(".unresolved-chord").click();
+  await page.screenshot({ path: "artifacts/import-issue.png" });
+  await page.locator("#issue-value").fill("incorrecto");
+  await page.locator('#issue-editor button[type="submit"]').click();
+  assert.match(
+    await page.locator("#issue-message").textContent(),
+    /no reconocido/,
+  );
+  await page.locator("#issue-value").fill("B7");
+  await page.locator('#issue-editor button[type="submit"]').click();
+  assert.equal(await page.locator(".unresolved-chord").count(), 0);
+  assert.equal(await page.locator("#issue-count").isVisible(), false);
+  assert.match(await page.locator("#source").inputValue(), /\[B7\]/);
+  const lyricsOnly = await parseThroughUI(
+    '<title>PRUEBA, Artista: Acordes</title><div id="tH1"><h1><a>Prueba</a></h1><h2><a>Artista</a></h2></div><div id="t_body"><pre>Una canción sin acordes\nOtra línea de letra</pre></div>',
+    "https://acordes.lacuerda.net/artista/prueba",
+  );
+  assert.match(lyricsOnly.text, /Una canción sin acordes/);
+  assert.match(await page.locator("#issue-count").textContent(), /Sin acordes/);
+  const misspelledTxt = await parseThroughUI(
+    "=====================================================================\n| ARTISTA: Artista |\n| CANCION: PRUEBA |\n=====================================================================\n\nH7\nLuz del día",
+    "https://acordes.lacuerda.net/TXT/artista/prueba.txt",
+    "text/plain",
+  );
+  assert.match(misspelledTxt.text, /\[\?H7\]Luz del día/);
+  const misspelledCifra = await parseThroughUI(
+    "<title>Prueba - Artista - Cifra Club</title><h1>Prueba</h1><a><h2>Artista</h2></a><pre data-chord-content><b>H7</b>\nLuz del día</pre>",
+    "https://www.cifraclub.com/artista/prueba/",
+  );
+  assert.match(misspelledCifra.text, /\[\?H7\]Luz del día/);
   const grid =
     "C     G\n" +
     [1, 2, 3, 4, 5, 6].map((string) => `${string}-0   ${string}-X`).join("\n");
@@ -174,6 +226,7 @@ try {
         "cuerda-html",
         "https://acordes.lacuerda.net/alejandro_sanz/amiga_mia.shtml",
       ],
+      ["cuerda-spanish", "https://acordes.lacuerda.net/kanka/payaso.shtml"],
       [
         "cuerda-txt",
         "https://acordes.lacuerda.net/TXT/alejandro_sanz/amiga_mia.txt",
@@ -206,6 +259,7 @@ try {
         {
           cifra: /Imagine/i,
           "cuerda-html": /Amiga M[ií]a/i,
+          "cuerda-spanish": /Payaso/i,
           "cuerda-txt": /Amiga M[ií]a/i,
           ug: /Fix You/i,
           "ug-es": /Hablar De Nada/i,
@@ -225,6 +279,38 @@ try {
       await page.locator("#new").click();
     }
   }
+  const mobile = await browser.newPage({
+    locale: "es-ES",
+    viewport: { width: 390, height: 844 },
+  });
+  await mobile.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
+  await mobile.route("**/api/import-web?**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        html: '<title>PRUEBA, Artista: Acordes</title><div id="tH1"><h1><a>Prueba</a></h1><h2><a>Artista</a></h2></div><div id="t_body"><pre><a>C</a>     <a>H7</a>\nLuz del día</pre></div>',
+        url: "https://acordes.lacuerda.net/artista/prueba",
+        contentType: "text/html",
+      }),
+    }),
+  );
+  await mobile.locator("#empty-new").click();
+  await mobile.locator("#web").click();
+  await mobile
+    .locator("#web-url")
+    .fill("https://acordes.lacuerda.net/artista/prueba");
+  await mobile.locator("#web-submit").click();
+  await mobile.locator(".unresolved-chord").waitFor();
+  assert.equal(
+    await mobile.locator("main").getAttribute("data-mobile-view"),
+    "preview",
+  );
+  assert.equal(await mobile.locator("#preview-panel").isVisible(), true);
+  await mobile.locator(".unresolved-chord").click();
+  assert.equal(await mobile.locator("#issue-editor").isVisible(), true);
+  await mobile.screenshot({ path: "artifacts/import-issue-mobile.png" });
+  await mobile.close();
   assert.deepEqual(errors, []);
   console.log("Import browser checks passed");
 } finally {

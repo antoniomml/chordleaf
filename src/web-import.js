@@ -1,6 +1,6 @@
 import { t } from "./i18n.js";
 import { importText, titleCase } from "./files.js";
-import { chordRE, chords } from "./music.js";
+import { chordRE, chords, unresolvedChordRE } from "./music.js";
 import { LACUERDA_HOSTS, songUrl } from "./web-sources.js";
 
 // Read text only; never mount downloaded markup or execute website scripts.
@@ -36,18 +36,64 @@ function laCuerdaPlainText(value) {
     .trim();
 }
 function laCuerdaChord(value) {
+  const spanishNotes = {
+    DO: "C",
+    RE: "D",
+    MI: "E",
+    FA: "F",
+    SOL: "G",
+    LA: "A",
+    SI: "B",
+  };
   const chord = value
-    .replace(/^FA#7(?=\/A#|$)/, "F#7")
+    .replace(
+      /^(DO|RE|MI|FA|SOL|LA|SI)([#b]?)/,
+      (_, note, accidental) => spanishNotes[note] + accidental,
+    )
     .replace(/^([A-G][#b]?)4\/7$/, (_, root) => `${root}7sus4`)
     .replace(/^([A-G][#b]?)4$/, (_, root) => `${root}sus4`)
     .replace(/^([A-G][#b]?m7)\/5b$/, (_, base) => `${base}b5`);
   return chordRE.test(chord) ? chord : value;
 }
-function laCuerdaNotation(text) {
-  return text.replace(
-    /(?<!\S)(?:FA#7(?:\/A#)?|[A-G][#b]?(?:4(?:\/7)?|m7\/5b))(?!\S)/g,
-    laCuerdaChord,
+const plausibleChord = (token) =>
+  /\d/.test(token) &&
+  /^(?:(?:DO|RE|MI|FA|SOL|LA|SI)|[A-H])(?:[#b]|m|M|maj|dim|aug|sus|add|\d)[A-Za-z0-9#b/+()?-]{0,12}$/i.test(
+    token,
   );
+function laCuerdaNotation(text) {
+  return text
+    .split("\n")
+    .map((line) => {
+      const tokens = line.trim().split(/\s+/);
+      const chordToken = (token) => laCuerdaChord(token.replace(/\.+$/, ""));
+      const unresolved = (token) => /^\[\?[^\[\]\n]{1,40}\]$/.test(token);
+      if (
+        tokens.some(
+          (token) =>
+            chordRE.test(chordToken(token)) ||
+            unresolved(token) ||
+            plausibleChord(chordToken(token)),
+        ) &&
+        tokens.every(
+          (token) =>
+            chordRE.test(chordToken(token)) ||
+            unresolved(token) ||
+            plausibleChord(chordToken(token)) ||
+            /^[.\-|:]+$/.test(token),
+        )
+      )
+        return line.replace(/\S+/g, (token) => {
+          if (/^[.\-|:]+$/.test(token)) return token.replace(/\./g, "");
+          if (unresolved(token)) return token;
+          const name = chordToken(token);
+          return chordRE.test(name) ? name : `[?${name}]`;
+        });
+      return line.replace(
+        /(?<!\S)(?:FA#7(?:\/A#)?|[A-G][#b]?(?:4(?:\/7)?|m7\/5b))(?!\S)/g,
+        laCuerdaChord,
+      );
+    })
+    .join("\n");
 }
 // Some LaCuerda sheets append a six-row fingering legend. It is a diagram,
 // not another verse or chord sequence, so keep it out of the editable song.
@@ -133,7 +179,11 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
     } catch {}
     const content = data?.tab_view?.wiki_tab?.content;
     if (typeof content === "string" && !data.tab_view.blocked) {
-      text = content.replace(/\[\/?(?:tab|ch)\]/g, "");
+      text = content
+        .replace(/\[ch\]([^\[\]\n]{1,40})\[\/ch\]/g, (_, name) =>
+          chordRE.test(name) ? name : `[?${name}]`,
+        )
+        .replace(/\[\/?tab\]/g, "");
       title = data.tab?.song_name || "";
       artist = data.tab?.artist_name || "";
       capo = Number(data.tab_view.meta?.capo) || 0;
@@ -158,7 +208,14 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
       for (const el of pre.querySelectorAll("b, a")) {
         const original = el.textContent.trim();
         const value = laCuerda ? laCuerdaChord(original) : original;
-        if (!chordRE.test(value)) continue;
+        if (!chordRE.test(value)) {
+          if (
+            (laCuerda || (el.tagName === "B" && plausibleChord(original))) &&
+            /^[^\s\[\]]{1,40}$/.test(original)
+          )
+            el.textContent = `[?${original}]`;
+          continue;
+        }
         if (value !== original)
           el.textContent = el.textContent.replace(original, value);
         const line = el.parentNode.textContent;
@@ -203,6 +260,29 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
       /(?:capo|cejilla|capotraste)\s*[:=]?\s*(\d+)/i,
     );
     capo = Number(capoMatch?.[1]) || 0;
+    if (laCuerda && !capo) {
+      const ordinalLine =
+        /^\s*-?\s*(?:capo|cejilla|capotraste)\s+en\s+(primer|segundo|tercer|cuarto|quinto|sexto|s[eé]ptimo|octavo|noveno|d[eé]cimo)\s+traste\s*-?\s*$/im;
+      const ordinal = text
+        .match(ordinalLine)?.[1]
+        ?.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+      capo =
+        [
+          "primer",
+          "segundo",
+          "tercer",
+          "cuarto",
+          "quinto",
+          "sexto",
+          "septimo",
+          "octavo",
+          "noveno",
+          "decimo",
+        ].indexOf(ordinal) + 1;
+      if (capo) text = text.replace(ordinalLine, "").trimStart();
+    }
   }
   if (!text.trim())
     throw new Error(
@@ -216,18 +296,18 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
       .split("\n")
       .map((line) => line.trimStart())
       .join("\n");
-  if (!chords(result.text).length)
-    throw new Error(
-      t(
-        "No se han encontrado acordes en este enlace. Abre una versión de acordes, no una tablatura o una página de búsqueda.",
-      ),
-    );
   return {
     ...result,
     title: titleCase(title || result.title),
     artist: titleCase(artist),
     capo: Math.max(0, Math.min(12, capo || result.capo)),
     sourceUrl: url.href,
+    ...(!chords(result.text).length &&
+    ![...result.text.matchAll(/\[([^\]]+)\]/g)].some((m) =>
+      unresolvedChordRE.test(m[1]),
+    )
+      ? { notice: t("No se detectaron acordes; revisa el texto importado.") }
+      : {}),
   };
 }
 export async function importWebSong(value, { signal } = {}) {

@@ -165,6 +165,7 @@ try {
     ),
     false,
   );
+  await page.locator('[data-section="chords"]').click();
   assert.equal(
     (await page.locator("#fretboard").boundingBox()).width,
     fretSize.width,

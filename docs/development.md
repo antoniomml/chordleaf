@@ -66,12 +66,12 @@ The previous application was removed from the current tree. Historical commits r
 
 ## Releases
 
-The current tagged release is **`v0.5.0`**. Before another release:
+The current tagged release is **`v0.5.1`**. Before another release:
 
 1. Update `version` in `package.json` and add its changes to `CHANGELOG.md`.
 2. Run frozen installation, formatting, tests, build and browser checks.
-3. Create a commit and an annotated `vX.Y.Z` tag pointing to it.
-4. Push the commit and tag, then publish release notes on GitHub.
+3. Merge the checked pull request into `main`.
+4. Create an annotated `vX.Y.Z` tag on the merged `main` commit, push it, then publish release notes on GitHub.
 
 `private: true` in `package.json` prevents accidental registry publication; it does not control GitHub repository visibility. The original application code is licensed under MIT; third-party notices must be retained.
 

@@ -10,7 +10,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
       signal,
       headers: {
         Accept: "text/html, text/plain;q=0.9",
-        "User-Agent": "Chordleaf/0.5.0 (song import)",
+        "User-Agent": "Chordleaf/0.5.1 (song import)",
       },
     });
     if ([301, 302, 303, 307, 308].includes(response.status)) {

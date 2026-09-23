@@ -11,7 +11,7 @@ export function renderPageMarkup(s, l, editing) {
           .flat()
           .map(
             (r) =>
-              `<div class="song-line ${editing ? "editable" : ""}" data-line="${r.index}" data-end="${r.endIndex ?? r.index}" style="left:${r.x}px;top:${r.y}px;width:${r.width}px;height:${r.height}px;font-size:${l.size}px" ${editing ? t('tabindex="0" role="button" aria-label="Editar verso"') : ""}>${r.marks.map((m) => `<span class="sheet-chord" data-chord="${esc(m.chord)}" style="left:${m.x * l.cw}px;top:${(m.lane || 0) * l.size * 1.44}px">${esc(m.chord)}</span>`).join("")}<span class="lyric" style="top:${r.lyricOffset}px">${esc(r.lyric) || " "}</span></div>`,
+              `<div class="song-line ${editing ? "editable" : ""}" data-line="${r.index}" data-end="${r.endIndex ?? r.index}" style="left:${r.x}px;top:${r.y}px;width:${r.width}px;height:${r.height}px;font-size:${l.size}px" ${editing ? t('tabindex="0" role="button" aria-label="Editar verso"') : ""}>${r.marks.map((m) => `<span class="sheet-chord${m.issue ? " unresolved-chord" : ""}" ${m.issue ? `data-issue-line="${r.index}" data-issue-offset="${m.rawIndex}" role="button" tabindex="0" aria-label="${t("Revisar acorde")}: ${esc(m.chord)}"` : `data-chord="${esc(m.chord)}"`} style="left:${m.x * l.cw}px;top:${(m.lane || 0) * l.size * 1.44}px">${esc(m.chord)}</span>`).join("")}<span class="lyric" style="top:${r.lyricOffset}px">${esc(r.lyric) || " "}</span></div>`,
           )
           .join(
             "",

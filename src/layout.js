@@ -1,4 +1,4 @@
-import { parseSong, chordRE } from "./music.js";
+import { parseSong, chordRE, unresolvedChordRE } from "./music.js";
 export const PAGE = { width: 595.28, height: 841.89 };
 function wrapText(text, capacity) {
   const lines = [];
@@ -70,8 +70,8 @@ export function layout(song, parsed = parseSong(song.text)) {
     if (instrumental) {
       // Instrumentals have their own horizontal flow. Each chord is a whole
       // token; spaces become dashes, while explicit bar/repeat signs survive.
-      const matches = [...line.raw.matchAll(/\[([^\]]+)\]/g)].filter((m) =>
-        chordRE.test(m[1]),
+      const matches = [...line.raw.matchAll(/\[([^\]]+)\]/g)].filter(
+        (m) => chordRE.test(m[1]) || unresolvedChordRE.test(m[1]),
       );
       let text = "",
         sequenceMarks = [],
@@ -99,7 +99,8 @@ export function layout(song, parsed = parseSong(song.text)) {
       if (prefix) append(prefix + " ");
       for (let i = 0; i < matches.length; i++) {
         const m = matches[i],
-          chord = label(m[1]);
+          issue = unresolvedChordRE.test(m[1]),
+          chord = issue ? m[1].slice(1) : label(m[1]);
         const previous = matches[i - 1];
         const gap = previous
           ? line.raw.slice(previous.index + previous[0].length, m.index).trim()
@@ -110,7 +111,13 @@ export function layout(song, parsed = parseSong(song.text)) {
           if (gap) append(" " + gap);
           flush();
         } else text += separator;
-        sequenceMarks.push({ at: text.length, x: text.length, chord, lane: 0 });
+        sequenceMarks.push({
+          at: text.length,
+          x: text.length,
+          chord,
+          lane: 0,
+          ...(issue ? { issue: true, rawIndex: m.index } : {}),
+        });
         text += " ".repeat(chord.length);
       }
       const last = matches.at(-1);

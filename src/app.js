@@ -19,6 +19,7 @@ import {
   diagram,
   transposeChord,
   chords,
+  chordRE,
 } from "./music.js";
 import { layout, PAGE } from "./layout.js";
 import { importWebSong } from "./web-import.js";
@@ -262,6 +263,14 @@ function renderPages() {
   const s = song(),
     l = layout(s);
   $("#pages").innerHTML = renderPageMarkup(s, l, editing);
+  $("#issue-editor").hidden = true;
+  const issues = [...s.text.matchAll(/\[\?[^\[\]\n]{1,40}\]/g)].length;
+  const noChords = !issues && !!s.text.trim() && !chords(s.text).length;
+  $("#issue-count").hidden = !issues && !noChords;
+  $("#issue-count").dataset.noChords = String(noChords);
+  $("#issue-count").textContent = noChords
+    ? t("Sin acordes detectados")
+    : `${t("Acordes por revisar")}: ${issues}`;
   $("#pencil").classList.toggle("selected", editing);
   if (window.matchMedia("(max-width: 760px)").matches)
     $("#pencil").removeAttribute("aria-pressed");
@@ -307,9 +316,11 @@ function renderPages() {
         }),
     );
     document.querySelectorAll(".song-line").forEach((el) => {
-      el.onclick = () => editLine(el);
+      el.onclick = (event) => {
+        if (!event.target.closest(".unresolved-chord")) editLine(el);
+      };
       el.onkeydown = (e) => {
-        if (e.key === "Enter") {
+        if (e.key === "Enter" && !e.target.closest(".unresolved-chord")) {
           e.preventDefault();
           editLine(el);
         }
@@ -377,6 +388,69 @@ function resetView() {
   $("#source").scrollTop = 0;
   $("#line-numbers").scrollTop = 0;
 }
+function openIssue(el) {
+  const panel = $("#issue-editor");
+  panel.dataset.line = el.dataset.issueLine;
+  panel.dataset.offset = el.dataset.issueOffset;
+  $("#issue-value").value = el.textContent;
+  $("#issue-message").textContent = t(
+    "Corrige el acorde o déjalo pendiente para más tarde.",
+  );
+  panel.hidden = false;
+  $("#issue-value").focus();
+  $("#issue-value").select();
+}
+$("#pages").addEventListener("click", (event) => {
+  const issue = event.target.closest(".unresolved-chord");
+  if (!issue) return;
+  event.stopPropagation();
+  openIssue(issue);
+});
+$("#pages").addEventListener("keydown", (event) => {
+  if (!["Enter", " "].includes(event.key)) return;
+  const issue = event.target.closest(".unresolved-chord");
+  if (!issue) return;
+  event.preventDefault();
+  event.stopPropagation();
+  openIssue(issue);
+});
+$("#issue-count").onclick = () => {
+  if ($("#issue-count").dataset.noChords === "true") {
+    section = "document";
+    mobileView = "editor";
+    renderSettings();
+    $("#source").focus();
+    return;
+  }
+  const issue = $(".unresolved-chord");
+  issue?.scrollIntoView({ block: "center", behavior: "smooth" });
+  if (issue) openIssue(issue);
+};
+$("#issue-close").onclick = () => ($("#issue-editor").hidden = true);
+$("#issue-editor").onsubmit = (event) => {
+  event.preventDefault();
+  const value = $("#issue-value").value.trim();
+  if (!chordRE.test(value)) {
+    $("#issue-message").textContent = t(
+      "Acorde no reconocido. Prueba otra escritura o déjalo pendiente.",
+    );
+    return;
+  }
+  const panel = $("#issue-editor"),
+    line = Number(panel.dataset.line),
+    offset = Number(panel.dataset.offset),
+    lines = song().text.split("\n"),
+    marker = lines[line]?.slice(offset).match(/^\[\?[^\[\]\n]{1,40}\]/)?.[0];
+  if (!marker) return renderPages();
+  lines[line] =
+    lines[line].slice(0, offset) +
+    `[${value}]` +
+    lines[line].slice(offset + marker.length);
+  song().text = lines.join("\n");
+  changed();
+  renderSource();
+  renderPages();
+};
 function render() {
   renderTabs();
   const empty = !song();
@@ -508,6 +582,7 @@ async function acceptImport(data) {
   songs.push(s);
   active = s.id;
   resetView();
+  mobileView = "preview";
   $("#new-dialog").close();
   render();
   persist();
