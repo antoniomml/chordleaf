@@ -7,7 +7,7 @@
     <a href="https://github.com/antoniomml/chordleaf/releases/tag/v0.4.0"><img src="https://img.shields.io/badge/version-0.4.0-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.4.0"></a>
     <a href="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
   </p>
-  <p><a href="https://chordleaf.com/">Open Chordleaf</a> · <a href="#a-small-studio-for-your-songs">Features</a> · <a href="docs/guide.md">User guide</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
+  <p><a href="https://chordleaf.com/">Open Chordleaf</a> · <a href="#a-small-studio-for-your-songs">Features</a> · <a href="https://github.com/antoniomml/chordleaf/wiki">Wiki</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
 </div>
 
 ![chordleaf: lyrics and chord editor beside a song sheet](docs/images/workspace.png)
@@ -75,7 +75,7 @@ Musical ideas, missing explanations and awkward controls are all useful contribu
 
 To run your own copy, follow [the development guide](docs/development.md). To put it online, use the [step-by-step Vercel guide](docs/deployment.md). Try the public app at [chordleaf.com](https://chordleaf.com/). Preview deployments still require Vercel authentication.
 
-The [production readiness audit](docs/audit.md) records the launch checks and remaining limitations. Public web imports are enabled behind a Vercel rate limit; provider availability and usage need ongoing review. Report security issues [privately](SECURITY.md).
+The [current public audit](docs/public-audit-2026-09-23.md) records security, SEO, performance and remaining checks. The [wiki](https://github.com/antoniomml/chordleaf/wiki) presents the documentation in one place; the versioned Markdown files remain in this repository. Public web imports are enabled behind a Vercel rate limit; provider availability and usage need ongoing review. Report security issues [privately](SECURITY.md).
 
 ---
 

@@ -26,6 +26,7 @@ export function setupLanguagePicker({ persist, toast }) {
   }
 
   label.textContent = getLocale().toUpperCase();
+  button.setAttribute("aria-label", `${t("Idioma")}: ${label.textContent}`);
   for (const option of options) {
     option.setAttribute(
       "aria-checked",

@@ -34,7 +34,7 @@
     <span class="local-badge"><i></i> Tu música se queda contigo</span
     ><button id="new" class="primary">＋ Nueva canción</button>
     <div class="export-wrap">
-      <button id="export" class="outline">
+      <button id="export" class="outline" aria-label="Exportar">
         <svg class="export-icon" viewBox="0 0 18 18" aria-hidden="true">
           <path d="M9 2v9m-4-4 4 4 4-4M3 15h12" /></svg
         ><span class="export-label">Exportar</span
@@ -57,7 +57,7 @@
   </div>
 </header>
 <nav id="tabs" class="tabs" aria-label="Canciones abiertas"></nav>
-<section id="empty-state" hidden>
+<section id="empty-state" role="main" hidden>
   <img src="/logo.svg" alt="" />
   <p class="eyebrow">TU MÚSICA, EN PAPEL</p>
   <h1>No hay canciones abiertas.</h1>

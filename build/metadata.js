@@ -62,7 +62,18 @@ export function metadataPlugin(site) {
             fileName: `${locale}/index.html`,
             source: html,
           });
-          if (locale === "en") index.source = html;
+          if (locale === "en")
+            index.source = site
+              ? html
+                  .replace(
+                    `<link rel="canonical" href="${site.origin}/en/">`,
+                    `<link rel="canonical" href="${site.origin}/">`,
+                  )
+                  .replace(
+                    `<meta property="og:url" content="${site.origin}/en/">`,
+                    `<meta property="og:url" content="${site.origin}/">`,
+                  )
+              : html;
         }
         this.emitFile({
           type: "asset",
@@ -75,7 +86,7 @@ export function metadataPlugin(site) {
           this.emitFile({
             type: "asset",
             fileName: "sitemap.xml",
-            source: `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["en", "es"].map((locale) => `<url><loc>${site.origin}/${locale}/</loc></url>`).join("")}</urlset>`,
+            source: `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["", "en/", "es/"].map((path) => `<url><loc>${site.origin}/${path}</loc></url>`).join("")}</urlset>`,
           });
       },
     },

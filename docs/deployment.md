@@ -67,7 +67,7 @@ Promote the reviewed preview only after the applicable launch priorities are res
 - Firewall rule: exact path `/api/import-web`, 10 requests per IP per 60 seconds, fixed window, HTTP 429 after the limit.
 - Both `chordleaf.com` and `www.chordleaf.com` are connected; `www` redirects permanently to the apex. Production `SITE_URL` is `https://chordleaf.com` and is scoped to Production only.
 - The public GitHub repository has an active `main` ruleset requiring a pull request, resolved review threads, up-to-date `app` and `Vercel` checks, and blocking force pushes and deletion.
-- The `chordleaf.com` Domain property is verified in Google Search Console with a Vercel DNS TXT record. Submit `https://chordleaf.com/sitemap.xml` after changing the canonical domain; Google may need time to update its reports.
+- The `chordleaf.com` Domain property is verified in Google Search Console with a Vercel DNS TXT record. `https://chordleaf.com/sitemap.xml` is submitted and marked correct; Google may need time to crawl and index its pages.
 
 The protected preview was tested end to end with Cifra Club, LaCuerda and Ultimate Guitar: each returned a page that parsed into an editable song. Provider availability can change; retain the text/file fallback. Production web imports are public and preview imports require authentication; both have the firewall rule.
 
