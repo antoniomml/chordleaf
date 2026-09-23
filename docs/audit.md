@@ -6,9 +6,9 @@
 
 ## Current status
 
-The application and MIT-licensed repository are public. English and Spanish are supported, while repository documentation remains English. The production site is accessible without sign-in at `https://www.chordleaf.com/`; the apex redirects to `www`. Vercel Standard Protection keeps previews behind authentication. The initial review was merged in [pull request #1](https://github.com/antoniomml/chordleaf/pull/1), and the final domain preparation in [pull request #4](https://github.com/antoniomml/chordleaf/pull/4).
+The application and MIT-licensed repository are public. English and Spanish are supported, while repository documentation remains English. The production site is accessible without sign-in at `https://chordleaf.com/`; `www` redirects to the apex. Vercel Standard Protection keeps previews behind authentication. The initial review was merged in [pull request #1](https://github.com/antoniomml/chordleaf/pull/1), and the public launch preparation in [pull request #4](https://github.com/antoniomml/chordleaf/pull/4).
 
-Anonymous requests to `/`, `/en/`, `/es/`, `/robots.txt` and `/sitemap.xml` returned 200 after launch. A preview deployment still redirected to Vercel sign-in. The canonical, Open Graph and language URLs point to `www.chordleaf.com`. The `chordleaf.com` Domain property is verified in Google Search Console; the submitted sitemap is marked correct with two discovered pages. Discovery does not guarantee indexing.
+Anonymous requests to `/`, `/en/`, `/es/`, `/robots.txt` and `/sitemap.xml` returned 200 after launch. A preview deployment still redirected to Vercel sign-in. The canonical, Open Graph and language URLs point to `chordleaf.com`. The `chordleaf.com` Domain property is verified in Google Search Console. Discovery does not guarantee indexing.
 
 ## Remaining priorities
 
@@ -16,11 +16,11 @@ Continue real-device and human accessibility checks, monitor public web-import u
 
 ### September 23 launch review
 
-- `www.chordleaf.com` is the configured production origin; `chordleaf.com` redirects to it. Production was rebuilt after setting `SITE_URL`, and its metadata uses the canonical domain.
+- `chordleaf.com` is the configured production origin; `www.chordleaf.com` redirects to it. Production was rebuilt after setting `SITE_URL`, and its metadata uses the canonical domain.
 - Vercel Authentication changed from **All Deployments** to **Standard Protection**. Production is public and previews remain protected.
 - GitHub is public. Dependency graph, vulnerability and malware alerts, Dependabot security updates, private vulnerability reporting and CodeQL default setup are enabled. Actions use read-only workflow tokens and full-length SHA-pinned actions. An active `main` ruleset requires a PR, resolved review threads and up-to-date `app` and `Vercel` checks, and blocks force pushes and deletion.
 - Vercel's `/api/import-web` rule remains active at 10 requests per IP per 60 seconds, returning 429. Project data sharing for model training is off. Web imports are enabled in Production and Preview; review public usage and provider availability.
-- Google Search Console verified the Domain property through a Vercel DNS TXT record. The submitted `https://www.chordleaf.com/sitemap.xml` was marked correct and listed two discovered pages.
+- Google Search Console verified the Domain property through a Vercel DNS TXT record. The former `www` sitemap was marked correct with two discovered pages; the apex sitemap needs to be submitted after the domain change.
 
 The first CodeQL scan found three partial LaCuerda hostname checks and one request-forgery alert. [Pull request #5](https://github.com/antoniomml/chordleaf/pull/5) replaced the substring checks with exact hostname matches; the next `main` scan closed all three alerts. The remaining request-forgery alert was reviewed and dismissed as a false positive with the reason recorded in GitHub: `songUrl` accepts only HTTPS URLs whose host exactly matches a fixed allowlist, rejects credentials and nonstandard ports, and revalidates every manually handled redirect before another fetch. No CodeQL alerts remain open after that review.
 
