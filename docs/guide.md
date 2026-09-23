@@ -1,10 +1,21 @@
 # Your first song in chordleaf
 
-[← Back to chordleaf](../README.md)
+[← Back to chordleaf](../README.md) · [Common questions](faq.md)
 
 Use **EN / ES** in the top bar to choose English or Spanish. The app starts in your browser language (English for languages other than Spanish). This guide uses the English control labels. Changing the interface does not translate songs.
 
 The workspace has a compact navigation rail, an editing sidebar and a sheet preview. **Document**, **Key** and **Chords** switch the entire sidebar. Your text and cursor remain in place when you return to Document.
+
+![The Chordleaf workspace with a song editor and page preview](images/workspace.png)
+
+## On this page
+
+- [Start or import a song](#start-or-import-a-song)
+- [Place a chord precisely](#place-a-chord-precisely)
+- [Browse and print chord diagrams](#browse-edit-and-print-chord-diagrams)
+- [Identify a chord](#identify-a-chord-on-the-fretboard)
+- [Prepare and export the sheet](#prepare-the-sheet)
+- [Recover or back up your workspace](#full-workspace-backups)
 
 ## Start or import a song
 
@@ -38,6 +49,8 @@ The expand icon beside **Lyrics and chords** opens a larger editor with the same
 The preview's pencil enables editing directly on the sheet. Select a verse; Enter commits, Escape cancels and Shift+Enter adds a line break.
 
 ## Browse, edit and print chord diagrams
+
+![A grid of guitar chord diagrams in the Chords section](images/chord-library.png)
 
 Open **Chords → In song**. Each card shows a chord name and its current guitar diagram. Click the card to edit the frets; the edit hint appears on hover or keyboard focus. Values run from low E to high e: `-1` is muted, `0` open, and positive values are frets. You can mark a custom voicing with an asterisk or restore the catalog shape.
 
@@ -87,7 +100,7 @@ Write `{column}` on its own line to start another column, or another page in a s
 | ----------- | ------------------------------------------------------------------------------ |
 | PDF         | Printing or sharing a fixed layout.                                            |
 | Word · DOCX | Further editing in a word processor; rendering may vary.                       |
-| Texto · TXT | Preserving lyrics, anchors, settings and custom diagrams for exact re-editing. |
+| Text · TXT  | Preserving lyrics, anchors, settings and custom diagrams for exact re-editing. |
 
 Preview, PDF and Word share a layout model. Reimported PDF or Word reconstructs that model from appearance, so review chord placements. TXT is the best editing backup. Autosave belongs to this browser: export before changing devices or clearing browser data.
 
