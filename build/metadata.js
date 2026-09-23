@@ -1,3 +1,5 @@
+import { introHtml } from "../src/ui/intro-copy.js";
+
 const copy = {
   en: {
     title: "Your music, on paper",
@@ -51,10 +53,12 @@ export function metadataPlugin(site) {
             )
             .replace(/<h1>.*?<\/h1>/s, `<h1>${c.heading}</h1>`)
             .replace(/<p>\s*Write lyrics.*?<\/p>/s, `<p>${c.intro}</p>`)
-            .replace(/<p>\s*Import TXT.*?<\/p>/s, `<p>${c.privacy}</p>`);
+            .replace(/<p>\s*Import TXT.*?<\/p>/s, `<p>${c.privacy}</p>`)
+            .replace('<div id="fallback-features"></div>', introHtml(locale));
           if (site) {
             const origin = site.origin;
-            const tags = `<link rel="canonical" href="${origin}/${locale}/"><link rel="alternate" hreflang="en" href="${origin}/en/"><link rel="alternate" hreflang="es" href="${origin}/es/"><link rel="alternate" hreflang="x-default" href="${origin}/"><meta property="og:url" content="${origin}/${locale}/"><meta property="og:locale" content="${locale === "en" ? "en_US" : "es_ES"}"><meta property="og:image" content="${origin}/social-preview.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">`;
+            const pageUrl = locale === "en" ? `${origin}/` : `${origin}/es/`;
+            const tags = `<link rel="canonical" href="${pageUrl}"><link rel="alternate" hreflang="en" href="${origin}/"><link rel="alternate" hreflang="es" href="${origin}/es/"><link rel="alternate" hreflang="x-default" href="${origin}/"><meta property="og:url" content="${pageUrl}"><meta property="og:locale" content="${locale === "en" ? "en_US" : "es_ES"}"><meta property="og:image" content="${origin}/social-preview.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">`;
             html = html.replace("</head>", tags + "</head>");
           }
           this.emitFile({
@@ -62,18 +66,7 @@ export function metadataPlugin(site) {
             fileName: `${locale}/index.html`,
             source: html,
           });
-          if (locale === "en")
-            index.source = site
-              ? html
-                  .replace(
-                    `<link rel="canonical" href="${site.origin}/en/">`,
-                    `<link rel="canonical" href="${site.origin}/">`,
-                  )
-                  .replace(
-                    `<meta property="og:url" content="${site.origin}/en/">`,
-                    `<meta property="og:url" content="${site.origin}/">`,
-                  )
-              : html;
+          if (locale === "en") index.source = html;
         }
         this.emitFile({
           type: "asset",
@@ -86,7 +79,7 @@ export function metadataPlugin(site) {
           this.emitFile({
             type: "asset",
             fileName: "sitemap.xml",
-            source: `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["", "en/", "es/"].map((path) => `<url><loc>${site.origin}/${path}</loc></url>`).join("")}</urlset>`,
+            source: `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["", "es/"].map((path) => `<url><loc>${site.origin}/${path}</loc></url>`).join("")}</urlset>`,
           });
       },
     },

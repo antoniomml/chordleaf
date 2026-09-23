@@ -32,6 +32,9 @@ export default {
     "Open Chordleaf over HTTPS in an up-to-date browser to save your songs safely.",
   "Volver a intentar": "Try again",
   "Vista del documento": "Document preview",
+  "Canción sin título": "Untitled song",
+  "Una columna": "One column",
+  "Dos columnas": "Two columns",
   "Recuperar datos": "Recover data",
   "Copia descargada. Conserva el archivo y consulta la guía de recuperación.":
     "Recovery copy downloaded. Keep the file and consult the recovery guide.",

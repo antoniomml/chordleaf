@@ -10,7 +10,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
       signal,
       headers: {
         Accept: "text/html, text/plain;q=0.9",
-        "User-Agent": "Chordleaf/0.4.0 (song import)",
+        "User-Agent": "Chordleaf/0.5.0 (song import)",
       },
     });
     if ([301, 302, 303, 307, 308].includes(response.status)) {
@@ -63,8 +63,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
   );
 }
 export async function webImportMiddleware(req, res, next) {
-  const request = new URL(req.url, "http://localhost");
-  if (request.pathname !== "/api/import-web") return next();
+  if (req.url?.split("?", 1)[0] !== "/api/import-web") return next();
   securityHeaders(res);
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
@@ -100,6 +99,7 @@ export async function webImportMiddleware(req, res, next) {
     res.end(JSON.stringify({ error: "El enlace es demasiado largo." }));
     return;
   }
+  const request = new URL(req.url, "http://localhost");
   try {
     const data = await fetchSongPage(request.searchParams.get("url"));
     const body = JSON.stringify(data);

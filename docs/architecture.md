@@ -6,7 +6,9 @@ chordleaf is a browser application built with ES modules and Vite. Editing and f
 
 | File                   | Responsibility                                                                     |
 | ---------------------- | ---------------------------------------------------------------------------------- |
-| `src/app.js`           | Song state, document/key sections, controls and rendering.                         |
+| `src/app.js`           | Song state, document/key sections and control wiring.                              |
+| `src/ui/pages.js`      | Escaped HTML for the document preview.                                             |
+| `src/ui/intro-copy.js` | Shared English/Spanish introduction for the app and static entry pages.            |
 | `src/chords-panel.js`  | Chord sidebar, catalog search, interactive fretboard and replacement workflow.     |
 | `src/harmony.js`       | Guitar pitches, formula matching, theoretical note spelling and token replacement. |
 | `src/dictionary-ui.js` | Song chord cards, custom shape editor and draggable sheet diagrams.                |
@@ -64,6 +66,6 @@ Web extraction is provider-specific, not song-specific. `src/web-import.js` read
 - `src/workspace-backup.js`: versioned JSON backup and additive restore, with fresh song identifiers and known-field sanitization.
 - `src/fit-song.js` and `src/fit-worker.js`: bounded auto-fit in a dedicated worker. Each search parses the song once; editing during a pending fit prevents stale results from being applied.
 - `src/docx-limits.js`: ZIP central-directory preflight limits declared expanded content to 32 MiB and 2,000 entries. It rejects encrypted and unsupported archives; it is not a complete malicious-parser sandbox.
-- `build/metadata.js`: static English/Spanish entry pages, canonical URLs, language links, social metadata and sitemap.
+- `build/metadata.js`: static English/Spanish entry pages, canonical URLs, language links, social metadata and sitemap. English has one indexed canonical at `/`; `/en/` remains a direct language route and points to `/` as canonical.
 
 The `src/ui/settings.js` render helpers and shared `src/ui/html.js` escaping utility keep presentation separate from application event/state wiring. `src/docx-import.js` owns the Word worker lifecycle; `src/docx-worker.js` validates and converts the archive without decoding images. `src/import-limits.js` applies cumulative PDF text/geometry budgets before canvas measurements. The import dialog aborts its current operation when closing or navigating back.

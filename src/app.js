@@ -1,6 +1,8 @@
 import { escapeHtml as esc } from "./ui/html.js";
 import { setupLanguagePicker } from "./ui/language.js";
 import { renderDocumentSettings, renderKeySettings } from "./ui/settings.js";
+import { renderPageMarkup } from "./ui/pages.js";
+import { introHtml } from "./ui/intro-copy.js";
 import { fitSong } from "./fit-song.js";
 import { serializeWorkspace, restoreWorkspace } from "./workspace-backup.js";
 import { openWorkspaceSession } from "./workspace-session.js";
@@ -57,7 +59,8 @@ let section = "document",
   editing = false,
   currentPage = 1,
   observer,
-  saveTimer;
+  saveTimer,
+  previewTimer;
 const song = () => songs.find((s) => s.id === active);
 function persist() {
   if (!workspaceSession.held) return false;
@@ -90,6 +93,7 @@ function toast(message) {
   setTimeout(() => $("#toast").classList.remove("visible"), 6500);
 }
 $("#app").innerHTML = t(shell.replace(/\s+/g, " "));
+$("#intro-content").innerHTML = introHtml(getLocale());
 function renderTabs() {
   $("#tabs").innerHTML =
     songs
@@ -241,33 +245,23 @@ function renderSource() {
   $("#source").value = song().text;
   sourceMeta();
 }
-function sourceMeta() {
+function sourceMeta({ harmonyChanged = true } = {}) {
   const lines = song().text.split("\n").length;
-  $("#line-numbers").innerHTML = Array.from(
-    { length: lines },
-    (_, i) => `<div>${i + 1}</div>`,
-  ).join("");
+  if ($("#line-numbers").childElementCount !== lines)
+    $("#line-numbers").innerHTML = Array.from(
+      { length: lines },
+      (_, i) => `<div>${i + 1}</div>`,
+    ).join("");
   $("#line-count").textContent = t`${lines} líneas`;
-  dictionary.renderTray();
+  if (harmonyChanged) dictionary.renderTray();
   if (section === "chords") chordPanel.refresh();
 }
 function renderPages() {
+  clearTimeout(previewTimer);
+  previewTimer = undefined;
   const s = song(),
     l = layout(s);
-  $("#pages").innerHTML = l.pages
-    .map(
-      (p, i) =>
-        `<div class="page-shell"><article class="page" data-page="${i + 1}" style="width:${PAGE.width}px;height:${PAGE.height}px">${i === 0 ? `<div class="sheet-header" style="left:${l.margin}px;right:${l.margin}px;top:${l.margin}px;height:${l.headerHeight}px"><h1 style="font-size:${l.header.titleSize}px" ${editing ? 'contenteditable="true" data-header="title"' : ""}>${l.titleLines.map(esc).join("<br>")}</h1><p style="left:${l.header.artistX}px;top:${l.header.artistY - l.header.artistSize}px;font-size:${l.header.artistSize}px" ${editing ? 'contenteditable="true" data-header="artist"' : ""}>${l.header.artistLines.map(esc).join("<br>")}</p><span style="top:${l.header.capoY - 11}px">CAPO ${s.capo}</span></div>` : ""}${p.columns
-          .flat()
-          .map(
-            (r) =>
-              `<div class="song-line ${editing ? "editable" : ""}" data-line="${r.index}" data-end="${r.endIndex ?? r.index}" style="left:${r.x}px;top:${r.y}px;width:${r.width}px;height:${r.height}px;font-size:${l.size}px" ${editing ? t('tabindex="0" role="button" aria-label="Editar verso"') : ""}>${r.marks.map((m) => `<span class="sheet-chord" data-chord="${esc(m.chord)}" style="left:${m.x * l.cw}px;top:${(m.lane || 0) * l.size * 1.44}px">${esc(m.chord)}</span>`).join("")}<span class="lyric" style="top:${r.lyricOffset}px">${esc(r.lyric) || " "}</span></div>`,
-          )
-          .join(
-            "",
-          )}<span class="sheet-brand">Chordleaf</span><span class="sheet-page">${i + 1}</span></article></div>`,
-    )
-    .join("");
+  $("#pages").innerHTML = renderPageMarkup(s, l, editing);
   $("#pencil").classList.toggle("selected", editing);
   if (window.matchMedia("(max-width: 760px)").matches)
     $("#pencil").removeAttribute("aria-pressed");
@@ -324,6 +318,11 @@ function renderPages() {
   }
   dictionary.render();
   resizePages();
+}
+function schedulePreview() {
+  if (song().text.length <= 10000) return renderPages();
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(renderPages, 120);
 }
 function editLine(el) {
   if (el.querySelector("textarea")) return;
@@ -386,6 +385,8 @@ function render() {
   $("main").hidden = empty;
   $("#export").disabled = empty;
   if (empty) {
+    clearTimeout(previewTimer);
+    previewTimer = undefined;
     observer?.disconnect();
     return;
   }
@@ -408,9 +409,9 @@ $("#source").oninput = (e) => {
     JSON.stringify(chords(e.target.value));
   song().text = e.target.value;
   changed();
-  sourceMeta();
+  sourceMeta({ harmonyChanged });
   if (harmonyChanged) renderSettings();
-  renderPages();
+  schedulePreview();
 };
 $("#source").onscroll = (e) =>
   ($("#line-numbers").scrollTop = e.target.scrollTop);

@@ -30,7 +30,7 @@ Create a protected preview first. Keep production changes gated on the Checks wo
 
 Set **`SITE_URL`** in Vercel's Production environment to `https://chordleaf.com`. Use no path, query, fragment or credentials. Rebuild after changing it.
 
-The build uses this value for the canonical URL, Open Graph URL and a bilingual sitemap, with separate `/en/` and `/es/` pages and reciprocal language links. Without it, those URLs are omitted instead of inventing a domain. `robots.txt` excludes `/api/`; it is not a security control. Preview indexing and access should remain restricted using Vercel Deployment Protection and its preview indexing controls.
+The build uses this value for canonical and Open Graph URLs, language links and a bilingual sitemap. `/` is the English canonical; `/en/` remains a direct English route with a canonical pointing to `/`, and `/es/` is the Spanish canonical. The static HTML contains useful feature descriptions even before JavaScript runs. `pnpm check` builds with this production origin and verifies the generated metadata. Without `SITE_URL`, canonical URLs and the sitemap are omitted instead of inventing a domain. `robots.txt` excludes `/api/`; it is not a security control. Preview indexing and access should remain restricted using Vercel Deployment Protection and its preview indexing controls.
 
 ## 4. Protect and enable web imports
 
@@ -38,8 +38,8 @@ On Vercel, web imports return **503** until `CHORDLEAF_WEB_IMPORT_ENABLED=true` 
 
 Before enabling it:
 
-1. Add a Vercel Firewall rate-limit rule for the exact path `/api/import-web`. Choose a conservative threshold for your traffic and plan, then review legitimate usage. Return 429 when the limit is exceeded.
-2. Configure usage/budget notifications and review function errors and invocation counts.
+1. Add a Vercel Firewall rate-limit rule for the exact path `/api/import-web`. The production baseline is a fixed window of 10 requests per 60 seconds per IP address, returning 429. Review legitimate usage before changing it. Vercel tracks these counters per region, so this is a cost control rather than a global quota.
+2. Review usage and spend notifications available on your Vercel plan, plus function errors and invocation counts. Some anomaly alerts require a paid plan; do not assume they are active on Hobby.
 3. Set `CHORDLEAF_WEB_IMPORT_ENABLED=true` only in the environments where those controls are ready, then redeploy.
 4. Test one supported URL from each provider. Public sites can block data-center traffic even when imports work locally. Do not bypass their access controls; retain file/text import as the fallback.
 
@@ -58,4 +58,4 @@ Promote the reviewed preview only after the applicable launch priorities are res
 
 ## References
 
-[Vite deployment](https://vite.dev/guide/static-deploy), [Vercel Node.js functions](https://vercel.com/docs/functions/runtimes/node-js), [Vercel configuration](https://vercel.com/docs/project-configuration/vercel-json), [Vercel rate limiting](https://vercel.com/kb/guide/add-rate-limiting-vercel).
+[Vite deployment](https://vite.dev/guide/static-deploy), [Vercel Node.js functions](https://vercel.com/docs/functions/runtimes/node-js), [Vercel configuration](https://vercel.com/docs/project-configuration/vercel-json), [Vercel WAF rate limiting](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting).

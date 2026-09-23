@@ -20,13 +20,13 @@ Open the URL printed by Vite, normally `http://localhost:5173`.
 | Command                 | Purpose                                                            |
 | ----------------------- | ------------------------------------------------------------------ |
 | `pnpm dev`              | Development server with automatic reload.                          |
-| `pnpm check`            | Formatting, unit tests and production build.                       |
+| `pnpm check`            | Formatting, unit tests, production-origin build and SEO metadata.  |
 | `pnpm start`            | Serve the build with security headers and the web-import endpoint. |
 | `pnpm audit`            | Query the dependency advisory database.                            |
 | `pnpm build`            | Static application in `dist/`.                                     |
 | `pnpm preview`          | Local preview of the production build.                             |
 | `pnpm test`             | Unit tests for music, harmony, layout and imports.                 |
-| `pnpm test:e2e`         | Browser checks; requires a running server.                         |
+| `pnpm test:e2e`         | Browser and automated accessibility checks; requires a server.     |
 | `pnpm format`           | Format code and documentation.                                     |
 | `pnpm format:check`     | Check formatting without modifying files.                          |
 | `pnpm docs:screenshots` | Refresh documentation screenshots using the demo song.             |
@@ -66,7 +66,7 @@ The previous application was removed from the current tree. Historical commits r
 
 ## Releases
 
-The current tagged release is **`v0.4.0`**. Before another release:
+The current tagged release is **`v0.5.0`**. Before another release:
 
 1. Update `version` in `package.json` and add its changes to `CHANGELOG.md`.
 2. Run frozen installation, formatting, tests, build and browser checks.
@@ -89,7 +89,7 @@ The endpoint accepts HTTPS song URLs from Cifra Club, LaCuerda and Ultimate Guit
 
 For the same compiled assets and headers used in production, build, run `PORT=5173 pnpm start`, and execute `pnpm test:e2e` in another terminal. Stop Vite first if it is using that port. Browser fixtures use the UI and mocked external pages, so they also work with a production build.
 
-Lighthouse and axe can be run as temporary tools without adding application dependencies. Re-run them on a protected Vercel preview before each release. Local timings and automated accessibility checks are not field performance measurements or a complete accessibility certification.
+The browser suite runs axe-core in the empty workspace, new-song dialog, editor and chord workspace. It also verifies the accessible column state and delayed previews for long songs. Run manual keyboard, screen-reader and 200% zoom checks before release; automated checks are not a complete accessibility certification. Lighthouse can be run as a temporary tool on a protected Vercel preview. Local timings are not field performance measurements.
 
 Environment variables are documented in [.env.example](../.env.example). Vite reads `SITE_URL` during builds. The Node import handler reads its process environment: export `CHORDLEAF_WEB_IMPORT_ENABLED=false` in your shell when testing disabled imports locally. Do not prefix secrets with `VITE_`; those variables are exposed to browser bundles.
 
