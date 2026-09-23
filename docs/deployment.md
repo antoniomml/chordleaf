@@ -2,7 +2,7 @@
 
 [← Back to Chordleaf](../README.md) · [Launch priorities](audit.md)
 
-Chordleaf uses a static Vite frontend and one Node.js function for importing public song pages. No database, authentication provider or secret API key is required. The repository includes deployment configuration. The protected production deployment is available at https://chordleaf-app.vercel.app. The intended custom domain, `chordleaf.com`, has not yet been registered. The current review build is linked from [pull request #1](https://github.com/antoniomml/chordleaf/pull/1); access requires the owner’s Vercel account.
+Chordleaf uses a static Vite frontend and one Node.js function for importing public song pages. No database, authentication provider or secret API key is required. The repository includes deployment configuration. The custom domain is `https://www.chordleaf.com/`, with `https://chordleaf.com/` configured to redirect to it. The production deployment still requires Vercel authentication; anonymous visitors and search engines cannot access it until deployment protection is changed.
 
 ## 1. Check the code
 
@@ -28,7 +28,7 @@ Create a protected preview first. Keep production changes gated on the Checks wo
 
 ## 3. Configure the production origin
 
-Once you have chosen a public domain, set **`SITE_URL`** in Vercel's Production environment to its HTTPS origin, for example `https://your-domain.example`. Use no path, query, fragment or credentials. Rebuild after changing it.
+Set **`SITE_URL`** in Vercel's Production environment to `https://www.chordleaf.com`. Use no path, query, fragment or credentials. Rebuild after changing it.
 
 The build uses this value for the canonical URL, Open Graph URL and a bilingual sitemap, with separate `/en/` and `/es/` pages and reciprocal language links. Without it, those URLs are omitted instead of inventing a domain. `robots.txt` excludes `/api/`; it is not a security control. Preview indexing and access should remain restricted using Vercel Deployment Protection and its preview indexing controls.
 
@@ -65,7 +65,7 @@ Promote the reviewed preview only after the applicable launch priorities are res
 - Project: `chordleaf`, Node.js `24.x`, Vercel Hobby.
 - All deployments require Vercel Authentication, including the production alias. Vercel assigned the first deployment to production automatically; it is protected and has not been publicly launched.
 - Firewall rule: exact path `/api/import-web`, 10 requests per IP per 60 seconds, fixed window, HTTP 429 after the limit.
-- `SITE_URL` currently uses `https://chordleaf-app.vercel.app`. Replace it with `https://chordleaf.com` after the domain has been registered and connected.
+- Both `chordleaf.com` and `www.chordleaf.com` are connected; the apex redirects to `www`. Production `SITE_URL` is `https://www.chordleaf.com` and is scoped to Production only. The site remains protected by Vercel Authentication pending public-launch approval.
 - GitHub branch protection is unavailable for the current private repository/account plan. Keep changes on a review branch; enable required checks when the repository becomes public or the account supports private protections.
 
 The protected preview was tested end to end with Cifra Club, LaCuerda and Ultimate Guitar: each returned a page that parsed into an editable song. Provider availability can change; retain the text/file fallback. Production and preview imports are enabled behind authentication and the firewall.

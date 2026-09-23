@@ -1,24 +1,32 @@
 # Production readiness audit
 
-**Updated:** September 22, 2026. Baseline: `39bf11b`, plus the production-readiness changes.
+**Updated:** September 23, 2026. Baseline: `39bf11b`, plus the production-readiness changes.
 
 [← Back to Chordleaf](../README.md) · [Deployment guide](deployment.md) · [Security policy](../SECURITY.md)
 
 ## Current decision
 
-The application is suitable for a protected review deployment. The original code has the owner-approved MIT license. English and Spanish are supported, while repository documentation remains English. The 0.4.0 tag prepares for a later public release; GitHub and Vercel visibility remain unchanged.
+The application is suitable for a protected review deployment. The original code has the owner-approved MIT license. English and Spanish are supported, while repository documentation remains English. The 0.4.0 tag prepares for a later public release. The custom domain is connected, but GitHub is still private and Vercel Authentication still protects the production deployment.
 
-Vercel's first deployment was automatically assigned to production. **All project deployments are now protected with Vercel Authentication**, including the production alias at `https://chordleaf-app.vercel.app`. An unauthenticated request redirects to sign-in. `chordleaf.com` has been selected as the intended custom domain but still needs to be registered and connected. The initial review was merged in [pull request #1](https://github.com/antoniomml/chordleaf/pull/1).
+Vercel's first deployment was automatically assigned to production. **All project deployments are now protected with Vercel Authentication**, including `https://www.chordleaf.com/`. An unauthenticated request redirects to sign-in. The apex `https://chordleaf.com/` redirects to `www`. The initial review was merged in [pull request #1](https://github.com/antoniomml/chordleaf/pull/1).
 
 ## Remaining priorities
 
-The owner deferred the final domain and intensive real-device/mobile acceptance to a later version. Keep the hosted deployment protected while those release decisions are open.
+The final domain is connected. Intensive real-device/mobile acceptance and the public-access decision remain open. Keep the hosted deployment protected until those decisions are resolved.
+
+### September 23 launch review
+
+- `www.chordleaf.com` is the configured production origin; `chordleaf.com` is configured to redirect to it. Production was rebuilt after setting `SITE_URL`, and the authenticated page now emits matching canonical, Open Graph and language URLs.
+- Anonymous requests to the home page, locale pages, `robots.txt` and `sitemap.xml` still redirect to Vercel sign-in. Public indexing requires changing Vercel Authentication from **All Deployments** to **Standard Protection**, then confirming that production is public and previews stay protected.
+- GitHub remains private. The dependency graph, vulnerability alerts and malware alerts are enabled. Actions are restricted to read-only workflow tokens and full-length SHA-pinned actions. No branch protection is configured; add a `main` ruleset with the Checks job required after the repository is public.
+- Vercel's `/api/import-web` rule remains active at 10 requests per IP per 60 seconds, returning 429. Project data sharing for model training is off. Web imports are still enabled in Production and Preview; review usage when production becomes public.
+- Register a `chordleaf.com` Domain property in Google Search Console after public access works, and submit `https://www.chordleaf.com/sitemap.xml`. The sitemap already lists `/en/` and `/es/`.
 
 | Priority | Action before the relevant release                                         | Evidence / limitation                                                                                                                                                                                                                                                                                                                                                           |
 | -------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | P1       | Review provider availability and usage before enabling public web imports. | The Vercel firewall is active at 10 requests/IP/minute; a bounded test returned ten 503 responses from the disabled endpoint, then two 429 responses. Imports are enabled only behind Vercel Authentication in the owner’s production and preview environments. All three providers also passed a real protected-preview import into an editable song. Availability can change. |
 | P1       | Perform human accessibility and real-device acceptance checks.             | Automated Chromium/Firefox/WebKit coverage and earlier axe checks do not replace a real iPhone, keyboard-at-200%-zoom and screen-reader session.                                                                                                                                                                                                                                |
-| P2       | Choose the final public origin and register Search Console after launch.   | Static `/en/` and `/es/` pages, reciprocal language links, a social image and sitemap are implemented. `SITE_URL` supports the temporary Vercel alias and a later custom domain.                                                                                                                                                                                                |
+| P2       | Verify public indexing and register Search Console after launch.           | The canonical production origin is `https://www.chordleaf.com`; static `/en/` and `/es/` pages, reciprocal language links, a social image and sitemap are implemented. Search engines currently receive a Vercel sign-in redirect.                                                                                                                                              |
 | P2       | Continue profiling unusually large or hostile documents.                   | Word and auto-fit use terminable workers; PDF parsing has cancellation, timeout and cumulative text/geometry budgets. These are not a complete hostile-document sandbox. Low-end phone profiling remains useful.                                                                                                                                                                |
 | P2       | Consolidate remaining UI render helpers and CSS incrementally.             | The static shell and document/key render helpers were extracted. Removed 24 superseded CSS declarations with twelve pixel-identical desktop/tablet/mobile screenshots. Continue gradual extraction when changing features.                                                                                                                                                      |
 
