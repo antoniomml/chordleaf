@@ -1,6 +1,6 @@
 # Deploy Chordleaf on Vercel
 
-[← Back to Chordleaf](../README.md) · [Launch priorities](audit.md)
+[← Back to Chordleaf](../README.md) · [Current audit](public-audit-2026-09-23.md)
 
 Chordleaf uses a static Vite frontend and one Node.js function for importing public song pages. No database, authentication provider or secret API key is required. The repository includes deployment configuration. The public production domain is `https://chordleaf.com/`, with `https://www.chordleaf.com/` redirecting to it. Vercel Standard Protection keeps preview deployments behind authentication.
 
