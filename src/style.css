@@ -287,6 +287,46 @@ button.primary {
   min-width: 170px;
   padding: 13px 18px;
 }
+.intro-features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 870px;
+  margin-top: 48px;
+  text-align: left;
+}
+.intro-features > div {
+  padding: 19px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #202621;
+}
+.intro-features h2 {
+  margin: 0 0 10px;
+  color: #edf2e7;
+  font-size: 16px;
+}
+.intro-features p {
+  margin: 0;
+  color: #b6c2ae;
+  font-size: 13px;
+  line-height: 1.6;
+}
+#empty-state .intro-links {
+  margin: 20px 0 0;
+  color: #b6c2ae;
+  font-size: 13px;
+}
+.intro-links a {
+  color: var(--green);
+}
+@media (max-width: 760px) {
+  .intro-features {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 32px;
+  }
+}
 main {
   display: flex;
   height: calc(100dvh - 100px);

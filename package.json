@@ -1,6 +1,6 @@
 {
   "name": "chordleaf",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A local-first workspace for lyrics, guitar chords and printable rehearsal sheets.",
   "private": true,
   "type": "module",
@@ -23,12 +23,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "node --test tests/*.test.js",
-    "test:e2e": "node tests/browser.mjs && node tests/mobile-browser.mjs && node tests/ios-text-browser.mjs && node tests/chords-browser.mjs && node tests/missing-chords-browser.mjs && node tests/workspace-browser.mjs && node tests/import-browser.mjs && node tests/instrumental-browser.mjs && node tests/new-song-browser.mjs && node tests/readiness-browser.mjs",
+    "test:e2e": "node tests/browser.mjs && node tests/mobile-browser.mjs && node tests/ios-text-browser.mjs && node tests/chords-browser.mjs && node tests/missing-chords-browser.mjs && node tests/workspace-browser.mjs && node tests/import-browser.mjs && node tests/instrumental-browser.mjs && node tests/new-song-browser.mjs && node tests/readiness-browser.mjs && node tests/long-song-browser.mjs && node tests/accessibility-browser.mjs",
     "format": "prettier --write src tests scripts build server api vercel.json vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
     "docs:screenshots": "node scripts/docs-screenshots.mjs",
     "format:check": "prettier --check src tests scripts build server api vercel.json vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
     "start": "node server/start.js",
-    "check": "pnpm format:check && pnpm test && pnpm build",
+    "check": "pnpm format:check && pnpm test && SITE_URL=https://chordleaf.com pnpm build && pnpm check:metadata",
+    "check:metadata": "node scripts/check-metadata.mjs",
     "test:compatibility": "node tests/compatibility-browser.mjs"
   },
   "dependencies": {
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "axe-core": "^4.13.0",
     "prettier": "^3.9.8",
     "vite": "^8.3.0"
   },

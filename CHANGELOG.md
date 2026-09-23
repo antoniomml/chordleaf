@@ -1,5 +1,13 @@
 # chordleaf changelog
 
+## 0.5.0 · September 23, 2026
+
+- Add accessible names for untitled preview headings and announce the selected document column count.
+- Keep long-song typing responsive by scheduling preview updates and avoiding unnecessary chord tray and line-number rebuilds.
+- Give the empty workspace useful bilingual feature descriptions, shared with the static HTML that search engines can read.
+- Consolidate English indexing on `/`, retain `/en/` as a direct route and verify canonical, language and sitemap metadata in CI.
+- Add automated accessibility and long-song browser checks, and validate overlong web-import requests before parsing their URLs.
+
 ## 0.4.0 · September 22, 2026
 
 - Rename the product from Chordi to Chordleaf across the application, exports, documentation, metadata and generated artwork.
