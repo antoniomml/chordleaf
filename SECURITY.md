@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please do not post exploit details, private songs, credentials or recovery files in a public issue. Use GitHub's **Security → Report a vulnerability** for this repository once private vulnerability reporting is enabled. If that option is unavailable, open an issue requesting a private contact without including the vulnerability details. Enabling and testing this reporting channel is part of the launch checklist.
+Please do not post exploit details, private songs, credentials or recovery files in a public issue. Use GitHub's [private vulnerability reporting](https://github.com/antoniomml/chordleaf/security/advisories/new) to contact the maintainers. If that option is unavailable, open an issue requesting a private contact without including the vulnerability details.
 
 Include the affected version, a minimal invented example, reproduction steps and the expected impact. There is no published response-time commitment or long-term support policy yet; fixes target the current codebase.
 

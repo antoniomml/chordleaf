@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { songUrl } from "../src/web-sources.js";
+import { LACUERDA_HOSTS, songUrl } from "../src/web-sources.js";
 import { fetchSongPage } from "../server/web-import.js";
 import { stripLaCuerdaFretGrids } from "../src/web-import.js";
 test("only supported public HTTPS hosts are accepted", () => {
@@ -25,6 +25,8 @@ test("only supported public HTTPS hosts are accepted", () => {
       "https://es.ultimate-guitar.com.evil.test/tab/artist/song-chords-123",
     ),
   );
+  assert.equal(LACUERDA_HOSTS.has("acordes.lacuerda.net"), true);
+  assert.equal(LACUERDA_HOSTS.has("lacuerda.net.evil.test"), false);
 });
 test("LaCuerda fingering legends are removed without touching the song", () => {
   const grid =

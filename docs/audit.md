@@ -1,34 +1,34 @@
 # Production readiness audit
 
-**Updated:** September 23, 2026. Baseline: `39bf11b`, plus the production-readiness changes.
+**Updated:** September 23, 2026. Baseline: `39bf11b`, plus the production-readiness and public-launch changes.
 
 [← Back to Chordleaf](../README.md) · [Deployment guide](deployment.md) · [Security policy](../SECURITY.md)
 
-## Current decision
+## Current status
 
-The application is suitable for a protected review deployment. The original code has the owner-approved MIT license. English and Spanish are supported, while repository documentation remains English. The 0.4.0 tag prepares for a later public release. The custom domain is connected, but GitHub is still private and Vercel Authentication still protects the production deployment.
+The application and MIT-licensed repository are public. English and Spanish are supported, while repository documentation remains English. The production site is accessible without sign-in at `https://www.chordleaf.com/`; the apex redirects to `www`. Vercel Standard Protection keeps previews behind authentication. The initial review was merged in [pull request #1](https://github.com/antoniomml/chordleaf/pull/1), and the final domain preparation in [pull request #4](https://github.com/antoniomml/chordleaf/pull/4).
 
-Vercel's first deployment was automatically assigned to production. **All project deployments are now protected with Vercel Authentication**, including `https://www.chordleaf.com/`. An unauthenticated request redirects to sign-in. The apex `https://chordleaf.com/` redirects to `www`. The initial review was merged in [pull request #1](https://github.com/antoniomml/chordleaf/pull/1).
+Anonymous requests to `/`, `/en/`, `/es/`, `/robots.txt` and `/sitemap.xml` returned 200 after launch. A preview deployment still redirected to Vercel sign-in. The canonical, Open Graph and language URLs point to `www.chordleaf.com`. The `chordleaf.com` Domain property is verified in Google Search Console; the submitted sitemap is marked correct with two discovered pages. Discovery does not guarantee indexing.
 
 ## Remaining priorities
 
-The final domain is connected. Intensive real-device/mobile acceptance and the public-access decision remain open. Keep the hosted deployment protected until those decisions are resolved.
+Continue real-device and human accessibility checks, monitor public web-import usage and provider availability, and watch Search Console as Google processes the new property. These are follow-up checks on the public service.
 
 ### September 23 launch review
 
-- `www.chordleaf.com` is the configured production origin; `chordleaf.com` is configured to redirect to it. Production was rebuilt after setting `SITE_URL`, and the authenticated page now emits matching canonical, Open Graph and language URLs.
-- Anonymous requests to the home page, locale pages, `robots.txt` and `sitemap.xml` still redirect to Vercel sign-in. Public indexing requires changing Vercel Authentication from **All Deployments** to **Standard Protection**, then confirming that production is public and previews stay protected.
-- GitHub remains private. The dependency graph, vulnerability alerts and malware alerts are enabled. Actions are restricted to read-only workflow tokens and full-length SHA-pinned actions. No branch protection is configured; add a `main` ruleset with the Checks job required after the repository is public.
-- Vercel's `/api/import-web` rule remains active at 10 requests per IP per 60 seconds, returning 429. Project data sharing for model training is off. Web imports are still enabled in Production and Preview; review usage when production becomes public.
-- Register a `chordleaf.com` Domain property in Google Search Console after public access works, and submit `https://www.chordleaf.com/sitemap.xml`. The sitemap already lists `/en/` and `/es/`.
+- `www.chordleaf.com` is the configured production origin; `chordleaf.com` redirects to it. Production was rebuilt after setting `SITE_URL`, and its metadata uses the canonical domain.
+- Vercel Authentication changed from **All Deployments** to **Standard Protection**. Production is public and previews remain protected.
+- GitHub is public. Dependency graph, vulnerability and malware alerts, Dependabot security updates, private vulnerability reporting and CodeQL default setup are enabled. Actions use read-only workflow tokens and full-length SHA-pinned actions. An active `main` ruleset requires a PR, resolved review threads and up-to-date `app` and `Vercel` checks, and blocks force pushes and deletion. The initial CodeQL scan may take time.
+- Vercel's `/api/import-web` rule remains active at 10 requests per IP per 60 seconds, returning 429. Project data sharing for model training is off. Web imports are enabled in Production and Preview; review public usage and provider availability.
+- Google Search Console verified the Domain property through a Vercel DNS TXT record. The submitted `https://www.chordleaf.com/sitemap.xml` was marked correct and listed two discovered pages.
 
-| Priority | Action before the relevant release                                         | Evidence / limitation                                                                                                                                                                                                                                                                                                                                                           |
-| -------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P1       | Review provider availability and usage before enabling public web imports. | The Vercel firewall is active at 10 requests/IP/minute; a bounded test returned ten 503 responses from the disabled endpoint, then two 429 responses. Imports are enabled only behind Vercel Authentication in the owner’s production and preview environments. All three providers also passed a real protected-preview import into an editable song. Availability can change. |
-| P1       | Perform human accessibility and real-device acceptance checks.             | Automated Chromium/Firefox/WebKit coverage and earlier axe checks do not replace a real iPhone, keyboard-at-200%-zoom and screen-reader session.                                                                                                                                                                                                                                |
-| P2       | Verify public indexing and register Search Console after launch.           | The canonical production origin is `https://www.chordleaf.com`; static `/en/` and `/es/` pages, reciprocal language links, a social image and sitemap are implemented. Search engines currently receive a Vercel sign-in redirect.                                                                                                                                              |
-| P2       | Continue profiling unusually large or hostile documents.                   | Word and auto-fit use terminable workers; PDF parsing has cancellation, timeout and cumulative text/geometry budgets. These are not a complete hostile-document sandbox. Low-end phone profiling remains useful.                                                                                                                                                                |
-| P2       | Consolidate remaining UI render helpers and CSS incrementally.             | The static shell and document/key render helpers were extracted. Removed 24 superseded CSS declarations with twelve pixel-identical desktop/tablet/mobile screenshots. Continue gradual extraction when changing features.                                                                                                                                                      |
+| Priority | Follow-up                                      | Evidence / limitation                                                                                                                                                                          |
+| -------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P1       | Monitor public web-import usage and providers. | The firewall limits `/api/import-web` to 10 requests/IP/minute. All three providers worked on a protected preview, but availability and usage can change. Keep text/file import as a fallback. |
+| P1       | Perform human accessibility and device checks. | Automated browser and earlier axe checks do not replace a real iPhone, keyboard use at 200% zoom and a screen-reader session.                                                                  |
+| P2       | Watch indexing in Search Console.              | The Domain property is verified and the sitemap is correct with two discovered pages; Google has not yet reported indexing for this new property.                                              |
+| P2       | Profile unusually large or hostile documents.  | Word and auto-fit use terminable workers; PDF parsing has cancellation, timeout and cumulative text/geometry budgets. These are not a complete hostile-document sandbox.                       |
+| P2       | Consolidate UI render helpers and CSS.         | The static shell and document/key render helpers were extracted. Continue gradual extraction when changing features.                                                                           |
 
 ## 0.4.0 pre-public repository review
 
@@ -89,6 +89,6 @@ Five additional unit cases exercise cumulative PDF limits, oversized fragments/i
 
 Version 0.3.0 removes the preloaded sample song, clarifies chord-diagram actions and gives language/export controls consistent application chrome. Language-menu behavior now lives in a focused UI module with keyboard navigation and Escape handling. Live local acceptance imported the same Alejandro Sanz song through both LaCuerda HTML and `/TXT/` URLs, alongside Cifra Club and Ultimate Guitar. The HTML failure was caused by LaCuerda placing an empty utility `<pre>` before the actual `#t_body` sheet; the provider adapter now selects the real sheet explicitly.
 
-Private publication is intentional. Required branch protection and GitHub private vulnerability reporting remain unavailable under the current private-repository plan; revisit them if visibility or plan changes. No paid upgrade or visibility change was made.
+At the time of the 0.3.0 review, the repository was private and branch protection and private vulnerability reporting were unavailable under that plan. The repository is now public and those controls are enabled as described above. No paid plan upgrade was made.
 
 The Vite 8.3.0 dependency update was reviewed and merged separately, then tested together with the import changes. The observed local production build dropped from approximately 2.0 seconds to 0.37 seconds; these are individual development-machine measurements, not website load-time claims. No application dependency was added.

@@ -1,7 +1,7 @@
 import { t } from "./i18n.js";
 import { importText, titleCase } from "./files.js";
 import { chordRE, chords } from "./music.js";
-import { songUrl } from "./web-sources.js";
+import { LACUERDA_HOSTS, songUrl } from "./web-sources.js";
 
 // Read text only; never mount downloaded markup or execute website scripts.
 function preText(root) {
@@ -139,7 +139,7 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
       capo = Number(data.tab_view.meta?.capo) || 0;
     }
   } else {
-    const laCuerda = url.hostname.includes("lacuerda.net");
+    const laCuerda = LACUERDA_HOSTS.has(url.hostname);
     const plainText =
       contentType === "text/plain" || url.pathname.endsWith(".txt");
     const pre = plainText
@@ -211,7 +211,7 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
       ),
     );
   const result = importText(text, title || t("Canción importada"));
-  if (url.hostname.includes("lacuerda.net"))
+  if (LACUERDA_HOSTS.has(url.hostname))
     result.text = result.text
       .split("\n")
       .map((line) => line.trimStart())
