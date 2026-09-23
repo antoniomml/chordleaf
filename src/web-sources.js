@@ -10,6 +10,11 @@ export const WEB_HOSTS = new Set([
   "tabs.ultimate-guitar.com",
   "es.ultimate-guitar.com",
 ]);
+export const LACUERDA_HOSTS = new Set([
+  "acordes.lacuerda.net",
+  "lacuerda.net",
+  "www.lacuerda.net",
+]);
 export function songUrl(value) {
   let url;
   try {

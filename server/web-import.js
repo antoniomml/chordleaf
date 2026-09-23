@@ -1,5 +1,5 @@
 import { securityHeaders } from "./security.js";
-import { songUrl } from "../src/web-sources.js";
+import { LACUERDA_HOSTS, songUrl } from "../src/web-sources.js";
 const MAX_BYTES = 3 * 1024 * 1024;
 export async function fetchSongPage(value, fetcher = fetch) {
   let url = songUrl(value);
@@ -29,10 +29,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
     const contentType = response.headers.get("content-type") || "";
     if (
       !contentType.includes("text/html") &&
-      !(
-        url.hostname.includes("lacuerda.net") &&
-        contentType.includes("text/plain")
-      )
+      !(LACUERDA_HOSTS.has(url.hostname) && contentType.includes("text/plain"))
     ) {
       await response.body?.cancel();
       throw new Error("El enlace no es una página de acordes.");
