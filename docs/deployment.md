@@ -1,6 +1,6 @@
 # Deploy Chordleaf on Vercel
 
-[← Back to Chordleaf](../README.md) · [Current audit](public-audit-2026-09-23.md)
+[← Back to Chordleaf](../README.md) · [Development](development.md)
 
 Chordleaf uses a static Vite frontend and one Node.js function for importing public song pages. No database, authentication provider or secret API key is required. The repository includes deployment configuration. The public production domain is `https://chordleaf.com/`, with `https://www.chordleaf.com/` redirecting to it. Vercel Standard Protection keeps preview deployments behind authentication.
 
@@ -38,7 +38,7 @@ On Vercel, web imports return **503** until `CHORDLEAF_WEB_IMPORT_ENABLED=true` 
 
 Before enabling it:
 
-1. Add a Vercel Firewall rate-limit rule for the exact path `/api/import-web`. Start conservatively (for example, 10 requests per client IP per minute), then review legitimate usage and your plan's available controls. Return 429 when the limit is exceeded.
+1. Add a Vercel Firewall rate-limit rule for the exact path `/api/import-web`. Choose a conservative threshold for your traffic and plan, then review legitimate usage. Return 429 when the limit is exceeded.
 2. Configure usage/budget notifications and review function errors and invocation counts.
 3. Set `CHORDLEAF_WEB_IMPORT_ENABLED=true` only in the environments where those controls are ready, then redeploy.
 4. Test one supported URL from each provider. Public sites can block data-center traffic even when imports work locally. Do not bypass their access controls; retain file/text import as the fallback.
@@ -59,18 +59,3 @@ Promote the reviewed preview only after the applicable launch priorities are res
 ## References
 
 [Vite deployment](https://vite.dev/guide/static-deploy), [Vercel Node.js functions](https://vercel.com/docs/functions/runtimes/node-js), [Vercel configuration](https://vercel.com/docs/project-configuration/vercel-json), [Vercel rate limiting](https://vercel.com/kb/guide/add-rate-limiting-vercel).
-
-## Current hosted configuration
-
-- Project: `chordleaf`, Node.js `24.x`, Vercel Hobby.
-- Production is publicly accessible. Standard Protection requires Vercel Authentication for preview deployments; an anonymous preview request redirects to sign-in.
-- Firewall rule: exact path `/api/import-web`, 10 requests per IP per 60 seconds, fixed window, HTTP 429 after the limit.
-- Both `chordleaf.com` and `www.chordleaf.com` are connected; `www` redirects permanently to the apex. Production `SITE_URL` is `https://chordleaf.com` and is scoped to Production only.
-- The public GitHub repository has an active `main` ruleset requiring a pull request, resolved review threads, up-to-date `app` and `Vercel` checks, and blocking force pushes and deletion.
-- The `chordleaf.com` Domain property is verified in Google Search Console with a Vercel DNS TXT record. `https://chordleaf.com/sitemap.xml` is submitted and marked correct; Google may need time to crawl and index its pages.
-
-The protected preview was tested end to end with Cifra Club, LaCuerda and Ultimate Guitar: each returned a page that parsed into an editable song. Provider availability can change; retain the text/file fallback. Production web imports are public and preview imports require authentication; both have the firewall rule.
-
-The account currently uses Hobby, which has usage caps rather than paid overages. Vercel documents automatic usage notifications for all plans. No paid upgrade, spending increase or billing-setting change was made. Review the owner's usage dashboard regularly; if moving to a paid plan, configure its spending limit first. See [Vercel usage notifications](https://vercel.com/docs/pricing/manage-and-optimize-usage) and [plan limits](https://vercel.com/pricing).
-
-The 0.4.0 tag predates the public launch. GitHub visibility and Vercel deployment protection were changed separately after the release tag.

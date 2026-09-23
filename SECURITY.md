@@ -15,4 +15,4 @@ Include the affected version, a minimal invented example, reproduction steps and
 - File, text and PDF-page limits reduce accidental exhaustion. They are not a complete sandbox against all compressed-document or parser attacks.
 - Songs are not encrypted or synchronized. Browser storage and XSS prevention are critical to protecting local documents.
 
-Run `pnpm audit`, `pnpm check` and production browser tests when changing dependencies or import code. Never commit `.env` files, tokens, private documents or generated audit outputs. See [the audit](docs/audit.md) for known limitations and remaining work.
+Run `pnpm audit`, `pnpm check` and production browser tests when changing dependencies or import code. Never commit `.env` files, tokens, private documents or generated audit outputs.

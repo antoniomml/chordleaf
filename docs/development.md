@@ -89,7 +89,7 @@ The endpoint accepts HTTPS song URLs from Cifra Club, LaCuerda and Ultimate Guit
 
 For the same compiled assets and headers used in production, build, run `PORT=5173 pnpm start`, and execute `pnpm test:e2e` in another terminal. Stop Vite first if it is using that port. Browser fixtures use the UI and mocked external pages, so they also work with a production build.
 
-The [current public audit](public-audit-2026-09-23.md) and [earlier production review](audit.md) used temporary Lighthouse and axe installations, not additional application dependencies. Re-run those tools on a protected Vercel preview before each release. Local timings and automated accessibility checks are not field performance measurements or a complete accessibility certification.
+Lighthouse and axe can be run as temporary tools without adding application dependencies. Re-run them on a protected Vercel preview before each release. Local timings and automated accessibility checks are not field performance measurements or a complete accessibility certification.
 
 Environment variables are documented in [.env.example](../.env.example). Vite reads `SITE_URL` during builds. The Node import handler reads its process environment: export `CHORDLEAF_WEB_IMPORT_ENABLED=false` in your shell when testing disabled imports locally. Do not prefix secrets with `VITE_`; those variables are exposed to browser bundles.
 
