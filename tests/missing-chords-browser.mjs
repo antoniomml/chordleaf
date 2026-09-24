@@ -18,6 +18,7 @@ try {
     [40, 40],
     [40, 40],
     [40, 40],
+    [40, 40],
   ]);
   await page.locator("#blank").click();
   await page.locator("#source").fill("[C] [F#7/A#] [A7/C#]");

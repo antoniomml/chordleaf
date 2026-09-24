@@ -15,7 +15,7 @@ export function renderPageMarkup(s, l, editing) {
           )
           .join(
             "",
-          )}<span class="sheet-brand">Chordleaf</span><span class="sheet-page">${i + 1}</span></article></div>`,
+          )}${s.showBrand !== false ? '<span class="sheet-brand">chordleaf.com</span>' : ""}<span class="sheet-page">${i + 1}</span></article></div>`,
     )
     .join("");
 }

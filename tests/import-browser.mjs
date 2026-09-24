@@ -12,7 +12,12 @@ try {
   await page.locator("#new").click();
   assert.deepEqual(
     await page.locator("#new-dialog .choice strong").allTextContents(),
-    ["Importar texto o archivo", "Importar desde una web", "Empezar de cero"],
+    [
+      "Importar texto o archivo",
+      "Abrir proyecto editable",
+      "Importar desde una web",
+      "Empezar de cero",
+    ],
   );
   await page.locator("#import").click();
   await page
@@ -21,7 +26,10 @@ try {
   await page.locator("#paste-import").click();
   await page.locator(".page").waitFor();
   assert.equal(await page.locator(".page").count(), 1);
-  assert.equal(await page.locator(".sheet-brand").textContent(), "Chordleaf");
+  assert.equal(
+    await page.locator(".sheet-brand").textContent(),
+    "chordleaf.com",
+  );
   await page.screenshot({ path: "artifacts/import-fit.png" });
   async function parseThroughUI(html, url, contentType = "text/html") {
     await page.route("**/api/import-web?**", (route) =>

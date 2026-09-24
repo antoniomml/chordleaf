@@ -1,5 +1,62 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Guardar proyecto editable": "Save editable project",
+  "Abrir proyecto editable": "Open editable project",
+  "Retomar una canción .chordleaf.json": "Resume a .chordleaf.json song",
+  "Abrir proyecto editable.": "Open an editable project.",
+  "Selecciona el archivo .chordleaf.json de una canción guardada.":
+    "Select a saved song's .chordleaf.json file.",
+  "Seleccionar proyecto": "Select project",
+  "Esta canción y todos sus ajustes · JSON":
+    "This song and all its settings · JSON",
+  "Descargar PDF": "Download PDF",
+  "Exportar Word · DOCX": "Export Word · DOCX",
+  "Documento para compartir": "Document to share",
+  "Mostrar chordleaf.com al pie de la hoja":
+    "Show chordleaf.com in the page footer",
+  INTERVALO: "INTERVAL",
+  "Intervalo de transposición": "Transposition interval",
+  "½ tono · 1 semitono": "Half step · 1 semitone",
+  "1 tono · 2 semitonos": "1 whole step · 2 semitones",
+  "2 tonos · 4 semitonos": "2 whole steps · 4 semitones",
+  "Deshacer transposición": "Undo transpose",
+  semitonos: "semitones",
+  tonos: "whole steps",
+  "acordes pendientes sin cambiar": "unresolved chords unchanged",
+  "Proyecto sin guardar": "Unsaved project",
+  "Sesión recuperable · proyecto sin guardar":
+    "Session recoverable · project unsaved",
+  "Sesión recuperable · proyecto guardado en archivo":
+    "Session recoverable · project saved to file",
+  "PDF descargado · proyecto sin guardar": "PDF downloaded · project unsaved",
+  "PDF descargado · proyecto guardado en archivo":
+    "PDF downloaded · project saved to file",
+  "No se pudo guardar la sesión · descarga el proyecto":
+    "Could not save session · download the project",
+  "Hay cambios posteriores al proyecto guardado. Si cierras, esos cambios no estarán en el archivo. Guarda el proyecto otra vez para conservarlos.":
+    "There are changes since the saved project. If you close, they will not be in the file. Save the project again to keep them.",
+  "Aunque hayas descargado un PDF o Word, no tienes un proyecto editable guardado. Si cierras, perderás la posibilidad de seguir editando esta copia.":
+    "Even if you downloaded a PDF or Word file, you have no saved editable project. Closing will discard this editable copy.",
+  "Guardar proyecto": "Save project",
+  "Proyecto editable abierto.": "Editable project opened.",
+  "Proyecto editable descargado. Conserva el archivo para reabrirlo.":
+    "Editable project downloaded. Keep the file to reopen it.",
+  "No se pudo guardar el proyecto. Copia la letra del editor o descarga TXT. ":
+    "Could not save the project. Copy the lyrics from the editor or download TXT. ",
+  "Documento descargado. Guarda también el proyecto para poder seguir editándolo después.":
+    "Document downloaded. Save the project too so you can edit it later.",
+  "No se pudo exportar. Copia la letra del editor o descarga TXT. ":
+    "Could not export. Copy the lyrics from the editor or download TXT. ",
+  "Un bloque de diagramas tapa la cabecera. Muévelo más abajo antes de exportar.":
+    "A diagram block covers the header. Move it lower before exporting.",
+  "Un bloque de diagramas tapa el pie o sale de la página. Muévelo más arriba antes de exportar.":
+    "A diagram block covers the footer or leaves the page. Move it higher before exporting.",
+  "El proyecto supera el límite de 10 MiB.":
+    "The project exceeds the 10 MiB limit.",
+  "El proyecto no es compatible o está dañado.":
+    "The project is unsupported or damaged.",
+  "El archivo JSON está dañado o no es compatible.":
+    "The JSON file is damaged or unsupported.",
   "Revisar acorde": "Review chord",
   "Acordes por revisar": "Chords to review",
   "Sin acordes detectados": "No chords detected",

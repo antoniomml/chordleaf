@@ -108,7 +108,11 @@ export function parseSong(text) {
     out = [];
   for (let i = 0; i < lines.length; i++) {
     if (/^\s*\{(?:column|new_page)\}\s*$/.test(lines[i])) {
-      out.push({ break: true, index: i });
+      out.push({
+        break: true,
+        breakType: lines[i].includes("new_page") ? "page" : "column",
+        index: i,
+      });
       continue;
     }
     let p = parseLine(lines[i], i);

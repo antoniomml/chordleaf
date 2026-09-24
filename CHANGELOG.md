@@ -1,5 +1,14 @@
 # chordleaf changelog
 
+## 0.6.0 · September 24, 2026
+
+- Save and reopen a single song as a versioned `.chordleaf.json` project with its text, chord anchors, page settings, custom positions and diagrams intact.
+- Keep PDF downloads distinct from editable project saves; warn clearly before discarding unsaved songs or later edits.
+- Offer a document option for the `chordleaf.com` footer, enabled by default and shared by preview, PDF and Word.
+- Keep manual column and page breaks during automatic fitting, and route text around diagram blocks in one or two columns.
+- Show transposition intervals, source and result chords, and an immediate undo; retain unresolved chords for review.
+- Add export and project browser coverage, clearer recovery messages, and a visual PDF/Word corpus. Use a portable monospace font in Word to avoid blank pages in LibreOffice.
+
 ## 0.5.3 · September 24, 2026
 
 - Split the phone workspace into Document, Edit, Music and Preview views so lyrics and chords have the full editor height in portrait and landscape.

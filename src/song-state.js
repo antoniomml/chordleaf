@@ -46,6 +46,7 @@ export function songMetadata(data = {}) {
         s.width <= 595.28 &&
         Number.isInteger(s.page) &&
         s.page >= 0 &&
+        s.page < MAX_PDF_PAGES &&
         (s.height === undefined ||
           (Number.isFinite(s.height) &&
             s.height >= 28 &&
@@ -81,6 +82,13 @@ export function createSong(data = {}) {
     capo: Math.round(number(data.capo, 0, 0, 12)),
     linked: data.linked === true,
     dirty: data.dirty === true,
+    pdfExported: data.pdfExported === true,
+    projectSignature:
+      typeof data.projectSignature === "string" &&
+      /^\d+:[0-9a-f]+:[0-9a-f]+$/.test(data.projectSignature)
+        ? data.projectSignature
+        : null,
+    showBrand: data.showBrand !== false,
     fontSize: number(data.fontSize, 10, 7, 20),
     margin: number(data.margin, 10, 5, 35),
     columns: data.columns === 2 ? 2 : 1,

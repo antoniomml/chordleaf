@@ -11,7 +11,7 @@ import { stickerPng, stickerGeometry } from "./dictionary.js";
 import { layout, PAGE } from "./layout.js";
 import { chordRE, unresolvedChordRE } from "./music.js";
 import { parsePdfPages, chordRow } from "./pdf-import.js";
-import { registerPdfFonts, DOCUMENT_FONT, fontBinaries } from "./fonts.js";
+import { registerPdfFonts } from "./fonts.js";
 export function download(blob, name) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -20,7 +20,7 @@ export function download(blob, name) {
   setTimeout(() => URL.revokeObjectURL(a.href), 30000);
 }
 export function txt(song) {
-  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordleaf: ${JSON.stringify({ chordShapes: song.chordShapes || {}, chordStickers: song.chordStickers || [] })}}\n\n${song.text}`;
+  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordleaf: ${JSON.stringify({ chordShapes: song.chordShapes || {}, chordStickers: song.chordStickers || [], linked: song.linked === true, showBrand: song.showBrand !== false })}}\n\n${song.text}`;
 }
 export async function exportSong(song, type) {
   const name = (song.title || t("Canción")).replace(/[\\/:*?"<>|]/g, "-");
@@ -40,6 +40,26 @@ export async function exportSong(song, type) {
       png: await stickerPng(song, sticker),
     })),
   );
+  for (const sticker of stickers) {
+    const headerBottom = l.margin + l.headerHeight;
+    if (
+      sticker.page === 0 &&
+      sticker.y < headerBottom &&
+      sticker.x < PAGE.width - l.margin &&
+      sticker.x + sticker.width > l.margin
+    )
+      throw new Error(
+        t(
+          "Un bloque de diagramas tapa la cabecera. Muévelo más abajo antes de exportar.",
+        ),
+      );
+    if (sticker.y + sticker.height > PAGE.height - 24)
+      throw new Error(
+        t(
+          "Un bloque de diagramas tapa el pie o sale de la página. Muévelo más arriba antes de exportar.",
+        ),
+      );
+  }
   if (type === "pdf") {
     const { jsPDF } = await import("jspdf");
     const pdf = new jsPDF({ unit: "pt", format: "a4" });
@@ -47,7 +67,6 @@ export async function exportSong(song, type) {
     pdf.setProperties({
       title: song.title,
       author: song.artist,
-      creator: "Chordleaf",
     });
     l.pages.forEach((page, i) => {
       if (i) pdf.addPage();
@@ -85,12 +104,14 @@ export async function exportSong(song, type) {
           pdf.setTextColor("#111111");
           pdf.text(row.lyric, row.x, row.y + l.size + row.lyricOffset);
         }
-      pdf.setFont("GoogleSansCode", "normal");
-      pdf.setFontSize(7);
-      pdf.setTextColor("#727272");
-      pdf.text("Chordleaf", PAGE.width / 2, PAGE.height - 12, {
-        align: "center",
-      });
+      if (song.showBrand !== false) {
+        pdf.setFont("GoogleSansCode", "normal");
+        pdf.setFontSize(7);
+        pdf.setTextColor("#727272");
+        pdf.text("chordleaf.com", PAGE.width / 2, PAGE.height - 12, {
+          align: "center",
+        });
+      }
       for (const sticker of stickers.filter((s) => s.page === i))
         pdf.addImage(
           sticker.png,
@@ -142,7 +163,7 @@ export async function exportSong(song, type) {
         lineRule: "exact",
       },
       children: [
-        new TextRun({ text, font: DOCUMENT_FONT, size: size * 2, bold, color }),
+        new TextRun({ text, font: "Courier New", size: size * 2, bold, color }),
       ],
     });
   const children = [];
@@ -200,7 +221,7 @@ export async function exportSong(song, type) {
             children: [
               new TextRun({
                 text: line,
-                font: DOCUMENT_FONT,
+                font: "Courier New",
                 bold: true,
                 size: 32,
                 color: "111111",
@@ -209,7 +230,7 @@ export async function exportSong(song, type) {
                 ? [
                     new TextRun({
                       text: "\t" + song.artist.toLocaleUpperCase(),
-                      font: DOCUMENT_FONT,
+                      font: "Courier New",
                       size: 24,
                       color: "111111",
                     }),
@@ -227,7 +248,7 @@ export async function exportSong(song, type) {
               children: [
                 new TextRun({
                   text: line,
-                  font: DOCUMENT_FONT,
+                  font: "Courier New",
                   size: 24,
                   color: "111111",
                 }),
@@ -240,7 +261,7 @@ export async function exportSong(song, type) {
           children: [
             new TextRun({
               text: `CAPO ${song.capo}`,
-              font: DOCUMENT_FONT,
+              font: "Courier New",
               size: 22,
               color: "111111",
             }),
@@ -261,7 +282,10 @@ export async function exportSong(song, type) {
           }),
         );
       const paras = [];
+      let previousBottom = l.margin + (i === 0 ? l.headerHeight : 0);
       for (const row of rows) {
+        if (row.y > previousBottom + 1)
+          paras.push(para(" ", 1, false, "FFFFFF", row.y - previousBottom));
         if (row.instrumental) {
           let line = row.lyric;
           for (const m of [...row.marks].reverse())
@@ -292,6 +316,7 @@ export async function exportSong(song, type) {
           paras.push(
             para(row.lyric || " ", l.size, false, "111111", row.height),
           );
+        previousBottom = row.y + row.height;
       }
       cells.push(
         new TableCell({
@@ -321,32 +346,31 @@ export async function exportSong(song, type) {
       }),
     );
   });
-  const [regularFont, boldFont] = await fontBinaries();
   const doc = new Document({
-    fonts: [
-      { name: DOCUMENT_FONT, data: regularFont },
-      { name: `${DOCUMENT_FONT} Bold`, data: boldFont },
-    ],
     sections: [
       {
-        footers: {
-          default: new Footer({
-            children: [
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                spacing: { before: 0, after: 0 },
-                children: [
-                  new TextRun({
-                    text: "Chordleaf",
-                    font: DOCUMENT_FONT,
-                    size: 14,
-                    color: "727272",
-                  }),
-                ],
-              }),
-            ],
-          }),
-        },
+        ...(song.showBrand !== false
+          ? {
+              footers: {
+                default: new Footer({
+                  children: [
+                    new Paragraph({
+                      alignment: AlignmentType.CENTER,
+                      spacing: { before: 0, after: 0 },
+                      children: [
+                        new TextRun({
+                          text: "chordleaf.com",
+                          font: "Courier New",
+                          size: 14,
+                          color: "727272",
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              },
+            }
+          : {}),
         properties: {
           page: {
             size: {
@@ -366,21 +390,7 @@ export async function exportSong(song, type) {
       },
     ],
   });
-  // docx's high-level font API only emits embedRegular. Associate the second
-  // binary with embedBold on the same family, and declare fixed pitch so that
-  // readers that ignore embedded fonts still select a monospace substitute.
-  const [regular, bold] = doc.FontTable.fontOptionsWithKey;
-  const overrides = [
-    {
-      path: "word/fontTable.xml",
-      data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:fonts xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:font w:name="Google Sans Code"><w:altName w:val="Courier New"/><w:family w:val="modern"/><w:pitch w:val="fixed"/><w:embedRegular r:id="rId1" w:fontKey="{${regular.fontKey}}"/><w:embedBold r:id="rId2" w:fontKey="{${bold.fontKey}}"/></w:font></w:fonts>`,
-    },
-    {
-      path: "word/settings.xml",
-      data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:embedTrueTypeFonts/><w:embedSystemFonts/><w:compat><w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat></w:settings>',
-    },
-  ];
-  download(await Packer.toBlob(doc, false, overrides), name + ".docx");
+  download(await Packer.toBlob(doc), name + ".docx");
 }
 function alignText(lines) {
   const out = [];
@@ -448,6 +458,9 @@ export function importText(text, fallback) {
       try {
         const data = JSON.parse(metadata[1]);
         Object.assign(song, songMetadata(data));
+        if (typeof data.linked === "boolean") song.linked = data.linked;
+        if (typeof data.showBrand === "boolean")
+          song.showBrand = data.showBrand;
       } catch {
         /* Ignore malformed optional editor metadata. */
       }

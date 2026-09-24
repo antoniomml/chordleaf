@@ -50,12 +50,17 @@
         </svg>
       </button>
       <div id="export-menu" class="chrome-menu menu" hidden>
+        <button id="save-project">
+          Guardar proyecto editable
+          <small>Esta canción y todos sus ajustes · JSON</small>
+        </button>
         <button id="workspace-backup">
           Copia completa · JSON <small>Todas las canciones y ajustes</small>
         </button>
-        <button data-export="pdf">PDF <small>Listo para imprimir</small></button
+        <button data-export="pdf">
+          Descargar PDF <small>Listo para imprimir</small></button
         ><button data-export="docx">
-          Word · DOCX <small>Documento editable</small></button
+          Exportar Word · DOCX <small>Documento para compartir</small></button
         ><button data-export="txt">
           Texto · TXT <small>Letra y acordes</small>
         </button>
@@ -322,6 +327,13 @@
         ><small>Pega texto o abre TXT, PDF o Word (.docx)</small>
       </div>
       <b>→</b></button
+    ><button id="open-project" class="choice">
+      <span class="choice-icon" aria-hidden="true">▣</span>
+      <div>
+        <strong>Abrir proyecto editable</strong
+        ><small>Retomar una canción .chordleaf.json</small>
+      </div>
+      <b>→</b></button
     ><button id="web" class="choice">
       <span class="choice-icon" aria-hidden="true"
         ><svg
@@ -365,7 +377,7 @@
     </button>
   </section>
   <section id="text-import" hidden>
-    <label class="field"
+    <label id="import-paste-field" class="field"
       >LETRA Y ACORDES<textarea
         id="import-text"
         rows="5"
@@ -417,12 +429,10 @@
 </dialog>
 <dialog id="close-dialog" aria-labelledby="close-heading">
   <h2 id="close-heading">¿Cerrar esta canción?</h2>
-  <p>
-    Hay cambios sin exportar. Si cierras la pestaña, perderás esta copia de
-    trabajo.
-  </p>
+  <p id="close-message"></p>
   <div class="dialog-actions">
     <button id="cancel-close">Seguir editando</button
+    ><button id="close-save-project">Guardar proyecto</button
     ><button id="confirm-close" class="danger">Cerrar y descartar</button>
   </div>
 </dialog>
