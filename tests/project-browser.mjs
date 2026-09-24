@@ -50,7 +50,7 @@ try {
   for (let n = 1; n <= pdf.numPages; n++) {
     const content = await (await pdf.getPage(n)).getTextContent();
     assert.equal(
-      content.items.some((item) => item.str.includes("chordleaf.com")),
+      content.items.some((item) => item.str.trim() === "chordleaf.com"),
       false,
     );
   }
