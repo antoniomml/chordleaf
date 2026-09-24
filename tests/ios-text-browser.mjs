@@ -40,7 +40,7 @@ try {
   await page.locator("#title").fill("Título móvil");
   assert.equal(await page.evaluate(() => visualViewport.scale), scale);
 
-  await page.locator("#new").click();
+  await page.locator("#mobile-tab-plus").click();
   await page.locator("#import").click();
   await checkTextControls();
   await page.locator("#import-text").fill("[G]Texto importado");

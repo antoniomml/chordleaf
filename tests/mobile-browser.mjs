@@ -19,6 +19,36 @@ try {
   await page.locator("#blank").click();
   await page.locator("#title").fill("Canción móvil");
   await page.locator("#source").fill("[G]Una canción [D]en el bolsillo");
+  assert.equal(
+    await page.locator("#document-options-content").isVisible(),
+    false,
+  );
+  await page
+    .locator("#source")
+    .fill(
+      "[G]Una línea muy larga que debe ajustarse al ancho de un teléfono sin desplazamiento horizontal",
+    );
+  assert.equal(
+    await page
+      .locator("#source")
+      .evaluate((el) => el.scrollWidth <= el.clientWidth),
+    true,
+  );
+  await page.locator("#source").fill("[G]Una canción [D]en el bolsillo");
+  await page.locator("#document-options-toggle").click();
+  assert.equal(
+    await page
+      .locator("#document-options-toggle")
+      .getAttribute("aria-expanded"),
+    "true",
+  );
+  await page.locator('[data-columns="2"]').click();
+  assert.equal(
+    await page.locator("#document-options-content").isVisible(),
+    true,
+  );
+  await page.locator('[data-columns="1"]').click();
+  await page.locator("#document-options-toggle").click();
 
   const editor = page.locator(".editor-panel");
   const preview = page.locator(".preview-panel");
@@ -36,6 +66,44 @@ try {
   );
   assert.ok(
     (await page.locator(".page-shell").first().boundingBox()).width > 250,
+  );
+  assert.equal(await page.locator(".preview-footer").isVisible(), false);
+  assert.equal(await page.locator("#zoom-reset").innerText(), "↔");
+  const initialWidth = (await page.locator(".page-shell").first().boundingBox())
+    .width;
+  await page.locator("#pages-scroll").evaluate((scroll) => {
+    const touch = (id, x) =>
+      new Touch({
+        identifier: id,
+        target: scroll,
+        clientX: x,
+        clientY: 240,
+      });
+    scroll.dispatchEvent(
+      new TouchEvent("touchstart", {
+        bubbles: true,
+        touches: [touch(1, 145), touch(2, 245)],
+      }),
+    );
+    scroll.dispatchEvent(
+      new TouchEvent("touchmove", {
+        bubbles: true,
+        cancelable: true,
+        touches: [touch(1, 115), touch(2, 275)],
+      }),
+    );
+    scroll.dispatchEvent(new TouchEvent("touchend", { bubbles: true }));
+  });
+  assert.ok(
+    (await page.locator(".page-shell").first().boundingBox()).width >
+      initialWidth * 1.5,
+  );
+  await page.locator("#zoom-reset").click();
+  assert.ok(
+    Math.abs(
+      (await page.locator(".page-shell").first().boundingBox()).width -
+        initialWidth,
+    ) < 1,
   );
   await page.screenshot({ path: "artifacts/mobile-preview-390.png" });
 
@@ -68,6 +136,11 @@ try {
     assert.ok(
       (await page.locator(".page-shell").first().boundingBox()).width > 0,
     );
+    for (const id of ["zoom-out", "zoom-reset", "zoom-in", "fit", "pencil"]) {
+      const button = await page.locator(`#${id}`).boundingBox();
+      assert.ok(button.x >= 0 && button.x + button.width <= width);
+      assert.ok(button.height >= 44);
+    }
     await page.locator('[data-section="document"]').click();
     assert.equal(await editor.isVisible(), true);
     assert.equal(
@@ -78,6 +151,35 @@ try {
       `Editor overflows at ${width}px`,
     );
   }
+
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.locator('[data-section="chords"]').click();
+  await page.locator(".chord-card .edit-shape").first().click();
+  const dialogBounds = await page.locator("#shape-dialog").boundingBox();
+  for (const button of await page
+    .locator("#shape-dialog .dialog-actions button")
+    .all()) {
+    const bounds = await button.boundingBox();
+    assert.ok(bounds.x >= dialogBounds.x);
+    assert.ok(bounds.x + bounds.width <= dialogBounds.x + dialogBounds.width);
+    assert.ok(bounds.height >= 44);
+  }
+  await page.locator("#shape-dialog .cancel-shape").click();
+  await page.locator("#mobile-tab-plus").click();
+  await page.locator("#blank").click();
+  await page.locator("#title").fill("Segunda canción");
+  const activeTab = await page.locator(".tab.active").boundingBox();
+  const tabs = await page.locator("#tabs").boundingBox();
+  assert.ok(
+    activeTab.x >= tabs.x &&
+      activeTab.x + activeTab.width <= tabs.x + tabs.width,
+  );
+
+  await page.setViewportSize({ width: 667, height: 375 });
+  const sourceBounds = await page.locator("#source").boundingBox();
+  const settingsBounds = await page.locator("#settings").boundingBox();
+  assert.ok(sourceBounds.x >= settingsBounds.x + settingsBounds.width);
+  assert.ok(sourceBounds.height >= 100);
 
   await page.setViewportSize({ width: 900, height: 844 });
   assert.equal(await previewTab.isVisible(), false);

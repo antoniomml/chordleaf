@@ -86,6 +86,8 @@ export default {
   "Ajustar el tamaño para intentar una página":
     "Adjust settings to try fitting one page",
   "Ajustar a 1 página": "Fit to one page",
+  "1 pág.": "1 page",
+  "Opciones de la hoja": "Sheet options",
   "Editar directamente la hoja": "Edit on the sheet",
   "Editar letra y acordes": "Edit lyrics and chords",
   "Página 1 de 1": "Page 1 of 1",

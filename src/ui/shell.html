@@ -1,7 +1,11 @@
 <header class="topbar">
-  <a class="brand" href="#" aria-label="Chordleaf"
-    ><img src="/logo.svg" alt="" />chordleaf<span>ESTUDIO DE CANCIONES</span></a
-  >
+  <h1 class="app-title">
+    <a class="brand" href="#" aria-label="Chordleaf"
+      ><img src="/logo.svg" alt="" />chordleaf<span
+        >ESTUDIO DE CANCIONES</span
+      ></a
+    >
+  </h1>
   <div class="top-actions">
     <button id="recover" hidden>Recuperar datos</button>
     <div class="language-wrap">
@@ -32,7 +36,10 @@
       </div>
     </div>
     <span class="local-badge"><i></i> Tu música se queda contigo</span
-    ><button id="new" class="primary">＋ Nueva canción</button>
+    ><button id="new" class="primary" aria-label="Nueva canción">
+      <span aria-hidden="true">＋</span
+      ><span class="new-label">Nueva canción</span>
+    </button>
     <div class="export-wrap">
       <button id="export" class="outline" aria-label="Exportar">
         <svg class="export-icon" viewBox="0 0 18 18" aria-hidden="true">
@@ -56,7 +63,10 @@
     </div>
   </div>
 </header>
-<nav id="tabs" class="tabs" aria-label="Canciones abiertas"></nav>
+<div id="tabs-wrap" class="tabs-wrap">
+  <nav id="tabs" class="tabs" aria-label="Canciones abiertas"></nav>
+  <button id="mobile-tab-plus" aria-label="Nueva canción">＋</button>
+</div>
 <section id="empty-state" role="main" hidden>
   <img src="/logo.svg" alt="" />
   <p class="eyebrow">TU MÚSICA, EN PAPEL</p>
@@ -188,11 +198,23 @@
           <button id="issue-count" class="issue-count" hidden></button>
           <div class="zoom-controls">
             <button id="zoom-out" aria-label="Alejar documento">−</button
-            ><button id="zoom-reset" title="Ajustar al ancho">100%</button
+            ><button
+              id="zoom-reset"
+              aria-label="Ajustar al ancho"
+              title="Ajustar al ancho"
+            >
+              ↔</button
             ><button id="zoom-in" aria-label="Acercar documento">＋</button>
           </div>
-          <button id="fit" title="Ajustar el tamaño para intentar una página">
-            Ajustar a 1 página</button
+          <button
+            id="fit"
+            aria-label="Ajustar a 1 página"
+            title="Ajustar el tamaño para intentar una página"
+          >
+            <span class="fit-desktop-label">Ajustar a 1 página</span
+            ><span class="fit-mobile-label" aria-hidden="true"
+              >1 pág.</span
+            ></button
           ><button
             id="pencil"
             title="Editar directamente la hoja"

@@ -55,6 +55,7 @@ try {
 if (!songs) songs = [];
 if (!songs.some((s) => s.id === active)) active = songs[0]?.id ?? null;
 let zoom = 1;
+let documentOptionsOpen = false;
 let section = "document",
   mobileView = "editor",
   editing = false,
@@ -119,6 +120,16 @@ function renderTabs() {
   document
     .querySelectorAll("[data-close]")
     .forEach((b) => (b.onclick = () => closeSong(b.dataset.close)));
+  const tabList = $("#tabs"),
+    selectedTab = tabList.querySelector(".tab.active");
+  if (selectedTab) {
+    const viewport = tabList.getBoundingClientRect(),
+      selected = selectedTab.getBoundingClientRect();
+    if (selected.left < viewport.left)
+      tabList.scrollLeft -= viewport.left - selected.left;
+    else if (selected.right > viewport.right)
+      tabList.scrollLeft += selected.right - viewport.right;
+  }
 }
 let closing;
 function closeSong(id) {
@@ -149,6 +160,22 @@ function renderSettings() {
     return;
   }
   $("#settings").innerHTML = renderDocumentSettings(s, key);
+  $("#settings").classList.toggle("document-options-open", documentOptionsOpen);
+  $("#document-options-toggle").setAttribute(
+    "aria-expanded",
+    String(documentOptionsOpen),
+  );
+  $("#document-options-toggle").onclick = () => {
+    documentOptionsOpen = !documentOptionsOpen;
+    $("#settings").classList.toggle(
+      "document-options-open",
+      documentOptionsOpen,
+    );
+    $("#document-options-toggle").setAttribute(
+      "aria-expanded",
+      String(documentOptionsOpen),
+    );
+  };
   for (const name of ["title", "artist", "fontSize", "margin"])
     $("#" + name).addEventListener(
       name === "title" || name === "artist" ? "input" : "change",
@@ -192,6 +219,7 @@ function renderSettings() {
 function updateNavigation() {
   const mobile = window.matchMedia("(max-width: 760px)").matches;
   $("main").dataset.mobileView = mobileView;
+  $("main").dataset.editorSection = section;
   document.querySelectorAll(".rail button").forEach((button) => {
     const selected = button.dataset.mobileView
       ? mobile && mobileView === "preview"
@@ -369,23 +397,89 @@ function editLine(el) {
 function resizePages() {
   const width = $("#pages-scroll").clientWidth;
   if (!width) return;
-  const available = width - 64,
+  const gutter = window.matchMedia("(max-width: 760px)").matches ? 24 : 64;
+  const available = width - gutter,
     scale = Math.max(0.2, Math.min(1.08, available / PAGE.width)) * zoom;
-  $("#zoom-reset").textContent = Math.round(zoom * 100) + "%";
   $("#zoom-out").disabled = zoom <= 0.5;
   $("#zoom-in").disabled = zoom >= 2.5;
-  $("#pages").style.minWidth = PAGE.width * scale + 64 + "px";
+  $("#pages").style.minWidth = PAGE.width * scale + gutter + "px";
   document.querySelectorAll(".page-shell").forEach((el) => {
     el.style.width = PAGE.width * scale + "px";
     el.style.height = PAGE.height * scale + "px";
     el.firstChild.style.transform = `scale(${scale})`;
   });
 }
+const previewScroll = $("#pages-scroll");
+let pinch;
+function pinchDistance(touches) {
+  return Math.hypot(
+    touches[0].clientX - touches[1].clientX,
+    touches[0].clientY - touches[1].clientY,
+  );
+}
+function pinchCenter(touches) {
+  return {
+    x: (touches[0].clientX + touches[1].clientX) / 2,
+    y: (touches[0].clientY + touches[1].clientY) / 2,
+  };
+}
+previewScroll.addEventListener(
+  "touchstart",
+  (event) => {
+    if (event.touches.length !== 2) return;
+    const center = pinchCenter(event.touches);
+    const pages = [...document.querySelectorAll(".page-shell")];
+    const page =
+      pages.find((el) => {
+        const rect = el.getBoundingClientRect();
+        return center.y >= rect.top && center.y <= rect.bottom;
+      }) || pages[0];
+    if (!page) return;
+    const rect = page.getBoundingClientRect();
+    pinch = {
+      page,
+      distance: pinchDistance(event.touches),
+      zoom,
+      x: (center.x - rect.left) / rect.width,
+      y: (center.y - rect.top) / rect.height,
+    };
+  },
+  { passive: true },
+);
+previewScroll.addEventListener(
+  "touchmove",
+  (event) => {
+    if (!pinch || event.touches.length !== 2) return;
+    event.preventDefault();
+    const next = Math.max(
+      0.5,
+      Math.min(
+        2.5,
+        (pinch.zoom * pinchDistance(event.touches)) / pinch.distance,
+      ),
+    );
+    if (!Number.isFinite(next) || next === zoom) return;
+    zoom = next;
+    resizePages();
+    const center = pinchCenter(event.touches);
+    const rect = pinch.page.getBoundingClientRect();
+    previewScroll.scrollLeft += rect.left + pinch.x * rect.width - center.x;
+    previewScroll.scrollTop += rect.top + pinch.y * rect.height - center.y;
+  },
+  { passive: false },
+);
+previewScroll.addEventListener("touchend", (event) => {
+  if (event.touches.length < 2) pinch = null;
+});
+previewScroll.addEventListener("touchcancel", () => {
+  pinch = null;
+});
 function resetView() {
   editing = false;
   currentPage = 1;
   $("#pages-scroll").scrollTop = 0;
   $("#source").scrollTop = 0;
+  $("#editor-panel").scrollTop = 0;
   $("#line-numbers").scrollTop = 0;
 }
 function openIssue(el) {
@@ -455,6 +549,7 @@ function render() {
   renderTabs();
   const empty = !song();
   $("#tabs").hidden = empty;
+  $("#tabs-wrap").hidden = empty;
   $("#empty-state").hidden = !empty;
   $("main").hidden = empty;
   $("#export").disabled = empty;
@@ -551,6 +646,7 @@ function openNewSong() {
   $("#import").focus();
 }
 $("#new").onclick = openNewSong;
+$("#mobile-tab-plus").onclick = openNewSong;
 $("#empty-new").onclick = openNewSong;
 $("#import-back").onclick = () => importScreen("menu");
 $("#new-dialog").addEventListener("close", () => {
@@ -562,6 +658,8 @@ $("#blank").onclick = () => {
   const s = create();
   songs.push(s);
   active = s.id;
+  section = "document";
+  mobileView = "editor";
   resetView();
   $("#new-dialog").close();
   render();

@@ -1,5 +1,12 @@
 # chordleaf changelog
 
+## 0.5.2 · September 24, 2026
+
+- Make the mobile song sheet easier to inspect with pinch zoom, fit-to-width controls and a compact floating toolbar.
+- Keep lyrics visible when opening a song on a phone; tuck document layout controls behind a clear button and wrap long editor lines without changing saved text.
+- Give chord actions and dialogs larger touch targets, keep the active song tab visible and place mobile song creation beside the tabs.
+- Arrange settings and lyrics side by side on short landscape screens, and open new blank songs in the editor from any section.
+
 ## 0.5.1 · September 23, 2026
 
 - Open imported songs even when chord notation is uncertain; show unresolved chords in the sheet and let readers correct them without leaving the preview.

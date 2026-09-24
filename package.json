@@ -1,6 +1,6 @@
 {
   "name": "chordleaf",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "A local-first workspace for lyrics, guitar chords and printable rehearsal sheets.",
   "private": true,
   "type": "module",
