@@ -371,7 +371,8 @@ main {
   background: #c9e79c0b;
   box-shadow: inset 0 0 0 1px #c9e79c13;
 }
-.rail .mobile-preview-tab {
+.rail .mobile-song-tab,
+#mobile-music-modes {
   display: none;
 }
 .workspace {
@@ -400,9 +401,6 @@ main {
   font-weight: 550;
   font-size: 15px;
   margin: 0 0 22px;
-}
-#document-options-toggle {
-  display: none;
 }
 .muted {
   color: #9aaa8e;
@@ -2192,9 +2190,23 @@ select:focus-visible {
   .preview-panel {
     overflow: hidden;
   }
-  main[data-mobile-view="editor"] .preview-panel,
+  main:not([data-mobile-view="preview"]) .preview-panel,
   main[data-mobile-view="preview"] .editor-panel {
     display: none;
+  }
+  main[data-mobile-view="document"] #source-area,
+  main[data-mobile-view="edit"] #settings,
+  main:not([data-mobile-view="music"]) #mobile-music-modes {
+    display: none;
+  }
+  main[data-mobile-view="edit"] .editor-panel {
+    overflow: hidden;
+  }
+  main[data-mobile-view="edit"] #source-area {
+    min-height: 0;
+  }
+  main[data-mobile-view="edit"] .source-container {
+    min-height: 0;
   }
   .rail {
     order: 2;
@@ -2224,8 +2236,34 @@ select:focus-visible {
     line-height: 1.1;
     white-space: nowrap;
   }
-  .rail .mobile-preview-tab {
+  .rail [data-section] {
+    display: none;
+  }
+  .rail .mobile-song-tab {
     display: flex;
+  }
+  .rail .mobile-song-tab > span:first-child {
+    font-size: 21px;
+    line-height: 1;
+  }
+  #mobile-music-modes {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 6px;
+    padding: 12px 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  #mobile-music-modes button {
+    flex: 1;
+    min-height: 44px;
+    border-bottom: 2px solid transparent;
+    color: #9ba78f;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  #mobile-music-modes button.selected {
+    border-bottom-color: var(--green);
+    color: var(--green);
   }
   #settings {
     padding: 14px 16px 0;
@@ -2236,34 +2274,6 @@ select:focus-visible {
   #settings .field {
     margin-bottom: 10px;
     font-size: 11px;
-  }
-  #document-options-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    min-height: 44px;
-    margin: 2px 0 10px;
-    padding: 0 12px;
-    border: 1px solid #46553b;
-    border-radius: 7px;
-    background: #293126;
-    color: #d8e9c5;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  #document-options-toggle span {
-    font-size: 18px;
-    transition: transform 0.15s;
-  }
-  .document-options-open #document-options-toggle span {
-    transform: rotate(180deg);
-  }
-  #document-options-content {
-    display: none;
-  }
-  .document-options-open #document-options-content {
-    display: block;
   }
   #settings .field input {
     min-height: 44px;
@@ -2420,22 +2430,7 @@ select:focus-visible {
   .rail {
     height: calc(52px + env(safe-area-inset-bottom));
   }
-  main[data-editor-section="document"] .editor-panel {
-    display: grid;
-    grid-template-columns: minmax(220px, 38%) minmax(0, 1fr);
-    overflow: hidden;
-  }
-  main[data-editor-section="document"] #settings {
-    min-width: 0;
-    overflow-y: auto;
-  }
-  main[data-editor-section="document"] .editor-panel #source-area {
-    min-width: 0;
-    min-height: 0;
-    height: 100%;
-    border-left: 1px solid var(--border);
-  }
-  main[data-editor-section="document"] .editor-panel .source-help {
+  main[data-mobile-view="edit"] .editor-panel .source-help {
     display: none;
   }
   .preview-toolbar {

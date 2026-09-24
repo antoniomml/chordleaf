@@ -111,7 +111,31 @@
       ><span>Acordes</span>
     </button>
     <button
-      class="mobile-preview-tab"
+      class="mobile-song-tab"
+      data-mobile-view="document"
+      aria-controls="editor-panel"
+      title="Documento"
+    >
+      <span aria-hidden="true">⚙</span><span>Documento</span>
+    </button>
+    <button
+      class="mobile-song-tab"
+      data-mobile-view="edit"
+      aria-controls="source-area"
+      title="Editar"
+    >
+      <span aria-hidden="true">✎</span><span>Editar</span>
+    </button>
+    <button
+      class="mobile-song-tab"
+      data-mobile-view="music"
+      aria-controls="mobile-music-modes"
+      title="Música"
+    >
+      <span aria-hidden="true">♬</span><span>Música</span>
+    </button>
+    <button
+      class="mobile-song-tab mobile-preview-tab"
       data-mobile-view="preview"
       aria-label="Vista previa"
       title="Vista previa"
@@ -131,11 +155,27 @@
         <path d="M7 3.5h8l3 3V20.5H7z" />
         <path d="M15 3.5v3h3M9.5 11h6M9.5 14h6M9.5 17h4" />
       </svg>
-      <span>Vista previa</span>
+      <span>Vista</span>
     </button>
   </nav>
   <section class="workspace">
     <div id="editor-panel" class="editor-panel">
+      <div
+        id="mobile-music-modes"
+        role="tablist"
+        aria-label="Herramientas musicales"
+      >
+        <button role="tab" data-music-section="key" aria-controls="settings">
+          Tonalidad
+        </button>
+        <button
+          role="tab"
+          data-music-section="chords"
+          aria-controls="chords-panel"
+        >
+          Acordes
+        </button>
+      </div>
       <div id="settings"></div>
       <div id="source-area">
         <div class="source-heading">
