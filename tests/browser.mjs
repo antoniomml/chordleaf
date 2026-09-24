@@ -277,7 +277,7 @@ assert.equal(
   await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
   false,
 );
-await page.locator('[data-section="document"]').click();
+await page.locator('[data-mobile-view="edit"]').click();
 await page.locator("#expand-editor").click();
 assert.equal(await page.locator("#editor-dialog").isVisible(), true);
 assert.equal(

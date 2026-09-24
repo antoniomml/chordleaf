@@ -1,5 +1,12 @@
 # chordleaf changelog
 
+## 0.5.3 · September 24, 2026
+
+- Split the phone workspace into Document, Edit, Music and Preview views so lyrics and chords have the full editor height in portrait and landscape.
+- Keep key analysis and chord tools together inside Music, with accessible tabs and keyboard navigation.
+- Remember each song's mobile view and Music tab; show the editor when a chord is inserted from the key guide.
+- Keep all document settings visible in their own phone view while preserving the desktop layout.
+
 ## 0.5.2 · September 24, 2026
 
 - Make the mobile song sheet easier to inspect with pinch zoom, fit-to-width controls and a compact floating toolbar.

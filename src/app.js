@@ -55,14 +55,16 @@ try {
 if (!songs) songs = [];
 if (!songs.some((s) => s.id === active)) active = songs[0]?.id ?? null;
 let zoom = 1;
-let documentOptionsOpen = false;
 let section = "document",
-  mobileView = "editor",
+  mobileView = "document",
+  musicSection = "key",
   editing = false,
   currentPage = 1,
   observer,
   saveTimer,
   previewTimer;
+const songViews = new Map();
+const songMusicSections = new Map();
 const song = () => songs.find((s) => s.id === active);
 function persist() {
   if (!workspaceSession.held) return false;
@@ -112,6 +114,9 @@ function renderTabs() {
     (b) =>
       (b.onclick = () => {
         active = b.dataset.id;
+        mobileView = songViews.get(active) ?? "document";
+        musicSection = songMusicSections.get(active) ?? "key";
+        section = mobileView === "music" ? musicSection : "document";
         resetView();
         render();
         persist();
@@ -140,7 +145,14 @@ function closeSong(id) {
 }
 function removeSong(id) {
   songs = songs.filter((s) => s.id !== id);
-  if (active === id) active = songs[0]?.id ?? null;
+  songViews.delete(id);
+  songMusicSections.delete(id);
+  if (active === id) {
+    active = songs[0]?.id ?? null;
+    mobileView = songViews.get(active) ?? "document";
+    musicSection = songMusicSections.get(active) ?? "key";
+    section = mobileView === "music" ? musicSection : "document";
+  }
   render();
   persist();
 }
@@ -160,22 +172,6 @@ function renderSettings() {
     return;
   }
   $("#settings").innerHTML = renderDocumentSettings(s, key);
-  $("#settings").classList.toggle("document-options-open", documentOptionsOpen);
-  $("#document-options-toggle").setAttribute(
-    "aria-expanded",
-    String(documentOptionsOpen),
-  );
-  $("#document-options-toggle").onclick = () => {
-    documentOptionsOpen = !documentOptionsOpen;
-    $("#settings").classList.toggle(
-      "document-options-open",
-      documentOptionsOpen,
-    );
-    $("#document-options-toggle").setAttribute(
-      "aria-expanded",
-      String(documentOptionsOpen),
-    );
-  };
   for (const name of ["title", "artist", "fontSize", "margin"])
     $("#" + name).addEventListener(
       name === "title" || name === "artist" ? "input" : "change",
@@ -222,12 +218,17 @@ function updateNavigation() {
   $("main").dataset.editorSection = section;
   document.querySelectorAll(".rail button").forEach((button) => {
     const selected = button.dataset.mobileView
-      ? mobile && mobileView === "preview"
-      : button.dataset.section === section &&
-        (!mobile || mobileView === "editor");
+      ? mobile && button.dataset.mobileView === mobileView
+      : !mobile && button.dataset.section === section;
     button.classList.toggle("selected", selected);
     if (selected) button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
+  });
+  document.querySelectorAll("[data-music-section]").forEach((button) => {
+    const selected = button.dataset.musicSection === musicSection;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-selected", String(selected));
+    button.tabIndex = selected ? 0 : -1;
   });
   const pencil = $("#pencil");
   const pencilLabel = t(
@@ -511,7 +512,8 @@ $("#pages").addEventListener("keydown", (event) => {
 $("#issue-count").onclick = () => {
   if ($("#issue-count").dataset.noChords === "true") {
     section = "document";
-    mobileView = "editor";
+    mobileView = "edit";
+    songViews.set(active, mobileView);
     renderSettings();
     $("#source").focus();
     return;
@@ -588,17 +590,49 @@ document.querySelectorAll("[data-section]").forEach(
   (b) =>
     (b.onclick = () => {
       section = b.dataset.section;
-      mobileView = "editor";
+      if (section !== "document") {
+        musicSection = section;
+        songMusicSections.set(active, musicSection);
+      }
+      mobileView = section === "document" ? "document" : "music";
+      songViews.set(active, mobileView);
       renderSettings();
     }),
 );
-$("[data-mobile-view='preview']").onclick = () => {
-  if (document.activeElement instanceof HTMLElement)
-    document.activeElement.blur();
-  mobileView = "preview";
-  updateNavigation();
-  resizePages();
-};
+document.querySelectorAll("[data-mobile-view]").forEach((button) => {
+  button.onclick = () => {
+    if (document.activeElement instanceof HTMLElement)
+      document.activeElement.blur();
+    mobileView = button.dataset.mobileView;
+    section = mobileView === "music" ? musicSection : "document";
+    songViews.set(active, mobileView);
+    renderSettings();
+    if (mobileView === "preview") resizePages();
+  };
+});
+document.querySelectorAll("[data-music-section]").forEach((button) => {
+  button.onclick = () => {
+    musicSection = button.dataset.musicSection;
+    songMusicSections.set(active, musicSection);
+    section = musicSection;
+    renderSettings();
+  };
+  button.onkeydown = (event) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const tabs = [...document.querySelectorAll("[data-music-section]")];
+    const index = tabs.indexOf(button);
+    const next =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? tabs.length - 1
+          : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) %
+            tabs.length;
+    tabs[next].click();
+    tabs[next].focus();
+  };
+});
 let importGeneration = 0,
   importController;
 function importScreen(screen) {
@@ -659,7 +693,10 @@ $("#blank").onclick = () => {
   songs.push(s);
   active = s.id;
   section = "document";
-  mobileView = "editor";
+  mobileView = "document";
+  musicSection = "key";
+  songViews.set(active, mobileView);
+  songMusicSections.set(active, musicSection);
   resetView();
   $("#new-dialog").close();
   render();
@@ -681,6 +718,8 @@ async function acceptImport(data) {
   active = s.id;
   resetView();
   mobileView = "preview";
+  songViews.set(active, mobileView);
+  songMusicSections.set(active, musicSection);
   $("#new-dialog").close();
   render();
   persist();
@@ -819,6 +858,12 @@ document.addEventListener("click", (e) => {
     changed();
     renderSource();
     renderPages();
+    if (window.matchMedia("(max-width: 760px)").matches) {
+      mobileView = "edit";
+      section = "document";
+      songViews.set(active, mobileView);
+      renderSettings();
+    }
     input.focus();
     input.setSelectionRange(start + value.length, start + value.length);
   }

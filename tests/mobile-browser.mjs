@@ -18,11 +18,21 @@ try {
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
   await page.locator("#title").fill("Canción móvil");
-  await page.locator("#source").fill("[G]Una canción [D]en el bolsillo");
+  assert.equal(
+    await page.locator("main").getAttribute("data-mobile-view"),
+    "document",
+  );
+  assert.equal(await page.locator("#source-area").isVisible(), false);
   assert.equal(
     await page.locator("#document-options-content").isVisible(),
-    false,
+    true,
   );
+  await page.locator('[data-columns="2"]').click();
+  await page.locator('[data-columns="1"]').click();
+  await page.locator('[data-mobile-view="edit"]').click();
+  await page.locator("#source").fill("[G]Una canción [D]en el bolsillo");
+  assert.equal(await page.locator("#settings").isVisible(), false);
+  assert.ok((await page.locator("#source").boundingBox()).height > 400);
   await page
     .locator("#source")
     .fill(
@@ -35,20 +45,6 @@ try {
     true,
   );
   await page.locator("#source").fill("[G]Una canción [D]en el bolsillo");
-  await page.locator("#document-options-toggle").click();
-  assert.equal(
-    await page
-      .locator("#document-options-toggle")
-      .getAttribute("aria-expanded"),
-    "true",
-  );
-  await page.locator('[data-columns="2"]').click();
-  assert.equal(
-    await page.locator("#document-options-content").isVisible(),
-    true,
-  );
-  await page.locator('[data-columns="1"]').click();
-  await page.locator("#document-options-toggle").click();
 
   const editor = page.locator(".editor-panel");
   const preview = page.locator(".preview-panel");
@@ -107,13 +103,22 @@ try {
   );
   await page.screenshot({ path: "artifacts/mobile-preview-390.png" });
 
-  await page.locator('[data-section="key"]').click();
+  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('[data-music-section="key"]').click();
   assert.equal(await preview.isVisible(), false);
   assert.equal(await page.locator("#settings").isVisible(), true);
-  await page.locator('[data-section="chords"]').click();
+  await page.locator(".degree[data-chord]").first().click();
+  assert.equal(
+    await page.locator("main").getAttribute("data-mobile-view"),
+    "edit",
+  );
+  await page.locator("#source").fill("[G]Una canción [D]en el bolsillo");
+  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('[data-music-section="chords"]').click();
   assert.equal(await page.locator("#chords-panel").isVisible(), true);
-  await page.locator('[data-section="document"]').click();
+  await page.locator('[data-mobile-view="document"]').click();
   assert.equal(await page.locator("#title").inputValue(), "Canción móvil");
+  await page.locator('[data-mobile-view="edit"]').click();
   assert.equal(
     await page.locator("#source").inputValue(),
     "[G]Una canción [D]en el bolsillo",
@@ -141,7 +146,7 @@ try {
       assert.ok(button.x >= 0 && button.x + button.width <= width);
       assert.ok(button.height >= 44);
     }
-    await page.locator('[data-section="document"]').click();
+    await page.locator('[data-mobile-view="edit"]').click();
     assert.equal(await editor.isVisible(), true);
     assert.equal(
       await page.evaluate(
@@ -153,7 +158,8 @@ try {
   }
 
   await page.setViewportSize({ width: 320, height: 640 });
-  await page.locator('[data-section="chords"]').click();
+  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('[data-music-section="chords"]').click();
   await page.locator(".chord-card .edit-shape").first().click();
   const dialogBounds = await page.locator("#shape-dialog").boundingBox();
   for (const button of await page
@@ -167,7 +173,31 @@ try {
   await page.locator("#shape-dialog .cancel-shape").click();
   await page.locator("#mobile-tab-plus").click();
   await page.locator("#blank").click();
+  assert.equal(
+    await page.locator("main").getAttribute("data-mobile-view"),
+    "document",
+  );
   await page.locator("#title").fill("Segunda canción");
+  await page.locator('[data-mobile-view="music"]').click();
+  assert.equal(
+    await page
+      .locator('[data-music-section="key"]')
+      .getAttribute("aria-selected"),
+    "true",
+  );
+  await page.locator(".tab-select").first().click();
+  assert.equal(
+    await page.locator("main").getAttribute("data-mobile-view"),
+    "music",
+  );
+  assert.equal(await page.locator("#chords-panel").isVisible(), true);
+  await page.locator(".tab-select").last().click();
+  assert.equal(
+    await page
+      .locator('[data-music-section="key"]')
+      .getAttribute("aria-selected"),
+    "true",
+  );
   const activeTab = await page.locator(".tab.active").boundingBox();
   const tabs = await page.locator("#tabs").boundingBox();
   assert.ok(
@@ -176,9 +206,9 @@ try {
   );
 
   await page.setViewportSize({ width: 667, height: 375 });
+  await page.locator('[data-mobile-view="edit"]').click();
   const sourceBounds = await page.locator("#source").boundingBox();
-  const settingsBounds = await page.locator("#settings").boundingBox();
-  assert.ok(sourceBounds.x >= settingsBounds.x + settingsBounds.width);
+  assert.ok(sourceBounds.width > 500);
   assert.ok(sourceBounds.height >= 100);
 
   await page.setViewportSize({ width: 900, height: 844 });

@@ -165,7 +165,8 @@ try {
     ),
     false,
   );
-  await page.locator('[data-section="chords"]').click();
+  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('[data-music-section="chords"]').click();
   assert.equal((await page.locator("#fretboard").boundingBox()).width, 300);
   await page.screenshot({
     path: "artifacts/identifier-horizontal-mobile.png",

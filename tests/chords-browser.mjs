@@ -184,7 +184,8 @@ try {
   await page.waitForTimeout(450);
   await page.reload();
   assert.ok((await source.inputValue()).includes("[Abm7b5]"));
-  await page.locator('[data-section="chords"]').click();
+  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('[data-music-section="chords"]').click();
   const savedSvg = await page
     .getByRole("button", { name: "Editar posición de Abm7b5", exact: true })
     .locator("svg")

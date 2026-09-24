@@ -54,6 +54,14 @@ try {
   await page.locator("#source").fill("[G]Una línea [C]con acordes");
   await page.locator('[data-section="chords"]').click();
   await check("chord workspace");
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const view of ["document", "edit", "music", "preview"]) {
+    await page.locator(`[data-mobile-view="${view}"]`).click();
+    await check(`mobile ${view}`);
+  }
+  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('[data-music-section="key"]').click();
+  await check("mobile key");
   console.log("Automated accessibility checks passed");
 } finally {
   await browser.close();
