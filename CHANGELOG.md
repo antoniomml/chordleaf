@@ -1,5 +1,10 @@
 # chordleaf changelog
 
+## 0.6.1 · September 24, 2026
+
+- Align the `chordleaf.com` footer checkbox with its label and match the document settings typography.
+- Place the transposition interval inside its stepper so the controls and lyrics editor remain visible at common desktop and phone sizes.
+
 ## 0.6.0 · September 24, 2026
 
 - Save and reopen a single song as a versioned `.chordleaf.json` project with its text, chord anchors, page settings, custom positions and diagrams intact.
