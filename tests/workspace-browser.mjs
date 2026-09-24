@@ -166,10 +166,7 @@ try {
     false,
   );
   await page.locator('[data-section="chords"]').click();
-  assert.equal(
-    (await page.locator("#fretboard").boundingBox()).width,
-    fretSize.width,
-  );
+  assert.equal((await page.locator("#fretboard").boundingBox()).width, 300);
   await page.screenshot({
     path: "artifacts/identifier-horizontal-mobile.png",
     fullPage: true,

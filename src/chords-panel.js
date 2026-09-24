@@ -7,7 +7,7 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
   const host = document.createElement("section");
   host.id = "chords-panel";
   host.hidden = true;
-  host.innerHTML = t`<div class="panel-title"><span>Tu mesa de acordes</span><span class="muted">03</span></div>
+  host.innerHTML = t`<h2 class="panel-title"><span>Tu mesa de acordes</span><span class="muted">03</span></h2>
     <div class="chord-modes" role="tablist" aria-label="Herramientas de acordes"><button role="tab" id="mode-song" aria-controls="song-chords" data-mode="song" aria-selected="true">En canción</button><button role="tab" id="mode-search" aria-controls="search-chords" tabindex="-1" data-mode="search" aria-selected="false">Buscar</button><button role="tab" id="mode-identify" aria-controls="identify-chords" tabindex="-1" data-mode="identify" aria-selected="false">Identificar</button></div>
     <div id="song-chords" role="tabpanel" aria-labelledby="mode-song"></div>
     <div id="search-chords" role="tabpanel" aria-labelledby="mode-search" hidden><label class="field">BUSCAR ACORDE<input id="catalog-search" type="search" placeholder="C, Emaj7, Abm7b5, C/G…" autocomplete="off"></label><p class="chord-help">Busca por nombre. Pulsa un diagrama para recorrer sus posiciones y usarlo en la canción.</p><p id="search-count" role="status"></p><div id="catalog-grid" class="chord-card-grid"></div><button id="more-chords">Mostrar más</button><p class="chord-help">828 acordes · 3283 posiciones · E A D G B e<br>Datos de <a href="https://github.com/tombatossals/chords-db">chords-db</a> · <a href="/licenses/chords-db.txt">MIT</a></p></div>

@@ -84,7 +84,7 @@ try {
     path: "artifacts/audit-mobile-en.png",
     fullPage: true,
   });
-  await page.locator("#new").click();
+  await page.locator("#mobile-tab-plus").click();
   await page.locator("#import").click();
   await page.locator("#file").setInputFiles({
     name: "huge.txt",
