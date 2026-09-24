@@ -14,6 +14,12 @@ export default {
   "Documento para compartir": "Document to share",
   "Mostrar chordleaf.com al pie de la hoja":
     "Show chordleaf.com in the page footer",
+  "Mostrar chordleaf.com en el pie": "Show chordleaf.com in the footer",
+  "Bajar intervalo": "Transpose down",
+  "Subir intervalo": "Transpose up",
+  "½ tono": "½ tone",
+  "1 tono": "1 tone",
+  "2 tonos": "2 tones",
   INTERVALO: "INTERVAL",
   "Intervalo de transposición": "Transposition interval",
   "½ tono · 1 semitono": "Half step · 1 semitone",

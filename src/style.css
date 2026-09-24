@@ -422,6 +422,27 @@ main {
   font-weight: 400;
   color: #e0e5d8;
 }
+.footer-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 2px 0 10px;
+  color: #c4ccbd;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.footer-option input {
+  flex: none;
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--green);
+}
 .settings-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -496,6 +517,24 @@ main {
   background: transparent;
   width: 30px;
   color: #e5ebdc;
+}
+.stepper select {
+  appearance: none;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 11px 0 2px;
+  border: 0;
+  background: #202421
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='m1 1 3 3 3-3' fill='none' stroke='%23a8b29b' stroke-width='1.3'/%3E%3C/svg%3E")
+    no-repeat right 3px center;
+  color: #e5ebdc;
+  color-scheme: dark;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  text-align-last: center;
+  cursor: pointer;
 }
 .stepper input::-webkit-inner-spin-button {
   display: none;
@@ -1880,14 +1919,15 @@ button:disabled {
 }
 #settings {
   padding: 16px 20px 0;
-  max-height: 320px;
+  flex-shrink: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 #settings .panel-title {
-  margin-bottom: 13px;
+  margin-bottom: 10px;
 }
 #settings .field {
-  margin-bottom: 9px;
+  margin-bottom: 7px;
 }
 #settings .field input {
   margin-top: 4px;
@@ -1906,7 +1946,7 @@ button:disabled {
   height: 30px;
 }
 #settings .link-help {
-  margin: 7px 0 10px;
+  margin: 5px 0 7px;
   min-height: 0;
 }
 .source-heading {
@@ -2269,7 +2309,8 @@ select:focus-visible {
   }
   #settings {
     padding: 14px 16px 0;
-    max-height: none;
+    flex-shrink: 0;
+    overflow-y: visible;
   }
   #settings .panel-title {
     margin-bottom: 12px;
@@ -2288,6 +2329,9 @@ select:focus-visible {
   }
   #settings .stepper button {
     width: 44px;
+  }
+  #settings .stepper select {
+    font-size: 16px;
   }
   #settings .music-controls {
     grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr);

@@ -207,7 +207,6 @@ function renderSettings() {
   }
   $("#settings").innerHTML = renderDocumentSettings(
     s,
-    key,
     transposeHistory.get(s.id),
   );
   $("#transpose-interval").value = String(transposeInterval);
