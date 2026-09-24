@@ -37,6 +37,11 @@ for (const engine of [chromium, firefox, webkit].filter(
     await page.locator("#empty-new").click();
     await page.locator("#blank").click();
     await page.locator("#source").fill("[C]Keep my changes\n[G]Across windows");
+    await page.waitForFunction(
+      () =>
+        JSON.parse(localStorage.getItem("chordleaf-v1"))?.songs?.[0]?.text ===
+        "[C]Keep my changes\n[G]Across windows",
+    );
     const second = await context.newPage();
     await second.goto(url);
     await second
