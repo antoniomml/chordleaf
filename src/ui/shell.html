@@ -135,9 +135,9 @@
       class="mobile-song-tab"
       data-mobile-view="music"
       aria-controls="mobile-music-modes"
-      title="Música"
+      title="Armonía"
     >
-      <span aria-hidden="true">♬</span><span>Música</span>
+      <span aria-hidden="true">♬</span><span>Armonía</span>
     </button>
     <button
       class="mobile-song-tab mobile-preview-tab"
@@ -168,17 +168,37 @@
       <div
         id="mobile-music-modes"
         role="tablist"
-        aria-label="Herramientas musicales"
+        aria-label="Herramientas de armonía"
       >
-        <button role="tab" data-music-section="key" aria-controls="settings">
+        <button
+          role="tab"
+          data-harmony-view="key"
+          data-music-section="key"
+          aria-controls="settings"
+        >
           Tonalidad
         </button>
         <button
           role="tab"
+          data-harmony-view="song"
           data-music-section="chords"
           aria-controls="chords-panel"
         >
           Acordes
+        </button>
+        <button
+          role="tab"
+          data-harmony-view="search"
+          aria-controls="search-chords"
+        >
+          Buscar
+        </button>
+        <button
+          role="tab"
+          data-harmony-view="identify"
+          aria-controls="identify-chords"
+        >
+          Identificar
         </button>
       </div>
       <div id="settings"></div>

@@ -69,7 +69,7 @@ Both interface and document fonts are served by the app itself. There are no thi
 
 ## A release with room to grow
 
-The current workspace gives phones separate Document, Edit, Music and Preview views. The lyrics editor fills the available space, songs remember their last view, and the sheet still supports pinch zoom. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md) and [export QA notes](docs/export-qa.es.md).
+The current workspace gives phones separate Document, Edit, Harmony and Preview views. Harmony has one row for key analysis, song chords, chord search and chord identification. The lyrics editor fills the available space, songs remember their last view, and the sheet still supports pinch zoom. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md) and [export QA notes](docs/export-qa.es.md).
 
 ## Take part
 

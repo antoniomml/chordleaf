@@ -56,7 +56,7 @@ try {
 
   await page.locator('[data-mobile-view="music"]').click();
   await page.locator('[data-music-section="chords"]').click();
-  await page.locator('[data-mode="search"]').click();
+  await page.locator('[data-harmony-view="search"]').click();
   await checkTextControls();
   await page.locator("#catalog-search").fill("C");
   assert.equal(await page.evaluate(() => visualViewport.scale), scale);

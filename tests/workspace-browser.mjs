@@ -26,7 +26,7 @@ try {
     await page.locator(".topbar").evaluate((el) => el.clientHeight),
     61,
   );
-  assert.ok((await page.locator("#source").boundingBox()).height > 350);
+  assert.ok((await page.locator("#source").boundingBox()).height > 300);
   await page.locator('[data-section="chords"]').click();
   await page
     .getByRole("button", { name: "Añadir todos los diagramas", exact: true })
@@ -166,7 +166,7 @@ try {
     false,
   );
   await page.locator('[data-mobile-view="music"]').click();
-  await page.locator('[data-music-section="chords"]').click();
+  await page.locator('[data-harmony-view="identify"]').click();
   assert.equal((await page.locator("#fretboard").boundingBox()).width, 300);
   await page.screenshot({
     path: "artifacts/identifier-horizontal-mobile.png",

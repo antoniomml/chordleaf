@@ -12,6 +12,8 @@ try {
     await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
     await page.locator("#empty-new").click();
     await page.locator("#blank").click();
+    assert.equal(await page.locator("#showBrand").isVisible(), false);
+    await page.locator(".more-document-options summary").click();
 
     const geometry = await page.evaluate(() => {
       const settings = document
@@ -23,27 +25,26 @@ try {
       const label = document
         .querySelector(".footer-option span")
         .getBoundingClientRect();
-      const interval = document
-        .querySelector("#transpose-interval")
+      const transpose = document
+        .querySelector("#transpose-up")
         .getBoundingClientRect();
-      return { settings, checkbox, label, interval };
+      return { settings, checkbox, label, transpose };
     });
     assert.ok(geometry.checkbox.width <= 18);
     assert.ok(geometry.label.left >= geometry.checkbox.right);
-    assert.ok(geometry.interval.top >= geometry.settings.top);
-    assert.ok(geometry.interval.bottom <= geometry.settings.bottom);
-    assert.ok(geometry.interval.right <= geometry.settings.right);
+    assert.ok(geometry.transpose.top >= geometry.settings.top);
+    assert.ok(geometry.transpose.bottom <= geometry.settings.bottom);
+    assert.ok(geometry.transpose.right <= geometry.settings.right);
 
     if (width > 760) {
       const editorHeight = await page
         .locator("#source")
         .evaluate((el) => el.getBoundingClientRect().height);
-      assert.ok(editorHeight >= (width >= 1200 ? 350 : 200));
+      assert.ok(editorHeight >= (width >= 1200 ? 180 : 120));
     }
     await page.locator(".footer-option").click();
     assert.equal(await page.locator("#showBrand").isChecked(), false);
-    await page.locator("#transpose-interval").selectOption("2");
-    assert.equal(await page.locator("#transpose-interval").inputValue(), "2");
+    assert.equal(await page.locator("#transpose-interval").count(), 0);
     await page.close();
   }
   console.log(

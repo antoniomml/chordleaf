@@ -79,7 +79,7 @@ let section = "document",
 const songViews = new Map();
 const songMusicSections = new Map();
 const transposeHistory = new Map();
-let transposeInterval = 1;
+let chordMode = "song";
 const song = () => songs.find((s) => s.id === active);
 function persist() {
   if (!workspaceSession.held) return false;
@@ -209,9 +209,6 @@ function renderSettings() {
     s,
     transposeHistory.get(s.id),
   );
-  $("#transpose-interval").value = String(transposeInterval);
-  $("#transpose-interval").onchange = (e) =>
-    (transposeInterval = Number(e.target.value));
   if ($("#undo-transpose")) $("#undo-transpose").onclick = undoTranspose;
   $("#showBrand").onchange = (e) => {
     s.showBrand = e.target.checked;
@@ -247,8 +244,8 @@ function renderSettings() {
         renderPages();
       }),
   );
-  $("#transpose-down").onclick = () => shift(-transposeInterval);
-  $("#transpose-up").onclick = () => shift(transposeInterval);
+  $("#transpose-down").onclick = () => shift(-1);
+  $("#transpose-up").onclick = () => shift(1);
   $("#capo-down").onclick = () => setCapo(s.capo - 1);
   $("#capo-up").onclick = () => setCapo(s.capo + 1);
   $("#capo").onchange = (e) => setCapo(Number(e.target.value));
@@ -270,8 +267,12 @@ function updateNavigation() {
     if (selected) button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
   });
-  document.querySelectorAll("[data-music-section]").forEach((button) => {
-    const selected = button.dataset.musicSection === musicSection;
+  document.querySelectorAll("[data-harmony-view]").forEach((button) => {
+    const view = button.dataset.harmonyView;
+    const selected =
+      view === "key"
+        ? musicSection === "key"
+        : musicSection === "chords" && view === chordMode;
     button.classList.toggle("selected", selected);
     button.setAttribute("aria-selected", String(selected));
     button.tabIndex = selected ? 0 : -1;
@@ -316,7 +317,7 @@ function shift(n) {
   const pending = [...s.text.matchAll(/\[\?[^\[\]\n]{1,40}\]/g)].length;
   transposeHistory.set(s.id, {
     snapshot,
-    label: `${n > 0 ? "+" : ""}${n} ${t("semitonos")} · ${Math.abs(n) / 2} ${t("tonos")}${pending ? ` · ${pending} ${t("acordes pendientes sin cambiar")}` : ""}`,
+    label: `${n > 0 ? "+" : ""}${n} ${t("semitono")}${pending ? ` · ${pending} ${t("acordes pendientes sin cambiar")}` : ""}`,
     before,
     after: chords(s.text).join(", ") || "—",
   });
@@ -679,9 +680,14 @@ document.querySelectorAll("[data-mobile-view]").forEach((button) => {
     if (mobileView === "preview") resizePages();
   };
 });
-document.querySelectorAll("[data-music-section]").forEach((button) => {
+document.querySelectorAll("[data-harmony-view]").forEach((button) => {
   button.onclick = () => {
-    musicSection = button.dataset.musicSection;
+    const view = button.dataset.harmonyView;
+    musicSection = view === "key" ? "key" : "chords";
+    if (view !== "key") {
+      chordMode = view;
+      chordPanel.setMode(view);
+    }
     songMusicSections.set(active, musicSection);
     section = musicSection;
     renderSettings();
@@ -689,7 +695,7 @@ document.querySelectorAll("[data-music-section]").forEach((button) => {
   button.onkeydown = (event) => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const tabs = [...document.querySelectorAll("[data-music-section]")];
+    const tabs = [...document.querySelectorAll("[data-harmony-view]")];
     const index = tabs.indexOf(button);
     const next =
       event.key === "Home"
@@ -1098,6 +1104,10 @@ const chordPanel = setupChordsPanel({
   refresh: render,
   esc,
   notify: toast,
+  onModeChange(mode) {
+    chordMode = mode;
+    updateNavigation();
+  },
 });
 const dictionary = setupDictionary({ song, changed, renderPages, esc });
 for (const [id, delta] of [

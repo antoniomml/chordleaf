@@ -105,8 +105,15 @@ try {
 
   await page.locator('[data-mobile-view="music"]').click();
   await page.locator('[data-music-section="key"]').click();
+  assert.equal(await page.locator("[data-harmony-view]").count(), 4);
+  assert.equal(await page.locator(".chord-modes").isVisible(), false);
   assert.equal(await preview.isVisible(), false);
   assert.equal(await page.locator("#settings").isVisible(), true);
+  await page.locator('[data-harmony-view="search"]').click();
+  assert.equal(await page.locator("#catalog-search").isVisible(), true);
+  await page.locator('[data-harmony-view="identify"]').click();
+  assert.equal(await page.locator("#fretboard").isVisible(), true);
+  await page.locator('[data-harmony-view="key"]').click();
   await page.locator(".degree[data-chord]").first().click();
   assert.equal(
     await page.locator("main").getAttribute("data-mobile-view"),

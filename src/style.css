@@ -426,7 +426,7 @@ main {
   display: flex;
   align-items: center;
   gap: 9px;
-  margin: 2px 0 10px;
+  margin: 12px 0 2px;
   color: #c4ccbd;
   font-size: 11px;
   font-weight: 500;
@@ -447,6 +447,36 @@ main {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
+}
+.settings-meta-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.settings-meta-row input {
+  min-width: 0;
+}
+.settings-group-label {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin: 8px 0 7px;
+  color: #aab6a0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+.more-document-options {
+  border-top: 1px solid var(--border);
+  padding: 11px 0 12px;
+}
+.more-document-options summary {
+  color: #aab6a0;
+  font-size: 11px;
+  cursor: pointer;
+}
+.more-document-options summary:hover,
+.more-document-options summary:focus-visible {
+  color: var(--green);
 }
 .number-unit {
   position: relative;
@@ -482,9 +512,10 @@ main {
 }
 .music-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 35px minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   align-items: end;
-  margin-top: 4px;
+  margin-top: 0;
 }
 .music-controls label {
   font-size: 9px;
@@ -518,37 +549,32 @@ main {
   width: 30px;
   color: #e5ebdc;
 }
-.stepper select {
-  appearance: none;
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  padding: 0 11px 0 2px;
-  border: 0;
-  background: #202421
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='m1 1 3 3 3-3' fill='none' stroke='%23a8b29b' stroke-width='1.3'/%3E%3C/svg%3E")
-    no-repeat right 3px center;
-  color: #e5ebdc;
-  color-scheme: dark;
-  font-size: 11px;
-  font-weight: 600;
-  text-align: center;
-  text-align-last: center;
-  cursor: pointer;
-}
 .stepper input::-webkit-inner-spin-button {
   display: none;
 }
-.chain {
-  height: 35px;
-  color: #707c66;
+.capo-link-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 28px;
+  margin-top: 9px;
+  color: #b9c3b1;
+  font-size: 11px;
+  text-align: left;
+}
+.capo-link-toggle .toggle-mark {
   display: grid;
   place-items: center;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border: 1px solid #78846e;
+  border-radius: 3px;
+  color: #202820;
 }
-.chain.linked {
-  color: var(--green);
-  background: #c9e79c15;
-  border-radius: 50%;
+.capo-link-toggle.linked .toggle-mark {
+  border-color: var(--green);
+  background: var(--green);
 }
 .link-help {
   font-size: 9px;
@@ -1942,9 +1968,6 @@ button:disabled {
 #settings .number-unit span {
   top: 9px;
 }
-#settings .chain {
-  height: 30px;
-}
 #settings .link-help {
   margin: 5px 0 7px;
   min-height: 0;
@@ -2294,14 +2317,17 @@ select:focus-visible {
     gap: 6px;
     padding: 12px 16px 0;
     border-bottom: 1px solid var(--border);
+    overflow-x: auto;
   }
   #mobile-music-modes button {
-    flex: 1;
+    flex: 0 0 auto;
     min-height: 44px;
+    padding: 0 9px;
     border-bottom: 2px solid transparent;
     color: #9ba78f;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
+    white-space: nowrap;
   }
   #mobile-music-modes button.selected {
     border-bottom-color: var(--green);
@@ -2309,8 +2335,12 @@ select:focus-visible {
   }
   #settings {
     padding: 14px 16px 0;
-    flex-shrink: 0;
-    overflow-y: visible;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  #settings .settings-meta-row {
+    display: block;
   }
   #settings .panel-title {
     margin-bottom: 12px;
@@ -2323,18 +2353,24 @@ select:focus-visible {
     min-height: 44px;
   }
   #settings .segmented,
-  #settings .stepper,
-  #settings .chain {
+  #settings .stepper {
     height: 44px;
   }
   #settings .stepper button {
     width: 44px;
   }
-  #settings .stepper select {
-    font-size: 16px;
+  #settings .stepper span {
+    font-size: 13px;
   }
   #settings .music-controls {
-    grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #settings .capo-link-toggle {
+    min-height: 44px;
+  }
+  #chords-panel .panel-title,
+  #chords-panel .chord-modes {
+    display: none;
   }
   #settings .number-unit span {
     top: 50%;

@@ -15,6 +15,15 @@ export default {
   "Mostrar chordleaf.com al pie de la hoja":
     "Show chordleaf.com in the page footer",
   "Mostrar chordleaf.com en el pie": "Show chordleaf.com in the footer",
+  "ACORDES Y CEJILLA": "CHORDS AND CAPO",
+  "FORMATO DE PÁGINA": "PAGE LAYOUT",
+  "Más opciones": "More options",
+  "Mantener el tono al mover la cejilla":
+    "Keep the sounding key when moving the capo",
+  "Los acordes se ajustan automáticamente al cambiar la cejilla.":
+    "Chords adjust automatically when the capo moves.",
+  "Cambiar la cejilla modifica el tono que suena.":
+    "Moving the capo changes the sounding key.",
   "Bajar intervalo": "Transpose down",
   "Subir intervalo": "Transpose up",
   "½ tono": "½ tone",
@@ -26,6 +35,7 @@ export default {
   "1 tono · 2 semitonos": "1 whole step · 2 semitones",
   "2 tonos · 4 semitonos": "2 whole steps · 4 semitones",
   "Deshacer transposición": "Undo transpose",
+  semitono: "semitone",
   semitonos: "semitones",
   tonos: "whole steps",
   "acordes pendientes sin cambiar": "unresolved chords unchanged",
@@ -129,6 +139,8 @@ export default {
   "Editar documento": "Edit document",
   Documento: "Document",
   Música: "Music",
+  Armonía: "Harmony",
+  "Herramientas de armonía": "Harmony tools",
   Vista: "View",
   "Herramientas musicales": "Music tools",
   "Vista previa": "Preview",

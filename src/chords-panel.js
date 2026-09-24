@@ -3,7 +3,14 @@ import guitar from "./data/guitar.json" with { type: "json" };
 import { chords, diagram, normalizeChord, NOTES, pc } from "./music.js";
 import { identifyChord, replaceChord } from "./harmony.js";
 
-export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
+export function setupChordsPanel({
+  song,
+  changed,
+  refresh,
+  esc,
+  notify,
+  onModeChange,
+}) {
   const host = document.createElement("section");
   host.id = "chords-panel";
   host.hidden = true;
@@ -40,6 +47,7 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
   });
   function setMode(value) {
     mode = value;
+    onModeChange?.(mode);
     host.querySelectorAll("[data-mode]").forEach((b) => {
       b.setAttribute("aria-selected", b.dataset.mode === mode);
       b.tabIndex = b.dataset.mode === mode ? 0 : -1;
@@ -344,6 +352,7 @@ export function setupChordsPanel({ song, changed, refresh, esc, notify }) {
     notify(t("Cambio de acorde deshecho."));
   };
   return {
+    setMode,
     refresh() {
       if (selected && selected.songId !== song().id) {
         selected = null;

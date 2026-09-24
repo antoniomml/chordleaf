@@ -166,14 +166,14 @@ try {
     path: "artifacts/chords-mobile.png",
     fullPage: true,
   });
-  await page.locator('[data-mode="search"]').click();
+  await page.locator('[data-harmony-view="search"]').click();
   await page.locator("#catalog-search").fill("Abm7b5");
   await page.locator("#catalog-grid .chord-card").first().click();
   await page.locator("#chosen-next").click();
   assert.equal(await page.locator("#chosen-diagram").innerHTML(), chosenSvg);
   await page.locator("#replace-target").selectOption("D");
   await page.locator("#replace-chosen").click();
-  await page.locator('[data-mode="song"]').click();
+  await page.locator('[data-harmony-view="song"]').click();
   assert.equal(
     await page
       .getByRole("button", { name: "Editar posición de Abm7b5", exact: true })
