@@ -141,6 +141,15 @@ export default {
   Música: "Music",
   Armonía: "Harmony",
   "Herramientas de armonía": "Harmony tools",
+  "Buscar acordes": "Find chords",
+  "Identificar acorde": "Identify chord",
+  "Busca un nombre y toca un diagrama para ver sus posiciones.":
+    "Search by name and tap a diagram to see its positions.",
+  "Dibuja un acorde": "Draw a chord",
+  "Toca un traste por cuerda; × la apaga y ○ la deja al aire.":
+    "Tap one fret per string; × mutes it and ○ leaves it open.",
+  "Elige un nombre para usarlo en la canción.":
+    "Choose a name to use in the song.",
   Vista: "View",
   "Herramientas musicales": "Music tools",
   "Vista previa": "Preview",

@@ -1684,6 +1684,9 @@ button:disabled {
 .identify-readings {
   min-width: 0;
 }
+.identify-readings {
+  overflow-wrap: anywhere;
+}
 #identify-chords h2 {
   margin: 0 0 8px;
   font-size: 15px;
@@ -2207,7 +2210,6 @@ select:focus-visible {
     place-items: center;
     flex: 0 0 44px;
     height: 44px;
-    border-left: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     background: #252d23;
     color: var(--green);
@@ -2227,6 +2229,9 @@ select:focus-visible {
   .tabs .tab:only-of-type {
     max-width: none;
     flex: 1;
+  }
+  .tabs .tab:last-of-type {
+    border-right: 0;
   }
   main {
     height: calc(100dvh - 96px);
@@ -2314,20 +2319,21 @@ select:focus-visible {
   #mobile-music-modes {
     display: flex;
     flex: 0 0 auto;
-    gap: 6px;
-    padding: 12px 16px 0;
+    gap: 0;
+    padding: 8px 8px 0;
     border-bottom: 1px solid var(--border);
-    overflow-x: auto;
   }
   #mobile-music-modes button {
-    flex: 0 0 auto;
-    min-height: 44px;
-    padding: 0 9px;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 48px;
+    padding: 3px 4px;
     border-bottom: 2px solid transparent;
     color: #9ba78f;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    white-space: nowrap;
+    line-height: 1.15;
+    white-space: normal;
   }
   #mobile-music-modes button.selected {
     border-bottom-color: var(--green);
@@ -2403,6 +2409,46 @@ select:focus-visible {
   }
   .chord-card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #catalog-grid .chord-card {
+    padding: 8px 4px;
+  }
+  #catalog-grid .chord-card svg {
+    width: min(100%, 108px);
+    margin-inline: auto;
+  }
+  #chords-panel {
+    padding: 12px 16px;
+  }
+  #identify-chords {
+    gap: 10px;
+  }
+  #identify-chords h2 {
+    margin-bottom: 4px;
+  }
+  #identify-chords .chord-help {
+    margin-bottom: 6px;
+  }
+  .fretboard-options {
+    margin: 6px 0;
+    max-width: 300px;
+    margin-inline: auto;
+  }
+  #fretboard {
+    margin-inline: auto;
+  }
+  .fretboard-legend {
+    display: none;
+  }
+  #capo-notes[data-capo="0"] {
+    display: none;
+  }
+  .identify-readings {
+    padding-top: 5px;
+    border-top: 1px solid var(--border);
+  }
+  .guitar-string .open-string {
+    margin: 0 3px 0 0;
   }
   .dictionary-item.chord-card .chord-card-actions button,
   .dictionary-all .add-sticker {
@@ -2500,6 +2546,21 @@ select:focus-visible {
   #toast {
     width: 85%;
     font-size: 11px;
+  }
+}
+@media (max-width: 360px) {
+  #fretboard {
+    width: 100%;
+  }
+  .guitar-string,
+  .fret-numbers,
+  .fret-markers {
+    grid-template-columns: 12px 44px repeat(4, minmax(44px, 1fr));
+  }
+  .guitar-string > :nth-child(7),
+  .fret-numbers > :nth-child(7),
+  .fret-markers > :nth-child(7) {
+    display: none;
   }
 }
 

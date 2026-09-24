@@ -747,7 +747,7 @@ function importScreen(screen) {
   $("#new-dialog").scrollTop = 0;
   if (screen === "web") $("#web-url").focus();
   else if (screen === "text") $("#import-text").focus();
-  else $("#import").focus();
+  else $("#open-project").focus();
 }
 function openNewSong() {
   $("#web-url").value = "";
@@ -755,7 +755,7 @@ function openNewSong() {
   $("#file").value = "";
   importScreen("menu");
   $("#new-dialog").showModal();
-  $("#import").focus();
+  $("#open-project").focus();
 }
 $("#new").onclick = openNewSong;
 $("#mobile-tab-plus").onclick = openNewSong;

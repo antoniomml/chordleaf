@@ -14,6 +14,12 @@ try {
   assert.equal(await page.locator(".page").count(), 0);
   async function menu() {
     assert.equal(await page.locator("#new-menu").isVisible(), true);
+    assert.deepEqual(
+      await page
+        .locator("#new-menu > button")
+        .evaluateAll((buttons) => buttons.map((button) => button.id)),
+      ["open-project", "import", "web", "blank"],
+    );
     for (const selector of [
       "#text-import",
       "#web-import",
@@ -24,6 +30,10 @@ try {
   }
   await page.locator("#empty-new").click();
   await menu();
+  assert.equal(
+    await page.evaluate(() => document.activeElement.id),
+    "open-project",
+  );
   await page.locator("#web").click();
   assert.equal(await page.locator("#new-menu").isVisible(), false);
   assert.equal(await page.locator("#text-import").isVisible(), false);

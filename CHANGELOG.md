@@ -5,6 +5,8 @@
 - Group document controls around chords, capo and page layout; move the optional `chordleaf.com` footer setting to the last, collapsed section.
 - Transpose one semitone per tap, and label the optional capo behavior by what it does to the sounding key.
 - Flatten the phone Harmony navigation into Key, Chords, Search and Identify views.
+- Put editable projects first in the new-song menu, remove the mobile tab divider, and clarify the Harmony tabs.
+- Compact mobile chord search and identification so diagrams and suggested names fit more comfortably.
 
 ## 0.6.1 · September 24, 2026
 

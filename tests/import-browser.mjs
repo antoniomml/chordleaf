@@ -13,8 +13,8 @@ try {
   assert.deepEqual(
     await page.locator("#new-dialog .choice strong").allTextContents(),
     [
-      "Importar texto o archivo",
       "Abrir proyecto editable",
+      "Importar texto o archivo",
       "Importar desde una web",
       "Empezar de cero",
     ],
