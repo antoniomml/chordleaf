@@ -1880,6 +1880,8 @@ button:disabled {
 }
 #settings {
   padding: 16px 20px 0;
+  max-height: 320px;
+  overflow-y: auto;
 }
 #settings .panel-title {
   margin-bottom: 13px;
@@ -2267,6 +2269,7 @@ select:focus-visible {
   }
   #settings {
     padding: 14px 16px 0;
+    max-height: none;
   }
   #settings .panel-title {
     margin-bottom: 12px;

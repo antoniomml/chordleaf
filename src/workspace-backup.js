@@ -32,7 +32,12 @@ export function restoreWorkspace(text) {
     );
   // Merge as new tabs: never replace existing work, even when IDs overlap.
   const songs = data.songs.map((s) =>
-    createSong({ ...s, id: crypto.randomUUID(), dirty: true }),
+    createSong({
+      ...s,
+      id: crypto.randomUUID(),
+      dirty: true,
+      pdfExported: false,
+    }),
   );
   const index = data.songs.findIndex((s) => s.id === data.active);
   return { songs, active: songs[Math.max(0, index)].id };

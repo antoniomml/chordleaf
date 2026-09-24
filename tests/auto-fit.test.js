@@ -44,14 +44,19 @@ test("very long songs retain every line and readable type across pages", () => {
   for (const row of result.pages.flatMap((p) => p.columns.flat()))
     assert.ok(row.y + row.height <= PAGE.height - 24);
 });
-test("imported page breaks are reflowed without dropping verses", () => {
+test("manual page and column breaks survive automatic fitting", () => {
   assert.equal(
     fitToPage({
       ...base,
       text: "[C]Uno\n{column}\n[D]Dos\n{new_page}\n[G]Tres",
     }).text,
-    "[C]Uno\n\n[D]Dos\n\n[G]Tres",
+    "[C]Uno\n{column}\n[D]Dos\n{new_page}\n[G]Tres",
   );
+  const fitted = fitToPage({
+    ...base,
+    text: "[C]Uno\n{column}\n[D]Dos\n{new_page}\n[G]Tres",
+  });
+  assert.ok(layout({ ...base, ...fitted }).pages.length >= 2);
 });
 test("F has a full barre, Bm a partial barre, open chords no barre", () => {
   assert.match(diagram("F"), /class="diagram-barre" d="M30 39H115"/);

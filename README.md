@@ -4,7 +4,7 @@
   <p><strong>Your song. Your chords. Everything in place.</strong></p>
   <p>A workspace for writing lyrics and chords, exploring guitar voicings,<br>and making a song sheet for your next rehearsal.</p>
   <p>
-    <a href="https://github.com/antoniomml/chordleaf/releases/tag/v0.5.3"><img src="https://img.shields.io/badge/version-0.5.3-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.5.3"></a>
+    <a href="https://github.com/antoniomml/chordleaf/releases/tag/v0.6.0"><img src="https://img.shields.io/badge/version-0.6.0-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.6.0"></a>
     <a href="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
   </p>
   <p><a href="https://chordleaf.com/">Open Chordleaf</a> · <a href="#a-small-studio-for-your-songs">Features</a> · <a href="https://github.com/antoniomml/chordleaf/wiki">User wiki</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -61,13 +61,15 @@ Choose an interpretation to insert it at the text cursor or replace a specific o
 
 Songs and imported files are processed in your browser. Web imports send the song URL to the Chordleaf server, which downloads the public page; your edited songs are not uploaded. There are no accounts. Changes are saved automatically in that browser.
 
-**Export a copy of anything you want to keep.** Browser storage does not sync devices and can disappear when browser data is cleared. Choose **Export → Workspace backup · JSON** to preserve all open songs and settings, or export chordleaf TXT for an individual song.
+**Save an editable project for any song you want to revisit.** Choose **Export → Save editable project** to download a `.chordleaf.json` file; open it later through **New song → Open editable project**. PDF and Word are sharing formats and do not mark the project as saved. Closing a song discards its browser copy; Chordleaf warns when the project has not been saved or has later changes. Browser storage is only a temporary recovery copy and does not sync devices. **Workspace backup · JSON** preserves every open song separately.
+
+Document settings include a checkbox for the `chordleaf.com` page footer. It is on for new songs and can be switched off for the preview, PDF and Word export.
 
 Both interface and document fonts are served by the app itself. There are no third-party font requests or analytics scripts. See [privacy and storage](https://github.com/antoniomml/chordleaf/wiki/Privacy-and-storage).
 
 ## A release with room to grow
 
-**0.5.3** gives phones separate Document, Edit, Music and Preview views. The lyrics editor fills the available space, songs remember their last view, and the sheet still supports pinch zoom. Chordleaf retains its bilingual workspace, complete backups and bounded imports. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md).
+The current workspace gives phones separate Document, Edit, Music and Preview views. The lyrics editor fills the available space, songs remember their last view, and the sheet still supports pinch zoom. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md) and [export QA notes](docs/export-qa.es.md).
 
 ## Take part
 

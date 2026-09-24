@@ -1,4 +1,5 @@
 import { parseSong, chordRE, unresolvedChordRE } from "./music.js";
+import { stickerGeometry } from "./dictionary.js";
 export const PAGE = { width: 595.28, height: 841.89 };
 function wrapText(text, capacity) {
   const lines = [];
@@ -180,6 +181,16 @@ export function layout(song, parsed = parseSong(song.text)) {
     }
   }
   const pages = [];
+  const obstacles = (song.chordStickers || []).map((sticker) => {
+    const { width, height } = stickerGeometry(song, sticker);
+    return {
+      page: sticker.page,
+      x: sticker.x,
+      y: sticker.y,
+      right: sticker.x + width,
+      bottom: sticker.y + height,
+    };
+  });
   let page, col, y;
   function nextPage() {
     page = { columns: Array.from({ length: song.columns }, () => []) };
@@ -195,10 +206,30 @@ export function layout(song, parsed = parseSong(song.text)) {
   nextPage();
   for (const row of rows) {
     if (row.break) {
-      if (page.columns[col].length) nextColumn();
+      if (row.breakType === "page") nextPage();
+      else if (page.columns[col].length) nextColumn();
       continue;
     }
-    if (y + row.height > PAGE.height - Math.max(margin, 24)) nextColumn();
+    // A diagram occupies physical page space. Advance the text below it,
+    // or into the next column/page when that leaves too little room.
+    let attempts = 0;
+    while (attempts++ < 200) {
+      if (y + row.height > PAGE.height - Math.max(margin, 24)) {
+        nextColumn();
+        continue;
+      }
+      const x = margin + col * (width + gap);
+      const hit = obstacles.find(
+        (box) =>
+          box.page === pages.length - 1 &&
+          x < box.right &&
+          x + width > box.x &&
+          y < box.bottom + 3 &&
+          y + row.height > box.y - 3,
+      );
+      if (!hit) break;
+      y = Math.max(y, hit.bottom + 3);
+    }
     page.columns[col].push({
       ...row,
       x: margin + col * (width + gap),
@@ -207,6 +238,8 @@ export function layout(song, parsed = parseSong(song.text)) {
     });
     y += row.height;
   }
+  const lastStickerPage = Math.max(-1, ...obstacles.map((box) => box.page));
+  while (pages.length <= lastStickerPage) nextPage();
   return {
     pages,
     margin,
@@ -223,7 +256,7 @@ export function layout(song, parsed = parseSong(song.text)) {
 // Maximize readable type first. At equal size prefer one column, then a
 // comfortable 10 mm margin; never shrink below 8 pt or force excess pages away.
 export function fitToPage(song) {
-  const text = song.text.replace(/^\s*\{(?:column|new_page)\}\s*$/gm, "");
+  const text = song.text;
   const parsed = parseSong(text);
   let best;
   for (let fontSize = 20; fontSize >= 8; fontSize -= 0.5) {

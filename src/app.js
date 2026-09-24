@@ -24,6 +24,11 @@ import {
 import { layout, PAGE } from "./layout.js";
 import { importWebSong } from "./web-import.js";
 import { exportSong, importFile, importText, download } from "./files.js";
+import {
+  projectSignature,
+  serializeProject,
+  restoreProject,
+} from "./project.js";
 const $ = (s) => document.querySelector(s);
 document.documentElement.lang = getLocale();
 const workspaceSession = await openWorkspaceSession($("#app"));
@@ -40,7 +45,15 @@ try {
       ))
   )
     throw new Error("Invalid workspace");
-  songs = Array.isArray(stored?.songs) ? stored.songs.map(create) : undefined;
+  songs = Array.isArray(stored?.songs)
+    ? stored.songs.map((data) => {
+        const loaded = create(data);
+        loaded.dirty =
+          !loaded.projectSignature ||
+          projectSignature(loaded) !== loaded.projectSignature;
+        return loaded;
+      })
+    : undefined;
   if (songs) {
     const ids = new Set();
     for (const s of songs) {
@@ -65,6 +78,8 @@ let section = "document",
   previewTimer;
 const songViews = new Map();
 const songMusicSections = new Map();
+const transposeHistory = new Map();
+let transposeInterval = 1;
 const song = () => songs.find((s) => s.id === active);
 function persist() {
   if (!workspaceSession.held) return false;
@@ -76,16 +91,27 @@ function persist() {
   }
   try {
     localStorage.setItem("chordleaf-v1", JSON.stringify({ songs, active }));
-    $("#save-state").textContent = t("Guardado en este navegador");
+    const current = song();
+    $("#save-state").textContent = current?.pdfExported
+      ? current.dirty || !current.projectSignature
+        ? t("PDF descargado · proyecto sin guardar")
+        : t("PDF descargado · proyecto guardado en archivo")
+      : current?.dirty || !current?.projectSignature
+        ? t("Sesión recuperable · proyecto sin guardar")
+        : t("Sesión recuperable · proyecto guardado en archivo");
     return true;
   } catch {
-    $("#save-state").textContent = t("No se pudo guardar · exporta una copia");
+    $("#save-state").textContent = t(
+      "No se pudo guardar la sesión · descarga el proyecto",
+    );
     return false;
   }
 }
-function changed() {
+function changed({ preserveTranspose = false } = {}) {
   if (!song()) return;
-  song().dirty = true;
+  if (!preserveTranspose) transposeHistory.delete(song().id);
+  song().pdfExported = false;
+  song().dirty = projectSignature(song()) !== song().projectSignature;
   $("#save-state").textContent = t("Guardando…");
   clearTimeout(saveTimer);
   saveTimer = setTimeout(persist, 350);
@@ -103,7 +129,7 @@ function renderTabs() {
     songs
       .map(
         (s) =>
-          t`<div class="tab ${s.id === active ? "active" : ""}"><button class="tab-select" data-id="${s.id}"><span class="tab-icon">♫</span><span>${esc(s.title || t("Nueva canción"))}</span>${s.dirty ? t('<i title="Cambios sin exportar"></i>') : ""}</button><button class="tab-close" data-close="${s.id}" aria-label="Cerrar ${esc(s.title)}">×</button></div>`,
+          t`<div class="tab ${s.id === active ? "active" : ""}"><button class="tab-select" data-id="${s.id}"><span class="tab-icon">♫</span><span>${esc(s.title || t("Nueva canción"))}</span>${s.dirty ? t('<i title="Proyecto sin guardar"></i>') : ""}</button><button class="tab-close" data-close="${s.id}" aria-label="Cerrar ${esc(s.title)}">×</button></div>`,
       )
       .join("") +
     (songs.length
@@ -138,8 +164,16 @@ function renderTabs() {
 }
 let closing;
 function closeSong(id) {
-  if (songs.find((s) => s.id === id).dirty) {
+  const target = songs.find((s) => s.id === id);
+  if (target.dirty || !target.projectSignature) {
     closing = id;
+    $("#close-message").textContent = target.projectSignature
+      ? t(
+          "Hay cambios posteriores al proyecto guardado. Si cierras, esos cambios no estarán en el archivo. Guarda el proyecto otra vez para conservarlos.",
+        )
+      : t(
+          "Aunque hayas descargado un PDF o Word, no tienes un proyecto editable guardado. Si cierras, perderás la posibilidad de seguir editando esta copia.",
+        );
     $("#close-dialog").showModal();
   } else removeSong(id);
 }
@@ -171,7 +205,20 @@ function renderSettings() {
     $("#settings").innerHTML = renderKeySettings(s, key);
     return;
   }
-  $("#settings").innerHTML = renderDocumentSettings(s, key);
+  $("#settings").innerHTML = renderDocumentSettings(
+    s,
+    key,
+    transposeHistory.get(s.id),
+  );
+  $("#transpose-interval").value = String(transposeInterval);
+  $("#transpose-interval").onchange = (e) =>
+    (transposeInterval = Number(e.target.value));
+  if ($("#undo-transpose")) $("#undo-transpose").onclick = undoTranspose;
+  $("#showBrand").onchange = (e) => {
+    s.showBrand = e.target.checked;
+    changed();
+    renderPages();
+  };
   for (const name of ["title", "artist", "fontSize", "margin"])
     $("#" + name).addEventListener(
       name === "title" || name === "artist" ? "input" : "change",
@@ -201,8 +248,8 @@ function renderSettings() {
         renderPages();
       }),
   );
-  $("#transpose-down").onclick = () => shift(-1);
-  $("#transpose-up").onclick = () => shift(1);
+  $("#transpose-down").onclick = () => shift(-transposeInterval);
+  $("#transpose-up").onclick = () => shift(transposeInterval);
   $("#capo-down").onclick = () => setCapo(s.capo - 1);
   $("#capo-up").onclick = () => setCapo(s.capo + 1);
   $("#capo").onchange = (e) => setCapo(Number(e.target.value));
@@ -259,7 +306,30 @@ function transposeSong(n) {
       sticker.chords = sticker.chords.map((c) => transposeChord(c, n));
 }
 function shift(n) {
+  const s = song();
+  const before = chords(s.text).join(", ") || "—";
+  const snapshot = {
+    text: s.text,
+    chordShapes: structuredClone(s.chordShapes),
+    chordStickers: structuredClone(s.chordStickers),
+  };
   transposeSong(n);
+  const pending = [...s.text.matchAll(/\[\?[^\[\]\n]{1,40}\]/g)].length;
+  transposeHistory.set(s.id, {
+    snapshot,
+    label: `${n > 0 ? "+" : ""}${n} ${t("semitonos")} · ${Math.abs(n) / 2} ${t("tonos")}${pending ? ` · ${pending} ${t("acordes pendientes sin cambiar")}` : ""}`,
+    before,
+    after: chords(s.text).join(", ") || "—",
+  });
+  changed({ preserveTranspose: true });
+  render();
+}
+function undoTranspose() {
+  const s = song(),
+    history = transposeHistory.get(s.id);
+  if (!history) return;
+  Object.assign(s, history.snapshot);
+  transposeHistory.delete(s.id);
   changed();
   render();
 }
@@ -666,6 +736,9 @@ function importScreen(screen) {
   $("#choose-file").disabled = false;
   $("#choose-file").textContent = t("Abrir archivo");
   $("#paste-import").disabled = false;
+  $("#import-paste-field").hidden = false;
+  $("#paste-import").hidden = false;
+  $("#file").accept = ".txt,.pdf,.docx,.cho,.chordpro,.json";
   $("#new-dialog").scrollTop = 0;
   if (screen === "web") $("#web-url").focus();
   else if (screen === "text") $("#import-text").focus();
@@ -736,6 +809,18 @@ function importError(error) {
   $("#import-error").textContent = t(error.message);
 }
 $("#import").onclick = () => importScreen("text");
+$("#open-project").onclick = () => {
+  importScreen("text");
+  $("#new-heading").textContent = t("Abrir proyecto editable.");
+  $("#new-description").textContent = t(
+    "Selecciona el archivo .chordleaf.json de una canción guardada.",
+  );
+  $("#import-paste-field").hidden = true;
+  $("#paste-import").hidden = true;
+  $("#choose-file").textContent = t("Seleccionar proyecto");
+  $("#file").accept = ".chordleaf.json,.json";
+  $("#choose-file").focus();
+};
 $("#choose-file").onclick = () => $("#file").click();
 $("#paste-import").onclick = async () => {
   const text = $("#import-text").value;
@@ -793,8 +878,26 @@ $("#file").onchange = async (e) => {
     if (file.name.toLowerCase().endsWith(".json")) {
       if (file.size > 10 * 1024 * 1024)
         throw new Error(t("La copia supera el límite de 10 MiB."));
-      const restored = restoreWorkspace(await file.text());
+      const content = await file.text();
+      let format;
+      try {
+        format = JSON.parse(content)?.format;
+      } catch {
+        throw new Error(t("El archivo JSON está dañado o no es compatible."));
+      }
       if (generation !== importGeneration || !$("#new-dialog").open) return;
+      if (format === "chordleaf-song") {
+        const opened = restoreProject(content);
+        songs.push(opened);
+        active = opened.id;
+        resetView();
+        $("#new-dialog").close();
+        render();
+        persist();
+        toast(t("Proyecto editable abierto."));
+        return;
+      }
+      const restored = restoreWorkspace(content);
       songs.push(...restored.songs);
       active = restored.active;
       resetView();
@@ -826,23 +929,61 @@ $("#workspace-backup").onclick = () => {
   );
   $("#export-menu").hidden = true;
 };
+function saveProject(target = song()) {
+  if (!target) return false;
+  try {
+    const signature = projectSignature(target);
+    const name = (target.title || t("Canción")).replace(/[\\/:*?"<>|]/g, "-");
+    download(
+      new Blob([serializeProject(target)], { type: "application/json" }),
+      `${name}.chordleaf.json`,
+    );
+    target.projectSignature = signature;
+    target.dirty = false;
+    renderTabs();
+    persist();
+    toast(
+      t("Proyecto editable descargado. Conserva el archivo para reabrirlo."),
+    );
+    return true;
+  } catch (error) {
+    toast(
+      t(
+        "No se pudo guardar el proyecto. Copia la letra del editor o descarga TXT. ",
+      ) + error.message,
+    );
+    return false;
+  }
+}
+$("#save-project").onclick = () => {
+  $("#export-menu").hidden = true;
+  saveProject();
+};
 $("#export").onclick = () =>
   ($("#export-menu").hidden = !$("#export-menu").hidden);
 document.querySelectorAll("[data-export]").forEach(
   (b) =>
     (b.onclick = async () => {
       $("#export-menu").hidden = true;
-      const s = song(),
-        snapshot = JSON.stringify(s);
+      const s = song();
+      const signature = projectSignature(s);
       try {
         toast(t("Preparando tu documento…"));
         await exportSong(structuredClone(s), b.dataset.export);
-        if (JSON.stringify(s) === snapshot) s.dirty = false;
-        renderTabs();
-        persist();
-        toast(t("Documento exportado. Listo para tocar."));
+        if (b.dataset.export === "pdf" && projectSignature(s) === signature) {
+          s.pdfExported = true;
+          persist();
+        }
+        toast(
+          t(
+            "Documento descargado. Guarda también el proyecto para poder seguir editándolo después.",
+          ),
+        );
       } catch (e) {
-        toast(t("No se pudo exportar: ") + e.message);
+        toast(
+          t("No se pudo exportar. Copia la letra del editor o descarga TXT. ") +
+            e.message,
+        );
       }
     }),
 );
@@ -904,6 +1045,12 @@ $("#fit").onclick = async () => {
   }
 };
 $("#cancel-close").onclick = () => $("#close-dialog").close();
+$("#close-save-project").onclick = () => {
+  if (saveProject(songs.find((s) => s.id === closing))) {
+    $("#close-dialog").close();
+    removeSong(closing);
+  }
+};
 $("#confirm-close").onclick = () => {
   removeSong(closing);
   $("#close-dialog").close();
@@ -942,11 +1089,7 @@ window.addEventListener("beforeunload", (e) => {
 document.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "s") {
     e.preventDefault();
-    toast(
-      persist()
-        ? t("Canciones guardadas en este navegador.")
-        : t("No se pudo guardar · exporta una copia"),
-    );
+    saveProject();
   }
 });
 setupEditorTools({ resizePages });

@@ -355,6 +355,7 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
           if (!el.onpointermove) return;
           el.onpointermove = null;
           changed();
+          renderPages();
         };
         el.onpointerup = finish;
         el.onpointercancel = finish;
@@ -398,6 +399,15 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
         constrain(sticker);
         draw();
         changed();
+        const index = [...document.querySelectorAll(".chord-sticker")].indexOf(
+          el,
+        );
+        renderPages();
+        const next = document.querySelectorAll(".chord-sticker")[index];
+        (resize
+          ? next?.querySelector(`[data-resize="${resize}"]`)
+          : next
+        )?.focus();
       };
     }
   }
