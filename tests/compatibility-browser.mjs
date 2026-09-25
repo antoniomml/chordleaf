@@ -44,21 +44,40 @@ for (const engine of [chromium, firefox, webkit].filter(
         "[C]Keep my changes\n[G]Across windows",
     );
     const second = await context.newPage();
-    await second.goto(url);
-    await second
-      .getByRole("heading", { name: "Your workspace is open in another tab" })
-      .waitFor();
-    await second.getByRole("button", { name: "Try again" }).click();
-    await second
-      .getByRole("button", { name: "Waiting for the other tab to close…" })
-      .waitFor();
-    assert.equal(await second.locator("#source").count(), 0);
+    // Firefox keeps Playwright's navigation machinery (and therefore locator
+    // actions) waiting while this tab is behind the workspace lock, even
+    // though the document is complete. Assert and drive the locked UI through
+    // plain DOM calls, which do not wait for that navigation.
+    second.goto(url).catch(() => {});
+    await second.waitForFunction(
+      () =>
+        document.querySelector(".workspace-locked h1")?.textContent ===
+        "Your workspace is open in another tab",
+    );
+    await second.evaluate(() =>
+      document.querySelector(".workspace-locked .primary").click(),
+    );
+    await second.waitForFunction(
+      () =>
+        document.querySelector(".workspace-locked .primary")?.disabled ===
+          true &&
+        document.querySelector(".workspace-locked .primary").textContent ===
+          "Waiting for the other tab to close…",
+    );
+    assert.equal(
+      await second.evaluate(() => !!document.querySelector("#source")),
+      false,
+    );
     await page.close();
     await second.waitForFunction(
       () =>
         document.querySelector("#source")?.value ===
         "[C]Keep my changes\n[G]Across windows",
     );
+    // Firefox leaves Playwright's navigation machinery waiting for the tab
+    // that was behind the lock; reloading now that we own it restores normal
+    // locator behaviour without changing what the test asserts.
+    await second.reload();
     await second.locator('.rail [data-desktop-view="edit"]').click();
     await second.locator("#source").waitFor();
     assert.equal(
