@@ -38,6 +38,10 @@ export function download(blob, name) {
 export function txt(song) {
   return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordleaf: ${JSON.stringify({ chordShapes: song.chordShapes || {}, chordStickers: song.chordStickers || [], linked: song.linked === true, showBrand: song.showBrand !== false })}}\n\n${song.text}`;
 }
+/** Portable ChordPro: metadata directives plus inline [chords], without editor extras. */
+export function chordPro(song) {
+  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n\n${song.text}`;
+}
 /** Strip path separators and control characters from user-provided names. */
 export function downloadName(title, fallback) {
   return (
@@ -53,6 +57,13 @@ export async function exportSong(song, type) {
     download(
       new Blob([txt(song)], { type: "text/plain;charset=utf-8" }),
       name + ".txt",
+    );
+    return;
+  }
+  if (type === "cho") {
+    download(
+      new Blob([chordPro(song)], { type: "text/plain;charset=utf-8" }),
+      name + ".cho",
     );
     return;
   }

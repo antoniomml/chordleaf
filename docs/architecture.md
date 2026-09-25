@@ -43,7 +43,7 @@ The identifier is independent of the fingering catalog. It calculates MIDI pitch
 
 ## Verification and evolution
 
-Unit tests cover import, anchors, harmony, specific voicings and pagination. Browser tests exercise editing, section isolation, dialogs, chord replacement, responsive layouts, the A4 print stylesheet and all three exports. `artifacts/` and `output/` are ignored local outputs.
+Unit tests cover import, anchors, harmony, specific voicings and pagination. Browser tests exercise editing, section isolation, dialogs, chord replacement, responsive layouts, the A4 print stylesheet and the TXT, ChordPro, PDF and Word exports. `artifacts/` and `output/` are ignored local outputs.
 
 Keep model transformations separate from UI controls. Audio transcription remains future work and requires decisions about models, privacy, cost and manual review before introducing services or credentials.
 

@@ -137,6 +137,7 @@ export default {
   "Listo para imprimir": "Ready to print",
   "Documento editable": "Editable document",
   "Texto · TXT": "Text · TXT",
+  "ChordPro (.cho)": "ChordPro (.cho)",
   Imprimir: "Print",
   "Hoja A4 sin barras de herramientas": "A4 sheet without toolbars",
   "Título de la canción": "Song title",
