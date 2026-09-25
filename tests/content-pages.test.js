@@ -11,10 +11,38 @@ import {
 
 const origin = "https://chordleaf.com";
 
+// Pages use lowercase markup: strip script/style by index scan so no tag
+// variant can slip past a regular expression.
+const withoutElement = (html, tag) => {
+  let out = "";
+  let index = 0;
+  while (index < html.length) {
+    const open = html.indexOf(`<${tag}`, index);
+    if (open < 0) return out + html.slice(index);
+    out += html.slice(index, open);
+    const close = html.indexOf(`</${tag}`, open);
+    if (close < 0) return out;
+    const closeEnd = html.indexOf(">", close);
+    index = closeEnd < 0 ? html.length : closeEnd + 1;
+  }
+  return out;
+};
+const scriptTags = (html) => {
+  const tags = [];
+  let index = 0;
+  while ((index = html.indexOf("<script", index)) >= 0) {
+    const end = html.indexOf(">", index);
+    if (end < 0) break;
+    tags.push(html.slice(index, end + 1));
+    index = end + 1;
+  }
+  return tags;
+};
 const bodyWords = (html) =>
-  html
-    .slice(html.indexOf("<body>"))
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+  withoutElement(
+    withoutElement(html.slice(html.indexOf("<body>")), "script"),
+    "style",
+  )
     .replace(/<[^>]+>/g, " ")
     .replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, " ")
     .split(/\s+/)
@@ -102,7 +130,7 @@ test("rendered content pages carry full metadata and useful copy", () => {
       ),
       `${url}: language switch`,
     );
-    const scripts = html.match(/<script\b[^>]*>/g) ?? [];
+    const scripts = scriptTags(html);
     assert.deepEqual(
       scripts,
       ['<script type="application/ld+json">'],
