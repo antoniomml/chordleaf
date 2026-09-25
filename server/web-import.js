@@ -53,6 +53,12 @@ export async function fetchSongPage(value, fetcher = fetch) {
     }
     if (!response.ok) {
       await response.body?.cancel();
+      // Datacenter ranges are often blocked by the source site; pasting the
+      // lyrics by hand is the reliable path there.
+      if ([403, 429].includes(response.status))
+        throw new ImportError(
+          `La web bloquea las descargas desde servidores (HTTP ${response.status}). Copia la letra y pégala en el editor.`,
+        );
       throw new ImportError(
         `La web no permite descargar esta canción (HTTP ${response.status}). Prueba otro enlace o importa un archivo.`,
       );

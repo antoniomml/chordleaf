@@ -497,6 +497,10 @@ export default {
     "The website does not allow this song to be downloaded (HTTP ",
   "). Prueba otro enlace o importa un archivo.":
     "). Try another link or import a file.",
+  "La web bloquea las descargas desde servidores (HTTP ":
+    "The website blocks downloads from servers (HTTP ",
+  "). Copia la letra y pégala en el editor.":
+    "). Copy the lyrics and paste them into the editor.",
   "No se pudieron restaurar los datos guardados. Exporta una copia de recuperación antes de continuar.":
     "Saved data could not be restored. Export a recovery copy before continuing.",
   Idioma: "Language",
