@@ -3,7 +3,7 @@ import { createReadStream } from "node:fs";
 import { stat, realpath } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { securityHeaders } from "./security.js";
+import { securityHeaders, cacheControlFor } from "./security.js";
 import { webImportMiddleware } from "./web-import.js";
 const root = await realpath(fileURLToPath(new URL("../dist", import.meta.url)));
 const types = {
@@ -43,12 +43,7 @@ const server = createServer((req, res) => {
         types[extname(file)] || "application/octet-stream",
       );
       res.setHeader("X-Content-Type-Options", "nosniff");
-      res.setHeader(
-        "Cache-Control",
-        pathname.startsWith("/assets/")
-          ? "public, max-age=31536000, immutable"
-          : "no-cache",
-      );
+      res.setHeader("Cache-Control", cacheControlFor(pathname));
       if (req.method === "HEAD") res.end();
       else
         createReadStream(file)
