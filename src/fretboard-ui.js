@@ -3,6 +3,9 @@ import { t } from "./i18n.js";
 // One horizontal guitar neck for chord identification and position editing.
 export function fretboardMarkup(frets, first) {
   const labels = ["E", "A", "D", "G", "B", "e"];
+  // frets[0] is the low E, so the string number for screen readers is
+  // inverted: string 0 is the 6th string, string 5 is the 1st.
+  const stringNumber = (string) => labels.length - string;
   const rows = [5, 4, 3, 2, 1, 0]
     .map((string) => {
       const selected = frets[string];
@@ -20,11 +23,11 @@ export function fretboardMarkup(frets, first) {
           : selected === 0
             ? t("al aire; silenciar")
             : t`traste ${selected}; silenciar`;
-      return t`<div class="guitar-string" style="--string-weight:${0.7 + (5 - string) * 0.22}px"><span class="string-name">${labels[string]}</span><button type="button" class="open-string ${state}" data-string="${string}" data-fret="-1" aria-label="Cuerda ${string + 1}: ${openLabel}" aria-pressed="${selected === 0}" title="${openLabel}"><span class="string-state-symbol" aria-hidden="true">${selected < 0 ? "×" : selected === 0 ? "○" : ""}</span><span class="string-state-label" aria-hidden="true">${stateLabel}</span></button>${Array.from(
+      return t`<div class="guitar-string" style="--string-weight:${0.7 + (5 - string) * 0.22}px"><span class="string-name">${labels[string]}</span><button type="button" class="open-string ${state}" data-string="${string}" data-fret="-1" aria-label="Cuerda ${stringNumber(string)}: ${openLabel}" aria-pressed="${selected === 0}" title="${openLabel}"><span class="string-state-symbol" aria-hidden="true">${selected < 0 ? "×" : selected === 0 ? "○" : ""}</span><span class="string-state-label" aria-hidden="true">${stateLabel}</span></button>${Array.from(
         { length: 5 },
         (_, i) => {
           const fret = first + i;
-          return t`<button type="button" class="fret-point ${selected === fret ? "pressed" : ""} ${i === 0 && first === 1 ? "at-nut" : ""}" data-string="${string}" data-fret="${fret}" aria-label="Cuerda ${string + 1}, traste ${fret}" aria-pressed="${selected === fret}"><span aria-hidden="true"></span></button>`;
+          return t`<button type="button" class="fret-point ${selected === fret ? "pressed" : ""} ${i === 0 && first === 1 ? "at-nut" : ""}" data-string="${string}" data-fret="${fret}" aria-label="Cuerda ${stringNumber(string)}, traste ${fret}" aria-pressed="${selected === fret}"><span aria-hidden="true"></span></button>`;
         },
       ).join("")}</div>`;
     })

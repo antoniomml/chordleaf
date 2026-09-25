@@ -395,7 +395,7 @@ export function setupDictionary({ song, changed, renderPages, esc, notify }) {
         );
       };
       el.innerHTML = t(
-        '<div class="sticker-image"></div><button class="configure-sticker" aria-label="Distribuir acordes: tamaño y columnas" title="Tamaño y columnas">⊞</button><button class="remove-sticker" aria-label="Quitar diccionario">×</button><button class="resize-sticker resize-width" data-resize="width" aria-label="Cambiar ancho del diccionario; flechas para ajustar" title="Cambiar ancho">↔</button><button class="resize-sticker resize-height" data-resize="height" aria-label="Cambiar alto del diccionario; flechas para ajustar" title="Cambiar alto">↕</button><button class="resize-sticker resize-corner" data-resize="both" aria-label="Cambiar tamaño del diccionario; flechas para ajustar" title="Cambiar ancho y alto">↘</button>',
+        '<div class="sticker-image"></div><button class="move-sticker" aria-label="Mover diccionario" title="Mover">✥</button><button class="configure-sticker" aria-label="Distribuir acordes: tamaño y columnas" title="Tamaño y columnas">⊞</button><button class="remove-sticker" aria-label="Quitar diccionario">×</button><button class="resize-sticker resize-width" data-resize="width" aria-label="Cambiar ancho del diccionario; flechas para ajustar" title="Cambiar ancho">↔</button><button class="resize-sticker resize-height" data-resize="height" aria-label="Cambiar alto del diccionario; flechas para ajustar" title="Cambiar alto">↕</button><button class="resize-sticker resize-corner" data-resize="both" aria-label="Cambiar tamaño del diccionario; flechas para ajustar" title="Cambiar ancho y alto">↘</button>',
       );
       el.querySelector(".configure-sticker").onclick = () => configure(sticker);
       draw();
@@ -413,10 +413,14 @@ export function setupDictionary({ song, changed, renderPages, esc, notify }) {
           event.button !== 0
         )
           return;
+        const handle = event.target.closest("[data-resize]");
+        const moveHandle = event.target.closest(".move-sticker");
+        // On touch the sheet keeps scrolling (pan-y on the body); only the
+        // explicit handles start a drag. A mouse can still drag the diagram.
+        if (event.pointerType === "touch" && !handle && !moveHandle) return;
         event.preventDefault();
         event.stopPropagation();
-        const handle = event.target.closest("[data-resize]");
-        (handle || el).focus();
+        (handle || moveHandle || el).focus();
         const resize = handle?.dataset.resize;
         const scale = page.getBoundingClientRect().width / PAGE.width;
         const x = event.clientX,
@@ -460,7 +464,14 @@ export function setupDictionary({ song, changed, renderPages, esc, notify }) {
       };
       el.onkeydown = (event) => {
         if (event.target.closest(".remove-sticker, .configure-sticker")) return;
-        if (["Delete", "Backspace"].includes(event.key)) {
+        const resizeHandle = event.target.closest("[data-resize]");
+        const moveHandle = event.target.closest(".move-sticker");
+        // Delete only acts when the block itself holds focus, never a handle.
+        if (
+          ["Delete", "Backspace"].includes(event.key) &&
+          !resizeHandle &&
+          !moveHandle
+        ) {
           event.preventDefault();
           el.querySelector(".remove-sticker").click();
           return;
@@ -472,7 +483,7 @@ export function setupDictionary({ song, changed, renderPages, esc, notify }) {
         )
           return;
         event.preventDefault();
-        const resize = event.target.closest("[data-resize]")?.dataset.resize;
+        const resize = resizeHandle?.dataset.resize;
         const dx =
           event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
         const dy =
@@ -501,10 +512,12 @@ export function setupDictionary({ song, changed, renderPages, esc, notify }) {
         );
         renderPages();
         const next = document.querySelectorAll(".chord-sticker")[index];
-        (resize
-          ? next?.querySelector(`[data-resize="${resize}"]`)
-          : next
-        )?.focus();
+        const selector = resize
+          ? `[data-resize="${resize}"]`
+          : moveHandle
+            ? ".move-sticker"
+            : null;
+        (selector ? next?.querySelector(selector) : next)?.focus();
       };
     }
   }

@@ -28,7 +28,7 @@ It is for singers, guitarists and anyone preparing a rehearsal or organizing son
 | **Name a shape**              | Place notes on a fretboard and compare harmonic interpretations.       |
 | **Try an alternative**        | Insert a voicing or replace one or all occurrences of a song chord.    |
 | **Prepare a rehearsal sheet** | Choose font size, margins and one or two columns in an A4 preview.     |
-| **Share the result**          | Export PDF, editable Word or text with chord anchors.                  |
+| **Share the result**          | Export PDF, editable Word or text, or print the A4 sheet.              |
 
 ## From the first verse to rehearsal
 
@@ -43,7 +43,7 @@ It is for singers, guitarists and anyone preparing a rehearsal or organizing son
 
 The printed sheet shows chords above the lyrics, without brackets. For a change inside a word, `mor[G]ning` anchors the chord to the **n**.
 
-**3. Make it comfortable to play.** The **Document**, **Key** and **Chords** sections each occupy the whole sidebar. Adjust the document, inspect the estimated key or work with guitar chords. When ready, choose **Export**.
+**3. Make it comfortable to play.** The **Document**, **Key** and **Chords** sections each occupy the whole sidebar. Adjust the document, inspect the estimated key or work with guitar chords. When ready, choose **Export**. **Export → Print** sends the A4 pages to the browser print dialog without the workspace controls.
 
 [Explore the controls in the user guide →](https://github.com/antoniomml/chordleaf/wiki/User-guide)
 
