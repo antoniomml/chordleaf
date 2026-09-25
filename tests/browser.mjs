@@ -14,6 +14,7 @@ await page.locator("#empty-new").click();
 await page.locator("#blank").click();
 await page.locator("#title").fill("Al otro lado");
 await page.locator("#artist").fill("Canción de ejemplo · Chordleaf");
+await page.locator('.rail [data-desktop-view="edit"]').click();
 await page
   .locator("#source")
   .fill(
@@ -23,6 +24,7 @@ await page.locator(".page").waitFor();
 await page.screenshot({ path: "artifacts/desktop.png", fullPage: true });
 const source = page.locator("#source"),
   original = await source.inputValue();
+await page.locator('.rail [data-desktop-view="document"]').click();
 await page.locator("#link").click();
 assert.equal(await source.inputValue(), original);
 await page.locator("#capo-up").click();
@@ -33,6 +35,7 @@ await page.locator("#link").click();
 await page.locator("#capo-up").click();
 assert.equal(await source.inputValue(), original);
 await page.locator("#capo-down").click();
+await page.locator('.rail [data-desktop-view="edit"]').click();
 await page.locator("#pencil").click();
 await page.locator(".song-line").first().click();
 await page.locator(".inline-editor").fill("[G]Un verso editado [D]en la hoja");
@@ -58,6 +61,7 @@ assert.ok(
     `Página ${count} de ${count}`,
   ),
 );
+await page.locator('.rail [data-desktop-view="document"]').click();
 await page.locator('[data-columns="2"]').click();
 await page.locator("#export").click();
 let waiting = page.waitForEvent("download");
@@ -67,6 +71,7 @@ await page.locator("#export").click();
 waiting = page.waitForEvent("download");
 await page.locator('[data-export="pdf"]').click();
 await (await waiting).saveAs("artifacts/multipage.pdf");
+await page.locator('.rail [data-desktop-view="edit"]').click();
 await source.fill(original + "\n[G]Cambio");
 await page.locator(".tab-close").first().click();
 assert.equal(await page.locator("#close-dialog").isVisible(), true);
@@ -94,7 +99,9 @@ assert.equal(
   [...(await source.inputValue()).matchAll(/\[[^\]]+\]/g)].length,
   400,
 );
+await page.locator('.rail [data-desktop-view="edit"]').click();
 await source.fill(original);
+await page.locator('.rail [data-desktop-view="document"]').click();
 await page.locator('[data-columns="1"]').click();
 // Resizing works with keyboard and pointer, without losing source content.
 await page.locator("#panel-splitter").focus();
@@ -116,6 +123,7 @@ assert.ok(
     beforeWidth + 50,
 );
 await page.locator("#panel-splitter").press("Home");
+await page.locator('.rail [data-desktop-view="edit"]').click();
 await page.locator("#expand-editor").click();
 assert.equal(await page.locator("#editor-dialog").isVisible(), true);
 await source.fill("Una ca[Emaj7]sa [Abm7b5]azul");
@@ -166,6 +174,7 @@ assert.equal(
 assert.equal(await page.locator(".sheet-header h1").textContent(), "");
 assert.equal(await source.inputValue(), "");
 await page.locator("#title").fill("Prueba de edición");
+await page.locator('.rail [data-desktop-view="edit"]').click();
 await source.fill("Una ca[Emaj7]sa [Abm7b5]azul");
 assert.equal(await page.locator("#chord-align").count(), 0);
 await page.waitForTimeout(450);
@@ -185,6 +194,7 @@ assert.ok(
     .evaluate((el) => el.getBoundingClientRect().width)) > pageWidth,
 );
 await page.locator("#zoom-reset").click();
+await page.locator('.rail [data-desktop-view="document"]').click();
 await page.locator("#title").fill("alone again");
 await page.locator("#artist").fill("gilbert sullivan");
 assert.equal(
@@ -196,7 +206,14 @@ await page.locator('[data-section="chords"]').click();
 await page
   .getByRole("button", { name: "Editar posición de Emaj7", exact: true })
   .click();
-await page.locator(".fret-inputs input").nth(0).fill("0");
+assert.equal(
+  await page.locator("#shape-dialog .shape-readings").isVisible(),
+  true,
+);
+assert.match(
+  await page.locator("#shape-dialog .shape-readings").textContent(),
+  /Posibles nombres:.*Emaj7/,
+);
 await page.locator("#shape-dialog button", { hasText: "Guardar" }).click();
 assert.equal(
   await page.locator(".sheet-chord").first().textContent(),
@@ -277,7 +294,7 @@ assert.equal(
   await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
   false,
 );
-await page.locator('[data-mobile-view="edit"]').click();
+await page.locator('.rail [data-mobile-view="edit"]').click();
 await page.locator("#expand-editor").click();
 assert.equal(await page.locator("#editor-dialog").isVisible(), true);
 assert.equal(

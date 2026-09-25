@@ -35,10 +35,10 @@ try {
   await checkTextControls();
 
   const scale = await page.evaluate(() => visualViewport.scale);
-  await page.locator('[data-mobile-view="edit"]').click();
+  await page.locator('.rail [data-mobile-view="edit"]').click();
   await page.locator("#source").fill("[C]Texto en el iPhone");
   assert.equal(await page.evaluate(() => visualViewport.scale), scale);
-  await page.locator('[data-mobile-view="document"]').click();
+  await page.locator('.rail [data-mobile-view="document"]').click();
   await page.locator("#title").fill("Título móvil");
   assert.equal(await page.evaluate(() => visualViewport.scale), scale);
 
@@ -54,7 +54,7 @@ try {
   assert.equal(await page.evaluate(() => visualViewport.scale), scale);
   await page.locator("#new-dialog .dialog-close").click();
 
-  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('.rail [data-mobile-view="music"]').click();
   await page.locator('[data-music-section="chords"]').click();
   await page.locator('[data-harmony-view="search"]').click();
   await checkTextControls();

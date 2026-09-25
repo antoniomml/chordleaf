@@ -20,6 +20,7 @@ try {
   assert.equal(await page.locator("#export").isDisabled(), true);
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
+  await page.locator('.rail [data-desktop-view="edit"]').click();
   await page.locator(".page").waitFor();
   assert.equal(await page.locator("html").getAttribute("lang"), "en");
   assert.match(await page.locator("#new").innerText(), /New song/);
@@ -35,10 +36,12 @@ try {
       duration: r.duration,
     })),
   }));
+  await page.locator('.rail [data-desktop-view="document"]').click();
   await page
     .locator("#title")
     .fill("Nueva canción <img src=x onerror=alert(1)>");
   const lyrics = "[C]Guardar esta canción\n[G]Sin traducción";
+  await page.locator('.rail [data-desktop-view="edit"]').click();
   await page.locator("#source").fill(lyrics);
   assert.equal(await page.locator(".sheet-header img").count(), 0);
   await page.locator("#language").click();
@@ -55,7 +58,7 @@ try {
   await page.waitForFunction(() => document.documentElement.lang === "en");
   assert.equal(await page.locator("#source").inputValue(), lyrics);
   await page.locator('[data-section="chords"]').click();
-  await page.getByRole("tab", { name: "Identify", exact: true }).click();
+  await page.locator('.rail [data-desktop-view="identify"]').click();
   assert.equal(
     await page.getByRole("heading", { name: "Draw a chord" }).count(),
     1,
@@ -120,6 +123,7 @@ try {
   await unavailable.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await unavailable.locator("#empty-new").click();
   await unavailable.locator("#blank").click();
+  await unavailable.locator('.rail [data-desktop-view="edit"]').click();
   await unavailable.locator("#source").fill("[C]Unsaved work");
   await unavailable.locator("#language").click();
   await unavailable.locator('[data-language="es"]').click();

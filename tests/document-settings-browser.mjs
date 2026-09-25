@@ -37,13 +37,94 @@ try {
     assert.ok(geometry.transpose.right <= geometry.settings.right);
 
     if (width > 760) {
+      assert.equal(await page.locator("#settings").isVisible(), true);
+      assert.equal(await page.locator("#source-area").isVisible(), false);
+      await page.locator('.rail [data-desktop-view="edit"]').click();
+      assert.equal(await page.locator("#settings").isVisible(), false);
+      assert.equal(await page.locator("#source-area").isVisible(), true);
       const editorHeight = await page
         .locator("#source")
         .evaluate((el) => el.getBoundingClientRect().height);
       assert.ok(editorHeight >= (width >= 1200 ? 180 : 120));
+      await page.locator('.rail [data-desktop-view="document"]').click();
+      await page.locator(".more-document-options summary").click();
     }
     await page.locator(".footer-option").click();
     assert.equal(await page.locator("#showBrand").isChecked(), false);
+    if (width > 760) {
+      assert.equal(await page.locator(".rail [data-desktop-view]").count(), 6);
+      assert.deepEqual(
+        await page
+          .locator(".rail [data-desktop-view]")
+          .evaluateAll((buttons) =>
+            buttons.map((button) => [
+              button.dataset.desktopView,
+              button.querySelector("span:last-child").textContent,
+            ]),
+          ),
+        locale === "en-US"
+          ? [
+              ["document", "Settings"],
+              ["edit", "Lyrics"],
+              ["song", "Chords"],
+              ["key", "Key"],
+              ["search", "Search"],
+              ["identify", "Identify"],
+            ]
+          : [
+              ["document", "Configuración"],
+              ["edit", "Letra"],
+              ["song", "Acordes"],
+              ["key", "Tonalidad"],
+              ["search", "Buscar"],
+              ["identify", "Identificar"],
+            ],
+      );
+      for (const [view, panel] of [
+        ["edit", "#source-area"],
+        ["key", ".key-name"],
+        ["song", "#song-chords"],
+        ["search", "#catalog-search"],
+        ["identify", "#fretboard"],
+        ["document", "#settings"],
+      ]) {
+        await page.locator(`.rail [data-desktop-view="${view}"]`).click();
+        assert.equal(await page.locator(panel).isVisible(), true, view);
+        if (view === "key") {
+          assert.equal(await page.locator("#settings .info-box").count(), 0);
+        }
+        if (view === "song" || view === "identify") {
+          assert.equal(
+            await page.locator("#chords-panel > .panel-title").count(),
+            0,
+          );
+        }
+        assert.equal(
+          await page
+            .locator(`.rail [data-desktop-view="${view}"]`)
+            .getAttribute("aria-current"),
+          "page",
+        );
+      }
+      if (width === 1440) {
+        await page.locator('.rail [data-desktop-view="identify"]').click();
+        await page.locator("#new").click();
+        await page.locator("#blank").click();
+        assert.equal(
+          await page
+            .locator('.rail [data-desktop-view="document"]')
+            .getAttribute("aria-current"),
+          "page",
+        );
+        await page.locator(".tab-select").first().click();
+        assert.equal(
+          await page
+            .locator('.rail [data-desktop-view="identify"]')
+            .getAttribute("aria-current"),
+          "page",
+        );
+      }
+    }
     assert.equal(await page.locator("#transpose-interval").count(), 0);
     await page.close();
   }

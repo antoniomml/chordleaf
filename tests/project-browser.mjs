@@ -15,23 +15,43 @@ try {
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
   await page.locator("#title").fill("Proyecto prueba");
+  await page.locator('.rail [data-desktop-view="edit"]').click();
   await page.locator("#source").fill("[C/G]Uno\n{new_page}\n[Dm7]Dos");
+  await page.locator('.rail [data-desktop-view="document"]').click();
+  const plusBefore = await page.locator("#transpose-up").boundingBox();
   await page.locator("#transpose-up").click();
+  const plusAfter = await page.locator("#transpose-up").boundingBox();
+  assert.equal(plusAfter.x, plusBefore.x);
+  assert.equal(plusAfter.y, plusBefore.y);
   assert.notEqual(
     await page.locator("#source").inputValue(),
     "[C/G]Uno\n{new_page}\n[Dm7]Dos",
   );
+  assert.equal(await page.locator(".transpose-value").textContent(), "+1");
   assert.match(
-    await page.locator("#undo-transpose").locator("..").textContent(),
+    await page.locator(".transpose-value").getAttribute("aria-label"),
     /\+1 semitono/,
   );
+  await page.mouse.click(
+    plusBefore.x + plusBefore.width / 2,
+    plusBefore.y + plusBefore.height / 2,
+  );
+  assert.equal(await page.locator(".transpose-value").textContent(), "+2");
+  assert.equal(await page.locator("#settings .link-help").count(), 0);
+  await page.locator("#artist").fill("Artista de prueba");
+  assert.equal(await page.locator(".transpose-value").textContent(), "+2");
   await page.locator("#undo-transpose").click();
   assert.equal(
     await page.locator("#source").inputValue(),
     "[C/G]Uno\n{new_page}\n[Dm7]Dos",
   );
   await page.locator("#transpose-up").click();
+  await page.locator("#transpose-up").click();
+  assert.equal(await page.locator(".transpose-value").textContent(), "+2");
   await page.locator("#transpose-down").click();
+  assert.equal(await page.locator(".transpose-value").textContent(), "+1");
+  await page.locator("#transpose-down").click();
+  assert.equal(await page.locator("#undo-transpose").isDisabled(), true);
   assert.equal(
     await page.locator("#source").inputValue(),
     "[C/G]Uno\n{new_page}\n[Dm7]Dos",
@@ -69,6 +89,7 @@ try {
   const project = await projectReady;
   assert.match(project.suggestedFilename(), /\.chordleaf\.json$/);
   const filePath = await project.path();
+  await page.locator('.rail [data-desktop-view="edit"]').click();
   await page.locator("#source").fill("[C/G]Cambio posterior");
   await page.locator(".tab-close").click();
   assert.match(
@@ -90,6 +111,7 @@ try {
     mimeType: "application/json",
     buffer: await readFile(filePath),
   });
+  await page.locator('.rail [data-desktop-view="edit"]').click();
   await page.locator("#source").waitFor();
   assert.equal(
     await page.locator("#source").inputValue(),

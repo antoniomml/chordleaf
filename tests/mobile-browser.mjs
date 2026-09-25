@@ -35,7 +35,7 @@ try {
   );
   await page.locator('[data-columns="2"]').click();
   await page.locator('[data-columns="1"]').click();
-  await page.locator('[data-mobile-view="edit"]').click();
+  await page.locator('.rail [data-mobile-view="edit"]').click();
   await page.locator("#source").fill("[G]Una canción [D]en el bolsillo");
   assert.equal(await page.locator("#settings").isVisible(), false);
   assert.ok((await page.locator("#source").boundingBox()).height > 400);
@@ -109,10 +109,19 @@ try {
   );
   await page.screenshot({ path: "artifacts/mobile-preview-390.png" });
 
-  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('.rail [data-mobile-view="music"]').click();
   await page.locator('[data-music-section="key"]').click();
   assert.equal(await page.locator("[data-harmony-view]").count(), 4);
-  assert.equal(await page.locator(".chord-modes").isVisible(), false);
+  for (const view of ["key", "song", "search", "identify"]) {
+    const mobilePaths = await page
+      .locator(`[data-harmony-view="${view}"] svg path`)
+      .evaluateAll((paths) => paths.map((path) => path.getAttribute("d")));
+    const desktopPaths = await page
+      .locator(`.rail [data-desktop-view="${view}"] svg path`)
+      .evaluateAll((paths) => paths.map((path) => path.getAttribute("d")));
+    assert.deepEqual(mobilePaths, desktopPaths);
+  }
+  assert.equal(await page.locator(".chord-modes").count(), 0);
   const harmonyTabWidths = await page
     .locator("[data-harmony-view]")
     .evaluateAll((buttons) =>
@@ -139,12 +148,12 @@ try {
     "edit",
   );
   await page.locator("#source").fill("[G]Una canción [D]en el bolsillo");
-  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('.rail [data-mobile-view="music"]').click();
   await page.locator('[data-music-section="chords"]').click();
   assert.equal(await page.locator("#chords-panel").isVisible(), true);
-  await page.locator('[data-mobile-view="document"]').click();
+  await page.locator('.rail [data-mobile-view="document"]').click();
   assert.equal(await page.locator("#title").inputValue(), "Canción móvil");
-  await page.locator('[data-mobile-view="edit"]').click();
+  await page.locator('.rail [data-mobile-view="edit"]').click();
   assert.equal(
     await page.locator("#source").inputValue(),
     "[G]Una canción [D]en el bolsillo",
@@ -172,7 +181,7 @@ try {
       assert.ok(button.x >= 0 && button.x + button.width <= width);
       assert.ok(button.height >= 44);
     }
-    await page.locator('[data-mobile-view="edit"]').click();
+    await page.locator('.rail [data-mobile-view="edit"]').click();
     assert.equal(await editor.isVisible(), true);
     assert.equal(
       await page.evaluate(
@@ -184,7 +193,7 @@ try {
   }
 
   await page.setViewportSize({ width: 320, height: 640 });
-  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('.rail [data-mobile-view="music"]').click();
   await page.locator('[data-harmony-view="identify"]').click();
   const narrowBoard = await page.locator("#fretboard").boundingBox();
   assert.ok(narrowBoard.x + narrowBoard.width <= 320);
@@ -196,7 +205,7 @@ try {
   await page.locator(".chord-card .edit-shape").first().click();
   const dialogBounds = await page.locator("#shape-dialog").boundingBox();
   for (const button of await page
-    .locator("#shape-dialog .dialog-actions button")
+    .locator("#shape-dialog .dialog-actions button:visible")
     .all()) {
     const bounds = await button.boundingBox();
     assert.ok(bounds.x >= dialogBounds.x);
@@ -204,14 +213,20 @@ try {
     assert.ok(bounds.height >= 44);
   }
   await page.locator("#shape-dialog .cancel-shape").click();
+  const singleTabWidth = (await page.locator(".tab").first().boundingBox())
+    .width;
   await page.locator("#mobile-tab-plus").click();
   await page.locator("#blank").click();
+  assert.equal(
+    (await page.locator(".tab").first().boundingBox()).width,
+    singleTabWidth,
+  );
   assert.equal(
     await page.locator("main").getAttribute("data-mobile-view"),
     "document",
   );
   await page.locator("#title").fill("Segunda canción");
-  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('.rail [data-mobile-view="music"]').click();
   assert.equal(
     await page
       .locator('[data-music-section="key"]')
@@ -239,7 +254,7 @@ try {
   );
 
   await page.setViewportSize({ width: 667, height: 375 });
-  await page.locator('[data-mobile-view="edit"]').click();
+  await page.locator('.rail [data-mobile-view="edit"]').click();
   const sourceBounds = await page.locator("#source").boundingBox();
   assert.ok(sourceBounds.width > 500);
   assert.ok(sourceBounds.height >= 100);
