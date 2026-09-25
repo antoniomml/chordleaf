@@ -2611,7 +2611,12 @@ select:focus-visible {
   font-size: 19px;
 }
 #settings .stepper #undo-transpose:disabled {
-  visibility: hidden;
+  color: #778174;
+  background: #ffffff06;
+  opacity: 1;
+}
+#settings .stepper #undo-transpose:disabled:hover {
+  background: #ffffff06;
 }
 @media (max-width: 760px) {
   #settings .stepper #undo-transpose {
