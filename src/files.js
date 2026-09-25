@@ -1,4 +1,4 @@
-import { countPdfContent } from "./import-limits.js";
+import { readPdfContent } from "./import-limits.js";
 import { decodeDocx } from "./docx-import.js";
 import { t } from "./i18n.js";
 import {
@@ -586,10 +586,22 @@ export async function importFile(file, { signal } = {}) {
       );
     for (let n = 1; n <= pdf.numPages; n++) {
       const page = await pdf.getPage(n),
-        viewport = page.getViewport({ scale: 1 }),
-        content = await page.getTextContent();
+        viewport = page.getViewport({ scale: 1 });
+      let content;
+      try {
+        content = await readPdfContent(
+          page.streamTextContent({ includeMarkedContent: false }),
+          budget,
+          { signal },
+        );
+      } finally {
+        try {
+          await page.cleanup();
+        } catch {
+          /* Page cleanup is best effort. */
+        }
+      }
       signal?.throwIfAborted();
-      countPdfContent(content, budget);
       const measure = document.createElement("canvas").getContext("2d");
       pages.push({
         width: viewport.width,
