@@ -12,6 +12,22 @@ import { layout, PAGE } from "./layout.js";
 import { chordRE, unresolvedChordRE } from "./music.js";
 import { parsePdfPages, chordRow } from "./pdf-import.js";
 import { registerPdfFonts } from "./fonts.js";
+/** Run async work in order with a bounded number of concurrent tasks. */
+export async function mapWithConcurrency(items, limit, mapper) {
+  const results = new Array(items.length);
+  let next = 0;
+  const workers = Array.from(
+    { length: Math.min(Math.max(1, limit), items.length) },
+    async () => {
+      while (next < items.length) {
+        const index = next++;
+        results[index] = await mapper(items[index], index);
+      }
+    },
+  );
+  await Promise.all(workers);
+  return results;
+}
 export function download(blob, name) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -32,13 +48,15 @@ export async function exportSong(song, type) {
     return;
   }
   const l = layout(song);
-  const stickers = await Promise.all(
-    (song.chordStickers || []).map(async (sticker) => ({
+  const stickers = await mapWithConcurrency(
+    song.chordStickers || [],
+    2,
+    async (sticker) => ({
       ...sticker,
       ...stickerGeometry(song, sticker),
       page: Math.min(sticker.page, l.pages.length - 1),
       png: await stickerPng(song, sticker),
-    })),
+    }),
   );
   for (const sticker of stickers) {
     const headerBottom = l.margin + l.headerHeight;

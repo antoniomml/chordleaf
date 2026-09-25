@@ -6,7 +6,7 @@ import {
   stickerSvg,
   unresolvedChords,
 } from "../src/dictionary.js";
-import { txt, importText } from "../src/files.js";
+import { txt, importText, mapWithConcurrency } from "../src/files.js";
 import { diagram } from "../src/music.js";
 const song = {
   title: "Frames",
@@ -131,4 +131,89 @@ test("a sticker omits unknown positions until a player defines them", () => {
   assert.deepEqual(unresolvedChords(withUnknown, "all"), ["A7/C#"]);
   assert.deepEqual(stickerChords(withUnknown, sticker), ["C", "F#7/A#"]);
   assert.match(stickerSvg(withUnknown, sticker), /F#7\/A#/);
+});
+
+test("sticker diagrams stay capped per block and across the song", () => {
+  const roots = [
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
+    "A",
+    "A#",
+    "B",
+  ];
+  const suffixes = ["", "m", "7", "m7", "maj7", "sus4", "add9", "dim", "aug"];
+  const names = roots.flatMap((root) =>
+    suffixes.map((suffix) => root + suffix),
+  );
+  const big = {
+    ...song,
+    text: names.map((name) => `[${name}]`).join(""),
+    chordShapes: Object.fromEntries(
+      names.map((name) => [name, { frets: [-1, 3, 2, 0, 1, 0] }]),
+    ),
+  };
+  assert.equal(stickerChords(big, { chords: "all", width: 300 }).length, 60);
+  assert.equal(stickerChords(big, { chords: names, width: 300 }).length, 60);
+  assert.equal(
+    stickerGeometry(big, { chords: "all", width: 300 }).names.length,
+    60,
+  );
+  const stickers = Array.from({ length: 5 }, (_, i) => ({
+    id: `s${i}`,
+    chords: names,
+    x: 0,
+    y: 0,
+    width: 300,
+    page: 0,
+  }));
+  const crowded = { ...big, chordStickers: stickers };
+  assert.equal(stickerChords(crowded, stickers[0]).length, 60);
+  assert.equal(stickerChords(crowded, stickers[3]).length, 60);
+  assert.equal(stickerChords(crowded, stickers[4]).length, 0);
+  assert.equal(stickerGeometry(crowded, stickers[4]).names.length, 0);
+});
+
+test("imported stickers keep at most one block of diagrams", () => {
+  const many = Array.from(
+    { length: 90 },
+    (_, i) => ["C", "D", "E", "F", "G", "A", "B"][i % 7],
+  );
+  const sticker = {
+    id: "big",
+    chords: many,
+    x: 0,
+    y: 0,
+    width: 300,
+    page: 0,
+  };
+  const restored = importText(
+    txt({ ...song, chordStickers: [sticker] }),
+    "Frames",
+  );
+  assert.equal(restored.chordStickers[0].chords.length, 60);
+});
+
+test("sticker rendering runs with bounded concurrency", async () => {
+  let active = 0;
+  let peak = 0;
+  const results = await mapWithConcurrency(
+    [1, 2, 3, 4, 5],
+    2,
+    async (value) => {
+      active++;
+      peak = Math.max(peak, active);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      active--;
+      return value * 2;
+    },
+  );
+  assert.equal(peak, 2);
+  assert.deepEqual(results, [2, 4, 6, 8, 10]);
 });
