@@ -30,6 +30,7 @@ Open the URL printed by Vite, normally `http://localhost:5173`.
 | `pnpm format`           | Format code and documentation.                                     |
 | `pnpm format:check`     | Check formatting without modifying files.                          |
 | `pnpm docs:screenshots` | Refresh documentation screenshots using the demo song.             |
+| `pnpm pwa:icons`        | Regenerate the installable PNG icons from the logo.                |
 
 To check the interface and exports:
 
@@ -94,3 +95,28 @@ The browser suite runs axe-core in the empty workspace, new-song dialog, editor 
 Environment variables are documented in [.env.example](../.env.example). Vite reads `SITE_URL` during builds. The Node import handler reads its process environment: export `CHORDLEAF_WEB_IMPORT_ENABLED=false` in your shell when testing disabled imports locally. Do not prefix secrets with `VITE_`; those variables are exposed to browser bundles.
 
 For the cross-browser persistence/backup suite, install the engines with `pnpm exec playwright install chromium firefox webkit`, then run `pnpm test:compatibility` against the built server. `CHORDLEAF_BROWSERS=chromium,webkit` narrows local diagnosis; CI deliberately runs all three engines.
+
+## PWA icons and offline support
+
+The installable web app manifest is `public/manifest.webmanifest`. Its PNG icons are generated from `public/logo.svg` and committed to the repository:
+
+```sh
+pnpm pwa:icons
+```
+
+The command renders every size with the Playwright Chromium already installed for browser tests and rewrites `public/icons/*.png`. Run it after changing the logo and commit the result.
+
+`public/sw.js` is a plain, dependency-free service worker served from the site root. It is registered only in production builds (`import.meta.env.PROD`), never by `pnpm dev`. Navigation is network-first with a cached fallback, `/assets/*` is cache-first, and `/fonts/*`, `/logo.svg`, `/icons/*` and `/licenses/*` use stale-while-revalidate. `/api/*` and cross-origin requests are never cached.
+
+Bump `CACHE_VERSION` in `public/sw.js` (`chordleaf-v1` → `chordleaf-v2`…) in every release that changes the shell or its URLs; activation deletes the caches of previous versions.
+
+To exercise the manifest and the offline shell against a production build:
+
+```sh
+pnpm build
+PORT=5173 pnpm start
+# In another terminal:
+CHORDLEAF_URL=http://localhost:5173 node tests/pwa-browser.mjs
+```
+
+`tests/pwa-browser.mjs` runs on Chromium, Firefox and WebKit; local runs skip WebKit when the host lacks its system libraries, and `CHORDLEAF_BROWSERS=chromium,firefox` narrows the engines. It checks the manifest, the icon sizes, an offline reload of the shell, offline editing and the `/api/*` exclusion.

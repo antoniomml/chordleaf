@@ -35,6 +35,7 @@ import {
   serializeProject,
   restoreProject,
 } from "./project.js";
+import { registerServiceWorker } from "./pwa.js";
 const $ = (s) => document.querySelector(s);
 document.documentElement.lang = getLocale();
 const workspaceSession = await openWorkspaceSession($("#app"));
@@ -1276,6 +1277,7 @@ for (const [id, delta] of [
   };
 render();
 persist();
+registerServiceWorker();
 
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") persist();

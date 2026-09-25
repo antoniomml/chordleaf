@@ -17,6 +17,7 @@ const types = {
   ".ttf": "font/ttf",
   ".txt": "text/plain; charset=utf-8",
   ".json": "application/json",
+  ".webmanifest": "application/manifest+json",
   ".xml": "application/xml",
 };
 const server = createServer((req, res) => {
@@ -43,7 +44,11 @@ const server = createServer((req, res) => {
         types[extname(file)] || "application/octet-stream",
       );
       res.setHeader("X-Content-Type-Options", "nosniff");
-      res.setHeader("Cache-Control", cacheControlFor(pathname));
+      // The service worker must never be served from a stale cache.
+      res.setHeader(
+        "Cache-Control",
+        pathname === "/sw.js" ? "no-cache" : cacheControlFor(pathname),
+      );
       if (req.method === "HEAD") res.end();
       else
         createReadStream(file)

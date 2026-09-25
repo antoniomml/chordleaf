@@ -26,6 +26,7 @@
     "test:e2e": "node scripts/test-e2e.mjs",
     "format": "prettier --write src tests scripts build server api vercel.json vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
     "docs:screenshots": "node scripts/docs-screenshots.mjs",
+    "pwa:icons": "node scripts/pwa-icons.mjs",
     "format:check": "prettier --check src tests scripts build server api vercel.json vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
     "start": "node server/start.js",
     "check": "pnpm format:check && pnpm test && SITE_URL=https://chordleaf.com pnpm build && pnpm check:metadata",
