@@ -38,8 +38,17 @@ export function download(blob, name) {
 export function txt(song) {
   return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordleaf: ${JSON.stringify({ chordShapes: song.chordShapes || {}, chordStickers: song.chordStickers || [], linked: song.linked === true, showBrand: song.showBrand !== false })}}\n\n${song.text}`;
 }
+/** Strip path separators and control characters from user-provided names. */
+export function downloadName(title, fallback) {
+  return (
+    String(title ?? "")
+      .replace(/[\\/:*?"<>|]/g, "-")
+      .replace(/[\u0000-\u001f\u007f]/g, "")
+      .trim() || fallback
+  );
+}
 export async function exportSong(song, type) {
-  const name = (song.title || t("Canción")).replace(/[\\/:*?"<>|]/g, "-");
+  const name = downloadName(song.title, t("Canción"));
   if (type === "txt") {
     download(
       new Blob([txt(song)], { type: "text/plain;charset=utf-8" }),

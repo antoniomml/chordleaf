@@ -994,7 +994,10 @@ function saveProject(target = song()) {
   if (!target) return false;
   try {
     const signature = projectSignature(target);
-    const name = (target.title || t("Canción")).replace(/[\\/:*?"<>|]/g, "-");
+    const name =
+      (target.title || t("Canción"))
+        .replace(/[\\/:*?"<>|\u0000-\u001f\u007f]/g, "-")
+        .trim() || t("Canción");
     download(
       new Blob([serializeProject(target)], { type: "application/json" }),
       `${name}.chordleaf.json`,

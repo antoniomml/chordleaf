@@ -34,7 +34,9 @@ const pattern = new RegExp(
 );
 function literal(value) {
   if (locale !== "en") return value;
-  return english[value] ?? value.replace(pattern, (key) => english[key]);
+  return Object.hasOwn(english, value)
+    ? english[value]
+    : value.replace(pattern, (key) => english[key]);
 }
 /** Translate source literals only. Tagged-template interpolations remain intact:
  * t`Cerrar ${title}` translates the label, never the user's song title.
