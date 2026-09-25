@@ -65,6 +65,12 @@ Commit code, tests with invented examples, documentation, demo screenshots, lice
 
 The previous application was removed from the current tree. Historical commits retain it; removing that history requires a separate explicit history rewrite.
 
+## Static content pages
+
+`build/metadata.js` emits ES/EN content pages into `dist/` during the build: pairs such as `/es/editor-de-acordes/` and `/en/chord-sheet-maker/`. Each page is a self-contained HTML document with canonical and reciprocal `hreflang` links, Open Graph and Twitter tags, `WebPage`/`FAQPage` JSON-LD, a real screenshot, a short FAQ, a repeated CTA and a footer with guide, privacy, import-policy, changelog and GitHub links. Pages only load the built CSS assets (`assets/index-*.css` and `content-pages.css`); they contain no executable scripts, so the CSP stays untouched.
+
+The same build writes the sitemap covering the home pair plus every content pair with `lastmod` and locale alternates. `scripts/check-metadata.mjs` (run by `pnpm check`) validates titles, descriptions, canonicals, reciprocal hreflang, structured data, footers, escaping, 600+ words per page and every internal link. Keep the copy original: no third-party lyrics, no public song index, no invented promises, and keep the privacy and import-policy pages consistent with `SECURITY.md` and the web-import section above. `public/images/editor-workspace.png` is the current screenshot used by those pages; refresh it from `docs/images/workspace.png` when the interface changes.
+
 ## Releases
 
 The current tagged release is **`v1.0.0`**. Before another release:
