@@ -1,7 +1,15 @@
 import { t } from "./i18n.js";
 import guitar from "./data/guitar.json" with { type: "json" };
-import { chords, diagram, normalizeChord, NOTES, pc } from "./music.js";
+import {
+  chords,
+  diagram,
+  fingerings,
+  normalizeChord,
+  NOTES,
+  pc,
+} from "./music.js";
 import { identifyChord, replaceChord } from "./harmony.js";
+import { fretboardMarkup } from "./fretboard-ui.js";
 
 export function setupChordsPanel({
   song,
@@ -14,12 +22,10 @@ export function setupChordsPanel({
   const host = document.createElement("section");
   host.id = "chords-panel";
   host.hidden = true;
-  host.innerHTML = t`<h2 class="panel-title"><span>Tu mesa de acordes</span><span class="muted">03</span></h2>
-    <div class="chord-modes" role="tablist" aria-label="Herramientas de acordes"><button role="tab" id="mode-song" aria-controls="song-chords" data-mode="song" aria-selected="true">En canción</button><button role="tab" id="mode-search" aria-controls="search-chords" tabindex="-1" data-mode="search" aria-selected="false">Buscar</button><button role="tab" id="mode-identify" aria-controls="identify-chords" tabindex="-1" data-mode="identify" aria-selected="false">Identificar</button></div>
-    <div id="song-chords" role="tabpanel" aria-labelledby="mode-song"></div>
-    <div id="search-chords" role="tabpanel" aria-labelledby="mode-search" hidden><label class="field">BUSCAR ACORDE<input id="catalog-search" type="search" placeholder="C, Emaj7, Abm7b5, C/G…" autocomplete="off"></label><p class="chord-help">Busca un nombre y toca un diagrama para ver sus posiciones.</p><p id="search-count" role="status"></p><div id="catalog-grid" class="chord-card-grid"></div><button id="more-chords">Mostrar más</button><p class="chord-help">828 acordes · 3283 posiciones · E A D G B e<br>Datos de <a href="https://github.com/tombatossals/chords-db">chords-db</a> · <a href="/licenses/chords-db.txt">MIT</a></p></div>
-    <div id="identify-chords" role="tabpanel" aria-labelledby="mode-identify" hidden>
-      <div class="identify-instrument"><h2>Dibuja un acorde</h2><p class="chord-help">Toca un traste por cuerda; × la apaga y ○ la deja al aire.</p>
+  host.innerHTML = t`<div id="song-chords" role="tabpanel" aria-label="Acordes de la canción"></div>
+    <div id="search-chords" role="tabpanel" aria-label="Buscar acordes" hidden><label class="field">BUSCAR ACORDE<input id="catalog-search" type="search" placeholder="C, Emaj7, Abm7b5, C/G…" autocomplete="off"></label><p class="chord-help">Busca un nombre y toca un diagrama para ver sus posiciones.</p><p id="search-count" role="status"></p><div id="catalog-grid" class="chord-card-grid"></div><button id="more-chords">Mostrar más</button><p class="chord-help">828 acordes · 3283 posiciones · E A D G B e<br>Datos de <a href="https://github.com/tombatossals/chords-db">chords-db</a> · <a href="/licenses/chords-db.txt">MIT</a></p></div>
+    <div id="identify-chords" role="tabpanel" aria-label="Identificar acorde" hidden>
+      <div class="identify-instrument"><h2>Dibuja un acorde</h2><p class="chord-help">Toca un traste por cuerda. El 0 está antes de la cejuela; púlsalo para dejarla al aire o apagarla.</p>
       <div class="fretboard-options"><div class="fret-window"><button id="frets-back" aria-label="Bajar un traste">−</button><span id="first-fret" aria-live="polite">Traste 1</span><button id="frets-forward" aria-label="Subir un traste">+</button></div><button id="clear-frets">Limpiar</button></div>
       <div class="fretboard-scroll"><div id="fretboard" aria-label="Mástil horizontal de guitarra"></div></div><p class="fretboard-legend"><span>● Pulsada</span><span>○ Al aire</span><span>× Apagada</span></p>
       <p id="capo-notes" class="chord-help"></p></div>
@@ -48,32 +54,12 @@ export function setupChordsPanel({
   function setMode(value) {
     mode = value;
     onModeChange?.(mode);
-    host.querySelectorAll("[data-mode]").forEach((b) => {
-      b.setAttribute("aria-selected", b.dataset.mode === mode);
-      b.tabIndex = b.dataset.mode === mode ? 0 : -1;
-    });
     for (const name of ["song", "search", "identify"])
       $("#" + name + "-chords").hidden = name !== mode;
     $("#use-chord").hidden = true;
     if (mode === "search") search();
     if (mode === "identify") drawFretboard();
   }
-  host.querySelectorAll("[data-mode]").forEach((button, index, buttons) => {
-    button.onclick = () => setMode(button.dataset.mode);
-    button.onkeydown = (event) => {
-      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
-        return;
-      event.preventDefault();
-      const next =
-        event.key === "Home"
-          ? 0
-          : event.key === "End"
-            ? 2
-            : (index + (event.key === "ArrowRight" ? 1 : 2)) % 3;
-      buttons[next].focus();
-      buttons[next].click();
-    };
-  });
   function search() {
     const query = normalizeChord($("#catalog-search").value.trim());
     const matches = catalog.filter(
@@ -133,22 +119,7 @@ export function setupChordsPanel({
     search();
   };
   function drawFretboard(focus) {
-    const labels = ["E", "A", "D", "G", "B", "e"];
-    $("#fretboard").innerHTML =
-      `<div class="fret-numbers"><span></span><span></span>${Array.from({ length: 5 }, (_, i) => `<span>${first + i}</span>`).join("")}</div>` +
-      [5, 4, 3, 2, 1, 0]
-        .map((string) => {
-          const f = frets[string];
-          return t`<div class="guitar-string" style="--string-weight:${0.7 + (5 - string) * 0.22}px"><span class="string-name">${labels[string]}</span><button class="open-string ${f < 0 ? "is-muted" : f === 0 ? "is-open" : "is-fretted"}" data-string="${string}" data-fret="-1" aria-label="Cuerda ${string + 1}: ${f < 0 ? t("apagada; poner al aire") : f === 0 ? t("al aire; silenciar") : t`traste ${f}; silenciar`}" aria-pressed="${f === 0}" title="${f > 0 ? t`Traste ${f} · pulsa para silenciar` : f === 0 ? t("Al aire · pulsa para silenciar") : t("Apagada · pulsa para poner al aire")}"><span class="string-state-symbol" aria-hidden="true">${f < 0 ? "×" : f === 0 ? "○" : f}</span><span class="string-state-label" aria-hidden="true">${f < 0 ? t("Apagada") : f === 0 ? t("Al aire") : t("Traste")}</span></button>${Array.from(
-            { length: 5 },
-            (_, i) => {
-              const fret = first + i;
-              return t`<button class="fret-point ${f === fret ? "pressed" : ""} ${i === 0 && first === 1 ? "at-nut" : ""}" data-string="${string}" data-fret="${fret}" aria-label="Cuerda ${string + 1}, traste ${fret}" aria-pressed="${f === fret}"><span>${f === fret ? "●" : ""}</span></button>`;
-            },
-          ).join("")}</div>`;
-        })
-        .join("") +
-      `<div class="fret-markers"><span></span><span></span>${Array.from({ length: 5 }, (_, i) => `<span>${[3, 5, 7, 9, 15, 17, 19, 21].includes(first + i) ? "•" : [12, 24].includes(first + i) ? "••" : ""}</span>`).join("")}</div>`;
+    $("#fretboard").innerHTML = fretboardMarkup(frets, first);
     $("#frets-back").disabled = first === 1;
     $("#frets-forward").disabled = first === 20;
     host.querySelectorAll("[data-string]").forEach(
@@ -193,9 +164,17 @@ export function setupChordsPanel({
             .querySelectorAll(".chord-match")
             .forEach((el) => el.setAttribute("aria-pressed", el === b));
           const m = result.matches[Number(b.dataset.match)];
+          const positions = [[...frets]];
+          for (const position of fingerings(m.symbol))
+            if (
+              !positions.some(
+                (candidate) => candidate.join() === position.join(),
+              )
+            )
+              positions.push(position);
           choose(
             m.symbol,
-            [[...frets]],
+            positions,
             t`${m.exact ? t("Todas las notas del acorde están presentes.") : t("Omisiones indicadas en el nombre: no1 = sin raíz; no5 = sin quinta.")} Notas: ${m.notes.join(" · ")}.`,
           );
         }),

@@ -206,7 +206,7 @@ button.primary {
   display: flex;
   align-items: stretch;
   border-bottom: 1px solid var(--border);
-  padding-left: 68px;
+  padding-left: 84px;
   overflow-x: auto;
 }
 .tab {
@@ -344,16 +344,16 @@ main {
   min-height: 450px;
 }
 .rail {
-  width: 68px;
+  width: 84px;
   flex-shrink: 0;
   border-right: 1px solid var(--border);
   padding: 14px 4px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 5px;
 }
 .rail button {
-  height: 57px;
+  height: 56px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -363,8 +363,19 @@ main {
   font-size: 25px;
   color: #87917f;
 }
-.rail button span {
-  font-size: 9px;
+.rail button span:not(.rail-icon) {
+  font-size: 10px;
+  line-height: 1.1;
+}
+.rail-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+}
+.rail-icon svg {
+  width: 22px;
+  height: 22px;
 }
 .rail button.selected {
   color: var(--green);
@@ -377,11 +388,11 @@ main {
 }
 .workspace {
   display: grid;
-  grid-template-columns: minmax(280px, var(--editor-width, 365px)) 8px minmax(
+  grid-template-columns: minmax(280px, var(--editor-width, 430px)) 8px minmax(
       0,
       1fr
     );
-  width: calc(100% - 68px);
+  width: calc(100% - 84px);
   min-width: 0;
 }
 .editor-panel {
@@ -450,8 +461,8 @@ main {
 }
 .settings-meta-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 0;
 }
 .settings-meta-row input {
   min-width: 0;
@@ -1120,7 +1131,7 @@ dialog .choice {
 }
 @media (min-width: 1500px) {
   .workspace {
-    grid-template-columns: minmax(280px, var(--editor-width, 410px)) 8px minmax(
+    grid-template-columns: minmax(280px, var(--editor-width, 480px)) 8px minmax(
         0,
         1fr
       );
@@ -1142,19 +1153,19 @@ dialog .choice {
     display: none;
   }
   .workspace {
-    grid-template-columns: minmax(280px, var(--editor-width, 320px)) 8px minmax(
+    grid-template-columns: minmax(280px, var(--editor-width, 360px)) 8px minmax(
         0,
         1fr
       );
   }
   .rail {
-    width: 68px;
+    width: 84px;
   }
   .workspace {
-    width: calc(100% - 68px);
+    width: calc(100% - 84px);
   }
   .tabs {
-    padding-left: 68px;
+    padding-left: 84px;
   }
   .preview-toolbar {
     padding: 0 16px;
@@ -1481,21 +1492,6 @@ button:disabled {
   bottom: 0;
   cursor: nwse-resize;
 }
-.fret-inputs {
-  display: flex;
-  gap: 8px;
-  margin: 18px 0;
-}
-.fret-inputs label {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
-}
-.fret-inputs input {
-  width: 100%;
-  padding: 8px 2px;
-  text-align: center;
-}
 .star-choice {
   display: flex;
   align-items: center;
@@ -1504,10 +1500,6 @@ button:disabled {
 }
 .star-choice input {
   width: auto;
-}
-.shape-preview {
-  width: 140px;
-  margin: auto;
 }
 .shape-error {
   color: #e5b79f;
@@ -1542,24 +1534,6 @@ button:disabled {
   font-size: 16px;
   font-weight: 550;
   margin: 18px 0 10px;
-}
-.chord-modes {
-  display: flex;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 22px;
-  gap: 5px;
-}
-.chord-modes button {
-  flex: 1;
-  padding: 12px 2px;
-  font-size: 12px;
-  border-radius: 0;
-  border-bottom: 2px solid transparent;
-}
-.chord-modes [aria-selected="true"] {
-  border-color: #c9e79c;
-  color: #c9e79c;
-  background: #c9e79c0b;
 }
 .chord-help,
 #search-count {
@@ -1701,7 +1675,7 @@ button:disabled {
   gap: 8px;
   font-size: 11px;
   margin: 14px 0 10px;
-  max-width: 284px;
+  max-width: 500px;
 }
 .fret-window {
   display: flex;
@@ -1726,106 +1700,112 @@ button:disabled {
   overflow-x: auto;
   padding: 2px;
 }
-#fretboard {
+#fretboard,
+.shape-fretboard {
   box-sizing: border-box;
-  width: 280px;
-  padding: 10px;
-  background: #171d18;
-  border: 1px solid #49533d;
+  width: 100%;
+  max-width: 500px;
+  padding: 13px 12px 9px;
+  background: linear-gradient(180deg, #202b20, #172019);
+  border: 1px solid #53634e;
   border-radius: 10px;
+  box-shadow: inset 0 1px #ffffff12;
 }
 .guitar-string,
 .fret-numbers,
 .fret-markers {
   display: grid;
-  grid-template-columns: 18px 48px repeat(5, minmax(0, 1fr));
+  grid-template-columns: 20px 38px repeat(5, minmax(0, 1fr));
   align-items: center;
   text-align: center;
 }
 .string-name {
   font-size: 11px;
-  color: #c8d4bc;
-}
-.fret-numbers {
-  font-size: 10px;
-  color: #a9b69b;
-  padding-bottom: 7px;
+  color: #b8c8ad;
+  font-weight: 700;
 }
 .guitar-string button {
-  height: 34px;
+  position: relative;
+  height: 30px;
   padding: 0;
   border-radius: 0;
   min-width: 0;
 }
-.guitar-string .open-string {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 42px;
-  margin: 2px 5px 2px 0;
-  border: 1px solid #63705a;
-  border-radius: 6px;
-  background: #30382c;
-  color: #e0e8d9;
-}
-.string-state-symbol {
-  font-size: 21px;
-  line-height: 22px;
-  font-weight: 600;
-}
-.string-state-label {
-  font-size: 8px;
-  line-height: 12px;
-}
-.guitar-string .open-string.is-open {
-  color: #17210f;
-  background: #c9e79c;
-  border-color: #c9e79c;
-}
-.guitar-string .open-string.is-fretted {
-  background: #20291d;
-  color: #c9e79c;
-}
-.fret-point {
-  position: relative;
-  display: grid;
-  place-items: center;
-  border-right: 1px solid #657058;
-}
-.fret-point::before {
+.guitar-string button::before {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   top: 50%;
   height: max(1px, var(--string-weight));
-  background: #7c846f;
+  background: #9aa696;
   pointer-events: none;
+}
+.guitar-string .open-string {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: #c1d1b6;
+}
+.string-state-symbol {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  font-size: 20px;
+  font-weight: 600;
+  background: #202b20;
+  border-radius: 50%;
+}
+.string-state-label {
+  display: none;
+}
+.guitar-string .open-string.is-open .string-state-symbol {
+  color: var(--green);
+  font-size: 24px;
+}
+.guitar-string .open-string.is-fretted .string-state-symbol {
+  width: 8px;
+  height: 8px;
+  background: #52694b;
+}
+.fret-point {
+  display: grid;
+  place-items: center;
+  border-right: 2px solid #81907d;
+}
+.fret-point.at-nut {
+  border-left: 4px solid #d4ddcc;
+}
+.fret-point:hover,
+.open-string:hover {
+  background-color: #34442f;
 }
 .fret-point span {
   position: relative;
   z-index: 1;
 }
-.fret-point.at-nut {
-  border-left: 3px solid #b1b89e;
-}
-.fret-point:hover {
-  background-color: #35432e;
-}
 .fret-point.pressed span {
-  display: block;
-  width: 20px;
-  height: 20px;
+  width: 23px;
+  height: 23px;
+  border: 2px solid #e6f5ce;
   border-radius: 50%;
-  background: #c9e79c;
-  color: transparent;
-  box-shadow: 0 0 0 3px #171d18;
+  background: #bddd8c;
+  box-shadow: 0 2px 7px #0008;
 }
 .fret-markers {
-  color: #768569;
+  color: #8da87a;
+  font-size: 12px;
+  height: 12px;
+}
+.fret-numbers {
+  color: #b9c8ad;
   font-size: 10px;
-  height: 15px;
+  font-variant-numeric: tabular-nums;
+  height: 17px;
 }
 .fretboard-legend {
   display: flex;
@@ -1857,12 +1837,6 @@ button:disabled {
   line-height: 1.6;
   color: #879a78;
   margin-top: 12px;
-}
-@container (min-width: 560px) {
-  #identify-chords {
-    grid-template-columns: 284px minmax(0, 1fr);
-    gap: 24px;
-  }
 }
 .chord-match {
   display: block;
@@ -1924,7 +1898,6 @@ button:disabled {
   }
 }
 
-.chord-modes button:focus-visible,
 .guitar-string button:focus-visible,
 .chord-card:focus-visible {
   outline: 2px solid #c9e79c;
@@ -2232,13 +2205,6 @@ select:focus-visible {
   .tab {
     flex-shrink: 0;
   }
-  .tabs .tab:only-of-type {
-    max-width: none;
-    flex: 1;
-  }
-  .tabs .tab:last-of-type {
-    border-right: 0;
-  }
   main {
     height: calc(100dvh - 96px);
     min-height: 0;
@@ -2312,15 +2278,21 @@ select:focus-visible {
     line-height: 1.1;
     white-space: nowrap;
   }
-  .rail [data-section] {
+  .rail [data-desktop-view] {
     display: none;
   }
   .rail .mobile-song-tab {
     display: flex;
   }
   .rail .mobile-song-tab > span:first-child {
-    font-size: 21px;
-    line-height: 1;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+  }
+  .rail .mobile-song-tab > span:first-child svg {
+    width: 22px;
+    height: 22px;
   }
   #mobile-music-modes {
     display: flex;
@@ -2330,6 +2302,11 @@ select:focus-visible {
     border-bottom: 1px solid var(--border);
   }
   #mobile-music-modes button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
     flex: 1 1 0;
     min-width: 0;
     min-height: 48px;
@@ -2340,6 +2317,11 @@ select:focus-visible {
     font-weight: 600;
     line-height: 1.15;
     white-space: normal;
+  }
+  #mobile-music-modes button svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
   }
   #mobile-music-modes button.selected {
     border-bottom-color: var(--green);
@@ -2380,8 +2362,7 @@ select:focus-visible {
   #settings .capo-link-toggle {
     min-height: 44px;
   }
-  #chords-panel .panel-title,
-  #chords-panel .chord-modes {
+  #chords-panel .panel-title {
     display: none;
   }
   #settings .number-unit span {
@@ -2452,9 +2433,6 @@ select:focus-visible {
   .identify-readings {
     padding-top: 5px;
     border-top: 1px solid var(--border);
-  }
-  .guitar-string .open-string {
-    margin: 0 3px 0 0;
   }
   .dictionary-item.chord-card .chord-card-actions button,
   .dictionary-all .add-sticker {
@@ -2619,4 +2597,105 @@ select:focus-visible {
 }
 .workspace-locked p {
   margin: 1.5rem 0;
+}
+
+/* Keep every transposition action at a stable position as the offset changes. */
+.transpose-value {
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+#settings .stepper #undo-transpose {
+  width: 30px;
+  border-right: 1px solid #3a4039;
+  color: var(--green);
+  font-size: 19px;
+}
+#settings .stepper #undo-transpose:disabled {
+  visibility: hidden;
+}
+@media (max-width: 760px) {
+  #settings .stepper #undo-transpose {
+    width: 44px;
+  }
+}
+/* The editor reuses the same fretboard as chord identification. */
+#shape-dialog {
+  width: min(510px, calc(100% - 24px));
+}
+#shape-dialog .shape-fretboard {
+  width: min(100%, 420px);
+  margin: 0 auto;
+}
+#shape-dialog .shape-fretboard .guitar-string,
+#shape-dialog .shape-fretboard .fret-numbers,
+#shape-dialog .shape-fretboard .fret-markers {
+  grid-template-columns: 20px 38px repeat(5, minmax(0, 1fr));
+}
+#shape-dialog .shape-fretboard .guitar-string button {
+  min-width: 0;
+}
+#shape-dialog .shape-fretboard .open-string {
+  min-width: 0;
+}
+.shape-fret-window {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: min(100%, 420px);
+  margin: 14px auto 8px;
+}
+.shape-fret-window button {
+  width: 40px;
+  height: 36px;
+  border: 1px solid #46553b;
+  border-radius: 6px;
+}
+#shape-dialog .shape-error {
+  min-height: 1.3em;
+}
+#shape-dialog .shape-readings {
+  width: min(100%, 420px);
+  margin: 12px auto 0;
+  color: var(--green);
+  font-size: 13px;
+  line-height: 1.5;
+}
+@media (max-width: 760px) {
+  #shape-dialog .shape-fretboard .guitar-string,
+  #shape-dialog .shape-fretboard .fret-numbers,
+  #shape-dialog .shape-fretboard .fret-markers {
+    grid-template-columns: 20px 44px repeat(5, minmax(0, 1fr));
+  }
+  #shape-dialog .shape-fretboard .guitar-string button {
+    min-height: 44px;
+  }
+  .shape-fret-window button {
+    min-height: 44px;
+  }
+}
+
+/* Desktop rail views give settings and lyrics the full editor column. */
+@media (min-width: 761px) {
+  main[data-desktop-view="document"] #source-area,
+  main[data-desktop-view="edit"] #settings {
+    display: none;
+  }
+  main[data-desktop-view="document"] #settings,
+  main[data-desktop-view="edit"] #source-area {
+    flex: 1;
+    min-height: 0;
+  }
+}
+@media (max-width: 360px) {
+  #settings .music-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 360px) {
+  #shape-dialog .shape-fretboard .guitar-string,
+  #shape-dialog .shape-fretboard .fret-numbers,
+  #shape-dialog .shape-fretboard .fret-markers {
+    grid-template-columns: 20px 44px repeat(4, minmax(0, 1fr));
+  }
 }

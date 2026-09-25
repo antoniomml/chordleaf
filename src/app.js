@@ -70,6 +70,7 @@ if (!songs.some((s) => s.id === active)) active = songs[0]?.id ?? null;
 let zoom = 1;
 let section = "document",
   mobileView = "document",
+  desktopView = "document",
   musicSection = "key",
   editing = false,
   currentPage = 1,
@@ -77,6 +78,7 @@ let section = "document",
   saveTimer,
   previewTimer;
 const songViews = new Map();
+const songDesktopViews = new Map();
 const songMusicSections = new Map();
 const transposeHistory = new Map();
 let chordMode = "song";
@@ -141,8 +143,8 @@ function renderTabs() {
       (b.onclick = () => {
         active = b.dataset.id;
         mobileView = songViews.get(active) ?? "document";
+        desktopView = songDesktopViews.get(active) ?? "document";
         musicSection = songMusicSections.get(active) ?? "key";
-        section = mobileView === "music" ? musicSection : "document";
         resetView();
         render();
         persist();
@@ -180,17 +182,35 @@ function closeSong(id) {
 function removeSong(id) {
   songs = songs.filter((s) => s.id !== id);
   songViews.delete(id);
+  songDesktopViews.delete(id);
   songMusicSections.delete(id);
   if (active === id) {
     active = songs[0]?.id ?? null;
     mobileView = songViews.get(active) ?? "document";
+    desktopView = songDesktopViews.get(active) ?? "document";
     musicSection = songMusicSections.get(active) ?? "key";
-    section = mobileView === "music" ? musicSection : "document";
   }
   render();
   persist();
 }
+function sectionForDesktop(view) {
+  if (view === "key") return "key";
+  return ["song", "search", "identify"].includes(view) ? "chords" : "document";
+}
+function syncSection() {
+  const mobile = window.matchMedia("(max-width: 760px)").matches;
+  section = mobile
+    ? mobileView === "music"
+      ? musicSection
+      : "document"
+    : sectionForDesktop(desktopView);
+  if (!mobile && section === "chords" && chordMode !== desktopView) {
+    chordMode = desktopView;
+    chordPanel.setMode(chordMode);
+  }
+}
 function renderSettings() {
+  syncSection();
   const s = song(),
     key = keyInfo(s.text);
   updateNavigation();
@@ -212,7 +232,7 @@ function renderSettings() {
   if ($("#undo-transpose")) $("#undo-transpose").onclick = undoTranspose;
   $("#showBrand").onchange = (e) => {
     s.showBrand = e.target.checked;
-    changed();
+    changed({ preserveTranspose: true });
     renderPages();
   };
   for (const name of ["title", "artist", "fontSize", "margin"])
@@ -231,7 +251,7 @@ function renderSettings() {
           e.target.value = value;
         }
         s[name] = value;
-        changed();
+        changed({ preserveTranspose: true });
         renderPages();
       },
     );
@@ -239,7 +259,7 @@ function renderSettings() {
     (b) =>
       (b.onclick = () => {
         s.columns = Number(b.dataset.columns);
-        changed();
+        changed({ preserveTranspose: true });
         renderSettings();
         renderPages();
       }),
@@ -251,18 +271,19 @@ function renderSettings() {
   $("#capo").onchange = (e) => setCapo(Number(e.target.value));
   $("#link").onclick = () => {
     s.linked = !s.linked;
-    changed();
+    changed({ preserveTranspose: true });
     renderSettings();
   };
 }
 function updateNavigation() {
   const mobile = window.matchMedia("(max-width: 760px)").matches;
   $("main").dataset.mobileView = mobileView;
+  $("main").dataset.desktopView = desktopView;
   $("main").dataset.editorSection = section;
   document.querySelectorAll(".rail button").forEach((button) => {
     const selected = button.dataset.mobileView
       ? mobile && button.dataset.mobileView === mobileView
-      : !mobile && button.dataset.section === section;
+      : !mobile && button.dataset.desktopView === desktopView;
     button.classList.toggle("selected", selected);
     if (selected) button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
@@ -307,20 +328,26 @@ function transposeSong(n) {
 }
 function shift(n) {
   const s = song();
-  const before = chords(s.text).join(", ") || "—";
-  const snapshot = {
-    text: s.text,
-    chordShapes: structuredClone(s.chordShapes),
-    chordStickers: structuredClone(s.chordStickers),
-  };
-  transposeSong(n);
-  const pending = [...s.text.matchAll(/\[\?[^\[\]\n]{1,40}\]/g)].length;
-  transposeHistory.set(s.id, {
-    snapshot,
-    label: `${n > 0 ? "+" : ""}${n} ${t("semitono")}${pending ? ` · ${pending} ${t("acordes pendientes sin cambiar")}` : ""}`,
-    before,
-    after: chords(s.text).join(", ") || "—",
-  });
+  let history = transposeHistory.get(s.id);
+  if (!history) {
+    history = {
+      snapshot: {
+        text: s.text,
+        chordShapes: structuredClone(s.chordShapes),
+        chordStickers: structuredClone(s.chordStickers),
+      },
+      offset: 0,
+    };
+  }
+  const next = history.offset + n;
+  if (next === 0) {
+    Object.assign(s, history.snapshot);
+    transposeHistory.delete(s.id);
+  } else {
+    transposeSong(n);
+    history.offset = next;
+    transposeHistory.set(s.id, history);
+  }
   changed({ preserveTranspose: true });
   render();
 }
@@ -582,6 +609,8 @@ $("#pages").addEventListener("keydown", (event) => {
 $("#issue-count").onclick = () => {
   if ($("#issue-count").dataset.noChords === "true") {
     section = "document";
+    desktopView = "edit";
+    songDesktopViews.set(active, desktopView);
     mobileView = "edit";
     songViews.set(active, mobileView);
     renderSettings();
@@ -656,25 +685,41 @@ $("#source").oninput = (e) => {
 };
 $("#source").onscroll = (e) =>
   ($("#line-numbers").scrollTop = e.target.scrollTop);
-document.querySelectorAll("[data-section]").forEach(
-  (b) =>
-    (b.onclick = () => {
-      section = b.dataset.section;
-      if (section !== "document") {
-        musicSection = section;
-        songMusicSections.set(active, musicSection);
-      }
-      mobileView = section === "document" ? "document" : "music";
-      songViews.set(active, mobileView);
-      renderSettings();
-    }),
-);
+document.querySelectorAll("[data-desktop-view]").forEach((button) => {
+  button.onclick = () => {
+    desktopView = button.dataset.desktopView;
+    songDesktopViews.set(active, desktopView);
+    mobileView =
+      desktopView === "document"
+        ? "document"
+        : desktopView === "edit"
+          ? "edit"
+          : "music";
+    songViews.set(active, mobileView);
+    if (desktopView === "key") musicSection = "key";
+    else if (["song", "search", "identify"].includes(desktopView)) {
+      musicSection = "chords";
+      chordMode = desktopView;
+      chordPanel.setMode(chordMode);
+    }
+    songMusicSections.set(active, musicSection);
+    renderSettings();
+  };
+});
 document.querySelectorAll("[data-mobile-view]").forEach((button) => {
   button.onclick = () => {
     if (document.activeElement instanceof HTMLElement)
       document.activeElement.blur();
     mobileView = button.dataset.mobileView;
-    section = mobileView === "music" ? musicSection : "document";
+    if (mobileView !== "preview") {
+      desktopView =
+        mobileView === "music"
+          ? musicSection === "key"
+            ? "key"
+            : chordMode
+          : mobileView;
+      songDesktopViews.set(active, desktopView);
+    }
     songViews.set(active, mobileView);
     renderSettings();
     if (mobileView === "preview") resizePages();
@@ -689,7 +734,8 @@ document.querySelectorAll("[data-harmony-view]").forEach((button) => {
       chordPanel.setMode(view);
     }
     songMusicSections.set(active, musicSection);
-    section = musicSection;
+    desktopView = view;
+    songDesktopViews.set(active, desktopView);
     renderSettings();
   };
   button.onkeydown = (event) => {
@@ -772,6 +818,8 @@ $("#blank").onclick = () => {
   active = s.id;
   section = "document";
   mobileView = "document";
+  desktopView = "document";
+  songDesktopViews.set(active, desktopView);
   musicSection = "key";
   songViews.set(active, mobileView);
   songMusicSections.set(active, musicSection);
@@ -794,6 +842,8 @@ async function acceptImport(data) {
   if (generation !== importGeneration || !$("#new-dialog").open) return;
   songs.push(s);
   active = s.id;
+  desktopView = "document";
+  songDesktopViews.set(active, desktopView);
   resetView();
   mobileView = "preview";
   songViews.set(active, mobileView);
@@ -895,6 +945,8 @@ $("#file").onchange = async (e) => {
         const opened = restoreProject(content);
         songs.push(opened);
         active = opened.id;
+        desktopView = "document";
+        songDesktopViews.set(active, desktopView);
         resetView();
         $("#new-dialog").close();
         render();
@@ -905,6 +957,7 @@ $("#file").onchange = async (e) => {
       const restored = restoreWorkspace(content);
       songs.push(...restored.songs);
       active = restored.active;
+      desktopView = "document";
       resetView();
       $("#new-dialog").close();
       render();
@@ -1004,12 +1057,12 @@ document.addEventListener("click", (e) => {
     changed();
     renderSource();
     renderPages();
-    if (window.matchMedia("(max-width: 760px)").matches) {
-      mobileView = "edit";
-      section = "document";
-      songViews.set(active, mobileView);
-      renderSettings();
-    }
+    mobileView = "edit";
+    section = "document";
+    desktopView = "edit";
+    songViews.set(active, mobileView);
+    songDesktopViews.set(active, desktopView);
+    renderSettings();
     input.focus();
     input.setSelectionRange(start + value.length, start + value.length);
   }
@@ -1081,7 +1134,7 @@ window.addEventListener("resize", () => {
     editing = false;
     renderPages();
   }
-  updateNavigation();
+  renderSettings();
   resizePages();
 });
 window.addEventListener("beforeunload", (e) => {

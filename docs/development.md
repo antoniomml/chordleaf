@@ -66,7 +66,7 @@ The previous application was removed from the current tree. Historical commits r
 
 ## Releases
 
-The current tagged release is **`v0.6.2`**. Before another release:
+The current tagged release is **`v0.6.3`**. Before another release:
 
 1. Update `version` in `package.json` and add its changes to `CHANGELOG.md`.
 2. Run frozen installation, formatting, tests, build and browser checks.

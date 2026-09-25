@@ -11,6 +11,7 @@ try {
   await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
+  await page.locator('.rail [data-desktop-view="edit"]').click();
   await page
     .locator("#source")
     .fill("[C]Verso con acordes y letra\n".repeat(45));

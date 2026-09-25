@@ -1,6 +1,8 @@
 import { t } from "./i18n.js";
 import { chords, fingering, diagram, chordRE } from "./music.js";
 import { PAGE } from "./layout.js";
+import { fretboardMarkup } from "./fretboard-ui.js";
+import { identifyChord } from "./harmony.js";
 import {
   stickerGeometry,
   stickerSvg,
@@ -20,42 +22,41 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
   dialog.id = "shape-dialog";
   dialog.setAttribute("aria-labelledby", "shape-heading");
   dialog.innerHTML = t(
-    '<h2 id="shape-heading">Editar posición</h2><p>De la cuerda grave E a la aguda e. −1 = apagada, 0 = al aire.</p><form><div class="fret-inputs"></div><label class="star-choice"><input type="checkbox" name="star" checked> Marcar con asterisco en la canción</label><p class="shape-error" role="status"></p><div class="shape-preview"></div><div class="dialog-actions"><button type="button" class="restore-shape">Restaurar</button><button type="button" class="cancel-shape">Cancelar</button><button class="primary">Guardar</button></div></form>',
+    '<h2 id="shape-heading">Editar posición</h2><p>Toca los trastes. El 0, antes de la cejuela, alterna al aire y apagada.</p><form><div class="shape-fret-window"><button type="button" class="shape-frets-back" aria-label="Mostrar trastes anteriores">−</button><span class="shape-first-fret" aria-live="polite">Traste 1</span><button type="button" class="shape-frets-forward" aria-label="Mostrar trastes siguientes">＋</button></div><div class="fretboard-scroll"><div class="shape-fretboard" aria-label="Dibuja la posición del acorde"></div></div><p class="shape-readings" role="status" aria-live="polite" hidden></p><p class="shape-error" role="status"></p><label class="star-choice"><input type="checkbox" name="star" checked> Marcar con asterisco en la canción</label><div class="dialog-actions"><button type="button" class="restore-shape">Restaurar</button><button type="button" class="cancel-shape">Cancelar</button><button class="primary">Guardar</button></div></form>',
   );
   document.body.append(dialog);
-  let editingChord;
+  let editingChord, draftFrets, firstFret;
   function edit(name, afterSave, afterCancel) {
     editingChord = name;
     const shape = song().chordShapes?.[name];
-    const frets = shape?.frets || fingering(name) || [-1, -1, -1, -1, -1, -1];
+    draftFrets = [
+      ...(shape?.frets || fingering(name) || [-1, -1, -1, -1, -1, -1]),
+    ];
+    const played = draftFrets.filter((f) => f > 0);
+    firstFret =
+      played.length && Math.max(...played) > 5
+        ? Math.min(20, Math.min(...played))
+        : 1;
     dialog.querySelector("h2").textContent = t`Posición de ${name}`;
-    dialog.querySelector(".fret-inputs").innerHTML = [
-      "E",
-      "A",
-      "D",
-      "G",
-      "B",
-      "e",
-    ]
-      .map(
-        (label, i) =>
-          t`<label>${label}<input required type="number" min="-1" max="24" step="1" value="${frets[i]}" aria-label="Traste cuerda ${i + 1}"></label>`,
-      )
-      .join("");
+    dialog.querySelector(".restore-shape").hidden = !shape;
     dialog.querySelector("[name=star]").checked = shape?.star ?? true;
     dialog.querySelector(".shape-error").textContent = "";
-    preview();
+    drawShapeBoard();
     dialog.querySelector(".cancel-shape").onclick = () => {
       dialog.close();
       afterCancel?.();
     };
     dialog.querySelector("form").onsubmit = (event) => {
       event.preventDefault();
-      const frets = values();
-      if (!valid(frets)) return;
+      if (!valid(draftFrets)) {
+        dialog.querySelector(".shape-error").textContent = t(
+          "Indica al menos una cuerda que suene y usa trastes enteros entre −1 y 24.",
+        );
+        return;
+      }
       song().chordShapes ||= {};
       song().chordShapes[editingChord] = {
-        frets,
+        frets: [...draftFrets],
         star: dialog.querySelector("[name=star]").checked,
       };
       changed();
@@ -66,28 +67,58 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
     };
     dialog.showModal();
   }
-  const values = () =>
-    [...dialog.querySelectorAll(".fret-inputs input")].map((el) =>
-      Number(el.value),
-    );
   function valid(frets) {
     return (
       frets.some((n) => n >= 0) &&
       frets.every((n) => Number.isInteger(n) && n >= -1 && n <= 24)
     );
   }
-  function preview() {
-    const frets = values();
-    dialog.querySelector(".shape-preview").innerHTML = valid(frets)
-      ? diagram(editingChord, 0, frets)
+  function drawShapeBoard(focus) {
+    dialog.querySelector(".shape-first-fret").textContent =
+      t`Traste ${firstFret}`;
+    dialog.querySelector(".shape-frets-back").disabled = firstFret === 1;
+    dialog.querySelector(".shape-frets-forward").disabled = firstFret === 20;
+    dialog.querySelector(".shape-fretboard").innerHTML = fretboardMarkup(
+      draftFrets,
+      firstFret,
+    );
+    const names = [
+      ...new Set(identifyChord(draftFrets).matches.map((m) => m.symbol)),
+    ].slice(0, 3);
+    const readings = dialog.querySelector(".shape-readings");
+    readings.hidden = names.length === 0;
+    readings.textContent = names.length
+      ? `${t("Posibles nombres")}: ${names.join(" · ")}`
       : "";
-    dialog.querySelector(".shape-error").textContent = valid(frets)
-      ? ""
-      : t(
-          "Indica al menos una cuerda que suene y usa trastes enteros entre −1 y 24.",
-        );
+    dialog
+      .querySelectorAll(".shape-fretboard [data-string]")
+      .forEach((button) => {
+        button.onclick = () => {
+          const string = Number(button.dataset.string);
+          const fret = Number(button.dataset.fret);
+          draftFrets[string] =
+            fret < 0
+              ? draftFrets[string] < 0
+                ? 0
+                : -1
+              : draftFrets[string] === fret
+                ? -1
+                : fret;
+          dialog.querySelector(".shape-error").textContent = "";
+          drawShapeBoard(`[data-string="${string}"][data-fret="${fret}"]`);
+        };
+      });
+    if (focus) dialog.querySelector(`.shape-fretboard ${focus}`)?.focus();
   }
-  dialog.oninput = preview;
+  for (const [selector, offset] of [
+    [".shape-frets-back", -1],
+    [".shape-frets-forward", 1],
+  ]) {
+    dialog.querySelector(selector).onclick = () => {
+      firstFret = Math.max(1, Math.min(20, firstFret + offset));
+      drawShapeBoard();
+    };
+  }
   dialog.querySelector(".restore-shape").onclick = () => {
     if (song().chordShapes) delete song().chordShapes[editingChord];
     changed();
@@ -219,7 +250,7 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
         names
           .map(
             (name) =>
-              t`<div class="dictionary-item chord-card" draggable="true" data-name="${esc(name)}"><button class="edit-shape" aria-label="Editar posición de ${esc(name)}"><strong>${esc(name)}${song().chordShapes?.[name]?.star ? "*" : ""}</strong>${unresolvedChords(song(), [name]).length ? t('<span class="missing-shape">Falta posición · pulsa para definirla</span>') : diagram(name, 0, song().chordShapes?.[name]?.frets)}</button><div class="chord-card-actions"><button class="edit-shape-text" aria-label="Editar ${esc(name)}">Editar</button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}">Añadir</button></div></div>`,
+              t`<div class="dictionary-item chord-card" draggable="true" data-name="${esc(name)}"><button class="edit-shape" aria-label="Editar posición de ${esc(name)}"><strong>${esc(name)}${song().chordShapes?.[name]?.star ? "*" : ""}</strong>${unresolvedChords(song(), [name]).length ? t('<span class="missing-shape">Falta posición · arreglar</span>') : diagram(name, 0, song().chordShapes?.[name]?.frets)}</button><div class="chord-card-actions"><button class="edit-shape-text" aria-label="${unresolvedChords(song(), [name]).length ? t`Definir posición de ${esc(name)}` : t`Editar ${esc(name)}`}">${unresolvedChords(song(), [name]).length ? t("Arreglar") : t("Editar")}</button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}">Añadir</button></div></div>`,
           )
           .join("")
       : t("<p>Añade acordes a la canción para crear tu diccionario.</p>");

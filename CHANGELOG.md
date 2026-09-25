@@ -1,5 +1,12 @@
 # chordleaf changelog
 
+## 0.6.3 · September 25, 2026
+
+- Split the desktop workspace into document settings, lyrics, song chords, key guidance, chord search and chord identification; keep matching navigation icons on phones.
+- Make guitar shapes editable by touching a compact fretboard, including chords with missing positions, and show possible chord names while drawing.
+- Keep mobile song tabs a consistent width and leave the semitone up button in place while offering a reset to the original key on its left.
+- Simplify the key and chord panel copy, and keep transpose feedback inside the control.
+
 ## 0.6.2 · September 25, 2026
 
 - Group document controls around chords, capo and page layout; move the optional `chordleaf.com` footer setting to the last, collapsed section.

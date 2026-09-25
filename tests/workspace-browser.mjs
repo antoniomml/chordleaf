@@ -11,6 +11,7 @@ try {
   await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
+  await page.locator('.rail [data-desktop-view="edit"]').click();
   await page
     .locator("#source")
     .fill("[C][D][E][F][G][A][B][Am][Dm][Em][G7][C7]");
@@ -20,7 +21,7 @@ try {
   );
   assert.equal(
     await page.locator(".rail").evaluate((el) => el.clientWidth),
-    67,
+    83,
   );
   assert.equal(
     await page.locator(".topbar").evaluate((el) => el.clientHeight),
@@ -114,11 +115,11 @@ try {
   await page.locator("#panel-splitter").focus();
   for (let i = 0; i < 16; i++) await page.keyboard.press("ArrowRight");
   const wideFret = await page.locator("#fretboard").boundingBox();
-  assert.equal(wideFret.width, fretSize.width);
+  assert.ok(wideFret.width >= fretSize.width);
   assert.equal(wideFret.height, fretSize.height);
   const instrument = await page.locator(".identify-instrument").boundingBox();
   const results = await page.locator(".identify-readings").boundingBox();
-  assert.ok(results.x > instrument.x + instrument.width);
+  assert.ok(results.y >= instrument.y + instrument.height);
   // Horizontal order and tablature string direction.
   const eHigh = await page
     .locator('[data-string="5"][data-fret="1"]')
@@ -131,6 +132,10 @@ try {
     .boundingBox();
   assert.ok(eHigh.y < eLow.y);
   assert.ok(nextFret.x > eHigh.x);
+  const openString = await page
+    .locator('#fretboard [data-string="5"][data-fret="-1"]')
+    .boundingBox();
+  assert.ok(openString.x < eHigh.x);
   for (const [string, fret] of [
     [1, 3],
     [2, 2],
@@ -144,11 +149,11 @@ try {
   await page.screenshot({ path: "artifacts/identifier-wide.png" });
   await page.locator("#frets-forward").click();
   assert.equal(await page.locator("#first-fret").textContent(), "Traste 2");
-  assert.equal(
+  assert.match(
     await page
-      .locator('[data-string="1"][data-fret="-1"] .string-state-symbol')
-      .textContent(),
-    "3",
+      .locator('[data-string="1"][data-fret="-1"]')
+      .getAttribute("aria-label"),
+    /traste 3/,
   );
   await page.locator("#frets-back").click();
   assert.equal(
@@ -165,7 +170,7 @@ try {
     ),
     false,
   );
-  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('.rail [data-mobile-view="music"]').click();
   await page.locator('[data-harmony-view="identify"]').click();
   assert.equal((await page.locator("#fretboard").boundingBox()).width, 300);
   await page.screenshot({

@@ -36,6 +36,7 @@ for (const engine of [chromium, firefox, webkit].filter(
     await page.goto(url);
     await page.locator("#empty-new").click();
     await page.locator("#blank").click();
+    await page.locator('.rail [data-desktop-view="edit"]').click();
     await page.locator("#source").fill("[C]Keep my changes\n[G]Across windows");
     await page.waitForFunction(
       () =>
@@ -53,6 +54,12 @@ for (const engine of [chromium, firefox, webkit].filter(
       .waitFor();
     assert.equal(await second.locator("#source").count(), 0);
     await page.close();
+    await second.waitForFunction(
+      () =>
+        document.querySelector("#source")?.value ===
+        "[C]Keep my changes\n[G]Across windows",
+    );
+    await second.locator('.rail [data-desktop-view="edit"]').click();
     await second.locator("#source").waitFor();
     assert.equal(
       await second.locator("#source").inputValue(),
@@ -81,6 +88,10 @@ for (const engine of [chromium, firefox, webkit].filter(
     await second.locator('[data-language="es"]').click();
     await second.waitForFunction(() => document.documentElement.lang === "es");
     await second.reload();
+    await second.waitForFunction(
+      () => document.querySelectorAll(".tab").length === 2,
+    );
+    await second.locator('.rail [data-desktop-view="edit"]').click();
     await second.locator("#source").waitFor();
     assert.equal(await second.locator(".tab").count(), 2);
     await second.locator("#new").click();

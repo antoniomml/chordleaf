@@ -7,6 +7,7 @@ try {
   await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173/es/");
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
+  await page.locator('.rail [data-desktop-view="edit"]').click();
 
   const longText = "[G]Una línea larga de ensayo [C]con acordes\n".repeat(700);
   await page.locator("#source").fill(longText);

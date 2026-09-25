@@ -11,6 +11,7 @@ try {
   await page.locator("#blank").click();
   await page.locator("#title").fill("Pasaje instrumental");
   await page.locator("#artist").fill("Prueba de maquetación");
+  await page.locator('.rail [data-desktop-view="edit"]').click();
   await page
     .locator("#source")
     .fill(

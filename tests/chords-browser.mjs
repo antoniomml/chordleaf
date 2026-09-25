@@ -13,6 +13,7 @@ try {
   await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
+  await page.locator('.rail [data-desktop-view="edit"]').click();
   const source = page.locator("#source");
   const original = "[G]One [D]two\n[G]Three [Gmaj7]four";
   await source.fill(original);
@@ -85,6 +86,9 @@ try {
   assert.equal(await page.locator("#frets-back").isEnabled(), false);
   await page.screenshot({ path: "artifacts/chord-identifier.png" });
   await result("C6").click();
+  assert.equal(await page.locator("#chosen-next").isEnabled(), true);
+  await page.locator("#chosen-next").click();
+  await page.locator("#chosen-prev").click();
   await page.locator("#replace-target").selectOption("G");
   await page.locator("#replace-occurrence").selectOption("1");
   await page.locator("#replace-chosen").click();
@@ -110,8 +114,9 @@ try {
   );
   assert.deepEqual(stored.songs[0].chordShapes.C6.frets, [-1, 3, 2, 2, 1, 3]);
   await page.locator('[data-section="document"]').click();
+  await page.locator('.rail [data-desktop-view="edit"]').click();
   await source.fill((await source.inputValue()) + " edited");
-  await page.locator('[data-section="chords"]').click();
+  await page.locator('[data-mode="identify"]').click();
   assert.equal(await page.locator("#undo-chord").isVisible(), false);
   for (let i = 1; i < 20; i++) await page.locator("#frets-forward").click();
   assert.equal(await page.locator("#first-fret").textContent(), "Traste 20");
@@ -184,7 +189,7 @@ try {
   await page.waitForTimeout(450);
   await page.reload();
   assert.ok((await source.inputValue()).includes("[Abm7b5]"));
-  await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('.rail [data-mobile-view="music"]').click();
   await page.locator('[data-music-section="chords"]').click();
   const savedSvg = await page
     .getByRole("button", { name: "Editar posición de Abm7b5", exact: true })
