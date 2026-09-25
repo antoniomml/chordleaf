@@ -46,6 +46,25 @@ try {
   await page
     .getByRole("button", { name: "Añadir diagrama de G", exact: true })
     .click();
+  await page
+    .getByRole("button", { name: "Añadir diagrama de G", exact: true })
+    .click();
+  await page.locator(".chord-sticker").nth(1).waitFor();
+  const stickerPositions = await page
+    .locator(".chord-sticker")
+    .evaluateAll((els) => els.map((el) => [el.style.left, el.style.top]));
+  assert.equal(stickerPositions.length, 2);
+  assert.notDeepEqual(stickerPositions[0], stickerPositions[1]);
+  assert.equal(
+    await page
+      .locator("#toast")
+      .evaluate((el) => el.classList.contains("visible")),
+    true,
+  );
+  assert.equal(
+    await page.locator("#toast").textContent(),
+    "Diagrama añadido a la hoja.",
+  );
   await page.locator('[data-mode="search"]').click();
   await page.locator("#catalog-search").fill("Abm7b5");
   await page.locator("#catalog-grid .chord-card").first().click();

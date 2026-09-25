@@ -63,6 +63,11 @@ textarea {
   color: inherit;
   outline: none;
 }
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
 input:focus,
 textarea:focus {
   border-color: #98b874 !important;
@@ -71,7 +76,8 @@ input {
   min-width: 0;
   width: 100%;
   background: #202421;
-  border: 1px solid #3a4039;
+  /* 3.5:1 against the field background: meets WCAG 1.4.11. */
+  border: 1px solid #6e7a68;
   border-radius: 6px;
   padding: 10px 11px;
 }
@@ -505,7 +511,7 @@ main {
 }
 .segmented {
   display: flex;
-  border: 1px solid #3a4039;
+  border: 1px solid #6e7a68;
   border-radius: 6px;
   height: 37px;
   margin-top: 7px;
@@ -538,7 +544,7 @@ main {
   display: flex;
   align-items: center;
   height: 35px;
-  border: 1px solid #3a4039;
+  border: 1px solid #6e7a68;
   border-radius: 6px;
   margin-top: 8px;
   overflow: hidden;
@@ -619,6 +625,14 @@ main {
   flex: 1;
   min-height: 90px;
   padding: 3px 10px 0 0;
+  border-radius: 6px;
+  transition: box-shadow 0.15s;
+}
+.source-container:focus-within {
+  box-shadow: inset 0 0 0 2px var(--green);
+}
+#source:focus-visible {
+  outline: none;
 }
 #line-numbers {
   width: 44px;
@@ -645,7 +659,7 @@ main {
   tab-size: 4;
 }
 #source:focus {
-  background: #ffffff02;
+  background: #ffffff0a;
 }
 .chord {
   border: 1px solid #414d37;
@@ -783,7 +797,7 @@ main {
   font-size: 22px;
   width: 33px;
   height: 32px;
-  border: 1px solid #515b48;
+  border: 1px solid #6e7a68;
   border-radius: 6px;
   color: #c6d4b4;
 }
@@ -1380,7 +1394,7 @@ button:disabled {
 .zoom-controls {
   display: flex;
   align-items: center;
-  border: 1px solid #515b48;
+  border: 1px solid #6e7a68;
   border-radius: 6px;
 }
 .zoom-controls button {
@@ -1422,7 +1436,7 @@ button:disabled {
   align-items: center;
   gap: 6px;
   padding: 4px 7px;
-  border: 1px solid #515b48;
+  border: 1px solid #6e7a68;
   border-radius: 5px;
   cursor: grab;
 }
@@ -1461,6 +1475,19 @@ button:disabled {
 .chord-sticker:hover,
 .chord-sticker:focus-within {
   outline-color: #738956;
+}
+.chord-sticker.sticker-added {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+  animation: sticker-added 1.5s ease-out;
+}
+@keyframes sticker-added {
+  from {
+    box-shadow: 0 0 0 0 #c9e79cb3;
+  }
+  to {
+    box-shadow: 0 0 0 14px #c9e79c00;
+  }
 }
 .sticker-image,
 .sticker-image > svg {
@@ -2042,7 +2069,8 @@ button:disabled {
   resize: vertical;
   min-height: 110px;
   padding: 12px;
-  border: 1px solid #424d3d;
+  /* 3.3:1 against its #1c241e field background. */
+  border: 1px solid #68765f;
   border-radius: 6px;
   background: #1c241e;
   color: #e2ead9;
@@ -2500,7 +2528,7 @@ select:focus-visible {
     min-width: 62px;
     min-height: 44px;
     padding: 6px;
-    border: 1px solid #515b48;
+    border: 1px solid #6e7a68;
     border-radius: 6px;
     font-size: 11px;
   }
@@ -2606,7 +2634,7 @@ select:focus-visible {
 }
 #settings .stepper #undo-transpose {
   width: 30px;
-  border-right: 1px solid #3a4039;
+  border-right: 1px solid #6e7a68;
   color: var(--green);
   font-size: 19px;
 }

@@ -1,6 +1,6 @@
 import { t } from "./i18n.js";
 import { chords, fingering, diagram, chordRE } from "./music.js";
-import { PAGE } from "./layout.js";
+import { PAGE, layout } from "./layout.js";
 import { fretboardMarkup } from "./fretboard-ui.js";
 import { identifyChord } from "./harmony.js";
 import {
@@ -11,7 +11,7 @@ import {
   MIN_STICKER_WIDTH,
   MIN_STICKER_HEIGHT,
 } from "./dictionary.js";
-export function setupDictionary({ song, changed, renderPages, esc }) {
+export function setupDictionary({ song, changed, renderPages, esc, notify }) {
   const tray = document.createElement("section");
   tray.className = "dictionary-tray";
   tray.innerHTML = t(
@@ -133,23 +133,88 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
   document.body.append(missingDialog);
   missingDialog.querySelector(".cancel-missing").onclick = () =>
     missingDialog.close();
+  function stickerBoxes(page, exclude) {
+    return (song().chordStickers || [])
+      .filter((s) => s !== exclude && (s.page || 0) === page)
+      .map((s) => {
+        const g = stickerGeometry(song(), s);
+        return {
+          x: s.x,
+          y: s.y,
+          right: s.x + g.width,
+          bottom: s.y + g.height,
+        };
+      });
+  }
+  // Free spot on the sheet: below the page header on page one, then a 16 pt
+  // grid against existing diagrams. New pages are added if nothing fits.
+  function findSpot(sticker) {
+    const g = stickerGeometry(song(), sticker),
+      pad = 8,
+      l = layout(song()),
+      firstTop = l.margin + l.headerHeight + 6;
+    const collides = (x, y, boxes) =>
+      boxes.some(
+        (b) =>
+          x < b.right + pad &&
+          x + g.width > b.x - pad &&
+          y < b.bottom + pad &&
+          y + g.height > b.y - pad,
+      );
+    for (let page = 0; page <= Math.max(1, l.pages.length); page++) {
+      const boxes = stickerBoxes(page, sticker),
+        top = page === 0 ? firstTop : l.margin;
+      for (let y = top; y <= PAGE.height - l.margin - g.height; y += 16)
+        for (let x = l.margin; x <= PAGE.width - l.margin - g.width; x += 16)
+          if (!collides(x, y, boxes)) return { page, x, y };
+    }
+    // A diagram that leaves no room still lands on its own new page.
+    return { page: Math.max(0, l.pages.length), x: l.margin, y: l.margin };
+  }
+  function revealSticker(sticker) {
+    const el = document.querySelector(
+      `.chord-sticker[data-sticker-id="${sticker.id}"]`,
+    );
+    if (!el) return;
+    el.classList.add("sticker-added");
+    el.scrollIntoView({
+      block: "center",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+    });
+    setTimeout(() => el.classList.remove("sticker-added"), 1600);
+  }
   function addResolved(names, page, x, y) {
     const available = stickerChords(song(), { chords: names });
     if (!available.length) return;
     const sticker = {
       id: crypto.randomUUID(),
       chords: names === "all" ? "all" : available,
-      page,
+      page: page ?? 0,
       x,
       y,
       width: names === "all" ? 300 : 85,
     };
+    // Button adds look for a free spot; drag and drop keeps the pointer target.
+    if (!Number.isFinite(x) || !Number.isFinite(y))
+      Object.assign(sticker, findSpot(sticker));
     constrain(sticker);
     (song().chordStickers ||= []).push(sticker);
     changed();
     renderPages();
+    notify?.(
+      t(
+        names === "all"
+          ? "Diagramas añadidos a la hoja."
+          : "Diagrama añadido a la hoja.",
+      ),
+    );
+    if (window.matchMedia("(max-width: 760px)").matches)
+      document.querySelector('[data-mobile-view="preview"]')?.click();
+    revealSticker(sticker);
   }
-  function add(names, page = 0, x = 28, y = 620) {
+  function add(names, page, x, y) {
     const missing = unresolvedChords(song(), names);
     if (!missing.length) return addResolved(names, page, x, y);
     missingDialog.querySelector(".missing-shapes-list").innerHTML = missing
@@ -315,6 +380,7 @@ export function setupDictionary({ song, changed, renderPages, esc }) {
       constrain(sticker);
       const el = document.createElement("div");
       el.className = "chord-sticker";
+      el.dataset.stickerId = sticker.id;
       el.tabIndex = 0;
       el.setAttribute(
         "aria-label",

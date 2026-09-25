@@ -211,9 +211,12 @@ function syncSection() {
 }
 function renderSettings() {
   syncSection();
-  const s = song(),
-    key = keyInfo(s.text);
   updateNavigation();
+  // Resize events reach this from the empty workspace (and after closing the
+  // last tab), where there is no active song to render.
+  const s = song();
+  if (!s) return;
+  const key = keyInfo(s.text);
   $("#source-area").hidden = section !== "document";
   $("#settings").hidden = section === "chords";
   $("#chords-panel").hidden = section !== "chords";
@@ -1162,7 +1165,13 @@ const chordPanel = setupChordsPanel({
     updateNavigation();
   },
 });
-const dictionary = setupDictionary({ song, changed, renderPages, esc });
+const dictionary = setupDictionary({
+  song,
+  changed,
+  renderPages,
+  esc,
+  notify: toast,
+});
 for (const [id, delta] of [
   ["zoom-in", 0.1],
   ["zoom-out", -0.1],

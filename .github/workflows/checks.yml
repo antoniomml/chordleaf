@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
@@ -22,6 +23,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm audit --audit-level=high
+      - name: Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | cut -d' ' -f2)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - name: Browser tests
         run: |
@@ -36,3 +44,13 @@ jobs:
           curl --silent --fail http://localhost:5173 > /dev/null
           pnpm test:e2e
           pnpm test:compatibility
+      - name: Upload browser artifacts
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.0
+        with:
+          name: browser-artifacts
+          path: |
+            artifacts/
+            /tmp/chordleaf-server.log
+          if-no-files-found: ignore
+          retention-days: 7
