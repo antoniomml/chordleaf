@@ -249,7 +249,363 @@ const pairEditor = {
   },
 };
 
-const contentPairs = [pairEditor];
+const pairPrint = {
+  id: "print",
+  es: {
+    slug: "hoja-de-acordes-para-imprimir",
+    kicker: "Impresión y PDF",
+    title: "Hoja de acordes para imprimir en A4 — Chordleaf",
+    description:
+      "Prepara una hoja de acordes clara para el ensayo: ajusta márgenes, tamaño, columnas y saltos, revisa los diagramas y exporta el PDF A4 o imprime desde el navegador.",
+    h1: "Hoja de acordes para imprimir: del editor al atril",
+    lead: "Una hoja de acordes se entiende o no se entiende en el atril. Chordleaf maqueta la canción en una página A4 real, permite ajustar márgenes, tamaño de letra y columnas, y exporta un PDF con fondo blanco y sin la interfaz del editor.",
+    imageAlt:
+      "Captura del editor de Chordleaf con la hoja A4 de una canción y el panel de formato de página.",
+    imageCaption:
+      "La vista previa muestra la misma página A4 que se exporta o se envía a la impresora.",
+    sections: [
+      {
+        h: "La página A4 como referencia",
+        p: [
+          "El editor trabaja sobre una página A4 de verdad, con sus medidas en puntos, así que la vista previa no es una aproximación: es el mismo documento que se exporta. Puedes acercar o alejar el zoom y, en el móvil, ajustar el ancho para revisar la hoja antes de imprimir.",
+          "Cada canción guarda su propio formato de página. Puedes tener una balada a una columna con letra grande y un tema denso a dos columnas con letra más pequeña sin reconfigurar nada cada vez.",
+        ],
+      },
+      {
+        h: "Ajustes que cambian la lectura",
+        p: [
+          "El tamaño de letra, los márgenes y el número de columnas son los tres controles que más afectan a la legibilidad. Empieza por los valores por defecto, imprime una página de prueba y ajusta desde ahí: casi siempre basta con un punto más de letra o un margen algo menor.",
+        ],
+        list: [
+          "Tamaño: entre 7 y 20 pt para adaptar la letra al papel.",
+          "Márgenes: de 5 a 35 mm, útiles cuando la canción no cabe en una página.",
+          "Columnas: una columna se lee mejor de pie; dos columnas aprovechan el papel en canciones largas.",
+        ],
+      },
+      {
+        h: "Colocar los diagramas en el papel",
+        p: [
+          "Los bloques de diagramas son elementos de la página, no imágenes sueltas. Puedes moverlos con el manejador, cambiar su ancho, alto y número de columnas, y el texto fluye alrededor del bloque para no quedar tapado.",
+          "Antes de exportar, el editor comprueba que ningún bloque tapa la cabecera ni se sale del pie de página y avisa si hay que recolocarlo. Es más rápido mover un bloque que descubrir el problema en el papel.",
+        ],
+      },
+      {
+        h: "De la vista previa al papel",
+        p: [
+          "El menú Exportar genera un PDF A4 que puedes guardar o enviar a la impresora. La opción Imprimir abre el diálogo del navegador con el mismo diseño, fondo blanco y sin barras de herramientas.",
+          "El PDF y el Word incluyen el título y el artista en la cabecera, y opcionalmente el pie «chordleaf.com», que puedes desactivar en Más opciones. Revisa siempre la primera página antes de imprimir el resto.",
+        ],
+        list: [
+          "¿Cabe la canción en las páginas que esperabas?",
+          "¿Los acordes quedan encima de la sílaba correcta?",
+          "¿La letra se lee a la distancia del atril?",
+          "¿Los diagramas están completos y sin tapar la letra?",
+        ],
+      },
+      {
+        h: "Consejos para el atril",
+        p: [
+          "Una hoja de uso real suele imprimirse en blanco y negro. Los diagramas y la letra funcionan bien sin color porque el contraste está en la tipografía, no en el fondo.",
+          "Si el tema es largo, dos columnas y un tamaño moderado suelen caber en una cara. Si vas a repartir la hoja entre varias personas, el PDF es la versión más fiel. Guarda el proyecto .chordleaf.json si quieres volver a editar la maquetación más adelante.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "¿La impresión ocupa toda la página A4?",
+        a: "Sí. El diseño usa A4 con márgenes configurables; la opción Imprimir del menú Exportar oculta la interfaz y pinta la hoja en blanco.",
+      },
+      {
+        q: "¿Puedo evitar que una canción se parta en dos páginas?",
+        a: "Reduce el tamaño de letra, ajusta los márgenes o usa dos columnas. El editor muestra dónde quedan los cortes para que puedas moverlos antes de imprimir.",
+      },
+      {
+        q: "¿Qué diferencia hay entre PDF e Imprimir?",
+        a: "El PDF es un archivo A4 que puedes guardar o compartir; Imprimir usa el mismo diseño a través del diálogo del navegador.",
+      },
+      {
+        q: "¿Puedo quitar el pie «chordleaf.com»?",
+        a: "Sí. Está activado por defecto y se desactiva desde Más opciones en los ajustes del documento; el cambio se aplica a la vista previa, al PDF y al Word.",
+      },
+    ],
+    related: [
+      {
+        href: "/es/editor-de-acordes/",
+        label: "Volver al editor de acordes",
+      },
+      {
+        href: "/es/transportar-acordes/",
+        label: "Transportar la canción antes de imprimir",
+      },
+      { href: "/es/guia/", label: "Guía completa de Chordleaf" },
+    ],
+  },
+  en: {
+    slug: "printable-chord-sheets",
+    kicker: "Printing and PDF",
+    title: "Printable chord sheets in A4 — Chordleaf",
+    description:
+      "Make a readable chord sheet for rehearsal: set font size, margins and columns, place chord diagrams, then export an A4 PDF or print from the browser.",
+    h1: "Printable chord sheets that read well on a music stand",
+    lead: "A chord sheet works when it can be read at a glance. Chordleaf lays the song out on a real A4 page, lets you tune the font size, margins and columns, and exports a white-background PDF without the editor interface.",
+    imageAlt:
+      "Screenshot of the Chordleaf editor showing an A4 song sheet and the page format settings.",
+    imageCaption:
+      "The preview shows the same A4 page that is exported or sent to the printer.",
+    sections: [
+      {
+        h: "A real A4 page, not an approximation",
+        p: [
+          "The editor works on an actual A4 page measured in points, so the preview is the document that gets exported. Zoom in and out to inspect details, or fit the width on a phone while you check the layout.",
+          "Each song keeps its own page format. A ballad with large type and a single column can live next to a dense song in two columns without reconfiguring the editor every time.",
+        ],
+      },
+      {
+        h: "Settings that change how the sheet reads",
+        p: [
+          "Font size, margins and column count have the biggest effect on legibility. Start with the defaults, print one test page and adjust from there; a slightly larger font or a smaller margin usually solves a tight song.",
+        ],
+        list: [
+          "Size: 7 to 20 pt to fit the lyrics on paper.",
+          "Margins: 5 to 35 mm when a song needs more room.",
+          "Columns: one reads well standing up; two make better use of the page for long songs.",
+        ],
+      },
+      {
+        h: "Placing chord diagrams on the page",
+        p: [
+          "Diagram blocks are page objects rather than loose images. Drag a block with its handle, change its width, height and column count, and the lyrics flow around it instead of disappearing underneath.",
+          "Before exporting, the editor checks that no block covers the header or runs past the footer and warns you when one needs to move. Fixing it on screen beats discovering it on paper.",
+        ],
+      },
+      {
+        h: "From the preview to paper",
+        p: [
+          "The Export menu produces an A4 PDF you can save or send to a printer. Print opens the browser dialog with the same layout, a white background and no toolbars.",
+          "The PDF and Word files carry the title and artist in the header, plus the optional chordleaf.com footer that you can switch off under More options. Check the first page before printing the rest.",
+        ],
+        list: [
+          "Does the song fit on the pages you expected?",
+          "Are the chords sitting over the right syllables?",
+          "Can you read the lyrics from where you stand?",
+          "Are all diagrams present and clear of the text?",
+        ],
+      },
+      {
+        h: "Notes for real music stands",
+        p: [
+          "Most rehearsal sheets end up printed in black and white, and that is fine: contrast comes from the type and the chord placement, not from colour.",
+          "For a long song, two columns at a moderate size often fit on one side. When you share the sheet with a band or a class, the PDF is the faithful version. Keep the .chordleaf.json project if you may want to adjust the layout later.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "Does printing use the full A4 page?",
+        a: "Yes. The layout targets A4 with configurable margins, and the Print entry in the Export menu hides the interface and paints the sheet white.",
+      },
+      {
+        q: "How do I keep a song from splitting across pages?",
+        a: "Reduce the font size, adjust the margins or switch to two columns. The editor shows where the breaks land so you can move them before printing.",
+      },
+      {
+        q: "What is the difference between PDF and Print?",
+        a: "The PDF is an A4 file you can store or share; Print sends the same design through the browser's print dialog.",
+      },
+      {
+        q: "Can I remove the chordleaf.com footer?",
+        a: "Yes. It is on by default and can be switched off under More options in the document settings; the preview, PDF and Word file all follow that choice.",
+      },
+    ],
+    related: [
+      {
+        href: "/en/chord-sheet-maker/",
+        label: "Back to the chord sheet maker",
+      },
+      {
+        href: "/en/transpose-chords/",
+        label: "Transpose the song before printing",
+      },
+      { href: "/en/guide/", label: "Full Chordleaf user guide" },
+    ],
+  },
+};
+
+const pairTranspose = {
+  id: "transpose",
+  es: {
+    slug: "transportar-acordes",
+    kicker: "Transporte y cejilla",
+    title: "Transportar acordes online y gratis — Chordleaf",
+    description:
+      "Sube o baja la canción por semitonos, ajusta la cejilla y consulta la tonalidad probable sin cambiar la letra. Gratis y directamente en el navegador.",
+    h1: "Transportar acordes sin reescribir la letra",
+    lead: "Transportar una canción no debería obligarte a corregir cada acorde a mano. En Chordleaf subes o bajas semitonos con un clic, ajustas la cejilla y ves la tonalidad probable mientras la letra permanece intacta.",
+    imageAlt:
+      "Captura del editor de Chordleaf con los controles de semitonos, cejilla y tonalidad probable.",
+    imageCaption:
+      "Los controles de semitonos, cejilla y tonalidad probable, junto a la letra sin tocar.",
+    sections: [
+      {
+        h: "Qué significa transportar",
+        p: [
+          "Transportar es subir o bajar toda la armonía la misma distancia para que la canción encaje mejor en una voz o en un instrumento. Cada acorde cambia de nombre, pero las relaciones entre ellos se mantienen: la canción sigue sonando igual, más aguda o más grave.",
+          "En Chordleaf el transporte se aplica a los acordes que el editor reconoce. Los acordes dudosos se conservan marcados para que los revises, en lugar de desaparecer sin avisar.",
+        ],
+      },
+      {
+        h: "Semitonos, tonos y tonalidad",
+        p: [
+          "Un semitono es la distancia más pequeña entre dos notas; doce semitonos forman una octava. Subir dos semitonos equivale a subir un tono. El contador del editor empieza en 0 y cada pulsación mueve la canción un semitono.",
+          "La tonalidad probable se estima a partir de los acordes escritos y se actualiza al transportar. Ese dato ayuda a decidir si el resultado es cómodo para cantar o conviene probar otra distancia. Por ejemplo, al subir dos semitonos una progresión en Do mayor, los acordes pasan a Re mayor y la tonalidad probable cambia con ellos.",
+          "Si practicas con la canción original «Al otro lado» de la documentación, verás cómo se mueven los grados de la escala al cambiar los semitonos: la letra no se toca y los acordes se recalculan solos.",
+        ],
+      },
+      {
+        h: "Cejilla: cuándo ayuda",
+        p: [
+          "La cejilla sube el sonido real sin cambiar las posiciones que tocas. Es la opción práctica cuando quieres seguir usando formas abiertas: pones cejilla en el traste 2 y tocas como si estuvieras en el tono original.",
+          "La opción «Mantener el tono al mover la cejilla» compensa los acordes escritos para que el resultado suene igual mientras mueves la cejilla. Si la desactivas, ambos controles actúan por separado y puedes combinarlos a propósito.",
+        ],
+      },
+      {
+        h: "Cómo transportar en la práctica",
+        p: [
+          "Elige la distancia con los botones − y +, y usa el símbolo ↺ para volver al tono original cuando te pierdas. La letra, los saltos de página y los diagramas no se ven afectados por el transporte. En el móvil, los controles de semitonos y cejilla viven en la pestaña de música, junto a la tonalidad probable.",
+        ],
+        list: [
+          "Comprueba el indicador antes de tocar: 0 es el tono original.",
+          "Revisa los acordes marcados y resuélvelos antes de imprimir.",
+          "Prueba el resultado con la cejilla real sobre el mástil.",
+          "Si la tonalidad queda con demasiadas alteraciones, prueba otra distancia.",
+        ],
+      },
+      {
+        h: "Errores frecuentes al transportar",
+        p: [
+          "El más habitual es transportar dos veces la misma canción: si el indicador no está en 0, ya has movido la armonía. También conviene recordar que el tono escrito y el tono que suena no coinciden cuando hay cejilla, y que un acorde extraño sin revisar puede arruinar una hoja por lo demás correcta.",
+          "Antes de exportar, revisa la tonalidad, los acordes marcados y la cejilla. El botón de deshacer devuelve todo al tono original en cualquier momento, así que puedes experimentar sin miedo. Si preparas la hoja para otra persona, anota en la cabecera el tono y la cejilla que has usado para que no tenga que adivinarlo.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "¿El transporte cambia la letra?",
+        a: "No. Solo cambian los nombres de los acordes; la letra y su posición se mantienen exactamente igual.",
+      },
+      {
+        q: "¿Cuántos semitonos puedo subir o bajar?",
+        a: "Puedes mover la canción por semitonos arriba o abajo y volver a 0 cuando quieras. Para ajustar a una voz suele bastar con uno o dos semitonos.",
+      },
+      {
+        q: "¿Qué pasa con los acordes que el editor no reconoce?",
+        a: "Se conservan y se marcan para revisarlos. Puedes sustituirlos desde el panel de acordes o dejarlos tal cual si son correctos.",
+      },
+      {
+        q: "¿Transportar y usar cejilla es lo mismo?",
+        a: "No exactamente. Transportar cambia los acordes escritos; la cejilla cambia el sonido real sin cambiar las posiciones. Con la opción de mantener el tono puedes combinar ambos controles.",
+      },
+    ],
+    related: [
+      {
+        href: "/es/editor-de-acordes/",
+        label: "Volver al editor de acordes",
+      },
+      {
+        href: "/es/hoja-de-acordes-para-imprimir/",
+        label: "Imprimir la hoja ya transportada",
+      },
+      { href: "/es/guia/", label: "Guía completa de Chordleaf" },
+    ],
+  },
+  en: {
+    slug: "transpose-chords",
+    kicker: "Transposing and capo",
+    title: "Transpose chords online — Chordleaf",
+    description:
+      "Shift a song up or down by semitones, set a capo and check the likely key without rewriting the lyrics. Free, in your browser and with no account.",
+    h1: "Transpose chords without rewriting the lyrics",
+    lead: "Transposing a song should not mean correcting every chord by hand. Chordleaf moves the whole progression by semitones, sets a capo and shows the likely key while the lyrics stay exactly where they were.",
+    imageAlt:
+      "Screenshot of the Chordleaf editor with the semitone, capo and likely key controls.",
+    imageCaption:
+      "Semitone, capo and likely key controls sit next to the untouched lyrics.",
+    sections: [
+      {
+        h: "What transposing actually does",
+        p: [
+          "Transposing moves the whole harmony by the same distance so a song fits a voice or an instrument better. Every chord changes name while the relationships between them stay the same: the song sounds identical, just higher or lower.",
+          "Chordleaf transposes the chords it recognises. Anything doubtful is kept and flagged for review instead of vanishing silently.",
+        ],
+      },
+      {
+        h: "Semitones, tones and keys",
+        p: [
+          "A semitone is the smallest step between two notes, and twelve of them make an octave. Two semitones equal one tone. The counter starts at 0 and each press moves the song by one semitone.",
+          "The likely key is estimated from the written chords and updates as you transpose, which helps you judge whether the result sits comfortably in your range. Move a progression in C major up two semitones, for instance, and the chords become D major while the key estimate follows along.",
+          "The original demo song in the Chordleaf documentation, «Al otro lado», is a handy way to watch the scale degrees move as you change the offset: the lyrics stay put and the chords are recalculated for you.",
+        ],
+      },
+      {
+        h: "When a capo helps",
+        p: [
+          "A capo raises the sounding pitch without changing the shapes you play. It is the practical choice when you want to keep open chords: place it on fret 2 and play as if you were in the original key.",
+          "The option to keep the key while moving the capo compensates the written chords so the result keeps sounding the same. Turn it off and both controls act independently, which you can also use on purpose.",
+        ],
+      },
+      {
+        h: "Transposing step by step",
+        p: [
+          "Choose the distance with the − and + buttons, and use the ↺ symbol to return to the original key whenever you lose track. Lyrics, page breaks and diagrams are untouched by transposition. On a phone, the semitone and capo controls sit in the music tab next to the likely key.",
+        ],
+        list: [
+          "Check the counter before you start: 0 is the original key.",
+          "Review the flagged chords and resolve them before printing.",
+          "Try the result with the real capo on the neck.",
+          "If the key ends up full of accidentals, try another offset.",
+        ],
+      },
+      {
+        h: "Common mistakes",
+        p: [
+          "The usual one is transposing twice: if the counter is not at 0, the harmony has already moved. It also helps to remember that the written key and the sounding key differ under a capo, and that one unreviewed chord can spoil an otherwise perfect sheet.",
+          "Before exporting, check the key, the flagged chords and the capo. The undo button restores the original key at any time, so experimenting costs nothing. If the sheet is for someone else, write the key and capo in the header so they do not have to guess.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "Does transposing change the lyrics?",
+        a: "No. Only the chord names change; the lyrics and their positions stay exactly the same.",
+      },
+      {
+        q: "How far can I transpose?",
+        a: "You can move the song by semitones up or down and return to 0 whenever you like. One or two semitones are usually enough to fit a voice.",
+      },
+      {
+        q: "What happens to chords the editor does not recognise?",
+        a: "They are kept and flagged for review. You can replace them from the chord panel or leave them if they are correct.",
+      },
+      {
+        q: "Is transposing the same as using a capo?",
+        a: "Not quite. Transposing changes the written chords; a capo changes the sounding pitch while you keep playing the same shapes. The keep-the-key option lets you combine both.",
+      },
+    ],
+    related: [
+      {
+        href: "/en/chord-sheet-maker/",
+        label: "Back to the chord sheet maker",
+      },
+      {
+        href: "/en/printable-chord-sheets/",
+        label: "Print the transposed sheet",
+      },
+      { href: "/en/guide/", label: "Full Chordleaf user guide" },
+    ],
+  },
+};
+
+const contentPairs = [pairEditor, pairPrint, pairTranspose];
 
 const chrome = {
   es: {
