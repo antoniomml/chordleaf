@@ -26,11 +26,19 @@
   font-family: "DM Sans", Arial, sans-serif;
   color: #e5e7df;
   background: #171a19;
+  color-scheme: dark;
   font-synthesis: none;
   font-size: 13px;
   --green: #c9e79c;
   --muted: #8a918b;
   --border: #343934;
+  --field-border: #6e7a68;
+  --danger: #ffb5a7;
+  --radius-sm: 5px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --text-label: 10px;
+  --text-state: 11px;
 }
 * {
   box-sizing: border-box;
@@ -77,8 +85,8 @@ input {
   width: 100%;
   background: #202421;
   /* 3.5:1 against the field background: meets WCAG 1.4.11. */
-  border: 1px solid #6e7a68;
-  border-radius: 6px;
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius-md);
   padding: 10px 11px;
 }
 input[type="number"] {
@@ -123,7 +131,7 @@ button.primary {
   color: #e9ebdf;
 }
 .brand > span {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1.6px;
   color: #82897f;
   margin-left: 22px;
@@ -160,7 +168,7 @@ button.primary {
   width: 220px;
   padding: 6px;
   border: 1px solid #464f40;
-  border-radius: 9px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 12px 30px #0005;
 }
 .chrome-menu button {
@@ -410,7 +418,10 @@ main {
   min-width: 0;
 }
 #settings {
-  flex-shrink: 0;
+  padding: 16px 20px 0;
+  flex-shrink: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 .panel-title {
   display: flex;
@@ -425,7 +436,7 @@ main {
 }
 .field {
   display: block;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1.3px;
   color: #98a38e;
   margin-bottom: 15px;
@@ -478,7 +489,7 @@ main {
   padding-top: 8px;
   margin: 8px 0 7px;
   color: #aab6a0;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.2px;
 }
@@ -511,8 +522,8 @@ main {
 }
 .segmented {
   display: flex;
-  border: 1px solid #6e7a68;
-  border-radius: 6px;
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius-md);
   height: 37px;
   margin-top: 7px;
   padding: 3px;
@@ -535,7 +546,7 @@ main {
   margin-top: 0;
 }
 .music-controls label {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1.3px;
   color: #98a38e;
   font-weight: 600;
@@ -544,8 +555,8 @@ main {
   display: flex;
   align-items: center;
   height: 35px;
-  border: 1px solid #6e7a68;
-  border-radius: 6px;
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius-md);
   margin-top: 8px;
   overflow: hidden;
 }
@@ -594,7 +605,7 @@ main {
   background: var(--green);
 }
 .link-help {
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.6;
   color: #9aaa8e;
   margin: 10px 0 16px;
@@ -611,7 +622,7 @@ main {
   justify-content: space-between;
   align-items: center;
   color: #9ba78f;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1.4px;
 }
 .code-label {
@@ -625,7 +636,7 @@ main {
   flex: 1;
   min-height: 90px;
   padding: 3px 10px 0 0;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: box-shadow 0.15s;
 }
 .source-container:focus-within {
@@ -679,9 +690,27 @@ main {
   align-items: center;
   padding: 11px 16px;
   border-top: 1px solid var(--border);
-  font-size: 8px;
+  font-size: 10px;
   color: #9aaa8e;
   gap: 4px;
+}
+#save-state {
+  font-size: var(--text-state);
+}
+#save-state.error {
+  color: var(--danger);
+  font-weight: 650;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 .editor-foot .tiny-dot {
   width: 4px;
@@ -707,13 +736,13 @@ main {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #373d34;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1.3px;
   color: #a7b29c;
   gap: 12px;
 }
 .paper-label {
-  font-size: 8px;
+  font-size: 10px;
   border: 1px solid #4a5244;
   color: #9ca790;
   margin-left: 12px;
@@ -797,7 +826,7 @@ main {
   font-size: 22px;
   width: 33px;
   height: 32px;
-  border: 1px solid #6e7a68;
+  border: 1px solid var(--field-border);
   border-radius: 6px;
   color: #c6d4b4;
 }
@@ -930,13 +959,13 @@ main {
   align-items: center;
   border-top: 1px solid #3a4037;
   padding: 0 24px;
-  font-size: 9px;
+  font-size: 11px;
   color: #8d9980;
   gap: 12px;
 }
 .preview-footer span:nth-child(2) {
   color: #9aaa8e;
-  font-size: 10px;
+  font-size: 11px;
 }
 #chord-tooltip {
   position: fixed;
@@ -962,7 +991,7 @@ main {
 }
 #toast {
   position: fixed;
-  bottom: 28px;
+  bottom: calc(28px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translate(-50%, 20px);
   opacity: 0;
@@ -970,15 +999,31 @@ main {
   color: #24341b;
   box-shadow: 0 8px 30px #0005;
   padding: 13px 21px;
-  border-radius: 8px;
-  max-width: 600px;
+  border-radius: var(--radius-md);
+  max-width: min(600px, calc(100vw - 32px));
+  font-size: 12px;
+  line-height: 1.45;
   z-index: 100;
   pointer-events: none;
+  cursor: pointer;
   transition: 0.2s;
 }
 #toast.visible {
   opacity: 1;
   transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+#toast.toast-success {
+  background: #d2e8b5;
+  color: #24341b;
+}
+#toast.toast-warning {
+  background: #f3ddab;
+  color: #3d3116;
+}
+#toast.toast-error {
+  background: #f0b7ac;
+  color: #471d16;
 }
 dialog {
   background: #222920;
@@ -1007,7 +1052,7 @@ dialog::backdrop {
   margin-bottom: 16px;
 }
 .eyebrow {
-  font-size: 9px !important;
+  font-size: 10px !important;
   letter-spacing: 1.8px;
   color: #a6bf8b !important;
 }
@@ -1087,7 +1132,7 @@ dialog .choice {
   color: #ffe4d9;
 }
 .section-caption {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1.5px;
   color: #9cae8c;
 }
@@ -1112,7 +1157,7 @@ dialog .choice {
 }
 .degree small {
   display: block;
-  font: 9px Arial;
+  font: 10px Arial;
   margin-bottom: 8px;
   color: #94a77f;
 }
@@ -1394,7 +1439,7 @@ button:disabled {
 .zoom-controls {
   display: flex;
   align-items: center;
-  border: 1px solid #6e7a68;
+  border: 1px solid var(--field-border);
   border-radius: 6px;
 }
 .zoom-controls button {
@@ -1413,7 +1458,10 @@ button:disabled {
   opacity: 0.35;
 }
 .dictionary-tray {
-  border-top: 1px solid var(--border);
+  border: 0;
+  padding: 0;
+  max-height: none;
+  overflow: visible;
   font-size: 11px;
   flex-shrink: 0;
 }
@@ -1423,8 +1471,9 @@ button:disabled {
 }
 .dictionary-tray p {
   color: #a7b29c;
+  font-size: 12px;
   line-height: 1.5;
-  margin: 8px 0;
+  margin: 8px 0 18px;
 }
 .dictionary-items {
   display: flex;
@@ -1436,7 +1485,7 @@ button:disabled {
   align-items: center;
   gap: 6px;
   padding: 4px 7px;
-  border: 1px solid #6e7a68;
+  border: 1px solid var(--field-border);
   border-radius: 5px;
   cursor: grab;
 }
@@ -1447,7 +1496,8 @@ button:disabled {
   position: absolute;
   z-index: 2;
   cursor: grab;
-  touch-action: none;
+  /* Vertical scroll still works over big diagrams; dragging uses the handles. */
+  touch-action: pan-y;
   outline: 1px solid transparent;
 }
 .missing-shape {
@@ -1505,6 +1555,7 @@ button:disabled {
   padding: 0;
   opacity: 0;
   border-radius: 4px;
+  touch-action: none;
 }
 .chord-sticker:hover > button,
 .chord-sticker:focus-within > button {
@@ -1513,6 +1564,11 @@ button:disabled {
 .remove-sticker {
   top: 0;
   right: 0;
+}
+.move-sticker {
+  top: -10px;
+  left: calc(50% - 10px);
+  cursor: move;
 }
 .resize-sticker {
   right: 0;
@@ -1547,6 +1603,12 @@ button:disabled {
   .chord-sticker > button {
     opacity: 1;
   }
+  /* A 44px touch area around the 20px glyph without enlarging the visuals. */
+  .chord-sticker > button::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
+  }
 }
 
 /* A section owns the entire sidebar, including its source editor. */
@@ -1570,16 +1632,6 @@ button:disabled {
 }
 .chord-help a {
   color: #c9e79c;
-}
-.dictionary-tray {
-  padding: 0;
-  border: 0;
-  max-height: none;
-  overflow: visible;
-}
-.dictionary-tray p {
-  font-size: 12px;
-  margin-bottom: 18px;
 }
 .chord-card-grid {
   display: grid;
@@ -1631,9 +1683,9 @@ button:disabled {
 }
 .dictionary-item.chord-card .chord-card-actions button {
   padding: 6px 2px;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   color: #aebca3;
-  font-size: 9px;
+  font-size: 10px;
 }
 .dictionary-item.chord-card .chord-card-actions .add-sticker {
   color: #d5e9bc;
@@ -1659,14 +1711,14 @@ button:disabled {
 }
 .dictionary-all span {
   color: #94a388;
-  font-size: 9px;
+  font-size: 10px;
 }
 .dictionary-all .add-sticker {
   padding: 7px 9px;
   border: 1px solid #71865f;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   color: var(--green);
-  font-size: 9px;
+  font-size: 10px;
   white-space: nowrap;
 }
 #more-chords {
@@ -1935,6 +1987,9 @@ button:disabled {
 .topbar {
   padding: 0 20px;
 }
+.new-plus::before {
+  content: "＋";
+}
 .brand {
   font-size: 25px;
 }
@@ -1945,12 +2000,6 @@ button:disabled {
 .topbar .primary,
 .topbar .outline {
   padding: 9px 12px;
-}
-#settings {
-  padding: 16px 20px 0;
-  flex-shrink: 1;
-  min-height: 0;
-  overflow-y: auto;
 }
 #settings .panel-title {
   margin-bottom: 10px;
@@ -2141,7 +2190,7 @@ button:disabled {
 }
 .language-menu small {
   margin: 0;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1px;
 }
 select:focus-visible {
@@ -2172,8 +2221,18 @@ select:focus-visible {
     font-size: 16px;
   }
   .topbar {
-    height: 52px;
-    padding: 0 12px;
+    height: calc(52px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 12px 0;
+  }
+  .degree {
+    min-height: 44px;
+  }
+  .dialog-close,
+  .issue-editor-heading button {
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
   }
   .brand {
     font-size: 24px;
@@ -2234,7 +2293,10 @@ select:focus-visible {
     flex-shrink: 0;
   }
   main {
-    height: calc(100dvh - 96px);
+    height: calc(
+      min(100dvh, var(--visual-viewport-height, 100dvh)) - 96px -
+        env(safe-area-inset-top) - env(safe-area-inset-bottom)
+    );
     min-height: 0;
     flex-direction: column;
     overflow: hidden;
@@ -2480,9 +2542,6 @@ select:focus-visible {
   .fret-markers {
     grid-template-columns: 14px 42px repeat(5, minmax(44px, 1fr));
   }
-  #panel-splitter {
-    display: none;
-  }
   .preview-toolbar {
     position: absolute;
     z-index: 6;
@@ -2528,7 +2587,7 @@ select:focus-visible {
     min-width: 62px;
     min-height: 44px;
     padding: 6px;
-    border: 1px solid #6e7a68;
+    border: 1px solid var(--field-border);
     border-radius: 6px;
     font-size: 11px;
   }
@@ -2556,8 +2615,13 @@ select:focus-visible {
     display: none;
   }
   #toast {
+    bottom: calc(72px + env(safe-area-inset-bottom));
     width: 85%;
-    font-size: 11px;
+    font-size: 12px;
+  }
+  /* In preview view the floating document controls sit above the rail. */
+  main[data-mobile-view="preview"] ~ #toast {
+    bottom: calc(124px + env(safe-area-inset-bottom));
   }
 }
 @media (max-width: 360px) {
@@ -2574,14 +2638,25 @@ select:focus-visible {
   .fret-markers > :nth-child(7) {
     display: none;
   }
+  #settings .music-controls {
+    grid-template-columns: 1fr;
+  }
+  #shape-dialog .shape-fretboard .guitar-string,
+  #shape-dialog .shape-fretboard .fret-numbers,
+  #shape-dialog .shape-fretboard .fret-markers {
+    grid-template-columns: 20px 44px repeat(4, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) and (max-height: 500px) and (min-width: 560px) {
   .topbar {
-    height: 44px;
+    height: calc(44px + env(safe-area-inset-top));
   }
   main {
-    height: calc(100dvh - 88px);
+    height: calc(
+      min(100dvh, var(--visual-viewport-height, 100dvh)) - 88px -
+        env(safe-area-inset-top) - env(safe-area-inset-bottom)
+    );
   }
   .rail {
     height: calc(52px + env(safe-area-inset-bottom));
@@ -2602,7 +2677,7 @@ select:focus-visible {
 
 @media (max-width: 480px) {
   .topbar {
-    padding: 0 12px;
+    padding: env(safe-area-inset-top) 12px 0;
   }
   .topbar .brand {
     font-size: 20px;
@@ -2634,7 +2709,7 @@ select:focus-visible {
 }
 #settings .stepper #undo-transpose {
   width: 30px;
-  border-right: 1px solid #6e7a68;
+  border-right: 1px solid var(--field-border);
   color: var(--green);
   font-size: 19px;
 }
@@ -2719,16 +2794,69 @@ select:focus-visible {
     min-height: 0;
   }
 }
-@media (max-width: 360px) {
-  #settings .music-controls {
-    grid-template-columns: 1fr;
-  }
+
+/* Print: only the A4 sheets, at paper size and without the workspace chrome. */
+@page {
+  size: A4 portrait;
+  margin: 0;
 }
 
-@media (max-width: 360px) {
-  #shape-dialog .shape-fretboard .guitar-string,
-  #shape-dialog .shape-fretboard .fret-numbers,
-  #shape-dialog .shape-fretboard .fret-markers {
-    grid-template-columns: 20px 44px repeat(4, minmax(0, 1fr));
+@media print {
+  html,
+  body {
+    height: auto !important;
+    background: #fff !important;
+  }
+  .topbar,
+  .tabs-wrap,
+  #empty-state,
+  .rail,
+  .editor-panel,
+  .preview-toolbar,
+  .preview-footer,
+  #chord-tooltip,
+  #toast,
+  dialog {
+    display: none !important;
+  }
+  #app,
+  main,
+  .workspace,
+  .preview-panel,
+  #pages-scroll,
+  #pages {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+  .page-shell {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: page;
+    page-break-after: always;
+  }
+  .page-shell:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .page {
+    width: 595.28px !important;
+    height: 841.89px !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    transform-origin: top left !important;
+    /* The sheet is laid out in points; scale it to real A4 paper. */
+    transform: scale(1.3333) !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }

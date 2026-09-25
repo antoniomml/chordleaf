@@ -82,36 +82,65 @@ let section = "document",
   currentPage = 1,
   observer,
   saveTimer,
-  previewTimer;
+  previewTimer,
+  toastTimer,
+  lastSaveAnnouncement,
+  saveFailureNotified = false;
 const songViews = new Map();
 const songDesktopViews = new Map();
 const songMusicSections = new Map();
 const transposeHistory = new Map();
 let chordMode = "song";
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const song = () => songs.find((s) => s.id === active);
+/** Keep the visible save label in sync without announcing every keystroke.
+ * Screen readers only hear the hidden live region on real transitions. */
+function setSaveState(text, { error = false, announce = false } = {}) {
+  const state = $("#save-state");
+  if (!state) return;
+  state.textContent = text;
+  state.classList.toggle("error", error);
+  if (announce && text !== lastSaveAnnouncement) {
+    lastSaveAnnouncement = text;
+    const announcer = $("#save-announcer");
+    if (announcer) announcer.textContent = text;
+  }
+}
 function persist() {
   if (!workspaceSession.held) return false;
   if (recoveryRaw) {
-    $("#save-state").textContent = t(
-      "No se pudieron restaurar los datos guardados. Exporta una copia de recuperación antes de continuar.",
+    setSaveState(
+      t(
+        "No se pudieron restaurar los datos guardados. Exporta una copia de recuperación antes de continuar.",
+      ),
+      { error: true, announce: true },
     );
     return false;
   }
   try {
     localStorage.setItem("chordleaf-v1", JSON.stringify({ songs, active }));
     const current = song();
-    $("#save-state").textContent = current?.pdfExported
-      ? current.dirty || !current.projectSignature
-        ? t("PDF descargado · proyecto sin guardar")
-        : t("PDF descargado · proyecto guardado en archivo")
-      : current?.dirty || !current?.projectSignature
-        ? t("Sesión recuperable · proyecto sin guardar")
-        : t("Sesión recuperable · proyecto guardado en archivo");
+    setSaveState(
+      current?.pdfExported
+        ? current.dirty || !current.projectSignature
+          ? t("PDF descargado · proyecto sin guardar")
+          : t("PDF descargado · proyecto guardado en archivo")
+        : current?.dirty || !current?.projectSignature
+          ? t("Sesión recuperable · proyecto sin guardar")
+          : t("Sesión recuperable · proyecto guardado en archivo"),
+      { announce: true },
+    );
+    saveFailureNotified = false;
     return true;
   } catch {
-    $("#save-state").textContent = t(
-      "No se pudo guardar la sesión · descarga el proyecto",
-    );
+    setSaveState(t("No se pudo guardar la sesión · descarga el proyecto"), {
+      error: true,
+      announce: true,
+    });
+    if (!saveFailureNotified) {
+      saveFailureNotified = true;
+      toast(t("No se pudo guardar la sesión · descarga el proyecto"), "error");
+    }
     return false;
   }
 }
@@ -120,24 +149,43 @@ function changed({ preserveTranspose = false } = {}) {
   if (!preserveTranspose) transposeHistory.delete(song().id);
   song().pdfExported = false;
   song().dirty = projectSignature(song()) !== song().projectSignature;
-  $("#save-state").textContent = t("Guardando…");
+  setSaveState(t("Guardando…"), { announce: true });
   clearTimeout(saveTimer);
   saveTimer = setTimeout(persist, 350);
   renderTabs();
 }
-function toast(message) {
-  $("#toast").textContent = message;
-  $("#toast").classList.add("visible");
-  setTimeout(() => $("#toast").classList.remove("visible"), 6500);
+/** Success, warning and error messages replace each other in the same slot. */
+function toast(message, variant = "success") {
+  const element = $("#toast");
+  element.textContent = message;
+  element.classList.remove("toast-success", "toast-warning", "toast-error");
+  element.classList.add(`toast-${variant}`);
+  element.setAttribute("role", variant === "error" ? "alert" : "status");
+  element.classList.add("visible");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(
+    () => element.classList.remove("visible"),
+    variant === "error" ? 9000 : 6500,
+  );
+}
+function scrollToOption(element, options) {
+  element?.scrollIntoView({
+    ...options,
+    behavior: reducedMotion.matches ? "auto" : "smooth",
+  });
 }
 $("#app").innerHTML = t(shell.replace(/\s+/g, " "));
 $("#intro-content").innerHTML = introHtml(getLocale());
+$("#toast").addEventListener("click", () => {
+  clearTimeout(toastTimer);
+  $("#toast").classList.remove("visible");
+});
 function renderTabs() {
   $("#tabs").innerHTML =
     songs
       .map(
         (s) =>
-          t`<div class="tab ${s.id === active ? "active" : ""}"><button class="tab-select" data-id="${s.id}"><span class="tab-icon">♫</span><span>${esc(s.title || t("Nueva canción"))}</span>${s.dirty ? t('<i title="Proyecto sin guardar"></i>') : ""}</button><button class="tab-close" data-close="${s.id}" aria-label="Cerrar ${esc(s.title)}">×</button></div>`,
+          t`<div class="tab ${s.id === active ? "active" : ""}"><button class="tab-select" data-id="${s.id}" ${s.id === active ? 'aria-current="page"' : ""}><span class="tab-icon">♫</span><span>${esc(s.title || t("Nueva canción"))}</span>${s.dirty ? t('<i title="Proyecto sin guardar"></i>') : ""}</button><button class="tab-close" data-close="${s.id}" aria-label="Cerrar ${esc(s.title)}">×</button></div>`,
       )
       .join("") +
     (songs.length
@@ -627,7 +675,7 @@ $("#issue-count").onclick = () => {
     return;
   }
   const issue = $(".unresolved-chord");
-  issue?.scrollIntoView({ block: "center", behavior: "smooth" });
+  scrollToOption(issue, { block: "center" });
   if (issue) openIssue(issue);
 };
 $("#issue-close").onclick = () => ($("#issue-editor").hidden = true);
@@ -680,6 +728,7 @@ $("#source").oninput = (e) => {
       t(
         "El texto es demasiado largo. Importa hasta 50.000 caracteres por canción.",
       ),
+      "warning",
     );
     return;
   }
@@ -996,6 +1045,11 @@ $("#workspace-backup").onclick = () => {
   );
   $("#export-menu").hidden = true;
 };
+$("#print-document").onclick = () => {
+  $("#export-menu").hidden = true;
+  // The print stylesheet paints only the A4 pages, whatever view is open.
+  window.print();
+};
 function saveProject(target = song()) {
   if (!target) return false;
   try {
@@ -1018,6 +1072,7 @@ function saveProject(target = song()) {
       t(
         "No se pudo guardar el proyecto. Copia la letra del editor o descarga TXT. ",
       ) + error.message,
+      "error",
     );
     return false;
   }
@@ -1050,6 +1105,7 @@ document.querySelectorAll("[data-export]").forEach(
         toast(
           t("No se pudo exportar. Copia la letra del editor o descarga TXT. ") +
             e.message,
+          "error",
         );
       }
     }),
@@ -1106,7 +1162,7 @@ $("#fit").onclick = async () => {
           ),
     );
   } catch (error) {
-    toast(error.message);
+    toast(error.message, "error");
   } finally {
     $("#fit").disabled = false;
   }
@@ -1122,10 +1178,8 @@ $("#confirm-close").onclick = () => {
   removeSong(closing);
   $("#close-dialog").close();
 };
-let tooltip = $("#chord-tooltip");
-document.addEventListener("pointerover", (e) => {
-  const target = e.target.closest("[data-chord]");
-  if (!target) return;
+const tooltip = $("#chord-tooltip");
+function showChordTooltip(target) {
   tooltip.innerHTML = `<strong>${esc(target.dataset.chord)}</strong>${diagram(target.dataset.chord, 0, (song().chordShapes?.[target.dataset.chord] || song().chordShapes?.[target.dataset.chord.replace(/\*$/, "")])?.frets)}`;
   tooltip.hidden = false;
   const r = target.getBoundingClientRect();
@@ -1133,11 +1187,42 @@ document.addEventListener("pointerover", (e) => {
     Math.max(8, Math.min(innerWidth - 180, r.left + r.width / 2 - 80)) + "px";
   tooltip.style.top =
     Math.max(8, Math.min(innerHeight - 230, r.bottom + 9)) + "px";
+}
+function hideChordTooltip() {
+  tooltip.hidden = true;
+}
+// The same diagram tooltip answers to pointer hover and to keyboard focus, so
+// chord positions are reachable without a mouse.
+document.addEventListener("pointerover", (event) => {
+  const target = event.target.closest("[data-chord]");
+  if (target) showChordTooltip(target);
 });
-document.addEventListener("pointerout", (e) => {
-  if (e.target.closest("[data-chord]")) tooltip.hidden = true;
+document.addEventListener("pointerout", (event) => {
+  if (event.target.closest("[data-chord]")) hideChordTooltip();
+});
+document.addEventListener("focusin", (event) => {
+  const target = event.target.closest("[data-chord]");
+  if (target) showChordTooltip(target);
+});
+document.addEventListener("focusout", (event) => {
+  if (event.target.closest("[data-chord]")) hideChordTooltip();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") hideChordTooltip();
 });
 const languagePicker = setupLanguagePicker({ persist, toast });
+// iOS keeps the layout viewport under the on-screen keyboard: mirror the
+// visual viewport height so the editor column stays usable.
+function syncVisualViewport() {
+  const height = window.visualViewport?.height ?? window.innerHeight;
+  document.documentElement.style.setProperty(
+    "--visual-viewport-height",
+    `${Math.round(height)}px`,
+  );
+}
+window.visualViewport?.addEventListener("resize", syncVisualViewport);
+window.visualViewport?.addEventListener("scroll", syncVisualViewport);
+syncVisualViewport();
 window.addEventListener("resize", () => {
   if (editing && window.matchMedia("(max-width: 760px)").matches) {
     editing = false;

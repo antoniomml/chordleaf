@@ -206,7 +206,12 @@ export function setupChordsPanel({
     $("#chosen-detail").textContent = detail;
     updateTargets();
     drawChosen();
-    $("#use-chord").scrollIntoView({ block: "nearest", behavior: "smooth" });
+    $("#use-chord").scrollIntoView({
+      block: "nearest",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+    });
   }
   function drawChosen() {
     $("#chosen-diagram").innerHTML = diagram(

@@ -137,6 +137,10 @@ export default {
   "Listo para imprimir": "Ready to print",
   "Documento editable": "Editable document",
   "Texto · TXT": "Text · TXT",
+  Imprimir: "Print",
+  "Hoja A4 sin barras de herramientas": "A4 sheet without toolbars",
+  "Título de la canción": "Song title",
+  "Artista de la canción": "Song artist",
   "Letra y acordes": "Lyrics and chords",
   Configuración: "Settings",
   Letra: "Lyrics",
@@ -412,6 +416,8 @@ export default {
   "Diccionario de acordes. Flechas para mover; Suprimir para quitar.":
     "Chord dictionary. Arrow keys to move; Delete to remove.",
   "Distribuir acordes: tamaño y columnas": "Arrange chords: size and columns",
+  "Mover diccionario": "Move dictionary",
+  Mover: "Move",
   "Tamaño y columnas": "Size and columns",
   "Quitar diccionario": "Remove dictionary",
   "Cambiar ancho del diccionario; flechas para ajustar":

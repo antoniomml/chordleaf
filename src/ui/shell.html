@@ -1,6 +1,6 @@
 <header class="topbar">
   <h1 class="app-title">
-    <a class="brand" href="#" aria-label="Chordleaf"
+    <a class="brand" href="#"
       ><img src="/logo.svg" alt="" />chordleaf<span
         >ESTUDIO DE CANCIONES</span
       ></a
@@ -37,7 +37,7 @@
     </div>
     <span class="local-badge"><i></i> Tu música se queda contigo</span
     ><button id="new" class="primary" aria-label="Nueva canción">
-      <span aria-hidden="true">＋</span
+      <span class="new-plus" aria-hidden="true"></span
       ><span class="new-label">Nueva canción</span>
     </button>
     <div class="export-wrap">
@@ -64,20 +64,27 @@
         ><button data-export="txt">
           Texto · TXT <small>Letra y acordes</small>
         </button>
+        <button id="print-document">
+          Imprimir <small>Hoja A4 sin barras de herramientas</small>
+        </button>
       </div>
     </div>
   </div>
 </header>
 <div id="tabs-wrap" class="tabs-wrap">
   <nav id="tabs" class="tabs" aria-label="Canciones abiertas"></nav>
-  <button id="mobile-tab-plus" aria-label="Nueva canción">＋</button>
+  <button id="mobile-tab-plus" aria-label="Nueva canción">
+    <span aria-hidden="true">＋</span>
+  </button>
 </div>
 <section id="empty-state" role="main" hidden>
   <img src="/logo.svg" alt="" />
   <p class="eyebrow">TU MÚSICA, EN PAPEL</p>
   <h1>No hay canciones abiertas.</h1>
   <p>Crea una canción en blanco o importa los acordes que ya tienes.</p>
-  <button id="empty-new" class="primary">＋ Nueva canción</button>
+  <button id="empty-new" class="primary">
+    <span aria-hidden="true">＋</span> Nueva canción
+  </button>
   <div id="intro-content"></div>
 </section>
 <main>
@@ -437,8 +444,14 @@
         </div>
         <div class="editor-foot">
           <span class="tiny-dot"></span
-          ><span id="save-state" role="status">Guardado en este navegador</span
-          ><span id="line-count"></span>
+          ><span id="save-state">Guardado en este navegador</span
+          ><span id="line-count"></span
+          ><span
+            id="save-announcer"
+            class="visually-hidden"
+            role="status"
+            aria-live="polite"
+          ></span>
         </div>
       </div>
     </div>
@@ -638,7 +651,7 @@
 <dialog id="editor-dialog" aria-labelledby="expanded-title">
   <header class="expanded-header">
     <h2 id="expanded-title">Letra y acordes</h2>
-    <button id="collapse-editor" aria-label="Cerrar editor ampliado">
+    <button id="collapse-editor" aria-label="Listo ↙ · Cerrar editor ampliado">
       Listo ↙
     </button>
   </header>

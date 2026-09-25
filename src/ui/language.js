@@ -8,10 +8,12 @@ export function setupLanguagePicker({ persist, toast }) {
   const state = { switching: false };
 
   document.documentElement.lang = getLocale();
+  // Keep the running document title in sync with the SEO titles emitted by
+  // build/metadata.js for the static entries.
   document.title =
     getLocale() === "en"
-      ? "Chordleaf · Your music, on paper"
-      : "Chordleaf · Tu música, en papel";
+      ? "Chordleaf — Lyrics & Guitar Chords Editor | Free PDF Sheets"
+      : "Chordleaf — Editor de letras y acordes | Hojas PDF gratis";
 
   function close({ focus = false } = {}) {
     menu.hidden = true;
@@ -43,7 +45,7 @@ export function setupLanguagePicker({ persist, toast }) {
         location.assign(`/${option.dataset.language}/`);
       } catch {
         close();
-        toast(t("No se pudo guardar · exporta una copia"));
+        toast(t("No se pudo guardar · exporta una copia"), "error");
       }
     };
   }
