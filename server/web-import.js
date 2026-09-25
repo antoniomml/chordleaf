@@ -145,7 +145,8 @@ export async function webImportMiddleware(req, res, next) {
       /[\r\n\t]/g,
       " ",
     );
-    console.error(`[web-import] ${target.slice(0, 500)}`, error);
+    // Keep the literal first so a crafted URL cannot act as a format string.
+    console.error("[web-import]", target.slice(0, 500), error);
     res.statusCode = 422;
     res.end(JSON.stringify({ error: publicImportError(error) }));
   }
