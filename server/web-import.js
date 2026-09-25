@@ -1,8 +1,31 @@
 import { securityHeaders } from "./security.js";
 import { LACUERDA_HOSTS, songUrl } from "../src/web-sources.js";
 const MAX_BYTES = 3 * 1024 * 1024;
+const GENERIC_ERROR = "No se pudo descargar la canción.";
+const TIMEOUT_ERROR = "La web ha tardado demasiado. Vuelve a intentarlo.";
+/** Fixed copy that the client can translate; only the server logs details. */
+class ImportError extends Error {
+  constructor(message, options) {
+    super(message, options);
+    this.name = "ImportError";
+    this.publicMessage = message;
+  }
+}
+export function publicImportError(error) {
+  if (error?.name === "TimeoutError" || error?.name === "AbortError")
+    return TIMEOUT_ERROR;
+  if (typeof error?.publicMessage === "string") return error.publicMessage;
+  return GENERIC_ERROR;
+}
 export async function fetchSongPage(value, fetcher = fetch) {
-  let url = songUrl(value);
+  let url;
+  try {
+    url = songUrl(value);
+  } catch {
+    throw new ImportError(
+      "Usa un enlace HTTPS de Cifra Club, LaCuerda o Ultimate Guitar.",
+    );
+  }
   const signal = AbortSignal.timeout(18000);
   for (let redirects = 0; redirects <= 4; redirects++) {
     const response = await fetcher(url.href, {
@@ -16,13 +39,21 @@ export async function fetchSongPage(value, fetcher = fetch) {
     if ([301, 302, 303, 307, 308].includes(response.status)) {
       await response.body?.cancel();
       if (!response.headers.get("location"))
-        throw new Error("La web devolvió una redirección incompleta.");
-      url = songUrl(new URL(response.headers.get("location"), url).href);
+        throw new ImportError("La web devolvió una redirección incompleta.");
+      let next;
+      try {
+        next = songUrl(new URL(response.headers.get("location"), url).href);
+      } catch {
+        throw new ImportError(
+          "Usa un enlace HTTPS de Cifra Club, LaCuerda o Ultimate Guitar.",
+        );
+      }
+      url = next;
       continue;
     }
     if (!response.ok) {
       await response.body?.cancel();
-      throw new Error(
+      throw new ImportError(
         `La web no permite descargar esta canción (HTTP ${response.status}). Prueba otro enlace o importa un archivo.`,
       );
     }
@@ -32,7 +63,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
       !(LACUERDA_HOSTS.has(url.hostname) && contentType.includes("text/plain"))
     ) {
       await response.body?.cancel();
-      throw new Error("El enlace no es una página de acordes.");
+      throw new ImportError("El enlace no es una página de acordes.");
     }
     const reader = response.body.getReader();
     const chunks = [];
@@ -43,7 +74,9 @@ export async function fetchSongPage(value, fetcher = fetch) {
         if (done) break;
         length += value.byteLength;
         if (length > MAX_BYTES)
-          throw new Error("La página es demasiado grande para importarla.");
+          throw new ImportError(
+            "La página es demasiado grande para importarla.",
+          );
         chunks.push(value);
       }
     } finally {
@@ -58,7 +91,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
       contentType: contentType.split(";")[0].trim().toLowerCase(),
     };
   }
-  throw new Error(
+  throw new ImportError(
     "La web redirige demasiadas veces. Copia el enlace final de la canción.",
   );
 }
@@ -105,17 +138,15 @@ export async function webImportMiddleware(req, res, next) {
     const body = JSON.stringify(data);
     // JSON escaping can make a 3 MiB HTML page exceed Vercel's response limit.
     if (Buffer.byteLength(body) > 4 * 1024 * 1024)
-      throw new Error("La página es demasiado grande para importarla.");
+      throw new ImportError("La página es demasiado grande para importarla.");
     res.end(body);
   } catch (error) {
-    res.statusCode = 422;
-    res.end(
-      JSON.stringify({
-        error:
-          error.name === "TimeoutError"
-            ? "La web ha tardado demasiado. Vuelve a intentarlo."
-            : error.message,
-      }),
+    const target = (request.searchParams.get("url") || "").replace(
+      /[\r\n\t]/g,
+      " ",
     );
+    console.error(`[web-import] ${target.slice(0, 500)}`, error);
+    res.statusCode = 422;
+    res.end(JSON.stringify({ error: publicImportError(error) }));
   }
 }
