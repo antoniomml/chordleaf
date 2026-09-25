@@ -10,7 +10,11 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const excluded = new Set(["cifra-comparison.mjs", "compatibility-browser.mjs"]);
 const suites = (await readdir(path.join(root, "tests")))
-  .filter((file) => file.endsWith("-browser.mjs") && !excluded.has(file))
+  .filter(
+    (file) =>
+      (file === "browser.mjs" || file.endsWith("-browser.mjs")) &&
+      !excluded.has(file),
+  )
   .sort();
 
 if (!suites.length) {
