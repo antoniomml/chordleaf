@@ -4,7 +4,7 @@
   <p><strong>Your song. Your chords. Everything in place.</strong></p>
   <p>A workspace for writing lyrics and chords, exploring guitar voicings,<br>and making a song sheet for your next rehearsal.</p>
   <p>
-    <a href="https://github.com/antoniomml/chordleaf/releases/tag/v0.6.4"><img src="https://img.shields.io/badge/version-0.6.4-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.6.4"></a>
+    <a href="https://github.com/antoniomml/chordleaf/releases/tag/v1.0.0"><img src="https://img.shields.io/badge/version-1.0.0-c9e79c?style=flat-square&labelColor=263426" alt="Release 1.0.0"></a>
     <a href="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
   </p>
   <p><a href="https://chordleaf.com/">Open Chordleaf</a> · <a href="#a-small-studio-for-your-songs">Features</a> · <a href="https://github.com/antoniomml/chordleaf/wiki">User wiki</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
