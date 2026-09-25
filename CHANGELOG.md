@@ -1,5 +1,9 @@
 # chordleaf changelog
 
+## 0.6.4 · September 25, 2026
+
+- Keep the reset-to-original symbol visible in muted gray while unavailable, then highlight it when the song is transposed without moving the semitone controls.
+
 ## 0.6.3 · September 25, 2026
 
 - Split the desktop workspace into document settings, lyrics, song chords, key guidance, chord search and chord identification; keep matching navigation icons on phones.

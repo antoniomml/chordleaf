@@ -18,8 +18,20 @@ try {
   await page.locator('.rail [data-desktop-view="edit"]').click();
   await page.locator("#source").fill("[C/G]Uno\n{new_page}\n[Dm7]Dos");
   await page.locator('.rail [data-desktop-view="document"]').click();
+  const reset = page.locator("#undo-transpose");
+  assert.equal(await reset.isVisible(), true);
+  assert.equal(await reset.isDisabled(), true);
+  const disabledColor = await reset.evaluate(
+    (button) => getComputedStyle(button).color,
+  );
   const plusBefore = await page.locator("#transpose-up").boundingBox();
   await page.locator("#transpose-up").click();
+  assert.equal(await reset.isVisible(), true);
+  assert.equal(await reset.isEnabled(), true);
+  assert.notEqual(
+    await reset.evaluate((button) => getComputedStyle(button).color),
+    disabledColor,
+  );
   const plusAfter = await page.locator("#transpose-up").boundingBox();
   assert.equal(plusAfter.x, plusBefore.x);
   assert.equal(plusAfter.y, plusBefore.y);
@@ -51,7 +63,8 @@ try {
   await page.locator("#transpose-down").click();
   assert.equal(await page.locator(".transpose-value").textContent(), "+1");
   await page.locator("#transpose-down").click();
-  assert.equal(await page.locator("#undo-transpose").isDisabled(), true);
+  assert.equal(await reset.isVisible(), true);
+  assert.equal(await reset.isDisabled(), true);
   assert.equal(
     await page.locator("#source").inputValue(),
     "[C/G]Uno\n{new_page}\n[Dm7]Dos",
