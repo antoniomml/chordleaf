@@ -74,6 +74,21 @@ test("blocked, oversized and non-HTML responses fail clearly", async () => {
       fetchSongPage("https://acordes.lacuerda.net/a/b", async () => response),
     );
 });
+test("server-side blocks explain the manual paste fallback", async () => {
+  await assert.rejects(
+    fetchSongPage(
+      "https://www.cifraclub.com/artista/cancion/",
+      async () => new Response("blocked", { status: 403 }),
+    ),
+    (error) => {
+      assert.equal(
+        publicImportError(error),
+        "La web bloquea las descargas desde servidores (HTTP 403). Copia la letra y pégala en el editor.",
+      );
+      return true;
+    },
+  );
+});
 test("a public HTML page is returned with its final URL", async () => {
   const data = await fetchSongPage(
     "https://acordes.lacuerda.net/a/b",
