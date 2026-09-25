@@ -4,7 +4,7 @@
   <p><strong>Your song. Your chords. Everything in place.</strong></p>
   <p>A workspace for writing lyrics and chords, exploring guitar voicings,<br>and making a song sheet for your next rehearsal.</p>
   <p>
-    <a href="https://github.com/antoniomml/chordleaf/releases/tag/v0.6.1"><img src="https://img.shields.io/badge/version-0.6.1-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.6.1"></a>
+    <a href="https://github.com/antoniomml/chordleaf/releases/tag/v0.6.2"><img src="https://img.shields.io/badge/version-0.6.2-c9e79c?style=flat-square&labelColor=263426" alt="Release 0.6.2"></a>
     <a href="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
   </p>
   <p><a href="https://chordleaf.com/">Open Chordleaf</a> · <a href="#a-small-studio-for-your-songs">Features</a> · <a href="https://github.com/antoniomml/chordleaf/wiki">User wiki</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -69,7 +69,7 @@ Both interface and document fonts are served by the app itself. There are no thi
 
 ## A release with room to grow
 
-The current workspace gives phones separate Document, Edit, Music and Preview views. The lyrics editor fills the available space, songs remember their last view, and the sheet still supports pinch zoom. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md) and [export QA notes](docs/export-qa.es.md).
+The current workspace gives phones separate Document, Edit, Harmony and Preview views. Harmony has one row for key analysis, song chords, chord search and chord identification. The lyrics editor fills the available space, songs remember their last view, and the sheet still supports pinch zoom. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md) and [export QA notes](docs/export-qa.es.md).
 
 ## Take part
 

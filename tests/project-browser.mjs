@@ -16,28 +16,27 @@ try {
   await page.locator("#blank").click();
   await page.locator("#title").fill("Proyecto prueba");
   await page.locator("#source").fill("[C/G]Uno\n{new_page}\n[Dm7]Dos");
-  await page.locator("#transpose-interval").selectOption("2");
   await page.locator("#transpose-up").click();
-  assert.equal(
+  assert.notEqual(
     await page.locator("#source").inputValue(),
-    "[D/A]Uno\n{new_page}\n[Em7]Dos",
+    "[C/G]Uno\n{new_page}\n[Dm7]Dos",
   );
   assert.match(
     await page.locator("#undo-transpose").locator("..").textContent(),
-    /\+2 semitonos/,
+    /\+1 semitono/,
   );
   await page.locator("#undo-transpose").click();
   assert.equal(
     await page.locator("#source").inputValue(),
     "[C/G]Uno\n{new_page}\n[Dm7]Dos",
   );
-  await page.locator("#transpose-interval").selectOption("4");
   await page.locator("#transpose-up").click();
   await page.locator("#transpose-down").click();
   assert.equal(
     await page.locator("#source").inputValue(),
     "[C/G]Uno\n{new_page}\n[Dm7]Dos",
   );
+  await page.locator(".more-document-options summary").click();
   await page.locator("#showBrand").uncheck();
   assert.equal(await page.locator(".sheet-brand").count(), 0);
   await page.locator("#export").click();

@@ -135,9 +135,9 @@
       class="mobile-song-tab"
       data-mobile-view="music"
       aria-controls="mobile-music-modes"
-      title="Música"
+      title="Armonía"
     >
-      <span aria-hidden="true">♬</span><span>Música</span>
+      <span aria-hidden="true">♬</span><span>Armonía</span>
     </button>
     <button
       class="mobile-song-tab mobile-preview-tab"
@@ -168,17 +168,37 @@
       <div
         id="mobile-music-modes"
         role="tablist"
-        aria-label="Herramientas musicales"
+        aria-label="Herramientas de armonía"
       >
-        <button role="tab" data-music-section="key" aria-controls="settings">
+        <button
+          role="tab"
+          data-harmony-view="key"
+          data-music-section="key"
+          aria-controls="settings"
+        >
           Tonalidad
         </button>
         <button
           role="tab"
+          data-harmony-view="song"
           data-music-section="chords"
           aria-controls="chords-panel"
         >
           Acordes
+        </button>
+        <button
+          role="tab"
+          data-harmony-view="search"
+          aria-controls="search-chords"
+        >
+          Buscar acordes
+        </button>
+        <button
+          role="tab"
+          data-harmony-view="identify"
+          aria-controls="identify-chords"
+        >
+          Identificar acorde
         </button>
       </div>
       <div id="settings"></div>
@@ -308,7 +328,14 @@
   <h1 id="new-heading">Una nueva canción.</h1>
   <p id="new-description">De una idea a tu próxima hoja de acordes.</p>
   <section id="new-menu">
-    <button id="import" class="choice">
+    <button id="open-project" class="choice">
+      <span class="choice-icon" aria-hidden="true">▣</span>
+      <div>
+        <strong>Abrir proyecto editable</strong
+        ><small>Retomar una canción .chordleaf.json</small>
+      </div>
+      <b>→</b></button
+    ><button id="import" class="choice">
       <span class="choice-icon" aria-hidden="true"
         ><svg
           viewBox="0 0 24 24"
@@ -325,13 +352,6 @@
       <div>
         <strong>Importar texto o archivo</strong
         ><small>Pega texto o abre TXT, PDF o Word (.docx)</small>
-      </div>
-      <b>→</b></button
-    ><button id="open-project" class="choice">
-      <span class="choice-icon" aria-hidden="true">▣</span>
-      <div>
-        <strong>Abrir proyecto editable</strong
-        ><small>Retomar una canción .chordleaf.json</small>
       </div>
       <b>→</b></button
     ><button id="web" class="choice">

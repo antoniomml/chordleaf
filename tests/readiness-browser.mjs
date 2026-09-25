@@ -57,9 +57,7 @@ try {
   await page.locator('[data-section="chords"]').click();
   await page.getByRole("tab", { name: "Identify", exact: true }).click();
   assert.equal(
-    await page
-      .getByRole("heading", { name: "What chord are you playing?" })
-      .count(),
+    await page.getByRole("heading", { name: "Draw a chord" }).count(),
     1,
   );
   await page.locator('[data-string="0"][data-fret="3"]').click();

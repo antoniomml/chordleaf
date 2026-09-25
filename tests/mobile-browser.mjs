@@ -17,6 +17,12 @@ try {
   await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
+  assert.equal(
+    await page
+      .locator("#tabs")
+      .evaluate((tabs) => tabs.scrollHeight <= tabs.clientHeight),
+    true,
+  );
   await page.locator("#title").fill("Canción móvil");
   assert.equal(
     await page.locator("main").getAttribute("data-mobile-view"),
@@ -105,8 +111,28 @@ try {
 
   await page.locator('[data-mobile-view="music"]').click();
   await page.locator('[data-music-section="key"]').click();
+  assert.equal(await page.locator("[data-harmony-view]").count(), 4);
+  assert.equal(await page.locator(".chord-modes").isVisible(), false);
+  const harmonyTabWidths = await page
+    .locator("[data-harmony-view]")
+    .evaluateAll((buttons) =>
+      buttons.map((button) => button.getBoundingClientRect().width),
+    );
+  assert.ok(Math.max(...harmonyTabWidths) - Math.min(...harmonyTabWidths) < 1);
+  assert.equal(
+    await page
+      .locator("#mobile-tab-plus")
+      .evaluate((button) => getComputedStyle(button).borderLeftWidth),
+    "0px",
+  );
   assert.equal(await preview.isVisible(), false);
   assert.equal(await page.locator("#settings").isVisible(), true);
+  await page.locator('[data-harmony-view="search"]').click();
+  assert.equal(await page.locator("#catalog-search").isVisible(), true);
+  await page.locator('[data-harmony-view="identify"]').click();
+  assert.equal(await page.locator("#fretboard").isVisible(), true);
+  assert.ok((await page.locator(".identify-readings").boundingBox()).y < 784);
+  await page.locator('[data-harmony-view="key"]').click();
   await page.locator(".degree[data-chord]").first().click();
   assert.equal(
     await page.locator("main").getAttribute("data-mobile-view"),
@@ -159,6 +185,13 @@ try {
 
   await page.setViewportSize({ width: 320, height: 640 });
   await page.locator('[data-mobile-view="music"]').click();
+  await page.locator('[data-harmony-view="identify"]').click();
+  const narrowBoard = await page.locator("#fretboard").boundingBox();
+  assert.ok(narrowBoard.x + narrowBoard.width <= 320);
+  assert.equal(
+    await page.locator('[data-string="0"][data-fret="5"]').isVisible(),
+    false,
+  );
   await page.locator('[data-music-section="chords"]').click();
   await page.locator(".chord-card .edit-shape").first().click();
   const dialogBounds = await page.locator("#shape-dialog").boundingBox();
