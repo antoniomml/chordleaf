@@ -23,7 +23,13 @@ import {
 } from "./music.js";
 import { layout, PAGE } from "./layout.js";
 import { importWebSong } from "./web-import.js";
-import { exportSong, importFile, importText, download } from "./files.js";
+import {
+  exportSong,
+  importFile,
+  importText,
+  download,
+  downloadName,
+} from "./files.js";
 import {
   projectSignature,
   serializeProject,
@@ -994,7 +1000,7 @@ function saveProject(target = song()) {
   if (!target) return false;
   try {
     const signature = projectSignature(target);
-    const name = (target.title || t("Canción")).replace(/[\\/:*?"<>|]/g, "-");
+    const name = downloadName(target.title, t("Canción"));
     download(
       new Blob([serializeProject(target)], { type: "application/json" }),
       `${name}.chordleaf.json`,

@@ -45,11 +45,20 @@ Before enabling it:
 
 To stop imports quickly, set the variable to `false` and redeploy. A browser-origin check is defense in depth, not a distributed rate limiter; scripts can forge request headers. The code deliberately does not pretend that an in-memory counter protects independently scaled functions.
 
-## 5. Check the preview before launch
+## 5. Harden headers and the domain
+
+`vercel.json` applies `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin` to every response, and a seven-day cache (`max-age=604800`) to `/fonts/*`, `/icons/*`, `/logo.svg` and `/social-preview.png`. Hashed `/assets/*` stay immutable, while HTML and API responses stay uncached. `server/security.js` and `server/start.js` mirror the same policy for local preview builds. This application needs no cross-origin reads or writes, so anything broader is unnecessary.
+
+Two header operations live outside the repository and must be reviewed in the Vercel dashboard or your DNS provider:
+
+1. **Remove the blanket CORS header.** Vercel may attach `access-control-allow-origin: *` to responses from a project-level setting that is not stored in `vercel.json`. Check it with `curl -I https://chordleaf.com/` after a deployment and delete the setting in **Project → Settings → Headers** (or replace it with an explicit, minimal policy). Same-origin requests keep working, and wildcard CORS only widens what other origins can read.
+2. **Treat HSTS `preload` as a separate operation.** Production sends `Strict-Transport-Security` with a long lifetime today. Adding `includeSubDomains; preload` and submitting the domain to <https://hstspreload.org/> commits every current and future subdomain to HTTPS-only, and removal from browser preload lists can take months. Enable it only when every subdomain is under your control and serves valid HTTPS; keep the header without `preload` until then.
+
+## 6. Check the preview before launch
 
 - Open the editor at desktop and phone widths in English and Spanish. Switch language after an edit and confirm the song stays intact.
 - Import an invented TXT, a selectable PDF and a DOCX. Export each format, reload, and check the saved song.
-- Confirm security headers on `/`, hashed asset caching, and JSON errors from `/api/import-web` (405 for POST, 422 for invalid URLs after activation).
+- Confirm `Cross-Origin-Opener-Policy`, `Cross-Origin-Resource-Policy`, the long cache for fonts, logo, icons and the social preview, hashed asset caching, and JSON errors from `/api/import-web` (405 for POST, 422 for invalid URLs after activation).
 - Confirm that `/src/app.js` and unknown paths return 404, rather than publishing source files or returning HTML for the API.
 - Run Lighthouse against the deployed preview; verify canonical/robots/sitemap on the final domain and add an absolute social-preview image URL.
 - Check Safari/iPhone and Firefox as well as Chromium. Test keyboard navigation, 200% zoom and a screen reader.

@@ -1,17 +1,44 @@
 import { chords, diagram, fingering } from "./music.js";
 import { PAGE } from "./layout.js";
+import { MAX_STICKER_CHORDS, MAX_SONG_DIAGRAMS } from "./song-state.js";
+const chordCache = new WeakMap();
+function songChords(song) {
+  const cached = chordCache.get(song);
+  if (cached && cached.text === song.text) return cached.names;
+  const names = chords(song.text);
+  chordCache.set(song, { text: song.text, names });
+  return names;
+}
+function resolvedChords(song, sticker) {
+  const selected =
+    sticker.chords === "all" ? songChords(song) : sticker.chords || [];
+  return selected.filter(
+    (name) => song.chordShapes?.[name]?.frets || fingering(name),
+  );
+}
 export function unresolvedChords(song, names) {
-  const selected = names === "all" ? chords(song.text) : names;
+  const selected = names === "all" ? songChords(song) : names;
   return selected.filter(
     (name) => !song.chordShapes?.[name]?.frets && !fingering(name),
   );
 }
 export function stickerChords(song, sticker) {
-  const selected =
-    sticker.chords === "all" ? chords(song.text) : sticker.chords;
-  return selected.filter(
-    (name) => song.chordShapes?.[name]?.frets || fingering(name),
-  );
+  const names = resolvedChords(song, sticker);
+  const stickers = song.chordStickers || [];
+  const index =
+    sticker && sticker.id
+      ? stickers.findIndex((entry) => entry.id === sticker.id)
+      : stickers.indexOf(sticker);
+  if (index < 0) return names.slice(0, MAX_STICKER_CHORDS);
+  // Share a per-song budget in sticker order so a document cannot turn into
+  // thousands of canvas renders during preview or export.
+  let budget = MAX_SONG_DIAGRAMS;
+  for (let i = 0; i < index; i++)
+    budget -= Math.min(
+      resolvedChords(song, stickers[i]).length,
+      MAX_STICKER_CHORDS,
+    );
+  return names.slice(0, Math.max(0, Math.min(MAX_STICKER_CHORDS, budget)));
 }
 export const MIN_STICKER_WIDTH = 28;
 export const MIN_STICKER_HEIGHT = 28;

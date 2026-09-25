@@ -3,7 +3,7 @@ import { validateDocxArchive } from "./docx-limits.js";
 
 self.onmessage = async ({ data }) => {
   try {
-    validateDocxArchive(data);
+    await validateDocxArchive(data);
     const result = await mammoth.convertToHtml(
       { arrayBuffer: data },
       {

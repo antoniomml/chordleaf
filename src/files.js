@@ -1,4 +1,4 @@
-import { countPdfContent } from "./import-limits.js";
+import { readPdfContent } from "./import-limits.js";
 import { decodeDocx } from "./docx-import.js";
 import { t } from "./i18n.js";
 import {
@@ -12,6 +12,22 @@ import { layout, PAGE } from "./layout.js";
 import { chordRE, unresolvedChordRE } from "./music.js";
 import { parsePdfPages, chordRow } from "./pdf-import.js";
 import { registerPdfFonts } from "./fonts.js";
+/** Run async work in order with a bounded number of concurrent tasks. */
+export async function mapWithConcurrency(items, limit, mapper) {
+  const results = new Array(items.length);
+  let next = 0;
+  const workers = Array.from(
+    { length: Math.min(Math.max(1, limit), items.length) },
+    async () => {
+      while (next < items.length) {
+        const index = next++;
+        results[index] = await mapper(items[index], index);
+      }
+    },
+  );
+  await Promise.all(workers);
+  return results;
+}
 export function download(blob, name) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -22,8 +38,17 @@ export function download(blob, name) {
 export function txt(song) {
   return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordleaf: ${JSON.stringify({ chordShapes: song.chordShapes || {}, chordStickers: song.chordStickers || [], linked: song.linked === true, showBrand: song.showBrand !== false })}}\n\n${song.text}`;
 }
+/** Strip path separators and control characters from user-provided names. */
+export function downloadName(title, fallback) {
+  return (
+    String(title ?? "")
+      .replace(/[\\/:*?"<>|]/g, "-")
+      .replace(/[\u0000-\u001f\u007f]/g, "")
+      .trim() || fallback
+  );
+}
 export async function exportSong(song, type) {
-  const name = (song.title || t("Canción")).replace(/[\\/:*?"<>|]/g, "-");
+  const name = downloadName(song.title, t("Canción"));
   if (type === "txt") {
     download(
       new Blob([txt(song)], { type: "text/plain;charset=utf-8" }),
@@ -32,13 +57,15 @@ export async function exportSong(song, type) {
     return;
   }
   const l = layout(song);
-  const stickers = await Promise.all(
-    (song.chordStickers || []).map(async (sticker) => ({
+  const stickers = await mapWithConcurrency(
+    song.chordStickers || [],
+    2,
+    async (sticker) => ({
       ...sticker,
       ...stickerGeometry(song, sticker),
       page: Math.min(sticker.page, l.pages.length - 1),
       png: await stickerPng(song, sticker),
-    })),
+    }),
   );
   for (const sticker of stickers) {
     const headerBottom = l.margin + l.headerHeight;
@@ -586,10 +613,22 @@ export async function importFile(file, { signal } = {}) {
       );
     for (let n = 1; n <= pdf.numPages; n++) {
       const page = await pdf.getPage(n),
-        viewport = page.getViewport({ scale: 1 }),
-        content = await page.getTextContent();
+        viewport = page.getViewport({ scale: 1 });
+      let content;
+      try {
+        content = await readPdfContent(
+          page.streamTextContent({ includeMarkedContent: false }),
+          budget,
+          { signal },
+        );
+      } finally {
+        try {
+          await page.cleanup();
+        } catch {
+          /* Page cleanup is best effort. */
+        }
+      }
       signal?.throwIfAborted();
-      countPdfContent(content, budget);
       const measure = document.createElement("canvas").getContext("2d");
       pages.push({
         width: viewport.width,

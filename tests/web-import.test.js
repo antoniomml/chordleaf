@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { LACUERDA_HOSTS, songUrl } from "../src/web-sources.js";
-import { fetchSongPage } from "../server/web-import.js";
+import { fetchSongPage, publicImportError } from "../server/web-import.js";
 import { stripLaCuerdaFretGrids } from "../src/web-import.js";
 test("only supported public HTTPS hosts are accepted", () => {
   for (const url of [
@@ -95,6 +95,17 @@ test("LaCuerda plain-text chord sheets are accepted", async () => {
   );
   assert.equal(data.contentType, "text/plain");
   assert.match(data.html, /Luz del día/);
+});
+test("client-visible import errors keep internal details on the server", () => {
+  const timeout = new Error("dial tcp 10.0.0.7:443: connect: timeout");
+  timeout.name = "TimeoutError";
+  assert.equal(
+    publicImportError(timeout),
+    "La web ha tardado demasiado. Vuelve a intentarlo.",
+  );
+  const generic = publicImportError(new Error("database password leaked"));
+  assert.equal(generic, "No se pudo descargar la canción.");
+  assert.doesNotMatch(generic, /password|database/);
 });
 test("plain text stays rejected for providers that do not expose chord TXT", async () => {
   await assert.rejects(

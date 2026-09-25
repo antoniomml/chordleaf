@@ -3,6 +3,10 @@ import { chordRE } from "./music.js";
 export const MAX_TEXT_LENGTH = 50000;
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
 export const MAX_PDF_PAGES = 50;
+/** Diagrams allowed inside a single chord sticker. */
+export const MAX_STICKER_CHORDS = 60;
+/** Diagrams allowed across every sticker of one song. */
+export const MAX_SONG_DIAGRAMS = 240;
 const validChord = (value) =>
   typeof value === "string" && value.length <= 80 && chordRE.test(value);
 const number = (value, fallback, min, max) =>
@@ -67,7 +71,8 @@ export function songMetadata(data = {}) {
       page: s.page,
       ...(s.height === undefined ? {} : { height: s.height }),
       ...(s.columns === undefined ? {} : { columns: s.columns }),
-      chords: s.chords === "all" ? "all" : [...s.chords].slice(0, 1000),
+      chords:
+        s.chords === "all" ? "all" : [...s.chords].slice(0, MAX_STICKER_CHORDS),
     }));
   return { chordShapes, chordStickers };
 }
