@@ -807,7 +807,7 @@ const pairPrivacy = {
     kicker: "Privacidad",
     title: "Privacidad — Chordleaf sin cuentas ni seguimiento",
     description:
-      "Chordleaf no usa cuentas ni cookies de seguimiento. Tus canciones se quedan en tu navegador; solo la importación web pasa por el servidor para descargar la página pública.",
+      "Chordleaf no usa cuentas ni cookies de seguimiento. Tus canciones se quedan en tu navegador y solo la importación web pasa por el servidor.",
     h1: "Privacidad: tus canciones se quedan en tu navegador",
     lead: "Chordleaf se diseñó para trabajar sin cuentas y sin seguimiento. El editor y tus canciones viven en tu dispositivo; no hay perfil de usuario que crear ni historial que consultar.",
     imageAlt:
@@ -1637,7 +1637,7 @@ export function contentPageUrl(origin, page) {
 export function contentPageEntries() {
   const entries = [];
   for (const pair of contentPairs)
-    for (const locale of ["es", "en"])
+    for (const locale of ["en", "es"])
       if (pair[locale]) entries.push({ pair, locale, page: pair[locale] });
   return entries;
 }
@@ -1646,8 +1646,8 @@ export { contentPagesCss, contentPairs, chrome };
 
 function pageAlternates(origin, pair) {
   if (!origin) return "";
-  const en = contentPageUrl(origin, pair.en);
-  const es = contentPageUrl(origin, pair.es);
+  const en = contentPageUrl(origin, { ...pair.en, locale: "en" });
+  const es = contentPageUrl(origin, { ...pair.es, locale: "es" });
   return (
     `<link rel="alternate" hreflang="en" href="${en}">` +
     `<link rel="alternate" hreflang="es" href="${es}">` +
@@ -1656,7 +1656,7 @@ function pageAlternates(origin, pair) {
 }
 
 export function buildContentJsonLd(origin, locale, page, pair) {
-  const url = contentPageUrl(origin, page);
+  const url = contentPageUrl(origin, { ...page, locale });
   const webpage = {
     "@type": "WebPage",
     url,

@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildJsonLd, buildSitemap } from "../build/metadata.js";
+import {
+  buildJsonLd,
+  buildSitemap,
+  contentPageEntries,
+  contentPageUrl,
+} from "../build/metadata.js";
 
 const origin = "https://chordleaf.com";
 
-test("sitemap keeps canonical locales with lastmod and hreflang alternates", () => {
+test("sitemap lists the home pair and every content page with alternates", () => {
   const sitemap = buildSitemap(origin, "2026-09-25");
   assert.match(sitemap, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
   assert.ok(
@@ -12,24 +17,37 @@ test("sitemap keeps canonical locales with lastmod and hreflang alternates", () 
     "xhtml namespace for hreflang alternates",
   );
   const entries = sitemap.match(/<url>.*?<\/url>/gs) ?? [];
-  assert.equal(entries.length, 2);
-  assert.deepEqual(
-    entries.map((entry) => entry.match(/<loc>([^<]+)<\/loc>/)?.[1]),
-    [`${origin}/`, `${origin}/es/`],
-    "/ stays canonical English and /es/ is the Spanish route",
-  );
+  const pages = contentPageEntries();
+  assert.equal(entries.length, 2 + pages.length);
+  const mates = new Map([
+    [`${origin}/`, { en: `${origin}/`, es: `${origin}/es/` }],
+    [`${origin}/es/`, { en: `${origin}/`, es: `${origin}/es/` }],
+  ]);
+  for (const { pair, locale, page } of pages) {
+    const urls = {
+      en: contentPageUrl(origin, { ...pair.en, locale: "en" }),
+      es: contentPageUrl(origin, { ...pair.es, locale: "es" }),
+    };
+    const url = contentPageUrl(origin, { ...page, locale });
+    mates.set(url, urls);
+  }
+  const urls = entries.map((entry) => entry.match(/<loc>([^<]+)<\/loc>/)?.[1]);
+  assert.deepEqual(urls, [...mates.keys()], "sitemap URL order");
   for (const entry of entries) {
+    const url = entry.match(/<loc>([^<]+)<\/loc>/)?.[1];
+    const pair = mates.get(url);
+    assert.ok(pair, `pair for ${url}`);
     assert.ok(entry.includes("<lastmod>2026-09-25</lastmod>"));
     for (const [hreflang, href] of [
-      ["en", `${origin}/`],
-      ["es", `${origin}/es/`],
-      ["x-default", `${origin}/`],
+      ["en", pair.en],
+      ["es", pair.es],
+      ["x-default", pair.en],
     ])
       assert.ok(
         entry.includes(
           `<xhtml:link rel="alternate" hreflang="${hreflang}" href="${href}"/>`,
         ),
-        `alternate ${hreflang}`,
+        `alternate ${hreflang} for ${url}`,
       );
   }
 });
