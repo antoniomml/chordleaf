@@ -1,5 +1,16 @@
 # chordleaf changelog
 
+## 1.0.0 · September 25, 2026
+
+- Install Chordleaf as an app and keep editing offline: web app manifest, service worker with a versioned shell cache, cache-first hashed assets and stale-while-revalidate fonts and icons. API responses are never cached.
+- Print the sheet as real A4 paper: the workspace chrome disappears, the point-based layout is scaled to paper and pages never split. New **Print** entry in the Export menu.
+- Export and re-import portable **ChordPro (.cho)** files next to TXT, PDF and Word.
+- Phone and accessibility pass: visible focus and 3:1 control borders, success/warning/error toasts, 44 px touch targets, a move handle for chord diagrams, correct string numbering for screen readers, keyboard chord tooltips, safe-area layout and `visualViewport` keyboard handling.
+- Show the semitone stepper as 0 until the song is transposed, and explain server-side import blocks with the manual paste fallback.
+- Security: DOCX decompression budget before the parser, streamed PDF text budget, per-block and per-song diagram caps, bounded sticker rendering, fixed server error copy, hardened i18n lookups and download names, plus COOP/CORP and long-lived static caching.
+- Search engines: search-intent titles and H1 copy, JSON-LD, complete social tags, sitemap with `lastmod` and locale alternates, all validated in CI.
+- Reliability: dynamic browser-suite harness with Playwright cache and failure artifacts, empty-state resize regression test and a deterministic workspace-lock compatibility test.
+
 ## 0.6.4 · September 25, 2026
 
 - Keep the reset-to-original symbol visible in muted gray while unavailable, then highlight it when the song is transposed without moving the semitone controls.

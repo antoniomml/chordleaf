@@ -14,6 +14,8 @@ try {
   await page.locator("#blank").click();
   await page.locator("#title").fill("Al otro lado");
   await page.locator("#artist").fill("Canción de ejemplo · Chordleaf");
+  // Desktop Document view shows the settings; the lyrics editor lives in Edit.
+  await page.locator('.rail [data-desktop-view="edit"]').click();
   await page
     .locator("#source")
     .fill(
@@ -21,6 +23,8 @@ try {
     );
   await page.locator(".page").waitFor();
   await page.evaluate(() => document.fonts.ready);
+  // Let the debounced save finish so the footer does not read "Saving…".
+  await page.waitForTimeout(600);
   await page.screenshot({ path: "docs/images/workspace.png" });
   await page.locator('[data-section="chords"]').click();
   await page

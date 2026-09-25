@@ -67,9 +67,15 @@ Document settings include a checkbox for the `chordleaf.com` page footer. It is 
 
 Both interface and document fonts are served by the app itself. There are no third-party font requests or analytics scripts. See [privacy and storage](https://github.com/antoniomml/chordleaf/wiki/Privacy-and-storage).
 
-## A release with room to grow
+## Install it, print it
 
-The current workspace gives phones separate Document, Edit, Harmony and Preview views. Harmony has one row for key analysis, song chords, chord search and chord identification. The lyrics editor fills the available space, songs remember their last view, and the sheet still supports pinch zoom. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md) and [export QA notes](docs/export-qa.es.md).
+Chordleaf is an installable app. Open it in Chromium, Firefox or Safari and choose **Install**, or add it to your home screen on a phone. After the first visit a service worker keeps the editor and the sheet available offline; only web imports need the server. **Export → Print** paints just the A4 sheet, without the workspace chrome.
+
+**Export → ChordPro (.cho)** writes a portable plain-text chord sheet with `{title}`, `{artist}` and `{capo}` directives, understood by apps such as SongBook, OnSong and the ChordPro toolchain, and it can be imported back here.
+
+## A workspace with room to grow
+
+The workspace gives phones separate Document, Edit, Harmony and Preview views. Harmony has one row for key analysis, song chords, chord search and chord identification. The lyrics editor fills the available space, songs remember their last view, and the sheet still supports pinch zoom. Scanned PDFs require external OCR, complex layouts may need corrections after import, and Word rendering depends on the reader and available fonts. Audio transcription is not available yet. See the [changelog](CHANGELOG.md) and [export QA notes](docs/export-qa.es.md).
 
 ## Take part
 
