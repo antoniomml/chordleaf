@@ -827,6 +827,7 @@ const pairPrivacy = {
         p: [
           "Chordleaf no usa cookies de publicidad ni de medición, no incorpora píxeles de redes sociales y no envía eventos a herramientas de analítica. Tu visita no alimenta ningún perfil publicitario.",
           "Las fuentes y el código se sirven desde el propio dominio o desde tu propia copia, sin depender de CDNs de terceros que puedan observar la visita. Si en el futuro se activara una analítica agregada y sin cookies, esta página se actualizaría antes de ponerla en marcha.",
+          "El proveedor de alojamiento entrega los archivos estáticos y conserva registros técnicos de acceso con la misma finalidad que cualquier servidor web: operar el servicio, medir fallos y defenderlo de abusos. Chordleaf no cruza esos registros con ninguna identidad porque no hay identidades que cruzar.",
         ],
       },
       {
@@ -834,6 +835,7 @@ const pairPrivacy = {
         p: [
           "Las canciones, los acordes personalizados y los ajustes se guardan en el almacenamiento local del navegador, en el dispositivo que estás usando. No se sincronizan entre dispositivos ni salen de él.",
           "Puedes borrar todo desde el propio navegador (borrar datos del sitio) o desinstalar la aplicación. Si quieres conservar las canciones, exporta antes una copia .chordleaf.json: ese archivo se descarga a tu equipo y no se envía a ningún sitio.",
+          "El almacenamiento está ligado al origen del sitio. Si un día te mudas a una copia propia de Chordleaf, tus canciones no viajan solas: exporta el proyecto desde un origen e impórtalo en el otro. Es el mismo archivo que usarías para pasar una canción de un navegador a otro.",
         ],
       },
       {
@@ -842,6 +844,7 @@ const pairPrivacy = {
           "La mayoría de funciones no tocan la red: escribir, colocar acordes, maquetar, transportar y exportar se ejecuta en el navegador. Las excepciones son la descarga de la aplicación y la importación web.",
           "Cuando importas por enlace, el servidor descarga la página pública para que tu navegador no tenga que hacerlo y registra en los logs técnicos la URL solicitada y, si algo falla, el error. Ese registro lo conserva el proveedor de alojamiento según su política y se usa para diagnosticar fallos o abusos, no para identificarte.",
           "El limitador de peticiones cuenta solicitudes por dirección para evitar abusos. No se asocia a ninguna identidad y no se usa con fines publicitarios.",
+          "El resto del sitio es estático: no hay base de datos de usuarios, ni API de canciones, ni panel de administración que consultar. Los archivos que ves se sirven tal cual y las canciones que escribes nunca llegan a esa infraestructura.",
         ],
       },
       {
@@ -904,6 +907,7 @@ const pairPrivacy = {
         p: [
           "Chordleaf does not use advertising or measurement cookies, does not embed social pixels and does not send events to analytics tools. Your visit does not feed an advertising profile.",
           "Fonts and code are served from the project's own domain, or from your own copy, without third-party CDNs watching the visit. If aggregate, cookie-free analytics were ever enabled, this page would be updated before switching it on.",
+          "The hosting provider delivers the static files and keeps technical access logs for the same reasons any web server does: to run the service, spot failures and defend it from abuse. Chordleaf does not link those logs to an identity because there are no identities to link.",
         ],
       },
       {
@@ -911,6 +915,7 @@ const pairPrivacy = {
         p: [
           "Songs, custom chords and settings are stored in your browser's local storage, on the device you are using. They are not synchronised across devices and do not leave it.",
           "You can erase everything from the browser itself (clear site data) or uninstall the app. If you want to keep your songs, export a .chordleaf.json project first: that file downloads to your machine and is not sent anywhere.",
+          "Storage belongs to the site origin. If you move to your own Chordleaf copy one day, songs do not travel on their own: export the project from one origin and import it in the other. It is the same file you would use to move a song between browsers.",
         ],
       },
       {
@@ -919,6 +924,7 @@ const pairPrivacy = {
           "Most features never use the network: writing, placing chords, layout, transposition and export all run in the browser. The exceptions are downloading the app and web imports.",
           "When you import a link, the server fetches the public page so your browser does not have to, and technical logs record the requested URL and any error. The hosting provider keeps those logs under its own policy; they are used to diagnose failures or abuse, not to identify you.",
           "A rate limiter counts requests per address to prevent abuse. It is not linked to any identity and is not used for advertising.",
+          "The rest of the site is static: there is no user database, no song API and no admin panel to query. The files you see are served as they are, and the songs you write never reach that infrastructure.",
         ],
       },
       {
@@ -958,12 +964,467 @@ const pairPrivacy = {
   },
 };
 
+const pairPolicy = {
+  id: "policy",
+  es: {
+    slug: "politica-de-importacion",
+    kicker: "Política de importación",
+    title: "Política de importación — Chordleaf",
+    description:
+      "Cómo funciona la importación desde enlaces, qué contenido puedes traer, qué límites aplica el servicio y por qué a veces conviene pegar el texto a mano.",
+    h1: "Política de importación: qué se puede traer y cómo",
+    lead: "La importación por enlace es una comodidad, no un derecho de acceso. Chordleaf descarga páginas públicas que tú indicas, con hosts permitidos y límites claros, y nunca intenta saltarse un bloqueo.",
+    imageAlt:
+      "Captura del editor de Chordleaf con el cuadro de importación de una canción.",
+    imageCaption:
+      "La importación por enlace convive con pegar el texto y con los archivos propios.",
+    sections: [
+      {
+        h: "Qué hace exactamente el importador",
+        p: [
+          "Cuando pegas un enlace compatible, el servidor hace una petición HTTPS a la página pública, la descarga con un límite de tamaño y de tiempo y la devuelve al editor para analizarla como texto. Las redirecciones se vuelven a validar contra la lista de hosts permitidos, y se rechazan credenciales, puertos no estándar y esquemas que no sean HTTPS.",
+          "El contenido descargado no se ejecuta, no se monta como página y no se guarda: se usa para extraer la letra y los acordes que el editor te mostrará. No hay caché de canciones de terceros ni índice público.",
+        ],
+      },
+      {
+        h: "Hosts permitidos",
+        p: [
+          "La lista es deliberadamente corta: Cifra Club (incluido su dominio brasileño), LaCuerda y Ultimate Guitar. Si tu canción está en otro sitio, pega el texto o importa un archivo; el editor no hace peticiones a dominios arbitrarios.",
+          "La lista se revisa cuando cambia el panorama de webs de acordes. Si una web compatible cambia su estructura, el analizador puede dejar de entenderla hasta que se actualice; mientras tanto, pegar el texto sigue siendo la vía más estable.",
+        ],
+      },
+      {
+        h: "Qué contenido puedes importar",
+        p: [
+          "Chordleaf no publica nada de lo que importas. Cada persona procesa su copia en su navegador y la responsabilidad sobre el contenido es suya. Si una obra tiene derechos, respeta su licencia y las condiciones del sitio de origen.",
+        ],
+        list: [
+          "Tus propias canciones, transcripciones y arreglos.",
+          "Contenido de dominio público o con licencia que permita ese uso.",
+          "Material que tengas derecho a usar en tu ensayo, clase o culto.",
+        ],
+      },
+      {
+        h: "Qué no es aceptable",
+        p: [
+          "El endpoint está pensado para importaciones puntuales de canciones que el usuario está preparando, no como API pública de scraping. Si se detecta un uso abusivo, el servicio puede desactivarse.",
+        ],
+        list: [
+          "Usar la importación para saltarse muros de pago, inicios de sesión o controles de acceso.",
+          "Descargar páginas en masa para crear catálogos o bases de datos ajenos al uso personal.",
+          "Publicar o redistribuir letras y cifras de terceros como si fueran propias.",
+          "Sondear el servicio para eludir el límite de peticiones.",
+        ],
+      },
+      {
+        h: "Límites técnicos y por qué existen",
+        p: [
+          "Los sitios de acordes también ponen sus propios límites: es habitual que bloqueen direcciones de centros de datos con un 403 o un 429. Chordleaf no los esquiva; te lo comunica y te propone pegar el texto o importar un archivo.",
+        ],
+        list: [
+          "Solo HTTPS y hosts conocidos, sin credenciales ni puertos no estándar.",
+          "Tamaño máximo por página, tiempo de espera y un número limitado de redirecciones.",
+          "Límite de peticiones por dirección para proteger el coste del servicio.",
+          "El servicio puede estar desactivado en una instalación concreta.",
+        ],
+      },
+      {
+        h: "Cambios y contacto",
+        p: [
+          "Esta política puede actualizarse si cambian los hosts compatibles o los límites técnicos. Las dudas o incidencias se atienden en el repositorio de GitHub; para vulnerabilidades hay un canal privado de reporte.",
+          "Si tienes dudas sobre si un uso concreto entra dentro de esta política, abre una incidencia antes de automatizar nada: es más fácil aclararlo que revertir un abuso.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "¿La importación funciona con cualquier web?",
+        a: "No. Solo con los hosts compatibles (Cifra Club, LaCuerda y Ultimate Guitar). Para el resto de orígenes, pega el texto o importa un archivo.",
+      },
+      {
+        q: "¿Chordleaf guarda las páginas que descarga?",
+        a: "No. Se procesan al vuelo para devolverte el texto y no se almacenan ni se añaden a ningún catálogo.",
+      },
+      {
+        q: "¿Qué pasa si la web me bloquea?",
+        a: "Te lo indicamos con un mensaje claro y puedes pegar el texto manualmente. No intentamos eludir el bloqueo ni cambiar de identidad para conseguirlo.",
+      },
+      {
+        q: "¿Puedo importar una canción con derechos de autor?",
+        a: "Solo si tienes derecho a usarla. Chordleaf no publica nada: la canción se queda en tu navegador y la responsabilidad de su uso es tuya.",
+      },
+    ],
+    related: [
+      { href: "/es/privacidad/", label: "Privacidad: qué datos se tratan" },
+      {
+        href: "/es/importar-cifra-club/",
+        label: "Importar una canción desde Cifra Club",
+      },
+      { href: "/es/guia/", label: "Guía completa de Chordleaf" },
+    ],
+  },
+  en: {
+    slug: "import-policy",
+    kicker: "Import policy",
+    title: "Import policy — Chordleaf",
+    description:
+      "How link imports work, what content you may bring in, which limits the service applies and why pasting text by hand is sometimes the right fallback.",
+    h1: "Import policy: what you can bring in and how",
+    lead: "Importing from a link is a convenience, not a right of access. Chordleaf fetches public pages you point it to, within an allowed host list and clear limits, and never tries to bypass a block.",
+    imageAlt:
+      "Screenshot of the Chordleaf editor with the song import dialog open.",
+    imageCaption:
+      "Link imports sit next to text pasting and importing your own files.",
+    sections: [
+      {
+        h: "What the importer actually does",
+        p: [
+          "When you paste a supported link, the server makes an HTTPS request to the public page, downloads it within size and time limits and hands it to the editor to parse as text. Redirects are revalidated against the allowed host list, and credentials, non-standard ports and non-HTTPS schemes are rejected.",
+          "The downloaded content is never executed, never mounted as a page and never stored: it is used to extract the lyrics and chords the editor shows you. There is no cache of third-party songs and no public index.",
+        ],
+      },
+      {
+        h: "Supported hosts",
+        p: [
+          "The list is deliberately short: Cifra Club (including its Brazilian domain), LaCuerda and Ultimate Guitar. If your song lives somewhere else, paste the text or import a file; the editor does not send requests to arbitrary domains.",
+          "The list is reviewed as the chord-site landscape changes. If a supported site alters its markup, the parser may stop understanding it until it is updated; pasting the text remains the most stable route in the meantime.",
+        ],
+      },
+      {
+        h: "Content you may import",
+        p: [
+          "Chordleaf publishes nothing of what you import. Every person processes their own copy in their browser and is responsible for the content. If a work is copyrighted, respect its licence and the terms of the source site.",
+        ],
+        list: [
+          "Your own songs, transcriptions and arrangements.",
+          "Public-domain material or content whose licence allows that use.",
+          "Material you have the right to use in your rehearsal, class or service.",
+        ],
+      },
+      {
+        h: "What is not acceptable",
+        p: [
+          "The endpoint exists for occasional imports of songs the user is preparing, not as a public scraping API. If abuse is detected, the service can be switched off.",
+        ],
+        list: [
+          "Using imports to get around paywalls, sign-ins or access controls.",
+          "Downloading pages in bulk to build catalogues or databases beyond personal use.",
+          "Publishing or redistributing third-party lyrics and chords as your own.",
+          "Probing the service to work around the request limit.",
+        ],
+      },
+      {
+        h: "Technical limits and why they exist",
+        p: [
+          "Chord sites enforce their own limits too: datacenter addresses often get a 403 or 429. Chordleaf does not evade them; it reports what happened and suggests pasting the text or importing a file instead.",
+        ],
+        list: [
+          "HTTPS and known hosts only, with no credentials or non-standard ports.",
+          "A maximum page size, a timeout and a limited number of redirects.",
+          "A per-address request limit that protects the running cost of the service.",
+          "The feature can be switched off in a given installation.",
+        ],
+      },
+      {
+        h: "Changes and contact",
+        p: [
+          "This policy may be updated when the supported hosts or the technical limits change. Questions and issues are handled in the GitHub repository; vulnerabilities have a private reporting channel.",
+          "If you are unsure whether a specific use fits this policy, open an issue before automating anything: clarifying it is easier than undoing an abuse.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "Does import work with any website?",
+        a: "No. Only the supported hosts (Ultimate Guitar, Cifra Club and LaCuerda). For any other source, paste the text or import a file.",
+      },
+      {
+        q: "Does Chordleaf store the pages it downloads?",
+        a: "No. They are processed on the fly to return the text to you and are not stored or added to any catalogue.",
+      },
+      {
+        q: "What happens when a site blocks the request?",
+        a: "We tell you with a clear message and you can paste the text by hand. We do not try to evade the block or change identity to get through.",
+      },
+      {
+        q: "Can I import a copyrighted song?",
+        a: "Only if you have the right to use it. Chordleaf publishes nothing: the song stays in your browser and its use is your responsibility.",
+      },
+    ],
+    related: [
+      { href: "/en/privacy/", label: "Privacy: what data is handled" },
+      {
+        href: "/en/import-ultimate-guitar/",
+        label: "Import a song from Ultimate Guitar",
+      },
+      { href: "/en/guide/", label: "Full Chordleaf user guide" },
+    ],
+  },
+};
+
+const pairGuide = {
+  id: "guide",
+  es: {
+    slug: "guia",
+    kicker: "Guía de uso",
+    title: "Guía de Chordleaf — editor de acordes paso a paso",
+    description:
+      "Primeros pasos, colocación de acordes, transporte, diseño de página, exportación y solución de problemas en el editor de acordes Chordleaf.",
+    h1: "Guía de Chordleaf: de la primera canción al PDF",
+    lead: "Esta guía resume el recorrido completo: crear o importar una canción, colocar los acordes, ajustar la música y el formato, exportar la hoja y resolver los problemas más habituales.",
+    imageAlt:
+      "Captura del editor de Chordleaf con una canción completa, acordes y vista previa de la página.",
+    imageCaption:
+      "El recorrido completo: letra, acordes, música, formato y exportación en una sola pantalla.",
+    sections: [
+      {
+        h: "Primeros pasos",
+        p: [
+          "Abre Chordleaf en el navegador. La primera vez verás el espacio vacío con la opción de crear una canción; después puedes volver desde el botón de nueva canción o desde las pestañas de la parte superior.",
+        ],
+        list: [
+          "Escribe la letra directamente o pega un texto.",
+          "O importa TXT, PDF, DOCX, ChordPro o un enlace compatible.",
+          "Pon título y artista para que aparezcan en la cabecera de la hoja.",
+        ],
+      },
+      {
+        h: "La letra y los acordes",
+        p: [
+          "Selecciona el acorde en el panel y colócalo donde cambia la armonía. El editor ancla el acorde a la sílaba, así que puedes editar la letra sin rehacer la alineación.",
+          "Los acordes que el editor no reconoce se marcan para revisarlos. También puedes crear acordes propios con el mástil interactivo y guardarlos para otras canciones.",
+        ],
+      },
+      {
+        h: "Música: tonalidad, cejilla y transporte",
+        p: [
+          "La tonalidad probable se calcula a partir de los acordes escritos. Con el transporte cambias la canción de tono en semitonos y con la cejilla adaptas las posiciones que tocas; el aviso de tonalidad te dice qué suena de verdad con la cejilla puesta.",
+          "Ni el transporte ni la cejilla modifican la letra. El botón de deshacer devuelve la canción al tono original cuando quieras.",
+        ],
+      },
+      {
+        h: "El documento y su formato",
+        p: [
+          "En los ajustes del documento controlas el tamaño de letra (7–20 pt), los márgenes (5–35 mm) y una o dos columnas. Cada canción guarda su formato, y la vista previa muestra la misma página A4 que se exporta.",
+          "Los bloques de diagramas se mueven por la página como objetos y el texto fluye a su alrededor. El pie «chordleaf.com» es opcional y se desactiva en Más opciones.",
+        ],
+      },
+      {
+        h: "Exportar y compartir",
+        p: [
+          "El menú de exportación reúne todos los formatos de salida. Elige según lo que vayas a hacer con la hoja.",
+        ],
+        list: [
+          "PDF: la opción más fiel para imprimir o compartir.",
+          "Imprimir: el diálogo del navegador con el diseño A4 y sin interfaz.",
+          "Word (DOCX): para retocar el documento en un procesador de textos.",
+          "Texto y ChordPro (.cho): para otros editores y aplicaciones.",
+          "Proyecto .chordleaf.json: para seguir editando en Chordleaf.",
+        ],
+      },
+      {
+        h: "Guardado y copias",
+        p: [
+          "Chordleaf guarda cada canción en el almacenamiento local del navegador. No hay cuenta ni sincronización, así que conviene exportar el proyecto cuando la canción importe de verdad.",
+          "Instalado como aplicación, el editor se abre sin conexión tras la primera visita. Si borras los datos del navegador, las canciones locales desaparecen y no hay forma de recuperarlas sin una copia.",
+        ],
+      },
+      {
+        h: "Problemas frecuentes",
+        p: [
+          "Casi todas las incidencias tienen una salida conocida. Estas son las más habituales.",
+        ],
+        list: [
+          "La importación por enlace falla o responde 403/429: pega el texto; la web está bloqueando tráfico de servidores.",
+          "Un acorde aparece marcado: sustitúyelo desde el panel o revisa su grafía.",
+          "La canción se parte en dos páginas: reduce la letra, ajusta los márgenes o usa dos columnas.",
+          "Has perdido las canciones: comprueba que estás en el mismo navegador y dominio; sin copia exportada no se pueden recuperar.",
+          "El PDF no se genera: revisa que ningún bloque de diagramas tape la cabecera o el pie.",
+        ],
+      },
+      {
+        h: "Glosario breve",
+        p: [
+          "Cuatro términos que aparecen a menudo en las hojas y en la interfaz.",
+        ],
+        list: [
+          "Transportar: cambiar el tono de una canción manteniendo la melodía y la letra.",
+          "Cejilla (capo): cejilla que sube el sonido sin cambiar las posiciones que tocas.",
+          "ChordPro: formato de texto con los acordes entre corchetes.",
+          "A4: tamaño de papel estándar de 210 × 297 mm, el que usa la hoja.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "¿Por dónde empiezo?",
+        a: "Crea una canción en blanco, escribe o pega la letra y coloca los primeros acordes. Si ya tienes el texto con acordes, impórtalo y revisa los que queden marcados.",
+      },
+      {
+        q: "¿Cómo consigo que quepa en una sola página?",
+        a: "Ajusta el tamaño de letra y los márgenes, o cambia a dos columnas. El editor muestra dónde quedan los cortes para que los muevas antes de imprimir.",
+      },
+      {
+        q: "¿Puedo seguir editando después de exportar?",
+        a: "Sí. El PDF y el Word son copias de salida; guarda el proyecto .chordleaf.json y podrás reabrirlo con la letra, los acordes y el formato intactos.",
+      },
+      {
+        q: "¿Dónde están mis canciones si cambio de dispositivo?",
+        a: "No se sincronizan. Exporta el proyecto en un dispositivo e impórtalo en el otro para trasladar la canción.",
+      },
+    ],
+    related: [
+      { href: "/es/editor-de-acordes/", label: "El editor de acordes" },
+      {
+        href: "/es/hoja-de-acordes-para-imprimir/",
+        label: "Hoja de acordes para imprimir",
+      },
+      { href: "/es/transportar-acordes/", label: "Transportar acordes" },
+      {
+        href: "/es/importar-cifra-club/",
+        label: "Importar desde Cifra Club",
+      },
+      { href: "/es/privacidad/", label: "Privacidad" },
+      {
+        href: "/es/politica-de-importacion/",
+        label: "Política de importación",
+      },
+    ],
+  },
+  en: {
+    slug: "guide",
+    kicker: "User guide",
+    title: "Chordleaf user guide — lyrics and chords editor",
+    description:
+      "First steps, chord placement, transposition, page layout, export options and troubleshooting in the Chordleaf lyrics and chords editor.",
+    h1: "Chordleaf user guide: from the first song to the PDF",
+    lead: "This guide walks through the whole journey: create or import a song, place the chords, adjust the music and the page format, export the sheet and solve the most common problems.",
+    imageAlt:
+      "Screenshot of the Chordleaf editor with a complete song, chords and the page preview.",
+    imageCaption:
+      "The full journey: lyrics, chords, music, layout and export in one workspace.",
+    sections: [
+      {
+        h: "First steps",
+        p: [
+          "Open Chordleaf in your browser. The first time you will see an empty workspace with the option to create a song; later you can return through the new song button or the tabs at the top.",
+        ],
+        list: [
+          "Type the lyrics directly or paste a text.",
+          "Or import TXT, PDF, DOCX, ChordPro or a supported link.",
+          "Set the title and artist so they appear in the sheet header.",
+        ],
+      },
+      {
+        h: "Lyrics and chords",
+        p: [
+          "Pick a chord from the panel and place it where the harmony changes. The editor anchors each chord to a syllable, so you can edit the lyrics without rebuilding the alignment.",
+          "Chords the editor does not recognise are flagged for review. You can also draw your own shapes on the interactive fretboard and keep them for other songs.",
+        ],
+      },
+      {
+        h: "Music: key, capo and transposition",
+        p: [
+          "The likely key is estimated from the written chords. Transposition moves the song by semitones and the capo adapts the shapes you play; the key note tells you what actually sounds with the capo on.",
+          "Neither transposition nor the capo changes the lyrics. The undo button restores the original key whenever you need it.",
+        ],
+      },
+      {
+        h: "The document and its format",
+        p: [
+          "The document settings control font size (7–20 pt), margins (5–35 mm) and one or two columns. Each song keeps its own format, and the preview shows the same A4 page that gets exported.",
+          "Diagram blocks move across the page as objects and the text flows around them. The chordleaf.com footer is optional and can be switched off under More options.",
+        ],
+      },
+      {
+        h: "Export and share",
+        p: [
+          "The export menu gathers every output format. Pick the one that matches what you will do with the sheet.",
+        ],
+        list: [
+          "PDF: the most faithful option for printing or sharing.",
+          "Print: the browser dialog with the A4 layout and no interface.",
+          "Word (DOCX): to tweak the document in a word processor.",
+          "Text and ChordPro (.cho): for other editors and applications.",
+          "Project .chordleaf.json: to keep editing in Chordleaf.",
+        ],
+      },
+      {
+        h: "Saving and backups",
+        p: [
+          "Chordleaf stores each song in the browser's local storage. There is no account and no sync, so export the project whenever the song matters.",
+          "Installed as an app, the editor opens offline after the first visit. Clearing the browser data removes the local songs, and without an exported copy there is no way to recover them.",
+        ],
+      },
+      {
+        h: "Common problems",
+        p: [
+          "Almost every issue has a known way out. These are the usual ones.",
+        ],
+        list: [
+          "A link import fails or returns 403/429: paste the text; the site is blocking server traffic.",
+          "A chord appears flagged: replace it from the panel or check its spelling.",
+          "The song splits across two pages: reduce the font, adjust the margins or use two columns.",
+          "You lost your songs: check that you are in the same browser and origin; without an exported copy they cannot be recovered.",
+          "The PDF will not generate: check that no diagram block covers the header or the footer.",
+        ],
+      },
+      {
+        h: "Short glossary",
+        p: [
+          "Four terms that show up often in chord sheets and in the interface.",
+        ],
+        list: [
+          "Transpose: change the key of a song while keeping the melody and lyrics.",
+          "Capo: a clamp that raises the sounding pitch without changing the shapes you play.",
+          "ChordPro: a text format with chords written in square brackets.",
+          "A4: the standard 210 × 297 mm paper size used by the sheet.",
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "Where do I start?",
+        a: "Create a blank song, write or paste the lyrics and place the first chords. If you already have a text with chords, import it and review anything flagged.",
+      },
+      {
+        q: "How do I fit a song on one page?",
+        a: "Adjust the font size and margins, or switch to two columns. The editor shows where the page breaks land so you can move them before printing.",
+      },
+      {
+        q: "Can I keep editing after exporting?",
+        a: "Yes. The PDF and Word files are outputs; save the .chordleaf.json project and reopen it with the lyrics, chords and format intact.",
+      },
+      {
+        q: "Where are my songs if I change device?",
+        a: "They are not synchronised. Export the project on one device and import it on the other to move the song.",
+      },
+    ],
+    related: [
+      { href: "/en/chord-sheet-maker/", label: "The chord sheet maker" },
+      {
+        href: "/en/printable-chord-sheets/",
+        label: "Printable chord sheets",
+      },
+      { href: "/en/transpose-chords/", label: "Transpose chords" },
+      {
+        href: "/en/import-ultimate-guitar/",
+        label: "Import from Ultimate Guitar",
+      },
+      { href: "/en/privacy/", label: "Privacy" },
+      { href: "/en/import-policy/", label: "Import policy" },
+    ],
+  },
+};
+
 const contentPairs = [
   pairEditor,
   pairPrint,
   pairTranspose,
   pairImport,
   pairPrivacy,
+  pairPolicy,
+  pairGuide,
 ];
 
 const chrome = {
