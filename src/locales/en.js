@@ -405,6 +405,8 @@ export default {
   "Editar posición de ": "Edit position of ",
   "Añadir diagrama de ": "Add diagram of ",
   "Añadir a la hoja": "Add to sheet",
+  "Diagrama añadido a la hoja.": "Chord diagram added to the sheet.",
+  "Diagramas añadidos a la hoja.": "Chord diagrams added to the sheet.",
   "Añade acordes a la canción para crear tu diccionario.":
     "Add chords to your song to create a chord dictionary.",
   "Diccionario de acordes. Flechas para mover; Suprimir para quitar.":

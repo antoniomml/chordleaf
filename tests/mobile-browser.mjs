@@ -213,6 +213,22 @@ try {
     assert.ok(bounds.height >= 44);
   }
   await page.locator("#shape-dialog .cancel-shape").click();
+  // Adding a diagram switches to the sheet on phones, so the new block lands
+  // on screen instead of behind the chord panel.
+  await page
+    .getByRole("button", { name: "Añadir diagrama de G", exact: true })
+    .click();
+  assert.equal(
+    await page.locator("main").getAttribute("data-mobile-view"),
+    "preview",
+  );
+  const sticker = page.locator(".chord-sticker").first();
+  await sticker.waitFor();
+  assert.equal(await sticker.isVisible(), true);
+  const stickerBox = await sticker.boundingBox();
+  assert.ok(stickerBox.y < 640 && stickerBox.y + stickerBox.height > 0);
+  await page.locator('.rail [data-mobile-view="music"]').click();
+  await page.locator('[data-music-section="chords"]').click();
   const singleTabWidth = (await page.locator(".tab").first().boundingBox())
     .width;
   await page.locator("#mobile-tab-plus").click();
