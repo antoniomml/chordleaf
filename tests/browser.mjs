@@ -239,18 +239,25 @@ await resizer.press("ArrowRight");
 assert.ok(
   (await sticker.evaluate((el) => parseFloat(el.style.width))) > oldWidth,
 );
-// Pointer drag remains accurate when the document is zoomed.
+// Pointer drag remains accurate when the document is zoomed. Drag towards the
+// page body: a diagram that overlaps the page header blocks every export.
 await page.locator("#zoom-in").click();
 await sticker.scrollIntoViewIfNeeded();
 const bounds = await sticker.boundingBox();
-const originalY = await sticker.evaluate((el) => parseFloat(el.style.top));
+const origin = await sticker.evaluate((el) => [
+  parseFloat(el.style.left),
+  parseFloat(el.style.top),
+]);
 await page.mouse.move(bounds.x + 20, bounds.y + 25);
 await page.mouse.down();
-await page.mouse.move(bounds.x + 50, bounds.y - 35, { steps: 5 });
+await page.mouse.move(bounds.x + 55, bounds.y + 60, { steps: 5 });
 await page.mouse.up();
-assert.ok(
-  (await sticker.evaluate((el) => parseFloat(el.style.top))) < originalY - 30,
-);
+const moved = await sticker.evaluate((el) => [
+  parseFloat(el.style.left),
+  parseFloat(el.style.top),
+]);
+assert.ok(moved[0] > origin[0] + 20);
+assert.ok(moved[1] > origin[1] + 20);
 await page.locator("#zoom-reset").click();
 await page
   .getByRole("button", { name: "Editar posición de Emaj7", exact: true })
