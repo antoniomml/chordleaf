@@ -2204,6 +2204,12 @@ select:focus-visible {
     min-width: 0;
     padding-left: 0;
     height: 44px;
+    border-bottom: 0;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
   }
   #mobile-tab-plus {
     display: grid;

@@ -17,6 +17,12 @@ try {
   await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await page.locator("#empty-new").click();
   await page.locator("#blank").click();
+  assert.equal(
+    await page
+      .locator("#tabs")
+      .evaluate((tabs) => tabs.scrollHeight <= tabs.clientHeight),
+    true,
+  );
   await page.locator("#title").fill("Canción móvil");
   assert.equal(
     await page.locator("main").getAttribute("data-mobile-view"),
