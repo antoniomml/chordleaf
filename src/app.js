@@ -37,6 +37,7 @@ import {
 } from "./project.js";
 import { registerServiceWorker } from "./pwa.js";
 import { setupLocalWebImport } from "./ui/local-web-import.js";
+import { blankLineCount, compressBlankLines } from "./text-tools.js";
 const $ = (s) => document.querySelector(s);
 document.documentElement.lang = getLocale();
 const workspaceSession = await openWorkspaceSession($("#app"));
@@ -265,6 +266,30 @@ function syncSection() {
     chordPanel.setMode(chordMode);
   }
 }
+/** Blank-line cleanup for imported sheets. Inline spacing stays untouched so
+ * every chord keeps its anchor over the lyrics. */
+function compressBlanks() {
+  const s = song();
+  const panel = $("#settings");
+  const scrollTop = panel?.scrollTop ?? 0;
+  const before = s.text;
+  const after = compressBlankLines(before);
+  const removed = blankLineCount(before) - blankLineCount(after);
+  if (!removed || after === before) {
+    toast(t("No hay líneas vacías que comprimir."));
+    renderSettings();
+    if (panel) panel.scrollTop = scrollTop;
+    return;
+  }
+  s.text = after;
+  changed();
+  renderSource();
+  schedulePreview();
+  renderSettings();
+  if (panel) panel.scrollTop = scrollTop;
+  const noun = removed === 1 ? t("línea vacía") : t("líneas vacías");
+  toast(t`Se comprimieron ${removed} ${noun}.`);
+}
 function renderSettings() {
   syncSection();
   updateNavigation();
@@ -333,6 +358,8 @@ function renderSettings() {
     changed({ preserveTranspose: true });
     renderSettings();
   };
+  const compressButton = $("#compress-blank-lines");
+  if (compressButton) compressButton.onclick = compressBlanks;
 }
 function updateNavigation() {
   const mobile = window.matchMedia("(max-width: 760px)").matches;
@@ -872,7 +899,7 @@ $("#new-dialog").addEventListener("close", () => {
   importController?.abort();
   importGeneration++;
 });
-$(".dialog-close").onclick = () => $("#new-dialog").close();
+$("#new-dialog .dialog-close").onclick = () => $("#new-dialog").close();
 $("#blank").onclick = () => {
   const s = create();
   songs.push(s);
@@ -1210,7 +1237,8 @@ $("#fit").onclick = async () => {
     $("#fit").disabled = false;
   }
 };
-$("#cancel-close").onclick = () => $("#close-dialog").close();
+const closeCancelDialog = () => $("#close-dialog").close();
+$("#cancel-close-x").onclick = closeCancelDialog;
 $("#close-save-project").onclick = () => {
   if (saveProject(songs.find((s) => s.id === closing))) {
     $("#close-dialog").close();

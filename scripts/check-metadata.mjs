@@ -270,7 +270,7 @@ const contentPairs = [
   ["chord-sheet-maker", "editor-de-acordes"],
   ["printable-chord-sheets", "hoja-de-acordes-para-imprimir"],
   ["transpose-chords", "transportar-acordes"],
-  ["import-ultimate-guitar", "importar-cifra-club"],
+  ["import-songs-web", "importar-desde-la-web"],
   ["privacy", "privacidad"],
   ["import-policy", "politica-de-importacion"],
   ["guide", "guia"],

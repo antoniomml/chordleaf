@@ -25,7 +25,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
     url = songUrl(value);
   } catch {
     throw new ImportError(
-      "Usa un enlace HTTPS de Cifra Club, LaCuerda o Ultimate Guitar.",
+      "Usa un enlace HTTPS de LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar.",
     );
   }
   const signal = AbortSignal.timeout(18000);
@@ -47,7 +47,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
         next = songUrl(new URL(response.headers.get("location"), url).href);
       } catch {
         throw new ImportError(
-          "Usa un enlace HTTPS de Cifra Club, LaCuerda o Ultimate Guitar.",
+          "Usa un enlace HTTPS de LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar.",
         );
       }
       url = next;
@@ -94,9 +94,25 @@ export async function fetchSongPage(value, fetcher = fetch) {
     const bytes = Buffer.concat(chunks);
     const charset =
       contentType.match(/charset\s*=\s*["']?([\w-]+)/i)?.[1] || "utf-8";
+    let html = new TextDecoder(charset).decode(bytes);
+    // Some legacy chord sites mislabel latin-1 bytes as UTF-8. Trust the
+    // charset declared inside the page only when the header decoding failed.
+    if (html.includes("\uFFFD")) {
+      const declared = bytes
+        .subarray(0, 4096)
+        .toString("latin1")
+        .match(/charset\s*=\s*["']?([\w-]+)/i)?.[1];
+      if (declared && declared.toLowerCase() !== charset.toLowerCase()) {
+        try {
+          html = new TextDecoder(declared).decode(bytes);
+        } catch {
+          /* Unknown declared charset: keep the header decoding. */
+        }
+      }
+    }
     return {
       url: url.href,
-      html: new TextDecoder(charset).decode(bytes),
+      html,
       contentType: contentType.split(";")[0].trim().toLowerCase(),
     };
   }

@@ -75,7 +75,31 @@ await page.locator('.rail [data-desktop-view="edit"]').click();
 await source.fill(original + "\n[G]Cambio");
 await page.locator(".tab-close").first().click();
 assert.equal(await page.locator("#close-dialog").isVisible(), true);
-await page.locator("#cancel-close").click();
+assert.equal(await page.locator("#close-save-project .button-icon").count(), 1);
+assert.equal(await page.locator("#confirm-close .button-icon").count(), 1);
+assert.equal(
+  (await page.locator("#confirm-close").textContent()).trim(),
+  "Descartar",
+);
+await page.locator("#cancel-close-x").click();
+assert.equal(
+  await page.locator("#close-dialog").evaluate((el) => el.open),
+  false,
+);
+await page.locator(".tab-close").first().click();
+assert.equal(await page.locator("#close-dialog").isVisible(), true);
+await page.locator("#cancel-close-x").click();
+// Saving from the close prompt downloads the project and closes that song.
+const tabsBeforeSave = await page.locator(".tab").count();
+await page.locator(".tab-close").first().click();
+const closeSave = page.waitForEvent("download");
+await page.locator("#close-save-project").click();
+await (await closeSave).saveAs("artifacts/close-save-project.json");
+assert.equal(
+  await page.locator("#close-dialog").evaluate((el) => el.open),
+  false,
+);
+assert.equal(await page.locator(".tab").count(), tabsBeforeSave - 1);
 await page.locator("#new").click();
 await page.locator("#file").setInputFiles("artifacts/sample.pdf");
 await page.waitForFunction(

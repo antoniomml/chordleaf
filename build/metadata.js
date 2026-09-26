@@ -132,7 +132,7 @@ const pairEditor = {
       },
       {
         q: "¿Puedo importar canciones que ya tengo?",
-        a: "Sí: pega el texto, importa un TXT, PDF o DOCX, o usa un enlace compatible de Cifra Club, LaCuerda o Ultimate Guitar. La guía de importación explica los tres caminos y qué hacer cuando una web bloquea la descarga.",
+        a: "Sí: pega el texto, importa un TXT, PDF o DOCX, o usa un enlace compatible de LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar. La guía de importación explica los tres caminos y qué hacer cuando una web bloquea la descarga.",
       },
       {
         q: "¿Dónde se guardan mis canciones?",
@@ -149,8 +149,8 @@ const pairEditor = {
         label: "Transportar acordes y usar la cejilla",
       },
       {
-        href: "/es/importar-cifra-club/",
-        label: "Importar una canción desde Cifra Club",
+        href: "/es/importar-desde-la-web/",
+        label: "Importar una canción desde la web",
       },
       { href: "/es/guia/", label: "Guía completa de Chordleaf" },
     ],
@@ -224,7 +224,7 @@ const pairEditor = {
       },
       {
         q: "Can I bring songs I already have?",
-        a: "Yes: paste the text, import a TXT, PDF or DOCX file, or use a supported link from Cifra Club, LaCuerda or Ultimate Guitar. The import guide explains all three routes and the manual fallback.",
+        a: "Yes: paste the text, import a TXT, PDF or DOCX file, or use a supported link from Ultimate Guitar, LaCuerda, AcordesWeb, TusAcordes or Chordie. The import guide explains all three routes and the manual fallback.",
       },
       {
         q: "Where are my songs stored?",
@@ -241,8 +241,8 @@ const pairEditor = {
         label: "Transpose chords and use a capo",
       },
       {
-        href: "/en/import-ultimate-guitar/",
-        label: "Import a song from Ultimate Guitar",
+        href: "/en/import-songs-web/",
+        label: "Import a song from the web",
       },
       { href: "/en/guide/", label: "Full Chordleaf user guide" },
     ],
@@ -608,13 +608,13 @@ const pairTranspose = {
 const pairImport = {
   id: "import",
   es: {
-    slug: "importar-cifra-club",
+    slug: "importar-desde-la-web",
     kicker: "Importación web",
-    title: "Importar canciones de Cifra Club — Chordleaf",
+    title: "Importar canciones desde la web — Chordleaf",
     description:
-      "Trae una página pública de Cifra Club al editor, revisa la alineación de los acordes y exporta tu hoja. También puedes pegar el texto o importar TXT, PDF y DOCX.",
-    h1: "Importar una canción de Cifra Club en el editor",
-    lead: "Chordleaf puede leer una página pública de Cifra Club y convertirla en una hoja editable. Si la web bloquea la descarga desde servidores, siempre queda pegar el texto a mano, y para archivos propios tienes TXT, PDF y DOCX.",
+      "Trae una página pública de acordes al editor, revisa la alineación y exporta tu hoja. LaCuerda, AcordesWeb, TusAcordes, Chordie y Ultimate Guitar.",
+    h1: "Importar una canción desde la web en el editor",
+    lead: "Chordleaf puede leer una página pública de acordes y convertirla en una hoja editable. Si la web bloquea la descarga desde servidores, siempre queda pegar el texto a mano o abrir el HTML guardado, y para archivos propios tienes TXT, PDF y DOCX.",
     imageAlt:
       "Captura del editor de Chordleaf después de importar una canción, con los acordes colocados sobre la letra.",
     imageCaption:
@@ -628,13 +628,13 @@ const pairImport = {
         list: [
           "Pegar texto: copia la letra con acordes de la página y pégala en el editor; funciona siempre, incluso sin red.",
           "Archivos: TXT, PDF con texto seleccionable, DOCX de Word y archivos ChordPro.",
-          "Enlaces compatibles: páginas públicas de Cifra Club, LaCuerda y Ultimate Guitar, siempre en HTTPS.",
+          "Enlaces compatibles: páginas públicas de LaCuerda, AcordesWeb, TusAcordes, Chordie y Ultimate Guitar, siempre en HTTPS.",
         ],
       },
       {
-        h: "Importar desde Cifra Club paso a paso",
+        h: "Importar desde un enlace paso a paso",
         p: [
-          "Abre la canción en Cifra Club y copia la dirección completa, que empieza por https://. Dentro de Chordleaf, abre Importar, pega el enlace y confirma.",
+          "Abre la canción en la web de acordes y copia la dirección completa, que empieza por https://. Dentro de Chordleaf, abre Importar, pega el enlace y confirma.",
           "El servidor descarga la página pública y la envía al editor, que la analiza como texto: no se ejecuta nada de la web de origen. Después revisa el título, el artista y los acordes marcados, y ajusta lo que haga falta.",
           "La importación respeta la alineación original lo mejor que puede, pero cada web maqueta a su manera. Cuenta con dedicar un minuto a revisar los acordes que quedan sin resolver.",
         ],
@@ -648,7 +648,7 @@ const pairImport = {
         ],
       },
       {
-        h: "Si Cifra Club bloquea la descarga",
+        h: "Si una web bloquea la descarga",
         p: [
           "Desde direcciones de centros de datos es habitual recibir un 403 o un 429: la web detecta tráfico automatizado y lo corta. Chordleaf no intenta saltarse ese bloqueo; simplemente te lo dice y te ofrece la alternativa.",
           "Si la web devuelve un 403, verás un aviso sobre la futura extensión de navegador de Chordleaf y la opción plegada ¿Tienes la página guardada? Desde ahí puedes abrir un HTML guardado en tu navegador, sin subirlo al servidor. Para pegar letra y acordes, vuelve al menú inicial y elige Importar texto o archivo. Revisa la alineación al terminar.",
@@ -678,7 +678,7 @@ const pairImport = {
     faq: [
       {
         q: "¿De qué webs puedo importar un enlace?",
-        a: "De páginas públicas de Cifra Club, LaCuerda y Ultimate Guitar con enlace HTTPS. Para cualquier otro origen puedes pegar el texto o importar un archivo.",
+        a: "De páginas públicas de LaCuerda, AcordesWeb, TusAcordes, Chordie y Ultimate Guitar con enlace HTTPS. Para cualquier otro origen puedes pegar el texto o importar un archivo.",
       },
       {
         q: "¿Por qué a veces falla la importación?",
@@ -706,13 +706,13 @@ const pairImport = {
     ],
   },
   en: {
-    slug: "import-ultimate-guitar",
+    slug: "import-songs-web",
     kicker: "Web import",
-    title: "Import songs from Ultimate Guitar — Chordleaf",
+    title: "Import songs from the web — Chordleaf",
     description:
-      "Bring a public Ultimate Guitar page into the editor, check the chord alignment and export your own sheet. Pasting text and importing TXT, PDF or DOCX also work.",
-    h1: "Import a song from Ultimate Guitar into the editor",
-    lead: "Chordleaf can read a public Ultimate Guitar page and turn it into an editable sheet. When a site blocks datacenter traffic, pasting the text always works, and your own TXT, PDF and DOCX files import without touching the network.",
+      "Bring a public chord page into the editor, check the alignment and export your own sheet. Ultimate Guitar, LaCuerda, AcordesWeb, TusAcordes and Chordie.",
+    h1: "Import a song from the web into the editor",
+    lead: "Chordleaf can read a public chord page and turn it into an editable sheet. When a site blocks datacenter traffic, you can still paste the text or open a saved HTML copy, and your own TXT, PDF and DOCX files import without touching the network.",
     imageAlt:
       "Screenshot of the Chordleaf editor after importing a song, with chords placed above the lyrics.",
     imageCaption:
@@ -726,13 +726,13 @@ const pairImport = {
         list: [
           "Paste text: copy the lyrics and chords from the page and paste them into the editor; it always works, even offline.",
           "Files: TXT, selectable PDF, Word DOCX and ChordPro files.",
-          "Supported links: public pages from Ultimate Guitar, Cifra Club and LaCuerda over HTTPS.",
+          "Supported links: public pages from Ultimate Guitar, LaCuerda, AcordesWeb, TusAcordes and Chordie over HTTPS.",
         ],
       },
       {
-        h: "Importing from Ultimate Guitar step by step",
+        h: "Importing from a link step by step",
         p: [
-          "Open the song on Ultimate Guitar and copy the full URL, starting with https://. In Chordleaf, open Import, paste the link and confirm.",
+          "Open the song on the chord website and copy the full URL, starting with https://. In Chordleaf, open Import, paste the link and confirm.",
           "The server downloads the public page and hands it to the editor, which parses it as text; nothing from the source site is executed. Then check the title, the artist and any flagged chords, and fix what needs fixing.",
           "The importer keeps the original alignment as well as it can, but every site lays out its pages differently. Budget a minute to review the chords that could not be matched.",
         ],
@@ -776,7 +776,7 @@ const pairImport = {
     faq: [
       {
         q: "Which sites can I import a link from?",
-        a: "Public HTTPS pages from Ultimate Guitar, Cifra Club and LaCuerda. For any other source you can paste the text or import a file.",
+        a: "Public HTTPS pages from Ultimate Guitar, LaCuerda, AcordesWeb, TusAcordes and Chordie. For any other source you can paste the text or import a file.",
       },
       {
         q: "Why does an import fail sometimes?",
@@ -994,7 +994,7 @@ const pairPolicy = {
       {
         h: "Hosts permitidos",
         p: [
-          "La lista es deliberadamente corta: Cifra Club (incluido su dominio brasileño), LaCuerda y Ultimate Guitar. Si tu canción está en otro sitio, pega el texto o importa un archivo; el editor no hace peticiones a dominios arbitrarios.",
+          "La lista es deliberadamente corta: LaCuerda, AcordesWeb, TusAcordes, Chordie y Ultimate Guitar. Si tu canción está en otro sitio, pega el texto o importa un archivo; el editor no hace peticiones a dominios arbitrarios.",
           "La lista se revisa cuando cambia el panorama de webs de acordes. Si una web compatible cambia su estructura, el analizador puede dejar de entenderla hasta que se actualice; mientras tanto, pegar el texto sigue siendo la vía más estable.",
         ],
       },
@@ -1044,7 +1044,7 @@ const pairPolicy = {
     faq: [
       {
         q: "¿La importación funciona con cualquier web?",
-        a: "No. Solo con los hosts compatibles (Cifra Club, LaCuerda y Ultimate Guitar). Para el resto de orígenes, pega el texto o importa un archivo.",
+        a: "No. Solo con los hosts compatibles (LaCuerda, AcordesWeb, TusAcordes, Chordie y Ultimate Guitar). Para el resto de orígenes, pega el texto o importa un archivo.",
       },
       {
         q: "¿Chordleaf guarda las páginas que descarga?",
@@ -1062,8 +1062,8 @@ const pairPolicy = {
     related: [
       { href: "/es/privacidad/", label: "Privacidad: qué datos se tratan" },
       {
-        href: "/es/importar-cifra-club/",
-        label: "Importar una canción desde Cifra Club",
+        href: "/es/importar-desde-la-web/",
+        label: "Importar una canción desde la web",
       },
       { href: "/es/guia/", label: "Guía completa de Chordleaf" },
     ],
@@ -1092,7 +1092,7 @@ const pairPolicy = {
       {
         h: "Supported hosts",
         p: [
-          "The list is deliberately short: Cifra Club (including its Brazilian domain), LaCuerda and Ultimate Guitar. If your song lives somewhere else, paste the text or import a file; the editor does not send requests to arbitrary domains.",
+          "The list is deliberately short: Ultimate Guitar, LaCuerda, AcordesWeb, TusAcordes and Chordie. If your song lives somewhere else, paste the text or import a file; the editor does not send requests to arbitrary domains.",
           "The list is reviewed as the chord-site landscape changes. If a supported site alters its markup, the parser may stop understanding it until it is updated; pasting the text remains the most stable route in the meantime.",
         ],
       },
@@ -1142,7 +1142,7 @@ const pairPolicy = {
     faq: [
       {
         q: "Does import work with any website?",
-        a: "No. Only the supported hosts (Ultimate Guitar, Cifra Club and LaCuerda). For any other source, paste the text or import a file.",
+        a: "No. Only the supported hosts (Ultimate Guitar, LaCuerda, AcordesWeb, TusAcordes and Chordie). For any other source, paste the text or import a file.",
       },
       {
         q: "Does Chordleaf store the pages it downloads?",
@@ -1160,8 +1160,8 @@ const pairPolicy = {
     related: [
       { href: "/en/privacy/", label: "Privacy: what data is handled" },
       {
-        href: "/en/import-ultimate-guitar/",
-        label: "Import a song from Ultimate Guitar",
+        href: "/en/import-songs-web/",
+        label: "Import a song from the web",
       },
       { href: "/en/guide/", label: "Full Chordleaf user guide" },
     ],
@@ -1287,8 +1287,8 @@ const pairGuide = {
       },
       { href: "/es/transportar-acordes/", label: "Transportar acordes" },
       {
-        href: "/es/importar-cifra-club/",
-        label: "Importar desde Cifra Club",
+        href: "/es/importar-desde-la-web/",
+        label: "Importar desde la web",
       },
       { href: "/es/privacidad/", label: "Privacidad" },
       {
@@ -1414,8 +1414,8 @@ const pairGuide = {
       },
       { href: "/en/transpose-chords/", label: "Transpose chords" },
       {
-        href: "/en/import-ultimate-guitar/",
-        label: "Import from Ultimate Guitar",
+        href: "/en/import-songs-web/",
+        label: "Import from the web",
       },
       { href: "/en/privacy/", label: "Privacy" },
       { href: "/en/import-policy/", label: "Import policy" },

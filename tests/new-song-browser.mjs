@@ -69,7 +69,7 @@ try {
   await page.locator("#web-url").fill("https://www.cifraclub.com/a/b/");
   await page.locator("#web-submit").click();
   await page.locator("#import-error").waitFor({ state: "visible" });
-  await page.locator(".dialog-close").click();
+  await page.locator("#new-dialog .dialog-close").click();
   await page.locator("#new").click();
   await menu();
   await page.unroute("**/api/import-web?**");

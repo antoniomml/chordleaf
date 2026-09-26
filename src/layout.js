@@ -87,6 +87,7 @@ export function layout(song, parsed = parseSong(song.text)) {
           lyricOffset: 0,
           instrumental: true,
           offset,
+          wrapped: offset > 0,
         });
         offset += text.length;
         text = "";
@@ -140,6 +141,7 @@ export function layout(song, parsed = parseSong(song.text)) {
         height: size * 1.44,
         lyricOffset: 0,
         instrumental: false,
+        wrapped: false,
       });
       continue;
     }
@@ -176,6 +178,7 @@ export function layout(song, parsed = parseSong(song.text)) {
         lyricOffset: chordHeight,
         instrumental,
         offset,
+        wrapped: offset > 0,
       });
       offset = end;
     }
@@ -250,26 +253,46 @@ export function layout(song, parsed = parseSong(song.text)) {
     titleLines,
     headerHeight,
     header,
+    // Continuation rows produced by wrapping a source line.
+    wrapped: rows.filter((row) => row.wrapped).length,
   };
 }
 
-// Maximize readable type first. At equal size prefer one column, then a
-// comfortable 10 mm margin; never shrink below 8 pt or force excess pages away.
+// Maximize readable type first. A one-page layout that keeps every source line
+// intact wins at the largest size, preferring one column on ties. Otherwise the
+// two-column layout with the fewest pages, then the fewest broken lines, then
+// the largest size; wrapping is accepted when no size can avoid it. Never
+// shrink below 8 pt or force excess pages away.
 export function fitToPage(song) {
   const text = song.text;
   const parsed = parseSong(text);
-  let best;
+  let bestTwoColumns;
   for (let fontSize = 20; fontSize >= 8; fontSize -= 0.5) {
     for (const columns of [1, 2]) {
       for (const margin of [10, 9, 8, 7, 6]) {
         const candidate = { ...song, text, fontSize, columns, margin };
-        const pages = layout(candidate, parsed).pages.length;
-        if (pages === 1) return { text, fontSize, columns, margin };
-        if (!best || pages < best.pages)
-          best = { text, fontSize, columns, margin, pages };
+        const result = layout(candidate, parsed);
+        const pages = result.pages.length;
+        if (pages === 1 && !result.wrapped)
+          return { text, fontSize, columns, margin };
+        if (
+          columns === 2 &&
+          (!bestTwoColumns ||
+            pages < bestTwoColumns.pages ||
+            (pages === bestTwoColumns.pages &&
+              result.wrapped < bestTwoColumns.wrapped))
+        )
+          bestTwoColumns = {
+            text,
+            fontSize,
+            columns,
+            margin,
+            pages,
+            wrapped: result.wrapped,
+          };
       }
     }
   }
-  const { pages, ...settings } = best;
+  const { pages, wrapped, ...settings } = bestTwoColumns;
   return settings;
 }

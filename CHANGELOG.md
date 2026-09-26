@@ -1,5 +1,14 @@
 # chordleaf changelog
 
+## 1.0.3 · September 26, 2026
+
+- Replace Cifra Club in the import screen with providers that still answer server downloads: LaCuerda, AcordesWeb, TusAcordes, Chordie and Ultimate Guitar. Saved Cifra Club HTML keeps parsing offline.
+- Add provider parsers for AcordesWeb (`#chordsPre`), TusAcordes (Spanish `(LA )` notation), Chordie text lines and Acordes.cc preformatted sheets, with real-page import checks.
+- Decode pages that mislabel latin-1 bytes as UTF-8 with the charset they declare, keeping accents in legacy sheets intact.
+- Add a **Clean text** action that removes a lone blank line and collapses a run of several into one, without touching chord columns, with a count in the confirmation toast.
+- Auto-fit now prefers a one-page layout that keeps every source line intact (one column on ties); when one page is impossible it uses two columns with the fewest pages, then the fewest broken lines.
+- Update the import guide, policy and related content pages to the new host list.
+
 ## 1.0.2 · September 26, 2026
 
 - Simplify website imports to the URL action. Only an upstream 403 shows the upcoming browser-extension notice and a collapsed saved-HTML option.

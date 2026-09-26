@@ -46,7 +46,7 @@ Rules first: most subreddits limit self-promotion. Share the demo and answer que
 - r/guitar: `I made a free chord sheet editor that prints proper A4 pages (no accounts, works offline)`.
 - r/WeAreTheMusicMakers: angle on the rehearsal workflow, from a chord idea to a printed sheet without an app account.
 - r/worshipleaders: angle on quick key changes and capo, with songs staying on the device.
-- Spanish forums and communities: same body, mention Cifra Club and LaCuerda import and that some sites block server downloads, with pasting the lyrics as the fallback.
+- Spanish forums and communities: same body, mention LaCuerda and AcordesWeb import and that some sites block server downloads, with pasting the lyrics or opening a saved HTML copy as the fallback.
 
 ## AlternativeTo
 

@@ -95,7 +95,7 @@ try {
     await page.locator("#close-message").textContent(),
     /PDF o Word/,
   );
-  await page.locator("#cancel-close").click();
+  await page.locator("#cancel-close-x").click();
   await page.locator("#export").click();
   const projectReady = page.waitForEvent("download");
   await page.locator("#save-project").click();
@@ -109,7 +109,7 @@ try {
     await page.locator("#close-message").textContent(),
     /cambios posteriores/,
   );
-  await page.locator("#cancel-close").click();
+  await page.locator("#cancel-close-x").click();
   await page.locator("#source").fill("[C/G]Uno\n{new_page}\n[Dm7]Dos");
   await page.locator(".tab-close").click();
   assert.equal(
