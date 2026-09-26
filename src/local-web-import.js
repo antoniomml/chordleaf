@@ -3,17 +3,7 @@ import { parseWebSong, preText } from "./web-import.js";
 import { songUrl } from "./web-sources.js";
 import { MAX_FILE_BYTES } from "./song-state.js";
 import { t } from "./i18n.js";
-
-function readMarkup(html) {
-  if (
-    html.length > MAX_FILE_BYTES ||
-    new TextEncoder().encode(html).length > MAX_FILE_BYTES
-  )
-    throw new Error(t("El archivo es demasiado grande. El límite es 10 MiB."));
-  const template = document.createElement("template");
-  template.innerHTML = html;
-  return template.content;
-}
+import { readWebMarkup } from "./web-markup.js";
 
 function sourceFromMarkup(root, sourceUrl) {
   const candidates = [
@@ -32,7 +22,7 @@ function sourceFromMarkup(root, sourceUrl) {
 }
 
 export function parseSavedWebPage(html, sourceUrl = "") {
-  const root = readMarkup(html);
+  const root = readWebMarkup(html);
   const source = sourceFromMarkup(root, sourceUrl);
   if (!source)
     throw new Error(
@@ -59,7 +49,7 @@ export async function importSavedWebPage(file, sourceUrl, { signal } = {}) {
 export function parseWebClipboard({ html = "", text = "", sourceUrl = "" }) {
   const fallback = t("Canción importada");
   if (!html) return importText(text, fallback);
-  const root = readMarkup(html);
+  const root = readWebMarkup(html);
   const source = sourceFromMarkup(root, sourceUrl);
   if (source && root.querySelector("pre, .js-store")) {
     try {

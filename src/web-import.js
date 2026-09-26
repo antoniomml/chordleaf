@@ -2,6 +2,7 @@ import { t } from "./i18n.js";
 import { importText, titleCase } from "./files.js";
 import { chordRE, chords, unresolvedChordRE } from "./music.js";
 import { LACUERDA_HOSTS, songUrl } from "./web-sources.js";
+import { readWebMarkup } from "./web-markup.js";
 
 // Read text only; never mount downloaded markup or execute website scripts.
 export function preText(root) {
@@ -161,11 +162,7 @@ function markSectionChords(text) {
 
 export function parseWebSong(html, sourceUrl, contentType = "text/html") {
   const url = songUrl(sourceUrl);
-  // Template contents stay inert, including images and iframes. Never attach
-  // this fragment to the live document, even for locally saved pages.
-  const template = document.createElement("template");
-  template.innerHTML = html;
-  const doc = template.content;
+  const doc = readWebMarkup(html);
   const documentTitle = doc.querySelector("title")?.textContent || "";
   let text = "",
     title = "",
