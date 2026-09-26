@@ -88,7 +88,7 @@ The current tagged release is **`v1.0.2`**. Before another release:
 
 For Vercel, follow [Deployment](deployment.md); the endpoint is disabled until explicitly enabled after firewall configuration. Local `dev`, `preview` and `start` enable it unless the process environment sets `CHORDLEAF_WEB_IMPORT_ENABLED=false`.
 
-The endpoint accepts HTTPS song URLs from Cifra Club, LaCuerda and Ultimate Guitar only. Redirects are checked against the same host allowlist, downloads time out after 18 seconds, and HTML is limited to 3 MiB. No accounts, cookies or credentials are forwarded. The browser extracts song text from inert HTML; downloaded scripts are never run. Sites can block downloads or change their markup; inaccessible versions produce an error and the file/text import remains available.
+The endpoint accepts HTTPS song URLs from the allowlisted hosts only: Ultimate Guitar, LaCuerda, AcordesWeb, TusAcordes, Chordie and Acordes.cc, plus Cifra Club for saved-HTML compatibility. Redirects are checked against the same host allowlist, downloads time out after 18 seconds, and HTML is limited to 3 MiB. No accounts, cookies or credentials are forwarded. The browser extracts song text from inert HTML; downloaded scripts are never run. Sites can block downloads or change their markup; inaccessible versions produce an error and the file/text import remains available.
 
 `CHORDLEAF_LIVE_IMPORTS=1 node tests/import-browser.mjs` additionally exercises public song URLs through the running server. Regular CI uses invented fixtures and does not depend on third-party availability.
 

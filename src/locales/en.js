@@ -6,8 +6,8 @@ export default {
   "La web bloquea la descarga (403). Próximamente podrás importarla con la extensión de navegador de Chordleaf.":
     "The website blocks the download (403). Coming soon: import it with the Chordleaf browser extension.",
   "Abrir página guardada · HTML": "Open saved page · HTML",
-  "Pega el enlace original de Cifra Club, LaCuerda o Ultimate Guitar antes de abrir el HTML.":
-    "Paste the original Cifra Club, LaCuerda or Ultimate Guitar link before opening the HTML.",
+  "Pega el enlace original de LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar antes de abrir el HTML.":
+    "Paste the original LaCuerda, AcordesWeb, TusAcordes, Chordie or Ultimate Guitar link before opening the HTML.",
   "Selecciona la página guardada como HTML (.html o .htm).":
     "Select the page saved as HTML (.html or .htm).",
   "Has hecho varias importaciones seguidas. Espera un minuto y vuelve a intentarlo.":
@@ -30,6 +30,15 @@ export default {
   "ACORDES Y CEJILLA": "CHORDS AND CAPO",
   "FORMATO DE PÁGINA": "PAGE LAYOUT",
   "Más opciones": "More options",
+  "LIMPIAR TEXTO": "CLEAN TEXT",
+  "Comprimir líneas vacías": "Collapse blank lines",
+  "Una línea vacía suelta se elimina; si hay varias seguidas, se deja solo una. Los acordes no se mueven.":
+    "A lone blank line is removed; a run of several is reduced to one. Chords do not move.",
+  "Se comprimieron ": "Collapsed ",
+  "línea vacía": "blank line",
+  "líneas vacías": "blank lines",
+  "No hay líneas vacías que comprimir.":
+    "There are no blank lines to collapse.",
   "Mantener el tono al mover la cejilla":
     "Keep the sounding key when moving the capo",
   "Los acordes se ajustan automáticamente al cambiar la cejilla.":
@@ -213,7 +222,7 @@ export default {
   "Crea una canción en blanco o importa los acordes que ya tienes.":
     "Start with a blank song or import chords you already have.",
   "Cerrar editor ampliado": "Close expanded editor",
-  "Cerrar y descartar": "Close and discard",
+  Descartar: "Discard",
   Cerrar: "Close",
   "← Volver": "← Back",
   "DALE ESPACIO A TU MÚSICA": "MAKE ROOM FOR YOUR MUSIC",
@@ -224,8 +233,8 @@ export default {
   "Pega texto o abre TXT, PDF o Word (.docx)":
     "Paste text or open TXT, PDF or Word (.docx)",
   "Importar desde una web": "Import from a website",
-  "Cifra Club, LaCuerda o Ultimate Guitar":
-    "Cifra Club, LaCuerda or Ultimate Guitar",
+  "LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar":
+    "LaCuerda, AcordesWeb, TusAcordes, Chordie or Ultimate Guitar",
   "Empezar de cero": "Start from scratch",
   "Un folio en blanco. Todas las posibilidades.":
     "A blank page. Every possibility.",
@@ -233,8 +242,8 @@ export default {
   "Abrir archivo": "Open file",
   "Importar texto": "Import text",
   "ENLACE A LA CANCIÓN": "SONG LINK",
-  "Cifra Club, LaCuerda o Ultimate Guitar. Convertiremos la canción en letra y acordes editables.":
-    "Cifra Club, LaCuerda or Ultimate Guitar. We will turn the song into editable lyrics and chords.",
+  "LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar. Convertiremos la canción en letra y acordes editables.":
+    "LaCuerda, AcordesWeb, TusAcordes, Chordie or Ultimate Guitar. We will turn the song into editable lyrics and chords.",
   "Importar canción": "Import song",
   "Los archivos se procesan aquí, en tu navegador.":
     "Files are processed here, in your browser.",
@@ -460,8 +469,8 @@ export default {
   "No se pudo descargar la canción.": "Could not download the song.",
   "Introduce un enlace completo, empezando por https://.":
     "Enter a complete link, starting with https://.",
-  "Usa un enlace HTTPS de Cifra Club, LaCuerda o Ultimate Guitar.":
-    "Use an HTTPS link from Cifra Club, LaCuerda or Ultimate Guitar.",
+  "Usa un enlace HTTPS de LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar.":
+    "Use an HTTPS link from LaCuerda, AcordesWeb, TusAcordes, Chordie or Ultimate Guitar.",
   "Posición no disponible para este acorde.":
     "No position available for this chord.",
   "Diagrama de acorde": "Chord diagram",

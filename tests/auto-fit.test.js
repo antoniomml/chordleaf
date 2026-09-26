@@ -29,6 +29,59 @@ test("automatic fit selects the largest size across both column options", () => 
           .length > 1,
       );
 });
+test("automatic fit avoids wrapping source lines on one page", () => {
+  const song = {
+    ...base,
+    text: "[C]" + "Palabra ".repeat(8).trim() + "\n" + "[G]Corta\n".repeat(6),
+  };
+  const fit = fitToPage(song);
+  const result = layout({ ...song, ...fit });
+  assert.equal(result.pages.length, 1);
+  assert.equal(result.wrapped, 0);
+  assert.equal(fit.columns, 1);
+  assert.ok(fit.margin >= 6 && fit.margin <= 10);
+  // A larger size also fits one page, but only by breaking the long line.
+  const larger = layout({
+    ...song,
+    fontSize: fit.fontSize + 0.5,
+    columns: fit.columns,
+    margin: fit.margin,
+  });
+  assert.equal(larger.pages.length, 1);
+  assert.ok(larger.wrapped > 0);
+});
+test("wrapping is kept and minimized when no readable size can avoid it", () => {
+  const song = { ...base, text: "[C]" + "a".repeat(200) };
+  const fit = fitToPage(song);
+  const result = layout({ ...song, ...fit });
+  assert.equal(fit.columns, 2);
+  assert.equal(result.pages.length, 1);
+  assert.ok(result.wrapped > 0);
+});
+test("two columns keep the fewest pages and broken lines", () => {
+  const line = "[C]" + "Palabra ".repeat(6).trim();
+  const song = { ...base, text: (line + "\n").repeat(70) };
+  const fit = fitToPage(song);
+  const result = layout({ ...song, ...fit });
+  assert.equal(result.wrapped, 0);
+  assert.ok(result.pages.length > 1);
+  assert.equal(fit.columns, 2);
+  // The old font-first choice used a larger size with broken lines instead.
+  let first;
+  outer: for (let fontSize = 20; fontSize >= 8; fontSize -= 0.5)
+    for (const columns of [1, 2])
+      for (const margin of [10, 9, 8, 7, 6]) {
+        const pages = layout({ ...song, fontSize, columns, margin }).pages
+          .length;
+        if (pages === result.pages.length) {
+          first = { fontSize, columns, margin };
+          break outer;
+        }
+      }
+  assert.ok(first);
+  assert.ok(fit.fontSize < first.fontSize);
+  assert.ok(layout({ ...song, ...first }).wrapped > 0);
+});
 test("very long songs retain every line and readable type across pages", () => {
   const song = { ...base, text: "[C]Luz de mañana\n".repeat(200) };
   const fit = fitToPage(song),

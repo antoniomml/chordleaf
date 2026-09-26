@@ -1,7 +1,7 @@
 import { t } from "./i18n.js";
 import { importText, titleCase } from "./files.js";
 import { chordRE, chords, unresolvedChordRE } from "./music.js";
-import { LACUERDA_HOSTS, songUrl } from "./web-sources.js";
+import { LACUERDA_HOSTS, songUrl, webProvider } from "./web-sources.js";
 import { readWebMarkup } from "./web-markup.js";
 
 // Read text only; never mount downloaded markup or execute website scripts.
@@ -96,6 +96,45 @@ function laCuerdaNotation(text) {
     })
     .join("\n");
 }
+/** TusAcordes writes chords as `(LA )`/`(MIm)`; keep the column so the text
+ * importer can still anchor each chord over the following lyric line. */
+export function tusAcordesNotation(text) {
+  return text
+    .split("\n")
+    .map((line) =>
+      line.replace(/\(([^()\n]{1,24})\)/g, (all, raw) => {
+        const token = raw.replace(/\s|\.+$/g, "");
+        if (!token) return all;
+        const name = laCuerdaChord(token);
+        if (!chordRE.test(name)) return all;
+        return name.length >= all.length
+          ? name
+          : name + " ".repeat(all.length - name.length);
+      }),
+    )
+    .join("\n");
+}
+/** Pick the provider's sheet container. Chordie diagrams live in <pre>
+ * blocks that must not be imported as lyrics. */
+function songSheet(doc, provider) {
+  if (provider === "lacuerda")
+    return (
+      doc.querySelector("#t_body pre") ||
+      doc.querySelector(".rtBody pre, pre[data-chord-content], pre:not(#tCode)")
+    );
+  if (provider === "acordesweb") return doc.querySelector("pre#chordsPre");
+  if (provider === "tusacordes") return doc.querySelector(".tablatura-content");
+  if (provider === "chordie") {
+    const sheet = doc.querySelector("#song, .songChord");
+    for (const diagram of sheet?.querySelectorAll("pre") || [])
+      diagram.remove();
+    return sheet;
+  }
+  if (provider === "acordescc") return doc.querySelector("pre");
+  return doc.querySelector(
+    "pre[data-chord-content], .cifra_cnt pre, .rtBody pre, pre",
+  );
+}
 // Some LaCuerda sheets append a six-row fingering legend. It is a diagram,
 // not another verse or chord sequence, so keep it out of the editable song.
 export function stripLaCuerdaFretGrids(text) {
@@ -168,11 +207,8 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
     title = "",
     artist = "",
     capo = 0;
-  if (
-    ["tabs.ultimate-guitar.com", "es.ultimate-guitar.com"].includes(
-      url.hostname,
-    )
-  ) {
+  const provider = webProvider(url.hostname);
+  if (provider === "ultimate-guitar") {
     let data;
     try {
       data = JSON.parse(
@@ -191,19 +227,10 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
       capo = Number(data.tab_view.meta?.capo) || 0;
     }
   } else {
-    const laCuerda = LACUERDA_HOSTS.has(url.hostname);
+    const laCuerda = provider === "lacuerda";
     const plainText =
       contentType === "text/plain" || url.pathname.endsWith(".txt");
-    const pre = plainText
-      ? null
-      : laCuerda
-        ? doc.querySelector("#t_body pre") ||
-          doc.querySelector(
-            ".rtBody pre, pre[data-chord-content], pre:not(#tCode)",
-          )
-        : doc.querySelector(
-            "pre[data-chord-content], .cifra_cnt pre, .rtBody pre, pre",
-          );
+    const pre = plainText ? null : songSheet(doc, provider);
     if (plainText && laCuerda) text = laCuerdaPlainText(html);
     if (pre) {
       // Mark chords on mixed lines (Intro: C - G) without changing spacing on chord rows.
@@ -230,6 +257,8 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
       }
       text = preText(pre);
       if (laCuerda) text = laCuerdaNotation(text);
+      if (provider === "tusacordes") text = tusAcordesNotation(text);
+      if (provider === "acordescc") text = laCuerdaNotation(text);
     }
     if (laCuerda) {
       if (plainText) text = laCuerdaNotation(text);
@@ -245,6 +274,32 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
           artist ||= names?.[2] || "";
         }
       }
+    } else if (provider === "acordesweb") {
+      title =
+        doc.querySelector(".s-title")?.textContent.trim() ||
+        doc.querySelector("h1")?.textContent.trim() ||
+        "";
+      artist =
+        doc.querySelector(".s-artist a, .s-artist")?.textContent.trim() || "";
+      if (!artist)
+        artist = documentTitle.match(/ - (.*?):\s*Acordes/i)?.[1]?.trim() || "";
+      if (!title) title = documentTitle.match(/^(.*?) - /)?.[1]?.trim() || "";
+    } else if (provider === "tusacordes") {
+      const heading = doc.querySelector("h1")?.cloneNode(true);
+      heading?.querySelector(".badge")?.remove();
+      title = heading?.textContent.trim() || "";
+      artist =
+        doc
+          .querySelector("h2.h4, .breadcrumb-item:nth-last-child(2) a")
+          ?.textContent.trim() || "";
+    } else if (provider === "chordie") {
+      const heading = doc.querySelector("h1.titleLeft, h1");
+      artist = heading?.querySelector("a")?.textContent.trim() || "";
+      title = (heading?.textContent || "").replace(artist, "").trim();
+    } else if (provider === "acordescc") {
+      const names = documentTitle.match(/^(.*?),\s*(.*?)\s*\(acordes\)/i);
+      artist = names?.[1]?.trim() || "";
+      title = names?.[2]?.trim() || "";
     } else {
       title = doc.querySelector("h1")?.textContent.trim() || "";
       artist = doc.querySelector("h1 + a h2, .t2 a")?.textContent.trim() || "";
@@ -253,7 +308,7 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
     }
     // Mixed section/chord lines are instrumental, including LaCuerda TXT.
     text = markSectionChords(text);
-    if (laCuerda)
+    if (laCuerda || provider === "chordie")
       text = text
         .split("\n")
         .map((line) => line.trimStart())

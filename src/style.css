@@ -501,6 +501,28 @@ main {
   font-weight: 700;
   letter-spacing: 1.2px;
 }
+.text-tools {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.text-tools button {
+  border: 1px solid #495044;
+  border-radius: 7px;
+  padding: 9px 10px;
+  font-size: 11px;
+  line-height: 1.25;
+}
+.text-tools button:hover:not(:disabled) {
+  border-color: #98b874;
+}
+.text-tools-help {
+  font-size: 10px;
+  line-height: 1.6;
+  color: #9aaa8e;
+  margin: 5px 0 7px;
+}
 .more-document-options {
   border-top: 1px solid var(--border);
   padding: 11px 0 12px;
@@ -1131,9 +1153,18 @@ dialog .choice {
   margin-top: 25px;
 }
 .dialog-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   padding: 10px 13px;
   border: 1px solid #576749;
   border-radius: 6px;
+}
+.button-icon {
+  width: 15px;
+  height: 15px;
+  flex: none;
 }
 .danger {
   background: #6c3933;

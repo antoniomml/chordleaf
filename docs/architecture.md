@@ -55,7 +55,7 @@ Keep model transformations separate from UI controls. Audio transcription remain
 
 `api/import-web.js` awaits `server/web-import.js`. The same handler supplies development, production preview and the standalone server. Vercel serves `dist/` through its CDN; it does not run `pnpm start`. `vercel.json` and `server/security.js` share security headers. The CSP allows inline styles for generated sheet geometry, but no inline scripts, remote scripts or remote connections from the browser.
 
-Web extraction is provider-specific, not song-specific. `src/web-import.js` reads the structured Ultimate Guitar payload, known Cifra Club containers, and LaCuerda's real `#t_body` sheet container. LaCuerda `/TXT/` responses are accepted as `text/plain` only on allowlisted LaCuerda hosts; their metadata header is separated from the chord sheet before normal text import. Downloaded markup remains inert and is never mounted.
+Web extraction is provider-specific, not song-specific. `src/web-import.js` reads the structured Ultimate Guitar payload, LaCuerda's real `#t_body` sheet container, AcordesWeb's `#chordsPre`, TusAcordes' `.tablatura-content` (Spanish chord names), Chordie's `#song` text lines and Acordes.cc's preformatted sheet. Cifra Club containers are still parsed for saved HTML, although its server downloads are blocked. LaCuerda `/TXT/` responses are accepted as `text/plain` only on allowlisted LaCuerda hosts; their metadata header is separated from the chord sheet before normal text import. Downloaded markup remains inert and is never mounted.
 
 ## Production readiness modules
 
@@ -64,7 +64,7 @@ Web extraction is provider-specific, not song-specific. `src/web-import.js` read
 - `src/i18n.js` and `src/locales/en.js`: source-literal translations; interpolated song text is not translated. `/en/` and `/es/` select the interface language.
 - `src/workspace-session.js`: exclusive Web Lock acquired before loading storage. The owner saves and releases on page exit; restored back/forward pages reload before editing.
 - `src/workspace-backup.js`: versioned JSON backup and additive restore, with fresh song identifiers and known-field sanitization.
-- `src/fit-song.js` and `src/fit-worker.js`: bounded auto-fit in a dedicated worker. Each search parses the song once; editing during a pending fit prevents stale results from being applied.
+- `src/fit-song.js` and `src/fit-worker.js`: bounded auto-fit in a dedicated worker. It prefers a one-page layout that keeps every source line intact (one column on ties); when one page is impossible it picks the two-column layout with the fewest pages, then the fewest broken lines. Each search parses the song once; editing during a pending fit prevents stale results from being applied.
 - `src/docx-limits.js`: ZIP central-directory preflight limits declared expanded content to 32 MiB and 2,000 entries. It rejects encrypted and unsupported archives; it is not a complete malicious-parser sandbox.
 - `build/metadata.js`: static English/Spanish entry pages, canonical URLs, language links, social metadata and sitemap. English has one indexed canonical at `/`; `/en/` remains a direct language route and points to `/` as canonical.
 

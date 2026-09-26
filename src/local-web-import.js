@@ -26,7 +26,7 @@ export function parseSavedWebPage(html, sourceUrl = "") {
   if (!source)
     throw new Error(
       t(
-        "Pega el enlace original de Cifra Club, LaCuerda o Ultimate Guitar antes de abrir el HTML.",
+        "Pega el enlace original de LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar antes de abrir el HTML.",
       ),
     );
   return parseWebSong(html, source);

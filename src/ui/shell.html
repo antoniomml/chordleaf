@@ -585,7 +585,9 @@
       ></span>
       <div>
         <strong>Importar desde una web</strong
-        ><small>Cifra Club, LaCuerda o Ultimate Guitar</small>
+        ><small
+          >LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar</small
+        >
       </div>
       <b>→</b></button
     ><button id="blank" class="choice">
@@ -629,11 +631,11 @@
         id="web-url"
         type="url"
         required
-        placeholder="https://www.cifraclub.com/artista/cancion/"
+        placeholder="https://acordesweb.com/cancion/artista/cancion"
     /></label>
     <p class="web-help">
-      Cifra Club, LaCuerda o Ultimate Guitar. Convertiremos la canción en letra
-      y acordes editables.
+      LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar. Convertiremos
+      la canción en letra y acordes editables.
     </p>
     <button id="web-submit" type="submit" class="primary">
       Importar canción
@@ -678,11 +680,42 @@
   </p>
 </dialog>
 <dialog id="close-dialog" aria-labelledby="close-heading">
+  <button id="cancel-close-x" class="dialog-close" aria-label="Seguir editando">
+    ×
+  </button>
   <h2 id="close-heading">¿Cerrar esta canción?</h2>
   <p id="close-message"></p>
   <div class="dialog-actions">
-    <button id="cancel-close">Seguir editando</button
-    ><button id="close-save-project">Guardar proyecto</button
-    ><button id="confirm-close" class="danger">Cerrar y descartar</button>
+    <button id="close-save-project">
+      <svg
+        class="button-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M5 3h11l4 4v14H5z" />
+        <path d="M8 3v6h7V3M8 21v-7h8v7" /></svg
+      >Guardar proyecto</button
+    ><button id="confirm-close" class="danger">
+      <svg
+        class="button-icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 6h18" />
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        <path d="M10 11v6M14 11v6" /></svg
+      >Descartar
+    </button>
   </div>
 </dialog>

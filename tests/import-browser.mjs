@@ -55,7 +55,7 @@ try {
           const workspace = JSON.parse(localStorage.getItem("chordleaf-v1"));
           return workspace.songs.find((s) => s.id === workspace.active);
         });
-    if (invalid) await page.locator(".dialog-close").click();
+    if (invalid) await page.locator("#new-dialog .dialog-close").click();
     await page.unroute("**/api/import-web?**");
     return result;
   }
@@ -101,6 +101,22 @@ try {
   const cuerdaSpanish = await parseThroughUI(
     '<title>PAYASO, El Kanka: Acordes</title><div id="tH1"><h1><a>Payaso</a></h1><h2><a>El Kanka</a></h2></div><div id="t_body"><pre>- Capo en segundo traste -\n\n<a>MIm</a>         <a>SI7</a>       <a>MIm</a>\nMe dicen que soy un payaso,\n<a>MI7</a>.                   <a>LAm</a>\nporque no les tomo en serio,\n<a>DO</a> .          <a>SI7</a>\nque siempre seré un payaso,</pre></div>',
     "https://acordes.lacuerda.net/kanka/payaso.shtml",
+  );
+  const acordesweb = await parseThroughUI(
+    '<title>Prueba - Artista: Acordes para Guitarra, Piano y Ukelele | AcordesWeb</title><header class="hd"><h1 class="s-title">Prueba</h1><p class="s-artist"><a href="https://acordesweb.com/artista/artista">Artista</a></p></header><pre id="chordsPre">Intro X2: <a>G</a> <a>Am</a><br/><br/>  <a>G</a><br/>Luz del día<br/><a>Am</a><br/>Vuelve a sonar</pre>',
+    "https://acordesweb.com/cancion/artista/prueba",
+  );
+  const tusacordes = await parseThroughUI(
+    '<title>Prueba - Artista - TusAcordes</title><nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a>Inicio</a></li><li class="breadcrumb-item"><a>Artista</a></li><li class="breadcrumb-item active" aria-current="page">Prueba</li></ol></nav><h2 class="h4 text-muted mb-0">Artista</h2><h1 class="display-6 fw-bold mb-2"> Prueba <span class="badge text-bg-primary">Acordes</span> </h1><div class="tablatura-content">\n    (LA )                 (MI )\n A cantar una niña yo le enseñaba\n       (MI )                      (LA )\n y un beso en cada nota ella me daba\n</div>',
+    "https://www.tusacordes.com/tab/prueba-acordes-51652",
+  );
+  const chordie = await parseThroughUI(
+    '<title>Prueba Artista Chords and Lyrics for Guitar</title><h1 class="titleLeft">Prueba&nbsp;&nbsp;<a href="/song.php/songartist/Artista/index.html"><span>Artista</span></a></h1><div class="row chordContent"><div id="song" class="songChord"><div class="textline"> Artista - Prueba (Álbum)</div><pre> --- Chords: --- C: E [--0--] G: E [--3--]</pre><div class="textline"> Verso</div><div class="chordline"> Luz <span class="bracket">[</span><span class="absc C">C</span><span class="bracket">]</span>del día</div><div class="chordline"> Vuelve <span class="bracket">[</span><span class="absc G">G</span><span class="bracket">]</span>a sonar</div></div></div>',
+    "https://www.chordie.com/chord.pere/www.example.com/artista/prueba.html",
+  );
+  const acordescc = await parseThroughUI(
+    '<TITLE>Artista, Prueba (acordes) en Acordes.cc</title><div><pre style="margin-top:16px">      DO\nLuz del día\n   RE           MIm\nVuelve a sonar</pre></div>',
+    "https://acordes.cc/?letra-de-prueba-artista",
   );
   assert.equal(cuerdaSpanish.title, "Payaso");
   assert.equal(cuerdaSpanish.artist, "El Kanka");
@@ -193,18 +209,46 @@ try {
     "<h1>Access denied</h1>",
     "https://www.cifraclub.com/a/b/",
   ));
-  const parsed = { cifra, cuerda, cuerdaTxt, ug, ugEs, invalid };
+  const parsed = {
+    cifra,
+    cuerda,
+    cuerdaTxt,
+    acordesweb,
+    tusacordes,
+    chordie,
+    acordescc,
+    ug,
+    ugEs,
+    invalid,
+  };
   for (const s of [
     parsed.cifra,
     parsed.cuerda,
     parsed.cuerdaTxt,
+    parsed.acordesweb,
+    parsed.tusacordes,
+    parsed.chordie,
+    parsed.acordescc,
     parsed.ug,
     parsed.ugEs,
   ]) {
     assert.equal(s.title, "Prueba");
     assert.equal(s.artist, "Artista");
+  }
+  for (const s of [parsed.cifra, parsed.cuerda, parsed.cuerdaTxt]) {
     assert.ok(s.text.includes("[C]Luz de[G]l día"), s.text);
   }
+  assert.match(parsed.acordesweb.text, /\[G\]/);
+  assert.match(parsed.acordesweb.text, /\[Am\]/);
+  assert.equal((parsed.tusacordes.text.match(/\[(?:A|E)\]/g) || []).length, 4);
+  assert.doesNotMatch(parsed.tusacordes.text, /\(|LA|MI/);
+  assert.match(parsed.chordie.text, /\[C\]del día/);
+  assert.match(parsed.chordie.text, /\[G\]a sonar/);
+  assert.doesNotMatch(parsed.chordie.text, /\[--0--\]|Chords:/);
+  assert.match(parsed.acordescc.text, /\[C\]/);
+  assert.match(parsed.acordescc.text, /\[D\]/);
+  assert.match(parsed.acordescc.text, /\[Em\]/);
+  assert.doesNotMatch(parsed.acordescc.text, /DO|RE|MIm/);
   assert.equal(parsed.ug.capo, 2);
   assert.equal(parsed.ugEs.capo, 2);
   assert.ok(parsed.cuerda.text.includes("INTRO: [C] - [G]"));
@@ -229,7 +273,6 @@ try {
   await page.screenshot({ path: "artifacts/import-dialog.png" });
   if (process.env.CHORDLEAF_LIVE_IMPORTS) {
     for (const [name, url] of [
-      ["cifra", "https://www.cifraclub.com/chris-klafford/imagine/"],
       [
         "cuerda-html",
         "https://acordes.lacuerda.net/alejandro_sanz/amiga_mia.shtml",
@@ -239,6 +282,16 @@ try {
         "cuerda-txt",
         "https://acordes.lacuerda.net/TXT/alejandro_sanz/amiga_mia.txt",
       ],
+      ["acordesweb", "https://acordesweb.com/cancion/las-pelotas/cubriendote"],
+      [
+        "tusacordes",
+        "https://www.tusacordes.com/tab/canciones_populares-a_cantar_una_nina-acordes-51652",
+      ],
+      [
+        "chordie",
+        "https://www.chordie.com/chord.pere/www.guitaretab.com/c/coldplay/379151.html",
+      ],
+      ["acordescc", "https://acordes.cc/?letra-de-24-horas-cafe-tacuba"],
       [
         "ug",
         "https://tabs.ultimate-guitar.com/tab/coldplay/fix-you-chords-202594",
@@ -265,10 +318,13 @@ try {
       assert.match(
         await page.locator("#title").inputValue(),
         {
-          cifra: /Imagine/i,
           "cuerda-html": /Amiga M[ií]a/i,
           "cuerda-spanish": /Payaso/i,
           "cuerda-txt": /Amiga M[ií]a/i,
+          acordesweb: /Cubri[eé]ndote/i,
+          tusacordes: /A Cantar Una Niña/i,
+          chordie: /We Never Change/i,
+          acordescc: /24 Horas/i,
           ug: /Fix You/i,
           "ug-es": /Hablar De Nada/i,
         }[name],
@@ -277,6 +333,15 @@ try {
         const source = await page.locator("#source").inputValue();
         assert.doesNotMatch(source, /(?:^|\n)\s*1-(?:\d|X)/);
         assert.doesNotMatch(source, /lacuerda\.net/i);
+      }
+      if (name === "tusacordes") {
+        const source = await page.locator("#source").inputValue();
+        assert.match(source, /\[(?:A|E|D)\]/);
+        assert.doesNotMatch(source, /\((?:LA|MI|RE)/);
+      }
+      if (name === "chordie") {
+        const source = await page.locator("#source").inputValue();
+        assert.doesNotMatch(source, /\[--\d/);
       }
       console.log(
         name,
