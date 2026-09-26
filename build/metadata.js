@@ -651,7 +651,8 @@ const pairImport = {
         h: "Si Cifra Club bloquea la descarga",
         p: [
           "Desde direcciones de centros de datos es habitual recibir un 403 o un 429: la web detecta tráfico automatizado y lo corta. Chordleaf no intenta saltarse ese bloqueo; simplemente te lo dice y te ofrece la alternativa.",
-          "La salida fiable es copiar la letra con acordes de la página y pegarla en el editor. Para archivos que ya tengas, TXT, PDF o DOCX funcionan sin tocar la red. En la política de importación explicamos los límites y por qué existen.",
+          "En el mismo diálogo, abre Usar mi conexión: abrir y pegar. Abrir página original carga la canción con la conexión de tu navegador; copia la letra con acordes y pégala en el campo. También puedes guardar la página como HTML y usar Abrir página guardada: el archivo se lee aquí, sin subirlo al servidor. Revisa la alineación al terminar.",
+          "Una web no puede leer automáticamente otra página sin permiso de ese sitio. Por eso pegar una URL no permite a Chordleaf usar tu conexión para descargarla; abrirla y traer su contenido tú sí. No hace falta instalar una extensión.",
         ],
       },
       {
@@ -748,7 +749,8 @@ const pairImport = {
         h: "When a site blocks the download",
         p: [
           "Requests from datacenter addresses often get a 403 or 429 because the site detects automated traffic and cuts it off. Chordleaf does not try to bypass that block; it tells you what happened and offers a fallback.",
-          "The reliable route is to copy the lyrics and chords from the page and paste them into the editor. For files you already have, TXT, PDF and DOCX import without any network request. The import policy page explains the limits and why they exist.",
+          "In the same dialog, open Use my connection: open and paste. Open original page loads the song through your browser connection; copy its lyrics and chords and paste them into the field. You can also save the page as HTML and choose Open saved page: the file is read locally without uploading it. Review the chord alignment afterwards.",
+          "A website cannot automatically read another site without that site granting permission. Pasting a URL therefore cannot make Chordleaf download it through your connection; opening the page and bringing its content yourself can. No extension is required.",
         ],
       },
       {
@@ -843,6 +845,7 @@ const pairPrivacy = {
         p: [
           "La mayoría de funciones no tocan la red: escribir, colocar acordes, maquetar, transportar y exportar se ejecuta en el navegador. Las excepciones son la descarga de la aplicación y la importación web.",
           "Cuando importas por enlace, el servidor descarga la página pública para que tu navegador no tenga que hacerlo y registra en los logs técnicos la URL solicitada y, si algo falla, el error. Ese registro lo conserva el proveedor de alojamiento según su política y se usa para diagnosticar fallos o abusos, no para identificarte.",
+          "Pegar contenido o abrir un HTML guardado se procesa solo en tu dispositivo. Abrir la página original conecta tu navegador con ese proveedor, cuya política de privacidad se aplica. No se pide permiso para leer el portapapeles: el texto se lee únicamente cuando lo pegas.",
           "El limitador de peticiones cuenta solicitudes por dirección para evitar abusos. No se asocia a ninguna identidad y no se usa con fines publicitarios.",
           "El resto del sitio es estático: no hay base de datos de usuarios, ni API de canciones, ni panel de administración que consultar. Los archivos que ves se sirven tal cual y las canciones que escribes nunca llegan a esa infraestructura.",
         ],
@@ -923,6 +926,7 @@ const pairPrivacy = {
         p: [
           "Most features never use the network: writing, placing chords, layout, transposition and export all run in the browser. The exceptions are downloading the app and web imports.",
           "When you import a link, the server fetches the public page so your browser does not have to, and technical logs record the requested URL and any error. The hosting provider keeps those logs under its own policy; they are used to diagnose failures or abuse, not to identify you.",
+          "Pasting page content or opening saved HTML uses local processing only. Opening the source page contacts that provider directly from your browser; its own privacy policy applies. No clipboard permission is requested, and copied text is read only when you paste it.",
           "A rate limiter counts requests per address to prevent abuse. It is not linked to any identity and is not used for advertising.",
           "The rest of the site is static: there is no user database, no song API and no admin panel to query. The files you see are served as they are, and the songs you write never reach that infrastructure.",
         ],
@@ -982,7 +986,8 @@ const pairPolicy = {
       {
         h: "Qué hace exactamente el importador",
         p: [
-          "Cuando pegas un enlace compatible, el servidor hace una petición HTTPS a la página pública, la descarga con un límite de tamaño y de tiempo y la devuelve al editor para analizarla como texto. Las redirecciones se vuelven a validar contra la lista de hosts permitidos, y se rechazan credenciales, puertos no estándar y esquemas que no sean HTTPS.",
+          "Para usar tu conexión, abre la página original y pega aquí su letra con acordes, o guarda la página como HTML y abre ese archivo. Chordleaf lee solo el contenido que aportas y no envía ese texto o archivo al servidor.",
+          "Cuando confirmas la descarga de un enlace compatible, el servidor hace una petición HTTPS a la página pública, la descarga con un límite de tamaño y de tiempo y la devuelve al editor para analizarla como texto. Las redirecciones se vuelven a validar contra la lista de hosts permitidos, y se rechazan credenciales, puertos no estándar y esquemas que no sean HTTPS.",
           "El contenido descargado no se ejecuta, no se monta como página y no se guarda: se usa para extraer la letra y los acordes que el editor te mostrará. No hay caché de canciones de terceros ni índice público.",
         ],
       },
@@ -1079,7 +1084,8 @@ const pairPolicy = {
       {
         h: "What the importer actually does",
         p: [
-          "When you paste a supported link, the server makes an HTTPS request to the public page, downloads it within size and time limits and hands it to the editor to parse as text. Redirects are revalidated against the allowed host list, and credentials, non-standard ports and non-HTTPS schemes are rejected.",
+          "To use your own connection, open the original page and paste its lyrics and chords here, or save the page as HTML and open that file. Chordleaf reads only the content you provide and does not send that text or file to the server.",
+          "When you confirm a supported link download, the server makes an HTTPS request to the public page, downloads it within size and time limits and hands it to the editor to parse as text. Redirects are revalidated against the allowed host list, and credentials, non-standard ports and non-HTTPS schemes are rejected.",
           "The downloaded content is never executed, never mounted as a page and never stored: it is used to extract the lyrics and chords the editor shows you. There is no cache of third-party songs and no public index.",
         ],
       },
@@ -1235,7 +1241,7 @@ const pairGuide = {
           "Casi todas las incidencias tienen una salida conocida. Estas son las más habituales.",
         ],
         list: [
-          "La importación por enlace falla o responde 403/429: pega el texto; la web está bloqueando tráfico de servidores.",
+          "La importación por enlace falla: usa Abrir página original y Usar mi conexión: abrir y pegar; también puedes abrir el HTML guardado. Un 403/429 del origen puede ser un bloqueo; si Chordleaf limita varias importaciones seguidas, espera un minuto.",
           "Un acorde aparece marcado: sustitúyelo desde el panel o revisa su grafía.",
           "La canción se parte en dos páginas: reduce la letra, ajusta los márgenes o usa dos columnas.",
           "Has perdido las canciones: comprueba que estás en el mismo navegador y dominio; sin copia exportada no se pueden recuperar.",
@@ -1362,7 +1368,7 @@ const pairGuide = {
           "Almost every issue has a known way out. These are the usual ones.",
         ],
         list: [
-          "A link import fails or returns 403/429: paste the text; the site is blocking server traffic.",
+          "A link import fails: use Open original page and Use my connection: open and paste, or open the saved HTML. A source 403/429 may be a block; if Chordleaf limits repeated imports, wait a minute.",
           "A chord appears flagged: replace it from the panel or check its spelling.",
           "The song splits across two pages: reduce the font, adjust the margins or use two columns.",
           "You lost your songs: check that you are in the same browser and origin; without an exported copy they cannot be recovered.",

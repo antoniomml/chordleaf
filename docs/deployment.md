@@ -49,10 +49,11 @@ To stop imports quickly, set the variable to `false` and redeploy. A browser-ori
 
 `vercel.json` applies `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin` to every response, and a seven-day cache (`max-age=604800`) to `/fonts/*`, `/icons/*`, `/logo.svg` and `/social-preview.png`. Hashed `/assets/*` stay immutable, while HTML and API responses stay uncached. `server/security.js` and `server/start.js` mirror the same policy for local preview builds. This application needs no cross-origin reads or writes, so anything broader is unnecessary.
 
-Two header operations live outside the repository and must be reviewed in the Vercel dashboard or your DNS provider:
+`Access-Control-Allow-Origin` is explicitly set to `https://chordleaf.com` in `vercel.json`, overriding the wildcard observed on static production responses. The standalone server mirrors that policy. Same-origin requests on previews or self-hosted copies do not need CORS permission. Verify the deployed header after promotion; this header does not let Chordleaf read another site's pages.
 
-1. **Remove the blanket CORS header.** Vercel may attach `access-control-allow-origin: *` to responses from a project-level setting that is not stored in `vercel.json`. Check it with `curl -I https://chordleaf.com/` after a deployment and delete the setting in **Project → Settings → Headers** (or replace it with an explicit, minimal policy). Same-origin requests keep working, and wildcard CORS only widens what other origins can read.
-2. **Treat HSTS `preload` as a separate operation.** Production sends `Strict-Transport-Security` with a long lifetime today. Adding `includeSubDomains; preload` and submitting the domain to <https://hstspreload.org/> commits every current and future subdomain to HTTPS-only, and removal from browser preload lists can take months. Enable it only when every subdomain is under your control and serves valid HTTPS; keep the header without `preload` until then.
+HSTS `preload` remains a separate operation: do not enable it without verifying that every subdomain is HTTPS. The current long-lived HSTS header remains in place.
+
+On September 26, 2026, the existing Vercel project rule **Limit song imports** was verified in the dashboard: enabled, Request Path equals `/api/import-web`, fixed window of 10 requests / 60 seconds, keyed by IP, response 429. No change or plan upgrade was needed. Recheck the rule if the project or endpoint moves; alerts for anomalies shown in this Hobby dashboard require Pro.
 
 ## 6. Check the preview before launch
 
@@ -62,6 +63,8 @@ Two header operations live outside the repository and must be reviewed in the Ve
 - Confirm that `/src/app.js` and unknown paths return 404, rather than publishing source files or returning HTML for the API.
 - Run Lighthouse against the deployed preview; verify canonical/robots/sitemap on the final domain and add an absolute social-preview image URL.
 - Check Safari/iPhone and Firefox as well as Chromium. Test keyboard navigation, 200% zoom and a screen reader.
+
+After promotion, verify `/release.json` against the package version and `git rev-parse vX.Y.Z^{commit}`; the tag must identify the deployed main commit.
 
 Promote the reviewed preview only after the applicable launch priorities are resolved. Keep the previous deployment available for rollback. Browser songs belong to their origin: moving from a preview URL to a custom domain does not move local storage. Tell testers to export a full workspace JSON backup before switching domains.
 

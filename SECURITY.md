@@ -8,10 +8,10 @@ Include the affected version, a minimal invented example, reproduction steps and
 
 ## Security boundaries
 
-- Local documents are processed in the browser. Imported HTML is parsed as data, never mounted as a live webpage.
+- Local documents are processed in the browser. Saved website HTML and pasted content are read only at the user’s request, within file/text budgets, and stay on the device. HTML is parsed in an unattached template, never mounted as a live webpage; embedded scripts and resources are not executed or loaded.
 - Web imports allow specific HTTPS hosts, reject credentials and nonstandard ports, revalidate redirects, and bound time and response size. Client-visible failures use a small fixed set of translated messages; technical details stay in server logs.
 - Vercel web imports require explicit activation after deployment-level rate limiting. This is a public endpoint, not an authenticated service.
-- Production CSP blocks inline and external scripts; inline styles remain necessary for document geometry. Framing, MIME sniffing and unnecessary device permissions are restricted. Responses also set `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy` to `same-origin`, and the project does not need CORS: remove any dashboard-level `access-control-allow-origin: *` that Vercel may add.
+- Production CSP blocks inline and external scripts; inline styles remain necessary for document geometry. Framing, MIME sniffing and unnecessary device permissions are restricted. Responses also set `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy` to `same-origin`, and deployment configuration fixes `Access-Control-Allow-Origin` to `https://chordleaf.com`, overriding the wildcard observed on static production responses.
 - HSTS does not include `subdomains` or `preload` yet. Enabling `preload` is a deliberate, hard-to-reverse operation reserved for a domain whose subdomains are all HTTPS.
 - File, text, DOCX, PDF-page and diagram limits reduce accidental exhaustion. Compressed Word documents are inflated in a worker with a decoded-size budget before the parser reads them. They are not a complete sandbox against all compressed-document or parser attacks.
 - Songs are not encrypted or synchronized. Browser storage and XSS prevention are critical to protecting local documents.

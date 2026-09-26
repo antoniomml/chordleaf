@@ -123,16 +123,10 @@ for (const name of names) {
     assert.equal(registration.scope, "/");
     assert.equal(registration.state, "activated");
     assert.equal(registration.script, "/sw.js");
-    if (
-      !(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)))
-    )
-      await page.reload({ waitUntil: "load" });
     await page.waitForFunction(() =>
       Boolean(navigator.serviceWorker.controller),
     );
-
-    // A controlled reload fills the runtime cache with the shell.
-    await page.reload({ waitUntil: "load" });
+    // Do not reload online: the first installation must cache the whole app.
     await page.locator("#empty-new").waitFor();
     const cachedPaths = await page.evaluate(async () => {
       const paths = [];
@@ -152,6 +146,32 @@ for (const name of names) {
       cachedPaths.some((path) => path.startsWith("/assets/")),
       "build assets should be cached",
     );
+    const entryResources = await page.evaluate(() =>
+      [...document.querySelectorAll('script[src], link[rel="stylesheet"]')].map(
+        (element) => new URL(element.src || element.href).pathname,
+      ),
+    );
+    for (const resource of entryResources)
+      assert.ok(
+        cachedPaths.includes(resource),
+        `${resource} cached on first visit`,
+      );
+    for (const resource of [
+      "/en/",
+      "/fonts/GoogleSansCode-Regular.ttf",
+      "/fonts/GoogleSansCode-Bold.ttf",
+    ])
+      assert.ok(
+        cachedPaths.includes(resource),
+        `${resource} available offline`,
+      );
+    assert.ok(cachedPaths.some((path) => path.includes("docx-worker")));
+    assert.ok(cachedPaths.some((path) => path.includes("pdf.worker")));
+    if (name === "chromium") {
+      const cdp = await context.newCDPSession(page);
+      await cdp.send("Network.clearBrowserCache");
+      await cdp.detach();
+    }
 
     assert.deepEqual(consoleErrors, [], "no console errors while online");
     if (name === "webkit") {
@@ -185,6 +205,15 @@ for (const name of names) {
           JSON.parse(localStorage.getItem("chordleaf-v1"))?.songs?.[0]?.text ===
           "[C]Offline editing works",
       );
+      // These dynamic libraries have never been used online in this context.
+      for (const format of ["pdf", "docx"]) {
+        await page.locator("#export").click();
+        const download = page.waitForEvent("download");
+        await page.locator(`[data-export="${format}"]`).click();
+        const file = await download;
+        assert.ok(file.suggestedFilename().endsWith(`.${format}`));
+        assert.equal(await file.failure(), null);
+      }
       // A failing API request must not be stored either.
       await page.evaluate(async () => {
         try {

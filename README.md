@@ -4,7 +4,7 @@
   <p><strong>Your song. Your chords. Everything in place.</strong></p>
   <p>A workspace for writing lyrics and chords, exploring guitar voicings,<br>and making a song sheet for your next rehearsal.</p>
   <p>
-    <a href="https://github.com/antoniomml/chordleaf/releases/tag/v1.0.0"><img src="https://img.shields.io/badge/version-1.0.0-c9e79c?style=flat-square&labelColor=263426" alt="Release 1.0.0"></a>
+    <a href="https://github.com/antoniomml/chordleaf/releases/tag/v1.0.1"><img src="https://img.shields.io/badge/version-1.0.1-c9e79c?style=flat-square&labelColor=263426" alt="Release 1.0.1"></a>
     <a href="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
   </p>
   <p><a href="https://chordleaf.com/">Open Chordleaf</a> · <a href="#a-small-studio-for-your-songs">Features</a> · <a href="https://github.com/antoniomml/chordleaf/wiki">User wiki</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
@@ -59,7 +59,7 @@ Choose an interpretation to insert it at the text cursor or replace a specific o
 
 ## Your music stays with you
 
-Songs and imported files are processed in your browser. Web imports send the song URL to the Chordleaf server, which downloads the public page; your edited songs are not uploaded. There are no accounts. Changes are saved automatically in that browser.
+Songs and imported files are processed in your browser. Link downloads send the song URL to the Chordleaf server, which downloads the public page; your edited songs are not uploaded. To use your own browser connection instead, choose **New song → Import from a website → Use my connection: open and paste**. Open the original page, copy its lyrics and chords and paste them, or choose **Open saved page · HTML** after saving the page in your browser. The pasted content and HTML file stay on your device. There are no accounts. Changes are saved automatically in that browser.
 
 **Save an editable project for any song you want to revisit.** Choose **Export → Save editable project** to download a `.chordleaf.json` file; open it later through **New song → Open editable project**. PDF and Word are sharing formats and do not mark the project as saved. Closing a song discards its browser copy; Chordleaf warns when the project has not been saved or has later changes. Browser storage is only a temporary recovery copy and does not sync devices. **Workspace backup · JSON** preserves every open song separately.
 
@@ -69,7 +69,7 @@ Both interface and document fonts are served by the app itself. There are no thi
 
 ## Install it, print it
 
-Chordleaf is an installable app. Open it in Chromium, Firefox or Safari and choose **Install**, or add it to your home screen on a phone. After the first visit a service worker keeps the editor and the sheet available offline; only web imports need the server. **Export → Print** paints just the A4 sheet, without the workspace chrome.
+Chordleaf is an installable app. Open it in Chromium, Firefox or Safari and choose **Install**, or add it to your home screen on a phone. After the first successful service-worker installation, the editor, fonts, file importers and PDF/Word exporters are available offline. Updates take over when existing Chordleaf tabs close; link downloads still need a connection. **Export → Print** paints just the A4 sheet, without the workspace chrome.
 
 **Export → ChordPro (.cho)** writes a portable plain-text chord sheet with `{title}`, `{artist}` and `{capo}` directives, understood by apps such as SongBook, OnSong and the ChordPro toolchain, and it can be imported back here.
 

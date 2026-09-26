@@ -1,4 +1,5 @@
 import { metadataPlugin } from "./build/metadata.js";
+import { pwaPlugin } from "./build/pwa.js";
 import { defineConfig } from "vite";
 import { webImportMiddleware } from "./server/web-import.js";
 const site = process.env.SITE_URL ? new URL(process.env.SITE_URL) : null;
@@ -17,6 +18,7 @@ if (
 export default defineConfig({
   plugins: [
     metadataPlugin(site),
+    pwaPlugin(),
     {
       name: "chordleaf-web-import",
       configureServer(server) {
