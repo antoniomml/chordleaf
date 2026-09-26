@@ -5,7 +5,7 @@ import { LACUERDA_HOSTS, songUrl } from "./web-sources.js";
 import { readWebMarkup } from "./web-markup.js";
 
 // Read text only; never mount downloaded markup or execute website scripts.
-export function preText(root) {
+function preText(root) {
   function read(node) {
     if (node.nodeType === 3) return node.textContent;
     if (node.nodeType !== 1) return "";
@@ -337,7 +337,7 @@ export async function importWebSong(value, { signal } = {}) {
   if (response.status === 429)
     throw new Error(
       t(
-        "Has hecho varias importaciones seguidas. Espera un minuto o usa la opción de abrir y pegar.",
+        "Has hecho varias importaciones seguidas. Espera un minuto y vuelve a intentarlo.",
       ),
     );
   if (!response.headers.get("content-type")?.includes("application/json"))
@@ -347,7 +347,12 @@ export async function importWebSong(value, { signal } = {}) {
       ),
     );
   const data = await response.json();
-  if (!response.ok)
-    throw new Error(data.error || t("No se pudo descargar la canción."));
+  if (!response.ok) {
+    const error = new Error(
+      data.error || t("No se pudo descargar la canción."),
+    );
+    if (data.code === "SOURCE_FORBIDDEN") error.code = data.code;
+    throw error;
+  }
   return parseWebSong(data.html, data.url, data.contentType);
 }

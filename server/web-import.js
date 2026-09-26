@@ -10,6 +10,7 @@ class ImportError extends Error {
     super(message, options);
     this.name = "ImportError";
     this.publicMessage = message;
+    this.code = options?.code;
   }
 }
 export function publicImportError(error) {
@@ -59,6 +60,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
       if ([403, 429].includes(response.status))
         throw new ImportError(
           `La web bloquea las descargas desde servidores (HTTP ${response.status}). Copia la letra y pégala en el editor.`,
+          { code: response.status === 403 ? "SOURCE_FORBIDDEN" : undefined },
         );
       throw new ImportError(
         `La web no permite descargar esta canción (HTTP ${response.status}). Prueba otro enlace o importa un archivo.`,
@@ -155,6 +157,13 @@ export async function webImportMiddleware(req, res, next) {
     // Keep the literal first so a crafted URL cannot act as a format string.
     console.error("[web-import]", target.slice(0, 500), error);
     res.statusCode = 422;
-    res.end(JSON.stringify({ error: publicImportError(error) }));
+    res.end(
+      JSON.stringify({
+        error: publicImportError(error),
+        ...(error instanceof ImportError && error.code === "SOURCE_FORBIDDEN"
+          ? { code: error.code }
+          : {}),
+      }),
+    );
   }
 }
