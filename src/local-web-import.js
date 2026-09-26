@@ -1,5 +1,4 @@
-import { importText } from "./files.js";
-import { parseWebSong, preText } from "./web-import.js";
+import { parseWebSong } from "./web-import.js";
 import { songUrl } from "./web-sources.js";
 import { MAX_FILE_BYTES } from "./song-state.js";
 import { t } from "./i18n.js";
@@ -44,22 +43,4 @@ export async function importSavedWebPage(file, sourceUrl, { signal } = {}) {
   const html = await file.text();
   signal?.throwIfAborted();
   return parseSavedWebPage(html, sourceUrl);
-}
-
-export function parseWebClipboard({ html = "", text = "", sourceUrl = "" }) {
-  const fallback = t("Canción importada");
-  if (!html) return importText(text, fallback);
-  const root = readWebMarkup(html);
-  const source = sourceFromMarkup(root, sourceUrl);
-  if (source && root.querySelector("pre, .js-store")) {
-    try {
-      return parseWebSong(html, source);
-    } catch {
-      // Copied selections may omit provider metadata required for a full page.
-    }
-  }
-  // A copied selection often has no title or provider wrapper. Preserve its
-  // preformatted chord spacing; fall back to the clipboard's plain text.
-  const pre = root.querySelector("pre");
-  return importText(pre ? preText(pre) : text, fallback);
 }

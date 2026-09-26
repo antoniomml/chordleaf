@@ -651,7 +651,7 @@ const pairImport = {
         h: "Si Cifra Club bloquea la descarga",
         p: [
           "Desde direcciones de centros de datos es habitual recibir un 403 o un 429: la web detecta tráfico automatizado y lo corta. Chordleaf no intenta saltarse ese bloqueo; simplemente te lo dice y te ofrece la alternativa.",
-          "En el mismo diálogo, abre Usar mi conexión: abrir y pegar. Abrir página original carga la canción con la conexión de tu navegador; copia la letra con acordes y pégala en el campo. También puedes guardar la página como HTML y usar Abrir página guardada: el archivo se lee aquí, sin subirlo al servidor. Revisa la alineación al terminar.",
+          "Si la web devuelve un 403, verás un aviso sobre la futura extensión de navegador de Chordleaf y la opción plegada ¿Tienes la página guardada? Desde ahí puedes abrir un HTML guardado en tu navegador, sin subirlo al servidor. Para pegar letra y acordes, vuelve al menú inicial y elige Importar texto o archivo. Revisa la alineación al terminar.",
           "Una web no puede leer automáticamente otra página sin permiso de ese sitio. Por eso pegar una URL no permite a Chordleaf usar tu conexión para descargarla; abrirla y traer su contenido tú sí. No hace falta instalar una extensión.",
         ],
       },
@@ -749,7 +749,7 @@ const pairImport = {
         h: "When a site blocks the download",
         p: [
           "Requests from datacenter addresses often get a 403 or 429 because the site detects automated traffic and cuts it off. Chordleaf does not try to bypass that block; it tells you what happened and offers a fallback.",
-          "In the same dialog, open Use my connection: open and paste. Open original page loads the song through your browser connection; copy its lyrics and chords and paste them into the field. You can also save the page as HTML and choose Open saved page: the file is read locally without uploading it. Review the chord alignment afterwards.",
+          "If the source returns 403, you will see a notice about the upcoming Chordleaf browser extension and a collapsed Have a saved copy of the page? option. Open a saved HTML file there without uploading it. To paste lyrics and chords, return to the initial menu and choose Import text or file. Review chord alignment afterwards.",
           "A website cannot automatically read another site without that site granting permission. Pasting a URL therefore cannot make Chordleaf download it through your connection; opening the page and bringing its content yourself can. No extension is required.",
         ],
       },
@@ -1241,7 +1241,7 @@ const pairGuide = {
           "Casi todas las incidencias tienen una salida conocida. Estas son las más habituales.",
         ],
         list: [
-          "La importación por enlace falla: usa Abrir página original y Usar mi conexión: abrir y pegar; también puedes abrir el HTML guardado. Un 403/429 del origen puede ser un bloqueo; si Chordleaf limita varias importaciones seguidas, espera un minuto.",
+          "La importación por enlace falla: un 403 del origen muestra una opción plegada para abrir el HTML guardado. Para pegar contenido, usa Importar texto o archivo desde el menú inicial. Si Chordleaf limita varias importaciones seguidas, espera un minuto.",
           "Un acorde aparece marcado: sustitúyelo desde el panel o revisa su grafía.",
           "La canción se parte en dos páginas: reduce la letra, ajusta los márgenes o usa dos columnas.",
           "Has perdido las canciones: comprueba que estás en el mismo navegador y dominio; sin copia exportada no se pueden recuperar.",
@@ -1368,7 +1368,7 @@ const pairGuide = {
           "Almost every issue has a known way out. These are the usual ones.",
         ],
         list: [
-          "A link import fails: use Open original page and Use my connection: open and paste, or open the saved HTML. A source 403/429 may be a block; if Chordleaf limits repeated imports, wait a minute.",
+          "A link import fails: a source 403 reveals a collapsed saved-HTML option. To paste content, use Import text or file from the initial menu. If Chordleaf limits repeated imports, wait a minute.",
           "A chord appears flagged: replace it from the panel or check its spelling.",
           "The song splits across two pages: reduce the font, adjust the margins or use two columns.",
           "You lost your songs: check that you are in the same browser and origin; without an exported copy they cannot be recovered.",

@@ -1,5 +1,11 @@
 # chordleaf changelog
 
+## 1.0.2 · September 26, 2026
+
+- Simplify website imports to the URL action. Only an upstream 403 shows the upcoming browser-extension notice and a collapsed saved-HTML option.
+- Keep text pasting in the existing text/file import screen. Hide and reset the HTML fallback on URL changes, retries and new imports; other errors do not reveal it.
+- Distinguish source 403 errors with a structured code and cover the conditional flow, local HTML safety and English/Spanish copy.
+
 ## 1.0.1 · September 26, 2026
 
 - Make offline use reliable after the first successful installation: precache the editor, all entry routes, fonts, workers and lazy PDF/Word libraries. Cache names follow build contents automatically; updates wait until open tabs close before replacing their cache.

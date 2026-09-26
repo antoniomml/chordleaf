@@ -1,7 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { LACUERDA_HOSTS, songUrl } from "../src/web-sources.js";
-import { fetchSongPage, publicImportError } from "../server/web-import.js";
+import {
+  fetchSongPage,
+  publicImportError,
+  webImportMiddleware,
+} from "../server/web-import.js";
 import { stripLaCuerdaFretGrids } from "../src/web-import.js";
 test("only supported public HTTPS hosts are accepted", () => {
   for (const url of [
@@ -74,13 +78,14 @@ test("blocked, oversized and non-HTML responses fail clearly", async () => {
       fetchSongPage("https://acordes.lacuerda.net/a/b", async () => response),
     );
 });
-test("server-side blocks explain the manual paste fallback", async () => {
+test("source 403 has a distinct code for the conditional HTML fallback", async () => {
   await assert.rejects(
     fetchSongPage(
       "https://www.cifraclub.com/artista/cancion/",
       async () => new Response("blocked", { status: 403 }),
     ),
     (error) => {
+      assert.equal(error.code, "SOURCE_FORBIDDEN");
       assert.equal(
         publicImportError(error),
         "La web bloquea las descargas desde servidores (HTTP 403). Copia la letra y pégala en el editor.",
@@ -132,4 +137,36 @@ test("plain text stays rejected for providers that do not expose chord TXT", asy
         }),
     ),
   );
+});
+
+test("API identifies only upstream 403 as the saved-HTML fallback", async (t) => {
+  let status = 403;
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async () => new Response("blocked", { status }),
+  );
+  t.mock.method(console, "error", () => {});
+  for (status of [403, 429, 500]) {
+    let body;
+    const response = {
+      statusCode: 200,
+      setHeader() {},
+      end(value) {
+        body = JSON.parse(value);
+      },
+    };
+    await webImportMiddleware(
+      {
+        method: "GET",
+        url:
+          "/api/import-web?url=" +
+          encodeURIComponent("https://www.cifraclub.com/artist/song/"),
+      },
+      response,
+      () => assert.fail("Import route must be handled"),
+    );
+    assert.equal(response.statusCode, 422);
+    assert.equal(body.code, status === 403 ? "SOURCE_FORBIDDEN" : undefined);
+  }
 });

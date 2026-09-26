@@ -839,9 +839,7 @@ function importScreen(screen) {
   }[screen];
   $("#import-privacy").textContent =
     screen === "web"
-      ? t(
-          "La descarga por enlace usa el servidor. Abrir y pegar o importar HTML usa tu navegador.",
-        )
+      ? t("El servidor descarga únicamente la página del enlace.")
       : t("Los archivos se procesan aquí, en tu navegador.");
   $("#import-error").hidden = true;
   $("#import-error").textContent = "";
@@ -960,7 +958,13 @@ $("#paste-import").onclick = async () => {
 };
 $("#web").onclick = () => importScreen("web");
 const localWebImport = setupLocalWebImport({
-  onError: importError,
+  onChange() {
+    importController?.abort();
+    importGeneration++;
+    $("#import-error").hidden = true;
+    $("#web-submit").disabled = false;
+    $("#web-submit").textContent = t("Importar canción");
+  },
   async onImport(read) {
     importController?.abort();
     importController = new AbortController();
@@ -985,6 +989,7 @@ $("#web-import").onsubmit = async (e) => {
   importController?.abort();
   importController = new AbortController();
   const generation = ++importGeneration;
+  localWebImport.reset();
   $("#import-error").hidden = true;
   $("#web-submit").disabled = true;
   $("#web-submit").textContent = t("Importando…");
@@ -997,8 +1002,16 @@ $("#web-import").onsubmit = async (e) => {
     $("#web-url").value = "";
   } catch (error) {
     if (generation === importGeneration && $("#new-dialog").open) {
-      importError(error);
-      localWebImport.show();
+      if (error.code === "SOURCE_FORBIDDEN") {
+        importError(
+          new Error(
+            t(
+              "La web bloquea la descarga (403). Próximamente podrás importarla con la extensión de navegador de Chordleaf.",
+            ),
+          ),
+        );
+        localWebImport.show();
+      } else importError(error);
     }
   } finally {
     if (generation === importGeneration) {

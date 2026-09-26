@@ -73,7 +73,7 @@ The same build writes the sitemap covering the home pair plus every content pair
 
 ## Releases
 
-The current tagged release is **`v1.0.1`**. Before another release:
+The current tagged release is **`v1.0.2`**. Before another release:
 
 1. Update `version` in `package.json` and add its changes to `CHANGELOG.md`.
 2. Run frozen installation, formatting, tests, build and browser checks.
@@ -127,10 +127,10 @@ PORT=5173 pnpm start
 CHORDLEAF_URL=http://localhost:5173 node tests/pwa-browser.mjs
 ```
 
-`tests/pwa-browser.mjs` runs on Chromium, Firefox and WebKit; local runs skip WebKit when the host lacks its system libraries, and `CHORDLEAF_BROWSERS=chromium,firefox` narrows the engines. It checks the manifest, icon sizes, installation without a controlled online reload, offline editing, first-time PDF/Word exports and the `/api/*` exclusion. Chromium also clears the HTTP cache before going offline. The local HTML/clipboard suite verifies that pasted or saved markup cannot execute or initiate embedded-resource requests, even with CSP disabled for the test.
+`tests/pwa-browser.mjs` runs on Chromium, Firefox and WebKit; local runs skip WebKit when the host lacks its system libraries, and `CHORDLEAF_BROWSERS=chromium,firefox` narrows the engines. It checks the manifest, icon sizes, installation without a controlled online reload, offline editing, first-time PDF/Word exports and the `/api/*` exclusion. Chromium also clears the HTTP cache before going offline. The local HTML fallback suite verifies that saved markup cannot execute or initiate embedded-resource requests, even with CSP disabled for the test.
 
 ## Local website imports
 
 The ordinary website cannot read another origin's page unless that origin grants CORS permission. `no-cors` returns an unreadable response, and forwarding a visitor IP header from Vercel does not change the outbound IP. Keep server-side downloads as an optional supported-provider flow; do not add public proxy services, identity spoofing or automatic retries after source blocks.
 
-The website import dialog has an explicit open-and-paste / saved-HTML route. Opening the original page uses the visitor's browser connection. `src/local-web-import.js` reads only user-supplied content, validates supported source metadata and applies existing size limits and provider parsers. `src/ui/local-web-import.js` manages the paste/file UI. `src/web-markup.js` uses DOMPurify with an explicit tag/attribute allowlist to return an inert fragment, preserving provider metadata and preformatted text. Scripts, images and frames are removed, and the fragment is never inserted into the live document. Keep sanitization in this shared path for both server and local imports. Clipboard access only occurs on a user paste event. Tests use invented songs; do not commit downloaded third-party pages.
+The website import dialog initially offers only the URL download. A structured `SOURCE_FORBIDDEN` error identifies an upstream 403; only that error reveals a collapsed saved-HTML fallback and the upcoming-extension notice. Other failures do not reveal it. Editing the URL, retrying or reopening the dialog resets the fallback. Text pasting remains in the existing text/file import screen. `src/local-web-import.js` validates local file size and source metadata, and `src/ui/local-web-import.js` handles file selection. `src/web-markup.js` uses DOMPurify with an explicit tag/attribute allowlist to return an inert fragment, preserving provider metadata and preformatted text. Scripts, images and frames are removed, and the fragment is never inserted into the live document. Keep sanitization in this shared path for both server and local imports. Tests use invented songs; do not commit downloaded third-party pages.

@@ -635,43 +635,27 @@
       Cifra Club, LaCuerda o Ultimate Guitar. Convertiremos la canción en letra
       y acordes editables.
     </p>
-    <div class="web-import-actions">
-      <button id="web-submit" type="submit" class="primary">
-        Importar canción</button
-      ><a id="web-open" target="_blank" rel="noopener noreferrer" hidden
-        >Abrir página original ↗</a
-      >
-    </div>
-    <details id="web-local-options">
-      <summary>Usar mi conexión: abrir y pegar</summary>
-      <p class="web-help">
-        Abre la página original, copia la letra con sus acordes y pégala aquí.
-        También puedes guardar la página en tu navegador y abrir su archivo
-        HTML. El contenido se procesa en tu dispositivo.
-      </p>
-      <label class="field"
-        >LETRA Y ACORDES<textarea
-          id="web-paste"
-          rows="5"
-          placeholder="Pega aquí la letra con sus acordes…"
-        ></textarea>
-      </label>
-      <div class="dialog-actions">
-        <button type="button" id="web-file-button">
-          Abrir página guardada · HTML</button
-        ><button type="button" id="web-paste-submit" class="primary">
-          Importar texto
-        </button>
-      </div>
-      <input
-        id="web-local-file"
-        type="file"
-        accept=".html,.htm,text/html"
-        hidden
-      />
-    </details>
+    <button id="web-submit" type="submit" class="primary">
+      Importar canción
+    </button>
   </form>
   <p id="import-error" role="alert" hidden></p>
+  <details id="web-local-options" hidden>
+    <summary>¿Tienes la página guardada?</summary>
+    <p class="web-help">
+      Puedes abrir el archivo HTML de la canción guardado desde tu navegador. Se
+      procesa en tu dispositivo, sin subirlo al servidor.
+    </p>
+    <button type="button" id="web-file-button">
+      Abrir página guardada · HTML
+    </button>
+    <input
+      id="web-local-file"
+      type="file"
+      accept=".html,.htm,text/html"
+      hidden
+    />
+  </details>
   <p id="import-privacy" class="privacy-note">
     Los archivos se procesan aquí, en tu navegador.
   </p>
