@@ -4,6 +4,14 @@ const copy = {
     label: "Features",
     guide: "User guide",
     source: "Open source on GitHub",
+    links: [
+      ["/en/guide/", "User guide"],
+      ["/en/chord-sheet-maker/", "Chord sheet maker"],
+      ["/en/printable-chord-sheets/", "Print your sheet"],
+      ["/en/transpose-chords/", "Transpose chords"],
+      ["/en/privacy/", "Privacy"],
+      ["/en/import-policy/", "Import policy"],
+    ],
     features: [
       [
         "Write your way",
@@ -23,6 +31,14 @@ const copy = {
     label: "Funciones",
     guide: "Guía de uso",
     source: "Código abierto en GitHub",
+    links: [
+      ["/es/guia/", "Guía de uso"],
+      ["/es/editor-de-acordes/", "Editor de acordes"],
+      ["/es/hoja-de-acordes-para-imprimir/", "Imprimir tu hoja"],
+      ["/es/transportar-acordes/", "Transportar acordes"],
+      ["/es/privacidad/", "Privacidad"],
+      ["/es/politica-de-importacion/", "Política de importación"],
+    ],
     features: [
       [
         "Escribe a tu manera",
@@ -42,5 +58,5 @@ const copy = {
 
 export function introHtml(locale) {
   const content = copy[locale === "es" ? "es" : "en"];
-  return `<section class="intro-features" aria-label="${content.label}">${content.features.map(([heading, body]) => `<div><h2>${heading}</h2><p>${body}</p></div>`).join("")}</section><p class="intro-links"><a href="https://github.com/antoniomml/chordleaf/wiki/User-guide">${content.guide}</a> · <a href="https://github.com/antoniomml/chordleaf">${content.source}</a></p>`;
+  return `<section class="intro-features" aria-label="${content.label}">${content.features.map(([heading, body]) => `<div><h2>${heading}</h2><p>${body}</p></div>`).join("")}</section><nav class="intro-links" aria-label="${content.guide}">${content.links.map(([href, label]) => `<a href="${href}">${label}</a>`).join(" ")} <a href="https://github.com/antoniomml/chordleaf">${content.source}</a></nav>`;
 }

@@ -36,6 +36,7 @@ import {
   restoreProject,
 } from "./project.js";
 import { registerServiceWorker } from "./pwa.js";
+import { setupLocalWebImport } from "./ui/local-web-import.js";
 const $ = (s) => document.querySelector(s);
 document.documentElement.lang = getLocale();
 const workspaceSession = await openWorkspaceSession($("#app"));
@@ -819,6 +820,7 @@ function importScreen(screen) {
   importController?.abort();
   importController = new AbortController();
   importGeneration++;
+  localWebImport.reset();
   $("#new-menu").hidden = screen !== "menu";
   $("#text-import").hidden = screen !== "text";
   $("#web-import").hidden = screen !== "web";
@@ -837,7 +839,9 @@ function importScreen(screen) {
   }[screen];
   $("#import-privacy").textContent =
     screen === "web"
-      ? t("El servidor descarga únicamente la página del enlace.")
+      ? t(
+          "La descarga por enlace usa el servidor. Abrir y pegar o importar HTML usa tu navegador.",
+        )
       : t("Los archivos se procesan aquí, en tu navegador.");
   $("#import-error").hidden = true;
   $("#import-error").textContent = "";
@@ -955,9 +959,32 @@ $("#paste-import").onclick = async () => {
   }
 };
 $("#web").onclick = () => importScreen("web");
+const localWebImport = setupLocalWebImport({
+  onError: importError,
+  async onImport(read) {
+    importController?.abort();
+    importController = new AbortController();
+    const signal = importController.signal;
+    const generation = ++importGeneration;
+    $("#import-error").hidden = true;
+    $("#web-submit").disabled = false;
+    $("#web-submit").textContent = t("Importar canción");
+    try {
+      const data = await read(signal);
+      signal.throwIfAborted();
+      if (generation !== importGeneration || !$("#new-dialog").open) return;
+      await acceptImport(data);
+    } catch (error) {
+      if (generation === importGeneration && $("#new-dialog").open)
+        importError(error);
+    }
+  },
+});
 $("#web-import").onsubmit = async (e) => {
   e.preventDefault();
-  const generation = importGeneration;
+  importController?.abort();
+  importController = new AbortController();
+  const generation = ++importGeneration;
   $("#import-error").hidden = true;
   $("#web-submit").disabled = true;
   $("#web-submit").textContent = t("Importando…");
@@ -969,8 +996,10 @@ $("#web-import").onsubmit = async (e) => {
     await acceptImport(data);
     $("#web-url").value = "";
   } catch (error) {
-    if (generation === importGeneration && $("#new-dialog").open)
+    if (generation === importGeneration && $("#new-dialog").open) {
       importError(error);
+      localWebImport.show();
+    }
   } finally {
     if (generation === importGeneration) {
       $("#web-submit").disabled = false;

@@ -2,9 +2,10 @@ import { t } from "./i18n.js";
 import { importText, titleCase } from "./files.js";
 import { chordRE, chords, unresolvedChordRE } from "./music.js";
 import { LACUERDA_HOSTS, songUrl } from "./web-sources.js";
+import { readWebMarkup } from "./web-markup.js";
 
 // Read text only; never mount downloaded markup or execute website scripts.
-function preText(root) {
+export function preText(root) {
   function read(node) {
     if (node.nodeType === 3) return node.textContent;
     if (node.nodeType !== 1) return "";
@@ -161,7 +162,8 @@ function markSectionChords(text) {
 
 export function parseWebSong(html, sourceUrl, contentType = "text/html") {
   const url = songUrl(sourceUrl);
-  const doc = new DOMParser().parseFromString(html, "text/html");
+  const doc = readWebMarkup(html);
+  const documentTitle = doc.querySelector("title")?.textContent || "";
   let text = "",
     title = "",
     artist = "",
@@ -238,7 +240,7 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
         title = doc.querySelector("#tH1 h1 a")?.textContent.trim() || "";
         artist = doc.querySelector("#tH1 h2 a")?.textContent.trim() || "";
         if (!title || !artist) {
-          const names = doc.title.match(/^(.*?),\s*(.*?):\s*Acordes/i);
+          const names = documentTitle.match(/^(.*?),\s*(.*?):\s*Acordes/i);
           title ||= names?.[1] || "";
           artist ||= names?.[2] || "";
         }
@@ -246,7 +248,8 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
     } else {
       title = doc.querySelector("h1")?.textContent.trim() || "";
       artist = doc.querySelector("h1 + a h2, .t2 a")?.textContent.trim() || "";
-      if (!artist) artist = doc.title.match(/ - (.*?) - Cifra Club/)?.[1] || "";
+      if (!artist)
+        artist = documentTitle.match(/ - (.*?) - Cifra Club/)?.[1] || "";
     }
     // Mixed section/chord lines are instrumental, including LaCuerda TXT.
     text = markSectionChords(text);
@@ -331,6 +334,12 @@ export async function importWebSong(value, { signal } = {}) {
       ),
     );
   }
+  if (response.status === 429)
+    throw new Error(
+      t(
+        "Has hecho varias importaciones seguidas. Espera un minuto o usa la opción de abrir y pegar.",
+      ),
+    );
   if (!response.headers.get("content-type")?.includes("application/json"))
     throw new Error(
       t(

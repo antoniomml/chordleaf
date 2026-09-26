@@ -4,7 +4,7 @@ Checklist and drafts for announcing Chordleaf 1.0. Keep every claim true: no acc
 
 ## Before posting
 
-- [ ] Release tag `v1.0.0` is published and the production deploy points at it.
+- [ ] Release tag `v1.0.1` is published and the production deploy points at it.
 - [ ] `pnpm check`, the browser suite and compatibility tests are green in CI.
 - [ ] Sitemap submitted in Google Search Console and Bing Webmaster Tools.
 - [ ] Social preview checked with a link debugger (WhatsApp, X, Slack).

@@ -1,6 +1,6 @@
 {
   "name": "chordleaf",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A local-first workspace for lyrics, guitar chords and printable rehearsal sheets.",
   "private": true,
   "type": "module",
@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "docx": "^9.5.1",
+    "dompurify": "^3.4.16",
     "jspdf": "^4.2.1",
     "mammoth": "^1.10.0",
     "pdfjs-dist": "^6.3.289"

@@ -341,9 +341,17 @@ button.primary {
   margin: 20px 0 0;
   color: #b6c2ae;
   font-size: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 16px;
+  max-width: 870px;
 }
 .intro-links a {
   color: var(--green);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 @media (max-width: 760px) {
   .intro-features {
@@ -2113,7 +2121,8 @@ button:disabled {
 #web-import[hidden] {
   display: none;
 }
-#import-text {
+#import-text,
+#web-paste {
   width: 100%;
   resize: vertical;
   min-height: 110px;
@@ -2129,7 +2138,8 @@ button:disabled {
   letter-spacing: normal;
   text-transform: none;
 }
-#import-text:focus-visible {
+#import-text:focus-visible,
+#web-paste:focus-visible {
   outline: 2px solid #a6bf8b;
   outline-offset: 2px;
 }
@@ -2137,6 +2147,40 @@ button:disabled {
   color: #aeb5b0;
   font-size: 12px;
   line-height: 1.5;
+}
+.web-import-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+#web-open {
+  color: var(--green);
+  min-height: 44px;
+  align-content: center;
+}
+#web-local-options {
+  margin-top: 20px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+#web-local-options summary {
+  cursor: pointer;
+  min-height: 44px;
+  align-content: center;
+  color: var(--green);
+}
+#web-local-options summary:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+@media (max-width: 760px) {
+  #web-paste {
+    font-size: 16px;
+  }
+  #web-local-options .dialog-actions {
+    flex-wrap: wrap;
+  }
 }
 #import-error {
   color: #ffb5a7;

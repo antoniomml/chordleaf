@@ -1,26 +1,14 @@
-// Chordleaf service worker: offline shell for the editor.
-// Plain JavaScript on purpose: no imports, served from the site root so its
-// scope is the whole origin. Bump CACHE_VERSION on every release (see
-// docs/development.md); activation deletes the previous caches.
-const CACHE_VERSION = "chordleaf-v1";
-
-// Fetched during installation so the editor opens without a network.
-const SHELL = [
-  "/",
-  "/es/",
-  "/manifest.webmanifest",
-  "/logo.svg",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
-  "/icons/icon-maskable-192.png",
-  "/icons/icon-maskable-512.png",
-  "/icons/apple-touch-icon.png",
-];
+// Build-time template. build/pwa.js inserts the complete offline resource list
+// and derives a cache name from its contents, including this worker.
+const CACHE_VERSION = "__CHORDLEAF_CACHE_VERSION__";
+const SHELL = __CHORDLEAF_PRECACHE__;
 
 const isCacheable = (response) => response && response.status === 200;
 
 async function put(cache, request, response) {
-  if (isCacheable(response)) await cache.put(request, response.clone());
+  // A full disk must not turn a successful online request into an error.
+  if (isCacheable(response))
+    await cache.put(request, response.clone()).catch(() => {});
   return response;
 }
 
@@ -52,12 +40,14 @@ async function cacheFirst(request) {
 
 // Versionless public files: serve cached immediately and refresh in the
 // background. The cached copy stays usable if the refresh fails.
-async function staleWhileRevalidate(request) {
+async function staleWhileRevalidate(event) {
+  const request = event.request;
   const cache = await caches.open(CACHE_VERSION);
   const cached = await cache.match(request);
   const network = fetch(request)
     .then((response) => put(cache, request, response))
     .catch(() => cached || Response.error());
+  event.waitUntil(network);
   return cached || network;
 }
 
@@ -72,8 +62,13 @@ self.addEventListener("install", (event) => {
     caches
       .open(CACHE_VERSION)
       .then((cache) => cache.addAll(SHELL))
-      .then(() => self.skipWaiting()),
+      .catch(async (error) => {
+        await caches.delete(CACHE_VERSION);
+        throw error;
+      }),
   );
+  // Updates wait until existing tabs close. Their lazy imports still need the
+  // previous build's cache; deleting it while they are open breaks offline use.
 });
 
 self.addEventListener("activate", (event) => {
@@ -103,5 +98,5 @@ self.addEventListener("fetch", (event) => {
   if (request.mode === "navigate") event.respondWith(networkFirst(request));
   else if (url.pathname.startsWith("/assets/"))
     event.respondWith(cacheFirst(request));
-  else if (isRevalidated(url)) event.respondWith(staleWhileRevalidate(request));
+  else if (isRevalidated(url)) event.respondWith(staleWhileRevalidate(event));
 });

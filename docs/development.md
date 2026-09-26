@@ -73,7 +73,7 @@ The same build writes the sitemap covering the home pair plus every content pair
 
 ## Releases
 
-The current tagged release is **`v1.0.0`**. Before another release:
+The current tagged release is **`v1.0.1`**. Before another release:
 
 1. Update `version` in `package.json` and add its changes to `CHANGELOG.md`.
 2. Run frozen installation, formatting, tests, build and browser checks.
@@ -112,9 +112,11 @@ pnpm pwa:icons
 
 The command renders every size with the Playwright Chromium already installed for browser tests and rewrites `public/icons/*.png`. Run it after changing the logo and commit the result.
 
-`public/sw.js` is a plain, dependency-free service worker served from the site root. It is registered only in production builds (`import.meta.env.PROD`), never by `pnpm dev`. Navigation is network-first with a cached fallback, `/assets/*` is cache-first, and `/fonts/*`, `/logo.svg`, `/icons/*` and `/licenses/*` use stale-while-revalidate. `/api/*` and cross-origin requests are never cached.
+`build/pwa.js` generates `/sw.js` from `build/service-worker.js` after Vite and the metadata plugin have emitted their resources. Installation precaches the EN/ES entry routes, every built asset (including lazy import/export libraries and workers), fonts, icons and licenses. No online reload or first online export is required. `/api/*` and cross-origin requests are never cached.
 
-Bump `CACHE_VERSION` in `public/sw.js` (`chordleaf-v1` → `chordleaf-v2`…) in every release that changes the shell or its URLs; activation deletes the caches of previous versions.
+The cache identifier hashes the worker template and resource contents automatically. An update waits for existing Chordleaf tabs to close, so old clients keep their own lazy libraries until they finish. Activation then removes previous Chordleaf caches. Navigation is network-first; hashed assets are cache-first; public fonts and icons revalidate in the background. A failed install leaves the previous worker available.
+
+The build also emits `/release.json` with the package version and source commit (`VERCEL_GIT_COMMIT_SHA`, or the local Git HEAD). Compare it with the dereferenced release tag when checking production. A local build with uncommitted edits reports its base commit and is not a release artifact.
 
 To exercise the manifest and the offline shell against a production build:
 
@@ -125,4 +127,10 @@ PORT=5173 pnpm start
 CHORDLEAF_URL=http://localhost:5173 node tests/pwa-browser.mjs
 ```
 
-`tests/pwa-browser.mjs` runs on Chromium, Firefox and WebKit; local runs skip WebKit when the host lacks its system libraries, and `CHORDLEAF_BROWSERS=chromium,firefox` narrows the engines. It checks the manifest, the icon sizes, an offline reload of the shell, offline editing and the `/api/*` exclusion.
+`tests/pwa-browser.mjs` runs on Chromium, Firefox and WebKit; local runs skip WebKit when the host lacks its system libraries, and `CHORDLEAF_BROWSERS=chromium,firefox` narrows the engines. It checks the manifest, icon sizes, installation without a controlled online reload, offline editing, first-time PDF/Word exports and the `/api/*` exclusion. Chromium also clears the HTTP cache before going offline. The local HTML/clipboard suite verifies that pasted or saved markup cannot execute or initiate embedded-resource requests, even with CSP disabled for the test.
+
+## Local website imports
+
+The ordinary website cannot read another origin's page unless that origin grants CORS permission. `no-cors` returns an unreadable response, and forwarding a visitor IP header from Vercel does not change the outbound IP. Keep server-side downloads as an optional supported-provider flow; do not add public proxy services, identity spoofing or automatic retries after source blocks.
+
+The website import dialog has an explicit open-and-paste / saved-HTML route. Opening the original page uses the visitor's browser connection. `src/local-web-import.js` reads only user-supplied content, validates supported source metadata and applies existing size limits and provider parsers. `src/ui/local-web-import.js` manages the paste/file UI. `src/web-markup.js` uses DOMPurify with an explicit tag/attribute allowlist to return an inert fragment, preserving provider metadata and preformatted text. Scripts, images and frames are removed, and the fragment is never inserted into the live document. Keep sanitization in this shared path for both server and local imports. Clipboard access only occurs on a user paste event. Tests use invented songs; do not commit downloaded third-party pages.

@@ -1,5 +1,14 @@
 # chordleaf changelog
 
+## 1.0.1 · September 26, 2026
+
+- Make offline use reliable after the first successful installation: precache the editor, all entry routes, fonts, workers and lazy PDF/Word libraries. Cache names follow build contents automatically; updates wait until open tabs close before replacing their cache.
+- Import with your own browser connection: open the original song page, paste its lyrics and chords, or import a saved HTML page locally. Preserve provider markup and chord spacing without executing scripts or loading embedded resources. Blocked link downloads reveal this fallback directly.
+- Explain rate-limit responses from the hosting firewall and retain cancellable server-side imports for providers that accept them.
+- Link the home page to the bilingual guides, print/transposition pages, privacy and import policy. Pin the CORS origin in deployment configuration instead of leaving a wildcard.
+- Expose version and source commit in `release.json` so the production deployment can be checked against its release tag. Include the 14 on-domain content pages added after 1.0.0.
+- Cover first-visit offline editing and first-time PDF/Word exports after clearing the HTTP cache, local HTML/clipboard imports, inert markup, mobile accessibility and oversized files.
+
 ## 1.0.0 · September 25, 2026
 
 - Install Chordleaf as an app and keep editing offline: web app manifest, service worker with a versioned shell cache, cache-first hashed assets and stale-while-revalidate fonts and icons. API responses are never cached.

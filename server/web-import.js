@@ -1,4 +1,5 @@
 import { securityHeaders } from "./security.js";
+import packageJson from "../package.json" with { type: "json" };
 import { LACUERDA_HOSTS, songUrl } from "../src/web-sources.js";
 const MAX_BYTES = 3 * 1024 * 1024;
 const GENERIC_ERROR = "No se pudo descargar la canción.";
@@ -33,7 +34,7 @@ export async function fetchSongPage(value, fetcher = fetch) {
       signal,
       headers: {
         Accept: "text/html, text/plain;q=0.9",
-        "User-Agent": "Chordleaf/0.6.0 (song import)",
+        "User-Agent": `Chordleaf/${packageJson.version} (song import)`,
       },
     });
     if ([301, 302, 303, 307, 308].includes(response.status)) {

@@ -1,5 +1,18 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Abrir página original ↗": "Open original page ↗",
+  "Usar mi conexión: abrir y pegar": "Use my connection: open and paste",
+  "Abre la página original, copia la letra con sus acordes y pégala aquí. También puedes guardar la página en tu navegador y abrir su archivo HTML. El contenido se procesa en tu dispositivo.":
+    "Open the original page, copy the lyrics and chords, and paste them here. You can also save the page in your browser and open its HTML file. The content is processed on your device.",
+  "Abrir página guardada · HTML": "Open saved page · HTML",
+  "La descarga por enlace usa el servidor. Abrir y pegar o importar HTML usa tu navegador.":
+    "Link downloads use the server. Opening and pasting or importing HTML uses your browser.",
+  "Pega el enlace original de Cifra Club, LaCuerda o Ultimate Guitar antes de abrir el HTML.":
+    "Paste the original Cifra Club, LaCuerda or Ultimate Guitar link before opening the HTML.",
+  "Selecciona la página guardada como HTML (.html o .htm).":
+    "Select the page saved as HTML (.html or .htm).",
+  "Has hecho varias importaciones seguidas. Espera un minuto o usa la opción de abrir y pegar.":
+    "You have made several imports in a row. Wait a minute or use the open-and-paste option.",
   "Guardar proyecto editable": "Save editable project",
   "Abrir proyecto editable": "Open editable project",
   "Retomar una canción .chordleaf.json": "Resume a .chordleaf.json song",
