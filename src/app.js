@@ -37,6 +37,7 @@ import {
 } from "./project.js";
 import { registerServiceWorker } from "./pwa.js";
 import { setupLocalWebImport } from "./ui/local-web-import.js";
+import { setupAudioImport } from "./ui/audio-import.js";
 import { blankLineCount, compressBlankLines } from "./text-tools.js";
 const $ = (s) => document.querySelector(s);
 document.documentElement.lang = getLocale();
@@ -843,7 +844,13 @@ document.querySelectorAll("[data-harmony-view]").forEach((button) => {
 });
 let importGeneration = 0,
   importController;
+const audioImport = setupAudioImport({
+  accept: acceptImport,
+  reportError: importError,
+});
+$("#audio").onclick = () => importScreen("audio");
 function importScreen(screen) {
+  audioImport.reset();
   importController?.abort();
   importController = new AbortController();
   importGeneration++;
@@ -851,11 +858,13 @@ function importScreen(screen) {
   $("#new-menu").hidden = screen !== "menu";
   $("#text-import").hidden = screen !== "text";
   $("#web-import").hidden = screen !== "web";
+  $("#audio-import").hidden = screen !== "audio";
   $("#import-back").hidden = screen === "menu";
   $("#new-heading").textContent = {
     menu: t("Una nueva canción."),
     text: t("Importar texto o archivo."),
     web: t("Importar desde una web."),
+    audio: t("Importar audio · Experimento"),
   }[screen];
   $("#new-description").textContent = {
     menu: t("De una idea a tu próxima hoja de acordes."),
@@ -863,11 +872,16 @@ function importScreen(screen) {
       "Pega la letra con sus acordes o abre un archivo TXT, PDF o Word (.docx).",
     ),
     web: t("Pega el enlace de la canción que quieres tocar."),
+    audio: t("De una grabación a un borrador de letra y acordes."),
   }[screen];
   $("#import-privacy").textContent =
-    screen === "web"
-      ? t("El servidor descarga únicamente la página del enlace.")
-      : t("Los archivos se procesan aquí, en tu navegador.");
+    screen === "audio"
+      ? t(
+          "El audio se analiza en tu ordenador con el servicio local. No se guarda en el proyecto.",
+        )
+      : screen === "web"
+        ? t("El servidor descarga únicamente la página del enlace.")
+        : t("Los archivos se procesan aquí, en tu navegador.");
   $("#import-error").hidden = true;
   $("#import-error").textContent = "";
   $("#web-submit").disabled = false;
@@ -880,7 +894,10 @@ function importScreen(screen) {
   $("#file").accept = ".txt,.pdf,.docx,.cho,.chordpro,.json";
   $("#new-dialog").scrollTop = 0;
   if (screen === "web") $("#web-url").focus();
-  else if (screen === "text") $("#import-text").focus();
+  else if (screen === "audio") {
+    audioImport.open();
+    $("#audio-file").focus();
+  } else if (screen === "text") $("#import-text").focus();
   else $("#open-project").focus();
 }
 function openNewSong() {
@@ -896,6 +913,7 @@ $("#mobile-tab-plus").onclick = openNewSong;
 $("#empty-new").onclick = openNewSong;
 $("#import-back").onclick = () => importScreen("menu");
 $("#new-dialog").addEventListener("close", () => {
+  audioImport.reset();
   importController?.abort();
   importGeneration++;
 });

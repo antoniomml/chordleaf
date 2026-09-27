@@ -1,5 +1,60 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "DETECTOR DE ACORDES": "CHORD DETECTOR",
+  "Neuronal · Séptimas, extensiones e inversiones":
+    "Neural · Sevenths, extensions and inversions",
+  "Referencia · Solo mayores y menores": "Baseline · Major and minor only",
+  "Whisper transcribe la letra. El modelo neuronal estima acordes, extensiones y bajos invertidos. Revisa el resultado: puede simplificar armonías o inventar palabras.":
+    "Whisper transcribes lyrics. The neural model estimates chords, extensions and bass inversions. Review the result: it may simplify harmonies or invent words.",
+  "Importar audio · Experimento": "Import audio · Experiment",
+  "Letra, acordes y tiempos desde una grabación":
+    "Lyrics, chords and timing from a recording",
+  "De una grabación a un borrador de letra y acordes.":
+    "From a recording to a draft of lyrics and chords.",
+  "El audio se analiza en tu ordenador con el servicio local. No se guarda en el proyecto.":
+    "Audio is analyzed on your computer by the local service. It is not saved in the project.",
+  "Whisper transcribe la letra. Un detector experimental estima acordes mayores y menores. Revisa el resultado: puede confundir acordes o inventar palabras.":
+    "Whisper transcribes lyrics. An experimental detector estimates major and minor chords. Review the result: it may confuse chords or invent words.",
+  "Esta prueba requiere iniciar el analizador en una copia local de Chordleaf. Consulta experiments/audio/README.md en el proyecto.":
+    "This experiment requires starting the analyzer in a local copy of Chordleaf. See experiments/audio/README.md in the project.",
+  "ARCHIVO DE AUDIO": "AUDIO FILE",
+  "MP3, WAV, M4A, FLAC u OGG · Hasta 30 MB y 10 minutos.":
+    "MP3, WAV, M4A, FLAC or OGG · Up to 30 MB and 10 minutes.",
+  "Transcribir también la letra": "Also transcribe lyrics",
+  "IDIOMA DE LA VOZ": "VOICE LANGUAGE",
+  "Detectar automáticamente": "Detect automatically",
+  "Analizar audio": "Analyze audio",
+  "Cancelar análisis": "Cancel analysis",
+  "Pulsa un intervalo para escucharlo. N indica silencio o armonía no identificada. Los cambios dentro de una palabra se colocan al inicio de esa palabra.":
+    "Select an interval to listen. N means silence or unidentified harmony. Changes within a word are placed at the start of that word.",
+  "Acordes en el tiempo": "Chords over time",
+  "BORRADOR EDITABLE": "EDITABLE DRAFT",
+  "El proyecto guarda la letra y los acordes. Descarga el análisis JSON para conservar los tiempos originales; las correcciones del borrador no cambian ese análisis.":
+    "The project saves lyrics and chords. Download the JSON analysis to keep the original timing; draft edits do not change that analysis.",
+  "Descargar tiempos · JSON": "Download timing · JSON",
+  "Crear canción": "Create song",
+  "Comprobando el analizador local…": "Checking the local analyzer…",
+  "Analizador local disponible.": "Local analyzer available.",
+  "El analizador local no está activado.": "The local analyzer is not enabled.",
+  "El audio supera el límite de 30 MB.": "Audio exceeds the 30 MB limit.",
+  "Listo para analizar. Máximo 10 minutos.":
+    "Ready to analyze. Maximum 10 minutes.",
+  "Análisis cancelado.": "Analysis canceled.",
+  "Analizando audio… La primera vez se descarga Whisper; puede tardar varios minutos.":
+    "Analyzing audio… Whisper downloads on the first run; this may take several minutes.",
+  "Ya hay un análisis en curso. Espera unos segundos.":
+    "An analysis is already running. Wait a few seconds.",
+  "No se pudo analizar. Comprueba el formato, la duración y la instalación local.":
+    "Analysis failed. Check the format, duration and local installation.",
+  "Sin acorde": "No chord",
+  "Borrador listo. Escucha y corrige antes de crear la canción.":
+    "Draft ready. Listen and correct it before creating the song.",
+  "Sin letra transcrita. Puedes revisar los acordes y añadir la letra.":
+    "No lyrics transcribed. You can review the chords and add lyrics.",
+  "El análisis no se ha completado.": "Analysis did not complete.",
+  "Añade letra o acordes antes de crear la canción.":
+    "Add lyrics or chords before creating the song.",
+
   "¿Tienes la página guardada?": "Have a saved copy of the page?",
   "Puedes abrir el archivo HTML de la canción guardado desde tu navegador. Se procesa en tu dispositivo, sin subirlo al servidor.":
     "You can open the song’s HTML file saved from your browser. It is processed on your device without uploading it.",

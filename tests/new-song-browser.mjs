@@ -18,7 +18,7 @@ try {
       await page
         .locator("#new-menu > button")
         .evaluateAll((buttons) => buttons.map((button) => button.id)),
-      ["open-project", "import", "web", "blank"],
+      ["open-project", "import", "web", "audio", "blank"],
     );
     for (const selector of [
       "#text-import",

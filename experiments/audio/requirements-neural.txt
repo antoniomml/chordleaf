@@ -1,0 +1,7 @@
+-r requirements.txt
+lv-chordia==1.1.0
+# pydub still imports audioop, removed from Python 3.13.
+audioop-lts==0.2.2; python_version >= "3.13"
+# Explicit tested versions for the research model's feature extraction and weights.
+librosa==1.0.0
+torch==2.14.0

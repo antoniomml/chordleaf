@@ -590,6 +590,13 @@
         >
       </div>
       <b>→</b></button
+    ><button id="audio" class="choice">
+      <span class="choice-icon" aria-hidden="true">♫</span>
+      <div>
+        <strong>Importar audio · Experimento</strong
+        ><small>Letra, acordes y tiempos desde una grabación</small>
+      </div>
+      <b>→</b></button
     ><button id="blank" class="choice">
       <span class="choice-icon" aria-hidden="true"
         ><svg
@@ -641,6 +648,76 @@
       Importar canción
     </button>
   </form>
+  <section id="audio-import" hidden>
+    <p class="web-help">
+      Whisper transcribe la letra. El modelo neuronal estima acordes,
+      extensiones y bajos invertidos. Revisa el resultado: puede simplificar
+      armonías o inventar palabras.
+    </p>
+    <p id="audio-setup" class="web-help" hidden>
+      Esta prueba requiere iniciar el analizador en una copia local de
+      Chordleaf. Consulta experiments/audio/README.md en el proyecto.
+    </p>
+    <label class="field"
+      >ARCHIVO DE AUDIO<input
+        id="audio-file"
+        type="file"
+        accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg"
+    /></label>
+    <p class="web-help">
+      MP3, WAV, M4A, FLAC u OGG · Hasta 30 MB y 10 minutos.
+    </p>
+    <label class="field"
+      >DETECTOR DE ACORDES<select id="audio-engine">
+        <option value="neural">
+          Neuronal · Séptimas, extensiones e inversiones
+        </option>
+        <option value="baseline">Referencia · Solo mayores y menores</option>
+      </select></label
+    >
+    <label class="audio-option"
+      ><input id="audio-lyrics" type="checkbox" checked /> Transcribir también
+      la letra</label
+    >
+    <label class="field"
+      >IDIOMA DE LA VOZ<select id="audio-language">
+        <option value="auto">Detectar automáticamente</option>
+        <option value="es">Español</option>
+        <option value="en">English</option>
+      </select></label
+    >
+    <audio id="audio-player" controls preload="metadata" hidden></audio>
+    <div class="dialog-actions">
+      <button id="audio-analyze" class="primary" disabled>Analizar audio</button
+      ><button id="audio-cancel" hidden>Cancelar análisis</button>
+    </div>
+    <p id="audio-status" class="web-help" role="status" aria-live="polite"></p>
+    <div id="audio-result" hidden>
+      <p id="audio-engine-used" class="web-help"></p>
+      <p class="web-help">
+        Pulsa un intervalo para escucharlo. N indica silencio o armonía no
+        identificada. Los cambios dentro de una palabra se colocan al inicio de
+        esa palabra.
+      </p>
+      <div id="audio-timeline" aria-label="Acordes en el tiempo"></div>
+      <label class="field"
+        >BORRADOR EDITABLE<textarea
+          id="audio-draft"
+          rows="8"
+          maxlength="50000"
+        ></textarea>
+      </label>
+      <p class="web-help">
+        El proyecto guarda la letra y los acordes. Descarga el análisis JSON
+        para conservar los tiempos originales; las correcciones del borrador no
+        cambian ese análisis.
+      </p>
+      <div class="dialog-actions">
+        <button id="audio-download">Descargar tiempos · JSON</button
+        ><button id="audio-create" class="primary">Crear canción</button>
+      </div>
+    </div>
+  </section>
   <p id="import-error" role="alert" hidden></p>
   <details id="web-local-options" hidden>
     <summary>¿Tienes la página guardada?</summary>

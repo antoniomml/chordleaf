@@ -21,3 +21,9 @@ Source: [Google Fonts DM Sans](https://github.com/google/fonts/tree/main/ofl/dms
 ## Dependencies
 
 Exact versions appear in `pnpm-lock.yaml`. Each package retains its own license. This document does not replace those licenses. Chordleaf's original application code is licensed under the MIT license in LICENSE.
+
+## Optional local audio experiment
+
+The optional Python environment uses [faster-whisper](https://github.com/SYSTRAN/faster-whisper) and [lv-chordia](https://github.com/openmirlab/lv-chordia), a package of the pretrained models from Junyan Jiang, Ke Chen, Wei Li and Gus Xia, _Large-Vocabulary Chord Transcription via Chord Structure Decomposition_, ISMIR 2019 ([original repository](https://github.com/music-x-lab/ISMIR2019-Large-Vocabulary-Chord-Recognition)). These projects identify their code as MIT licensed; their installed distributions retain their own notices. The local lv-chordia installation includes the research checkpoints. No checkpoints are copied into Chordleaf's repository or web bundle. Exact tested dependencies are listed in `experiments/audio/requirements-neural.lock.txt`.
+
+User PDFs, recordings and official preview audio used for the local pilot are not part of the software distribution and retain their respective rights.
