@@ -1,5 +1,6 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 const browser = await chromium.launch({ headless: true });
 const url = process.env.CHORDLEAF_URL || "http://localhost:5173";
 const fixture = {
@@ -36,7 +37,14 @@ try {
     }
     if (mode === "error")
       return route.fulfill({ status: 422, json: { error: "analysis" } });
-    return route.fulfill({ json: fixture }).catch(() => {});
+    return route
+      .fulfill({
+        json:
+          mode === "partial"
+            ? { ...fixture, words: [], warnings: ["lyrics-failed"] }
+            : fixture,
+      })
+      .catch(() => {});
   });
   await page.goto(url);
   await page.locator("#empty-new").click();
@@ -50,7 +58,7 @@ try {
     document.querySelector("#audio-status").textContent.includes("disponible"),
   );
   // Valid PCM silence: UI lifecycle tests do not call a model.
-  const buffer = Buffer.alloc(44 + 16000 * 2);
+  const buffer = Buffer.alloc(44 + 16000 * 2 * 6);
   buffer.write("RIFF", 0);
   buffer.writeUInt32LE(buffer.length - 8, 4);
   buffer.write("WAVEfmt ", 8);
@@ -78,6 +86,11 @@ try {
   await page.waitForTimeout(650);
   assert.equal(await page.locator("#audio-result").isVisible(), false);
   assert.match(await page.locator("#audio-status").textContent(), /cancelado/);
+  mode = "partial";
+  await page.locator("#audio-analyze").click();
+  await page.locator("#audio-warning").waitFor({ state: "visible" });
+  assert.equal(await page.locator("#audio-timeline button").count(), 2);
+  assert.match(await page.locator("#audio-draft").inputValue(), /Cmaj7/);
   mode = "ok";
   await page.locator("#audio-analyze").click();
   await page.locator("#audio-result").waitFor({ state: "visible" });
@@ -86,9 +99,36 @@ try {
     "[Cmaj7]\nHola [G7/B]mundo",
   );
   assert.equal(await page.locator("#audio-timeline button").count(), 2);
+  await page.locator("#audio-loop").check();
+  await page.locator("#audio-timeline button").first().click();
+  await page.locator("#audio-player").evaluate((el) => {
+    el.currentTime = 2.1;
+  });
+  await page.waitForFunction(
+    () => document.querySelector("#audio-player").currentTime < 2,
+  );
+  assert.equal(
+    await page
+      .locator("#audio-timeline button")
+      .first()
+      .getAttribute("aria-current"),
+    "true",
+  );
+  await page.locator("#audio-loop").uncheck();
+  await page.locator("#audio-player").evaluate((el) => {
+    el.currentTime = 2.1;
+  });
+  await page.waitForFunction(
+    () => document.querySelector("#audio-player").paused,
+  );
+  await page.locator("#audio-draft").fill("[Cmaj7]Revisión conservada");
   const download = page.waitForEvent("download");
   await page.locator("#audio-download").click();
-  assert.equal((await download).suggestedFilename(), "audio-analysis.json");
+  const exported = await download;
+  assert.equal(exported.suggestedFilename(), "audio-analysis.json");
+  const saved = JSON.parse(await readFile(await exported.path(), "utf8"));
+  assert.equal(saved.draftText, "[Cmaj7]Revisión conservada");
+  assert.deepEqual(saved.chords, fixture.chords);
   await page.screenshot({ path: "artifacts/audio-import-desktop.png" });
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(

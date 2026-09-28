@@ -1,5 +1,23 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Falta el modelo de acordes. Puedes elegir el detector básico.":
+    "The chord model is missing. You can select the baseline detector.",
+  "Whisper no está instalado en este equipo. Puedes analizar sólo los acordes.":
+    "Whisper is not installed on this computer. You can analyze chords only.",
+  "Analizando en tu equipo… El audio no se envía a servicios externos.":
+    "Analyzing on your computer\u2026 Audio is not sent to external services.",
+  "El audio debe durar entre 1 segundo y 10 minutos.":
+    "Audio must be between 1 second and 10 minutes long.",
+  "No se puede leer este audio. Prueba a convertirlo a WAV o MP3.":
+    "This audio cannot be read. Try converting it to WAV or MP3.",
+  "El análisis ha superado el tiempo máximo. Prueba un fragmento más corto.":
+    "Analysis timed out. Try a shorter excerpt.",
+  "No se pudo transcribir la letra. Los acordes están disponibles; puedes añadir la letra al borrador o revisar la instalación de Whisper.":
+    "Lyrics could not be transcribed. Chords are available; you can add lyrics to the draft or check the Whisper installation.",
+  "Repetir el intervalo seleccionado": "Loop selected interval",
+  "El proyecto guarda la letra y los acordes. Descarga el análisis JSON para conservar los tiempos originales y una copia del borrador corregido. Las correcciones no cambian los tiempos del modelo.":
+    "The project saves lyrics and chords. Download the analysis JSON to keep original timings and a copy of the corrected draft. Corrections do not change model timings.",
+
   "DETECTOR DE ACORDES": "CHORD DETECTOR",
   "Neuronal · Séptimas, extensiones e inversiones":
     "Neural · Sevenths, extensions and inversions",

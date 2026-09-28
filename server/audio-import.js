@@ -1,4 +1,5 @@
 // Opt-in local experiment. Public deployments do not register this endpoint.
+import { audioReadiness } from "./audio-readiness.js";
 import { spawn } from "node:child_process";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -41,7 +42,7 @@ export async function audioImportMiddleware(req, res, next) {
     req.headers.origin !== `https://${req.headers.host}`
   )
     return reply(403, { error: "origin" });
-  if (req.method === "GET") return reply(200, { available: Boolean(python) });
+  if (req.method === "GET") return reply(200, await audioReadiness(python));
   if (req.method !== "POST") return reply(405, { error: "method" });
   if (!python) return reply(503, { error: "unavailable" });
   const engine = url.searchParams.get("engine") || "neural";
@@ -81,7 +82,12 @@ export async function audioImportMiddleware(req, res, next) {
     const output = await new Promise((resolve, reject) => {
       child = spawn(python, args, {
         stdio: ["ignore", "pipe", "pipe"],
-        env: { ...process.env, CHORDLEAF_AUDIO_TMPDIR: directory },
+        env: {
+          ...process.env,
+          CHORDLEAF_AUDIO_TMPDIR: directory,
+          CHORDLEAF_AUDIO_OFFLINE: "1",
+          HF_HUB_OFFLINE: "1",
+        },
       });
       let stdout = "";
       child.stdout.on("data", (data) => {
@@ -93,9 +99,17 @@ export async function audioImportMiddleware(req, res, next) {
       });
       child.stderr.resume(); // Never expose paths or model download credentials.
       child.once("error", reject);
-      child.once("close", (code) =>
-        code === 0 ? resolve(stdout) : reject(new Error("analysis")),
-      );
+      child.once("close", (code) => {
+        if (code === 0) return resolve(stdout);
+        let failure = "analysis";
+        try {
+          const data = JSON.parse(stdout);
+          if (["duration", "decode"].includes(data.error)) failure = data.error;
+        } catch {
+          /* Python may fail before starting the analyzer. */
+        }
+        reject(new Error(failure));
+      });
       timer = setTimeout(() => {
         abort();
         reject(new Error("timeout"));
@@ -106,7 +120,9 @@ export async function audioImportMiddleware(req, res, next) {
     response = [
       error.message === "timeout" ? 504 : 422,
       {
-        error: error.message === "timeout" ? "timeout" : "analysis",
+        error: ["timeout", "duration", "decode"].includes(error.message)
+          ? error.message
+          : "analysis",
       },
     ];
   } finally {

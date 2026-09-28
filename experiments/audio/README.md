@@ -4,7 +4,13 @@ This branch adds **New song → Import audio · Experiment**. It runs on your ow
 
 ## Run
 
-Use Python 3.13 (tested on macOS ARM) and the normal project Node/pnpm environment:
+Use Python 3.13 (tested on macOS ARM) and the normal project Node/pnpm environment. One explicit command prepares the isolated environment and downloads Whisper without receiving any audio:
+
+```sh
+pnpm audio:setup
+```
+
+Set `CHORDLEAF_SETUP_PYTHON` if Python 3.13 has a different executable path. `pnpm audio:setup medium` prepares the optional larger model. This is a developer installer, not a packaged desktop application. Manual installation remains available:
 
 ```sh
 python3.13 -m venv experiments/audio/.venv
@@ -12,13 +18,13 @@ experiments/audio/.venv/bin/pip install -r experiments/audio/requirements-neural
 CHORDLEAF_AUDIO_PYTHON="$PWD/experiments/audio/.venv/bin/python" pnpm dev --host 127.0.0.1
 ```
 
-Open the local URL, select **New song → Import audio · Experiment**, choose a recording and press **Analyze audio**. Leave lyrics enabled for the complete pipeline, or disable them to test chords without downloading Whisper. Spanish, English and automatic voice language selection are available. The first transcription downloads the `small` Whisper model from Hugging Face to its normal cache. Subsequent runs reuse the download, but load the model into a new process for each request. No API key or paid service is required.
+Open the local URL, select **New song → Import audio · Experiment**, choose a recording and press **Analyze audio**. Leave lyrics enabled for the complete pipeline, or disable them to test chords without Whisper. Spanish, English and automatic voice language selection are available. The setup command downloads the `small` Whisper model from Hugging Face to its normal cache. The audio endpoint uses cached models only; it never downloads during analysis. Each request loads the model into a new process. A readiness check verifies local dependencies and weight files before enabling the controls; results are cached for up to 30 seconds. No API key or paid service is required.
 
-For a quick, lower-quality smoke test, set `CHORDLEAF_WHISPER_MODEL=tiny` when starting Vite. A local model directory is also supported. Larger models require more memory and time; no song-level latency benchmark has been established.
+For a quick, lower-quality smoke test, set `CHORDLEAF_WHISPER_MODEL=tiny` when starting Vite. A local model directory is also supported. Larger models require more memory and time. A three-passage comparison of `small` and `medium` is recorded in the full-corpus report; it is not a general singing benchmark.
 
 The UI accepts MP3, WAV, M4A, FLAC and OGG, up to 30 MiB and 10 minutes. The worker probes the audio contents with PyAV, converts to mono 16 kHz and limits decoded duration. Browser playback depends on the browser's codec support; analysis can support a format that the browser cannot play.
 
-Listen using the interval buttons, edit the draft and create a song. **Download timing · JSON** preserves original word and chord intervals and engine names. The regular editable project currently saves only the text sheet: it does not embed audio or timing. Draft corrections do not update the original analysis JSON.
+Listen using the interval buttons, edit the draft and create a song. **Download timing · JSON** preserves original word and chord intervals and engine names. The regular editable project currently saves only the text sheet: it does not embed audio or timing. The JSON includes a separate `draftText` copy of your corrections while preserving the original model intervals. It is an export, not yet a resumable review project. Interval buttons play only the selected interval; optional looping and the current-chord highlight help review it.
 
 ## Run the built app locally, offline
 
@@ -40,7 +46,7 @@ Each user's own computer serves its UI and performs inference. There is **no cen
 - Default chords: the pretrained **lv-chordia 1.1.0** ensemble (five CNN/LSTM networks from Jiang et al., ISMIR 2019), with the `submission` dictionary: 301 labels including seventh/ninth/eleventh/thirteenth, suspended, diminished and augmented chords and selected inversions. These are vocabulary capabilities, not guarantees of correct detection. Original Harte labels remain in JSON as `rawLabel`. No new model has been trained.
 - Optional baseline: our small signal-processing detector, available in the detector selector. Centered 256 ms FFT windows sampled every 100 ms, pitch-class energy, temporal smoothing, 24 major/minor templates and Viterbi continuity. A silence/similarity gate emits `N`. It assumes A4 = 440 Hz and does not infer sevenths, inversions, capo, key or guitar fingering.
 - Alignment: both branches analyze the same decoded samples. Chord changes within a word snap to that word's start in the editable text. Instrumental changes remain separate chord-only lines. Exact source intervals are retained in JSON. Neither the baseline’s 100 ms sampling grid nor the neural model’s approximately 23 ms frame hop is a claim of equivalent recognition accuracy.
-- The local endpoint accepts a single job at a time, checks loopback socket/Host and same-origin requests, enforces byte/duration limits, kills inference on cancellation or a 15-minute timeout, and removes temporary uploads. No audio is sent to a remote inference service. Initial model downloads still need network access. Do not expose this development server publicly.
+- The local endpoint accepts a single job at a time, checks loopback socket/Host and same-origin requests, enforces byte/duration limits, kills inference on cancellation or a 15-minute timeout, and removes temporary uploads. No audio is sent to a remote inference service. Explicit setup downloads still need network access. If Whisper fails after chord inference, the response preserves the chords with a `lyrics-failed` warning, so the user can add lyrics manually. Do not expose this development server publicly.
 
 ## Checks
 
@@ -77,3 +83,13 @@ experiments/audio/.venv/bin/python experiments/audio/corpus.py \
 ```
 
 `evaluate-passages.py` takes a manually reviewed manifest with `id`, `start`, `end`, `chords` and `split`; it compares only these passages, with a single transposition per passage, against saved full-song predictions. It keeps extensions, inversions and sequence gaps separate. Its optional short A–X–A smoothing variants are research comparisons, not enabled in the app. Partial sheets and alternate arrangements must not be silently expanded into training labels.
+
+## Compare lyric models
+
+`benchmark-lyrics.py` runs cached models with network connections blocked on explicit windows and manually reviewed text references. It reports token edit counts and latency, not a general accuracy claim. Install selected models first; its manifest contains local paths and should remain in ignored artifacts.
+
+```sh
+experiments/audio/.venv/bin/python experiments/audio/benchmark-lyrics.py \
+  artifacts/audio-benchmark/full-corpus/lyrics-manifest.json \
+  artifacts/audio-benchmark/full-corpus/lyrics-offline.json --models small medium
+```

@@ -2977,3 +2977,8 @@ select:focus-visible {
   letter-spacing: normal;
   text-transform: none;
 }
+
+#audio-timeline button[aria-current="true"] {
+  outline: 2px solid var(--accent, #a4ba83);
+  outline-offset: -2px;
+}

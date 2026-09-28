@@ -18,6 +18,18 @@ class OfflineTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('Network disabled for local audio inference', result.stderr)
 
+    def test_failed_whisper_preserves_chords(self):
+        def fail(*a, **kw):
+            raise RuntimeError('model unavailable')
+        with patch('analyze.decode', return_value=np.zeros(RATE)), \
+             patch.dict(sys.modules, {'faster_whisper': SimpleNamespace(WhisperModel=fail)}), \
+             patch.dict(os.environ, {'CHORDLEAF_AUDIO_OFFLINE': '0'}):
+            result = analyze('unused', engine='baseline')
+        self.assertEqual(result['words'], [])
+        self.assertEqual(result['chords'], [{'start': 0, 'end': 1, 'label': 'N'}])
+        self.assertEqual(result['warnings'], ['lyrics-failed'])
+        self.assertIsNone(result['engines']['lyrics'])
+
     def test_whisper_words_are_checked_after_clipping(self):
         words = [SimpleNamespace(word='valid', start=.8, end=1.2),
                  SimpleNamespace(word='past end', start=1.1, end=1.2),

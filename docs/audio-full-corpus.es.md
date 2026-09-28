@@ -58,3 +58,25 @@ Los resultados contienen frases incorrectas y una etiqueta «Music» durante una
 Se mantiene LV-Chordia como motor predeterminado: en esta selección ofrece un equilibrio útil entre detalle armónico y cambios espurios. No se ha encontrado una variante que justifique sustituirlo de forma general. El resultado es un **borrador editable con acordes complejos**, todavía no una transcripción musical fiable sin revisión.
 
 La mejora siguiente requiere anotaciones temporales revisadas y un vocabulario que represente los acordes de interés. Los PDFs ayudan a construirlas, pero no bastan para entrenar directamente. El requisito de ejecutar todo en el dispositivo se mantiene: [distribución local y arquitectura para producción](audio-local-production.es.md).
+
+## Segunda ronda: letra y fiabilidad del producto
+
+Se compararon Whisper `small` y `medium`, CPU/int8, sobre tres ventanas vocales cortas con las mismas opciones, sin VAD y sin contexto previo. Se descargó `medium` explícitamente y se repitió la comparación con las conexiones de Python bloqueadas. Los modelos no recibieron el PDF como pista.
+
+| Fragmento                    | Palabras de referencia | Ediciones small | Ediciones medium |
+| ---------------------------- | ---------------------- | --------------- | ---------------- |
+| Guantanamera, 20,78–36,38    | 25                     | 4               | 4                |
+| More Than Words, 28,48–38,52 | 14                     | 3               | 0                |
+| Alone Again, 11,16–22,02     | 25                     | 4               | 5                |
+
+En la primera ejecución medida, `small` tardó 1,2–1,6 segundos por fragmento, frente a 4,3–4,7 de `medium`, sin contar carga/descarga del modelo. El mayor reduce el total de ediciones de 11 a 9, pero empeora una canción. Se conserva `small` por defecto y se permite preparar `medium` como alternativa. Son sólo 64 palabras de tres pasajes elegidos por errores previos: no es una estimación representativa. La métrica separa palabras con una expresión regular, ignora mayúsculas y normaliza «I'm»; la segmentación y contracciones afectan al resultado.
+
+Mejoras implementadas:
+
+- Preparación explícita con `pnpm audio:setup`: entorno aislado, dependencias y pesos. La API nunca descarga modelos al recibir audio.
+- Comprobación local de dependencias, pesos de acordes y Whisper; ya no basta con que exista una variable de configuración.
+- Los acordes se conservan si falla Whisper, con un aviso visible. Se distinguen errores de formato, duración y tiempo máximo.
+- Los intervalos se pueden repetir y el acorde que suena queda señalado.
+- El JSON conserva una copia del borrador corregido además de los tiempos originales; las correcciones no se presentan como salida del modelo.
+
+Sigue faltando un instalador de escritorio para usuarios no técnicos, o el portado al navegador; un formato para reabrir una sesión completa de revisión; y anotaciones temporales verificadas para evaluar y entrenar acordes complejos. El experimento funciona localmente, pero no se declara listo para publicación general.

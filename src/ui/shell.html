@@ -658,6 +658,7 @@
       Esta prueba requiere iniciar el analizador en una copia local de
       Chordleaf. Consulta experiments/audio/README.md en el proyecto.
     </p>
+    <p id="audio-capabilities" class="web-help" role="status"></p>
     <label class="field"
       >ARCHIVO DE AUDIO<input
         id="audio-file"
@@ -693,12 +694,20 @@
     </div>
     <p id="audio-status" class="web-help" role="status" aria-live="polite"></p>
     <div id="audio-result" hidden>
+      <p id="audio-warning" class="web-help" role="status" hidden>
+        No se pudo transcribir la letra. Los acordes están disponibles; puedes
+        añadir la letra al borrador o revisar la instalación de Whisper.
+      </p>
       <p id="audio-engine-used" class="web-help"></p>
       <p class="web-help">
         Pulsa un intervalo para escucharlo. N indica silencio o armonía no
         identificada. Los cambios dentro de una palabra se colocan al inicio de
         esa palabra.
       </p>
+      <label class="audio-option"
+        ><input id="audio-loop" type="checkbox" /> Repetir el intervalo
+        seleccionado</label
+      >
       <div id="audio-timeline" aria-label="Acordes en el tiempo"></div>
       <label class="field"
         >BORRADOR EDITABLE<textarea
@@ -709,8 +718,8 @@
       </label>
       <p class="web-help">
         El proyecto guarda la letra y los acordes. Descarga el análisis JSON
-        para conservar los tiempos originales; las correcciones del borrador no
-        cambian ese análisis.
+        para conservar los tiempos originales y una copia del borrador
+        corregido. Las correcciones no cambian los tiempos del modelo.
       </p>
       <div class="dialog-actions">
         <button id="audio-download">Descargar tiempos · JSON</button

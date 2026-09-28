@@ -43,6 +43,10 @@ test("local audio endpoint is opt-in and rejects cross-origin and oversized uplo
       (await fetch(url, { method: "POST", body: "test" })).status,
       415,
     );
+    assert.deepEqual(await (await fetch(url)).json(), {
+      available: false,
+      reason: "runtime",
+    });
     // Invalid runtime failures return a controlled response and release the slot.
     for (let i = 0; i < 2; i++) {
       const response = await fetch(url, {

@@ -104,23 +104,30 @@ def analyze(path, lyrics=True, language=None, engine="neural"):
               "chords": detected, "words": [],
               "engines": {"chords": chord_engine, "lyrics": None}}
     if lyrics:
-        from faster_whisper import WhisperModel
-        model_name = os.environ.get("CHORDLEAF_WHISPER_MODEL", "small")
-        model = WhisperModel(model_name, device="cpu", compute_type="int8",
-                             local_files_only=os.environ.get("CHORDLEAF_AUDIO_OFFLINE") == "1")
-        segments, info = model.transcribe(
-            audio, language=language, word_timestamps=True,
-            vad_filter=False, condition_on_previous_text=False, beam_size=5,
-        )
-        for line, segment in enumerate(segments):
-            for word in segment.words or []:
-                start, end = max(0, word.start), min(result["duration"], word.end)
-                if word.word.strip() and end > start:
-                    result["words"].append({"start": start,
-                                            "end": end,
-                                            "text": word.word.strip(), "line": line})
-        result["engines"]["lyrics"] = "faster-whisper/" + model_name
-        result["language"] = info.language
+        try:
+            from faster_whisper import WhisperModel
+            model_name = os.environ.get("CHORDLEAF_WHISPER_MODEL", "small")
+            model = WhisperModel(model_name, device="cpu", compute_type="int8",
+                                 local_files_only=os.environ.get("CHORDLEAF_AUDIO_OFFLINE") == "1")
+            segments, info = model.transcribe(
+                audio, language=language, word_timestamps=True,
+                vad_filter=False, condition_on_previous_text=False, beam_size=5,
+            )
+            for line, segment in enumerate(segments):
+                for word in segment.words or []:
+                    start, end = max(0, word.start), min(result["duration"], word.end)
+                    if word.word.strip() and end > start:
+                        result["words"].append({"start": start,
+                                                "end": end,
+                                                "text": word.word.strip(), "line": line})
+            result["engines"]["lyrics"] = "faster-whisper/" + model_name
+            result["language"] = info.language
+        except Exception:
+            # Chord inference has already succeeded. A missing/corrupt Whisper
+            # model or transcription error must not discard those results.
+            result["words"] = []
+            result["engines"]["lyrics"] = None
+            result["warnings"] = ["lyrics-failed"]
     return result
 
 
@@ -134,5 +141,8 @@ if __name__ == "__main__":
     try:
         print(json.dumps(analyze(args.file, not args.no_lyrics, args.language, args.engine), allow_nan=False))
     except Exception as error:
-        print(str(error), file=sys.stderr)
+        code = "duration" if isinstance(error, ValueError) and str(error) == "duration" else "analysis"
+        if isinstance(error, av.error.FFmpegError):
+            code = "decode"
+        print(json.dumps({"error": code}))
         sys.exit(1)
