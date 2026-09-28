@@ -192,8 +192,8 @@ importers:
         specifier: ^3.9.8
         version: 3.9.8
       vite:
-        specifier: ^8.3.0
-        version: 8.3.0(@types/node@25.9.8)(esbuild@0.28.2)
+        specifier: ^8.3.1
+        version: 8.3.1(@types/node@25.9.8)(esbuild@0.28.2)
 
 packages:
 
@@ -864,8 +864,8 @@ packages:
   utrie@1.0.2:
     resolution: {integrity: sha512-1MLa5ouZiOmQzUbjbu9VmjLzn1QLXBhwpUa7kdLUQK+KQ5KA9I1vk5U4YHe/X2Ch7PYnJfWuWT+VbuxbGwljhw==}
 
-  vite@8.3.0:
-    resolution: {integrity: sha512-lhZBVvEHefgE+HQZC9O7EBJgCU/nVzFNl7vkS4RE0APtWLP02/8QVIkQtzBxPquh7lq5/78NHipTj7ODQ6XuyQ==}
+  vite@8.3.1:
+    resolution: {integrity: sha512-/bvH9E9tmCXRGp2uXY3WbOldqpTwFkbha/8ANaEQ6VkxhH60KyqLwgZq6lG2y+4uT55x9+9eUHMpQ7uGnOCKjA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -1449,7 +1449,7 @@ snapshots:
       base64-arraybuffer: 1.0.2
     optional: true
 
-  vite@8.3.0(@types/node@25.9.8)(esbuild@0.28.2):
+  vite@8.3.1(@types/node@25.9.8)(esbuild@0.28.2):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
