@@ -5,9 +5,18 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const model = process.argv[2] || "small";
-if (!new Set(["tiny", "small", "medium"]).has(model)) {
+if (!new Set(["tiny", "small", "medium", "qwen"]).has(model)) {
   console.error(
-    "Usage: pnpm audio:setup [tiny|small|medium]. Downloads dependencies and model weights; receives no audio.",
+    "Usage: pnpm audio:setup [tiny|small|medium|qwen]. Downloads dependencies and model weights; receives no audio.",
+  );
+  process.exit(1);
+}
+if (
+  model === "qwen" &&
+  (process.platform !== "darwin" || process.arch !== "arm64")
+) {
+  console.error(
+    "Qwen MLX requires Apple Silicon. Use Whisper on this platform.",
   );
   process.exit(1);
 }
@@ -40,11 +49,21 @@ try {
     "-r",
     "experiments/audio/requirements-neural.lock.txt",
   ]);
-  await run(python, [
-    "-c",
-    "from faster_whisper import WhisperModel; import sys; WhisperModel(sys.argv[1], device='cpu', compute_type='int8')",
-    model,
-  ]);
+  if (model === "qwen") {
+    await run(python, [
+      "-m",
+      "pip",
+      "install",
+      "-r",
+      "experiments/audio/requirements-qwen.txt",
+    ]);
+    await run(python, ["experiments/audio/prepare-qwen.py"]);
+  } else
+    await run(python, [
+      "-c",
+      "from faster_whisper import WhisperModel; import sys; WhisperModel(sys.argv[1], device='cpu', compute_type='int8')",
+      model,
+    ]);
   console.log(
     "Models installed locally. Run pnpm build, then pnpm start:local-audio. Select a non-default Whisper model with CHORDLEAF_WHISPER_MODEL.",
   );

@@ -69,6 +69,10 @@ test("Vercel adapter rejects unsupported methods and applies security headers", 
   assert.equal(res.headers.Allow, "GET");
   assert.equal(res.headers["Cache-Control"], "no-store");
   assert.match(res.headers["Content-Security-Policy"], /script-src 'self'/);
+  assert.match(
+    res.headers["Content-Security-Policy"],
+    /media-src 'self' blob:/,
+  );
 });
 test("web imports require explicit activation on Vercel", async () => {
   const previous = {

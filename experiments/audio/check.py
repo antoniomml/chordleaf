@@ -9,7 +9,7 @@ from offline import require_offline
 
 def check():
     require_offline()
-    result = {'available': False, 'neural': False, 'lyrics': False, 'offline': True}
+    result = {'available': False, 'neural': False, 'lyrics': False, 'offline': True, 'qwen': False}
     with redirect_stdout(sys.stderr):
         try:
             import av, numpy, scipy
@@ -28,6 +28,11 @@ def check():
             name = os.environ.get('CHORDLEAF_WHISPER_MODEL', 'small')
             folder = Path(name) if Path(name).is_dir() else Path(download_model(name, local_files_only=True))
             result['lyrics'] = all((folder / n).is_file() for n in ['model.bin', 'config.json', 'tokenizer.json'])
+        except Exception:
+            pass
+        try:
+            from qwen_worker import ready
+            result['qwen'] = ready()
         except Exception:
             pass
     return result

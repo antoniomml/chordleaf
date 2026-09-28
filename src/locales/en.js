@@ -1,9 +1,14 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "TRANSCRIPTOR DE LETRA": "LYRIC TRANSCRIBER",
+  "Whisper · CPU": "Whisper · CPU",
+  "Qwen3 · Apple Silicon": "Qwen3 · Apple Silicon",
+  "Algunos tiempos son aproximados: se han agrupado palabras para conservar la letra. Escucha y revisa esos tramos.":
+    "Some timings are approximate: words have been grouped to preserve the lyrics. Listen and review those passages.",
   "Falta el modelo de acordes. Puedes elegir el detector básico.":
     "The chord model is missing. You can select the baseline detector.",
-  "Whisper no está instalado en este equipo. Puedes analizar sólo los acordes.":
-    "Whisper is not installed on this computer. You can analyze chords only.",
+  "No hay un transcriptor instalado en este equipo. Puedes analizar sólo los acordes.":
+    "No lyric transcriber is installed on this computer. You can analyze chords only.",
   "Analizando en tu equipo… El audio no se envía a servicios externos.":
     "Analyzing on your computer\u2026 Audio is not sent to external services.",
   "El audio debe durar entre 1 segundo y 10 minutos.":
@@ -12,8 +17,8 @@ export default {
     "This audio cannot be read. Try converting it to WAV or MP3.",
   "El análisis ha superado el tiempo máximo. Prueba un fragmento más corto.":
     "Analysis timed out. Try a shorter excerpt.",
-  "No se pudo transcribir la letra. Los acordes están disponibles; puedes añadir la letra al borrador o revisar la instalación de Whisper.":
-    "Lyrics could not be transcribed. Chords are available; you can add lyrics to the draft or check the Whisper installation.",
+  "No se pudo transcribir la letra. Los acordes están disponibles; puedes añadir la letra al borrador o revisar la instalación del transcriptor.":
+    "Lyrics could not be transcribed. Chords are available; you can add lyrics to the draft or check the transcriber installation.",
   "Repetir el intervalo seleccionado": "Loop selected interval",
   "El proyecto guarda la letra y los acordes. Descarga el análisis JSON para conservar los tiempos originales y una copia del borrador corregido. Las correcciones no cambian los tiempos del modelo.":
     "The project saves lyrics and chords. Download the analysis JSON to keep original timings and a copy of the corrected draft. Corrections do not change model timings.",
@@ -22,8 +27,8 @@ export default {
   "Neuronal · Séptimas, extensiones e inversiones":
     "Neural · Sevenths, extensions and inversions",
   "Referencia · Solo mayores y menores": "Baseline · Major and minor only",
-  "Whisper transcribe la letra. El modelo neuronal estima acordes, extensiones y bajos invertidos. Revisa el resultado: puede simplificar armonías o inventar palabras.":
-    "Whisper transcribes lyrics. The neural model estimates chords, extensions and bass inversions. Review the result: it may simplify harmonies or invent words.",
+  "El transcriptor local extrae la letra. El modelo neuronal estima acordes, extensiones y bajos invertidos. Revisa el resultado: puede simplificar armonías o inventar palabras.":
+    "The local transcriber extracts lyrics. The neural model estimates chords, extensions and bass inversions. Review the result: it may simplify harmonies or invent words.",
   "Importar audio · Experimento": "Import audio · Experiment",
   "Letra, acordes y tiempos desde una grabación":
     "Lyrics, chords and timing from a recording",
@@ -31,8 +36,8 @@ export default {
     "From a recording to a draft of lyrics and chords.",
   "El audio se analiza en tu ordenador con el servicio local. No se guarda en el proyecto.":
     "Audio is analyzed on your computer by the local service. It is not saved in the project.",
-  "Whisper transcribe la letra. Un detector experimental estima acordes mayores y menores. Revisa el resultado: puede confundir acordes o inventar palabras.":
-    "Whisper transcribes lyrics. An experimental detector estimates major and minor chords. Review the result: it may confuse chords or invent words.",
+  "El transcriptor local extrae la letra. Un detector experimental estima acordes mayores y menores. Revisa el resultado: puede confundir acordes o inventar palabras.":
+    "The local transcriber extracts lyrics. An experimental detector estimates major and minor chords. Review the result: it may confuse chords or invent words.",
   "Esta prueba requiere iniciar el analizador en una copia local de Chordleaf. Consulta experiments/audio/README.md en el proyecto.":
     "This experiment requires starting the analyzer in a local copy of Chordleaf. See experiments/audio/README.md in the project.",
   "ARCHIVO DE AUDIO": "AUDIO FILE",

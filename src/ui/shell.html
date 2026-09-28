@@ -650,7 +650,7 @@
   </form>
   <section id="audio-import" hidden>
     <p class="web-help">
-      Whisper transcribe la letra. El modelo neuronal estima acordes,
+      El transcriptor local extrae la letra. El modelo neuronal estima acordes,
       extensiones y bajos invertidos. Revisa el resultado: puede simplificar
       armonías o inventar palabras.
     </p>
@@ -681,6 +681,12 @@
       la letra</label
     >
     <label class="field"
+      >TRANSCRIPTOR DE LETRA<select id="audio-lyrics-engine">
+        <option value="whisper">Whisper · CPU</option>
+        <option value="qwen" disabled>Qwen3 · Apple Silicon</option>
+      </select></label
+    >
+    <label class="field"
       >IDIOMA DE LA VOZ<select id="audio-language">
         <option value="auto">Detectar automáticamente</option>
         <option value="es">Español</option>
@@ -696,7 +702,11 @@
     <div id="audio-result" hidden>
       <p id="audio-warning" class="web-help" role="status" hidden>
         No se pudo transcribir la letra. Los acordes están disponibles; puedes
-        añadir la letra al borrador o revisar la instalación de Whisper.
+        añadir la letra al borrador o revisar la instalación del transcriptor.
+      </p>
+      <p id="audio-timing-warning" class="web-help" role="status" hidden>
+        Algunos tiempos son aproximados: se han agrupado palabras para conservar
+        la letra. Escucha y revisa esos tramos.
       </p>
       <p id="audio-engine-used" class="web-help"></p>
       <p class="web-help">

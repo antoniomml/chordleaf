@@ -70,3 +70,13 @@ test("neural extensions and slash bass survive validation and sheet conversion",
     "[Cmaj7]\n[Dm7b5]\n[G7sus4]\n[Am9]\n[D/F#]",
   );
 });
+
+test("approximate lyric groups preserve text longer than a single word", () => {
+  const data = example();
+  const text = "palabra ".repeat(40).trim();
+  data.words[0].text = text;
+  assert.throws(() => validateAnalysis(data));
+  data.words[0].timing = "grouped";
+  assert.equal(validateAnalysis(data).words[0].text, text);
+  assert.ok(analysisToText(data).includes(text));
+});

@@ -33,7 +33,8 @@ export function validateAnalysis(data) {
             (event.label !== "N" && !chordRE.test(event.label))
           : typeof event.text !== "string" ||
             !event.text.trim() ||
-            event.text.length > 200 ||
+            event.text.length >
+              (["grouped", "segment"].includes(event.timing) ? 4000 : 200) ||
             !Number.isInteger(event.line) ||
             event.line < 0
       )

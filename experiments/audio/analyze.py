@@ -86,7 +86,7 @@ def chords(audio):
     return result
 
 
-def analyze(path, lyrics=True, language=None, engine="neural"):
+def analyze(path, lyrics=True, language=None, engine="neural", lyrics_engine="whisper"):
     if os.environ.get("CHORDLEAF_AUDIO_OFFLINE") == "1":
         from offline import require_offline
         require_offline()
@@ -103,7 +103,16 @@ def analyze(path, lyrics=True, language=None, engine="neural"):
     result = {"version": 1, "duration": len(audio) / RATE,
               "chords": detected, "words": [],
               "engines": {"chords": chord_engine, "lyrics": None}}
-    if lyrics:
+    if lyrics and lyrics_engine == "qwen":
+        try:
+            from qwen_worker import transcribe
+            transcription = transcribe(path, language)
+            result.update(words=transcription['words'], transcript=transcription['transcript'],
+                          warnings=transcription['warnings'], rawAlignment=transcription['rawAlignment'])
+            result['engines']['lyrics'] = transcription['engine']
+        except Exception:
+            result['warnings'] = ['lyrics-failed']
+    elif lyrics and lyrics_engine == "whisper":
         try:
             from faster_whisper import WhisperModel
             model_name = os.environ.get("CHORDLEAF_WHISPER_MODEL", "small")
@@ -128,6 +137,8 @@ def analyze(path, lyrics=True, language=None, engine="neural"):
             result["words"] = []
             result["engines"]["lyrics"] = None
             result["warnings"] = ["lyrics-failed"]
+    elif lyrics:
+        raise ValueError("lyrics_engine")
     return result
 
 
@@ -137,9 +148,10 @@ if __name__ == "__main__":
     parser.add_argument("--no-lyrics", action="store_true")
     parser.add_argument("--language", choices=["es", "en"])
     parser.add_argument("--engine", choices=["neural", "baseline"], default="neural")
+    parser.add_argument("--lyrics-engine", choices=["whisper", "qwen"], default="whisper")
     args = parser.parse_args()
     try:
-        print(json.dumps(analyze(args.file, not args.no_lyrics, args.language, args.engine), allow_nan=False))
+        print(json.dumps(analyze(args.file, not args.no_lyrics, args.language, args.engine, args.lyrics_engine), allow_nan=False))
     except Exception as error:
         code = "duration" if isinstance(error, ValueError) and str(error) == "duration" else "analysis"
         if isinstance(error, av.error.FFmpegError):

@@ -24,13 +24,18 @@ try {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   let available = false,
-    mode = "ok";
+    mode = "ok",
+    qwen = false;
   await page.route("**/api/audio-import*", async (route) => {
     if (route.request().method() === "GET")
-      return route.fulfill({ json: { available } });
+      return route.fulfill({ json: { available, qwen, lyrics: !qwen } });
     assert.equal(
       new URL(route.request().url()).searchParams.get("engine"),
       "neural",
+    );
+    assert.equal(
+      new URL(route.request().url()).searchParams.get("lyricsEngine"),
+      qwen ? "qwen" : "whisper",
     );
     if (mode === "slow") {
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -42,7 +47,9 @@ try {
         json:
           mode === "partial"
             ? { ...fixture, words: [], warnings: ["lyrics-failed"] }
-            : fixture,
+            : qwen
+              ? { ...fixture, warnings: ["alignment-approximate"] }
+              : fixture,
       })
       .catch(() => {});
   });
@@ -92,15 +99,30 @@ try {
   assert.equal(await page.locator("#audio-timeline button").count(), 2);
   assert.match(await page.locator("#audio-draft").inputValue(), /Cmaj7/);
   mode = "ok";
+  await page.locator("#import-back").click();
+  qwen = true;
+  await page.locator("#audio").click();
+  await page.waitForFunction(
+    () => document.querySelector("#audio-lyrics-engine").value === "qwen",
+  );
+  assert.equal(await page.locator("#audio-lyrics").isDisabled(), false);
+  await upload();
   await page.locator("#audio-analyze").click();
   await page.locator("#audio-result").waitFor({ state: "visible" });
+  await page.locator("#audio-timing-warning").waitFor({ state: "visible" });
   assert.equal(
     await page.locator("#audio-draft").inputValue(),
     "[Cmaj7]\nHola [G7/B]mundo",
   );
   assert.equal(await page.locator("#audio-timeline button").count(), 2);
+  await page.waitForFunction(
+    () => document.querySelector("#audio-player").readyState >= 1,
+  );
   await page.locator("#audio-loop").check();
   await page.locator("#audio-timeline button").first().click();
+  await page.waitForFunction(
+    () => !document.querySelector("#audio-player").paused,
+  );
   await page.locator("#audio-player").evaluate((el) => {
     el.currentTime = 2.1;
   });

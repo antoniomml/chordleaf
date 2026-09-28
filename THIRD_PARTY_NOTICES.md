@@ -27,3 +27,11 @@ Exact versions appear in `pnpm-lock.yaml`. Each package retains its own license.
 The optional Python environment uses [faster-whisper](https://github.com/SYSTRAN/faster-whisper) and [lv-chordia](https://github.com/openmirlab/lv-chordia), a package of the pretrained models from Junyan Jiang, Ke Chen, Wei Li and Gus Xia, _Large-Vocabulary Chord Transcription via Chord Structure Decomposition_, ISMIR 2019 ([original repository](https://github.com/music-x-lab/ISMIR2019-Large-Vocabulary-Chord-Recognition)). These projects identify their code as MIT licensed; their installed distributions retain their own notices. The local lv-chordia installation includes the research checkpoints. No checkpoints are copied into Chordleaf's repository or web bundle. Exact tested dependencies are listed in `experiments/audio/requirements-neural.lock.txt`.
 
 User PDFs, recordings and official preview audio used for the local pilot are not part of the software distribution and retain their respective rights.
+
+## Optional lyric models and research data
+
+Apple Silicon lyric inference optionally uses [MLX Audio](https://github.com/Blaizzy/mlx-audio) and the [Qwen3-ASR / ForcedAligner family](https://github.com/QwenLM/Qwen3-ASR/), downloaded separately from the MLX Community repositories. Pinned revisions appear in `experiments/audio/qwen_worker.py`; installed projects and downloaded models retain their own licenses and notices. No weights are embedded in the web application. NVIDIA Parakeet v3 and its MLX port were evaluated locally but are not an application dependency.
+
+The chord-training research uses [GuitarSet 1.1.0](https://zenodo.org/records/3371780), by Qingyang Xi, Rachel M. Bittner, Johan Pauwels, Xuzhou Ye and Juan Pablo Bello, under CC BY 4.0. Please cite _GuitarSet: A Dataset for Guitar Transcription_, ISMIR 2018. Downloads, features and trained checkpoints stay outside Git.
+
+The lyric benchmark uses [Jam-ALT](https://huggingface.co/datasets/jamendolyrics/jam-alt). Each recording keeps its own license, recorded by the download script; recordings and reference lyrics are not redistributed with this software or used here for training. This notice does not grant rights beyond those of the original datasets and models.

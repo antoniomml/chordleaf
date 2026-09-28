@@ -47,6 +47,11 @@ test("local audio endpoint is opt-in and rejects cross-origin and oversized uplo
       available: false,
       reason: "runtime",
     });
+    const invalidEngine = await fetch(`${url}?lyricsEngine=unknown`, {
+      method: "POST",
+    });
+    assert.equal(invalidEngine.status, 400);
+    assert.deepEqual(await invalidEngine.json(), { error: "lyrics-engine" });
     // Invalid runtime failures return a controlled response and release the slot.
     for (let i = 0; i < 2; i++) {
       const response = await fetch(url, {

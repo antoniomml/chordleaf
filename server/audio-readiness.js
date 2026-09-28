@@ -6,7 +6,12 @@ const script = fileURLToPath(
 let cached;
 export function audioReadiness(python) {
   if (!python) return Promise.resolve({ available: false });
-  const key = JSON.stringify([python, process.env.CHORDLEAF_WHISPER_MODEL]);
+  const key = JSON.stringify([
+    python,
+    process.env.CHORDLEAF_WHISPER_MODEL,
+    process.env.CHORDLEAF_QWEN_MODEL,
+    process.env.CHORDLEAF_QWEN_ALIGNER,
+  ]);
   if (cached?.key === key && cached.until > Date.now()) return cached.promise;
   const promise = new Promise((resolve) => {
     const child = spawn(python, [script], {

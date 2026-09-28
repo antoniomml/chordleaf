@@ -42,11 +42,11 @@ Each user's own computer serves its UI and performs inference. There is **no cen
 
 ## What actually runs
 
-- Lyrics: `faster-whisper`, CPU/int8, word timestamps, no speech VAD (sustained sung vowels should not automatically be discarded by a speech gate). This is a speech-trained model used on singing, not a validated singing model.
-- Default chords: the pretrained **lv-chordia 1.1.0** ensemble (five CNN/LSTM networks from Jiang et al., ISMIR 2019), with the `submission` dictionary: 301 labels including seventh/ninth/eleventh/thirteenth, suspended, diminished and augmented chords and selected inversions. These are vocabulary capabilities, not guarantees of correct detection. Original Harte labels remain in JSON as `rawLabel`. No new model has been trained.
+- Lyrics: optional Qwen3-ASR 1.7B + forced alignment on Apple Silicon (see below), or `faster-whisper`, CPU/int8, word timestamps, no speech VAD (sustained sung vowels should not automatically be discarded by a speech gate). This is a speech-trained model used on singing, not a validated singing model.
+- Default chords: the pretrained **lv-chordia 1.1.0** ensemble (five CNN/LSTM networks from Jiang et al., ISMIR 2019), with the `submission` dictionary: 301 labels including seventh/ninth/eleventh/thirteenth, suspended, diminished and augmented chords and selected inversions. These are vocabulary capabilities, not guarantees of correct detection. Original Harte labels remain in JSON as `rawLabel`. The application uses these pretrained weights; a separate newly trained research model underperformed and is not deployed.
 - Optional baseline: our small signal-processing detector, available in the detector selector. Centered 256 ms FFT windows sampled every 100 ms, pitch-class energy, temporal smoothing, 24 major/minor templates and Viterbi continuity. A silence/similarity gate emits `N`. It assumes A4 = 440 Hz and does not infer sevenths, inversions, capo, key or guitar fingering.
 - Alignment: both branches analyze the same decoded samples. Chord changes within a word snap to that word's start in the editable text. Instrumental changes remain separate chord-only lines. Exact source intervals are retained in JSON. Neither the baseline’s 100 ms sampling grid nor the neural model’s approximately 23 ms frame hop is a claim of equivalent recognition accuracy.
-- The local endpoint accepts a single job at a time, checks loopback socket/Host and same-origin requests, enforces byte/duration limits, kills inference on cancellation or a 15-minute timeout, and removes temporary uploads. No audio is sent to a remote inference service. Explicit setup downloads still need network access. If Whisper fails after chord inference, the response preserves the chords with a `lyrics-failed` warning, so the user can add lyrics manually. Do not expose this development server publicly.
+- The local endpoint accepts a single job at a time, checks loopback socket/Host and same-origin requests, enforces byte/duration limits, kills inference on cancellation or a 15-minute timeout, and removes temporary uploads. No audio is sent to a remote inference service. Explicit setup downloads still need network access. If lyric transcription fails after chord inference, the response preserves the chords with a `lyrics-failed` warning, so the user can add lyrics manually. Do not expose this development server publicly.
 
 ## Checks
 
@@ -93,3 +93,37 @@ experiments/audio/.venv/bin/python experiments/audio/benchmark-lyrics.py \
   artifacts/audio-benchmark/full-corpus/lyrics-manifest.json \
   artifacts/audio-benchmark/full-corpus/lyrics-offline.json --models small medium
 ```
+
+## Qwen, Parakeet and actual chord training (September 29)
+
+The [measured comparison](../../docs/audio-model-comparison.es.md) covers four local ASR models and a newly trained chord network. Qwen3-ASR 1.7B performed best on this small bilingual lyric benchmark. The app supports it with Qwen3-ForcedAligner on Apple Silicon:
+
+```sh
+pnpm audio:setup qwen
+pnpm build
+pnpm start:local-audio
+```
+
+The optional `requirements-qwen.txt` dependencies extend the same Python environment. Setup downloads pinned model revisions; inference never downloads. The UI selects Qwen when ready, or Whisper otherwise. Approximate alignments group words without dropping text and retain raw alignment separately in JSON. Their temporal error has not yet been quantitatively evaluated.
+
+To reproduce public research data acquisition (explicit network stage, evaluation recordings retain their individual licenses):
+
+```sh
+experiments/audio/.venv/bin/python experiments/audio/prepare-research.py jam artifacts/audio-benchmark/model-comparison
+experiments/audio/.venv/bin/python experiments/audio/prepare-research.py guitarset artifacts/audio-benchmark/guitarset
+experiments/audio/.venv/bin/python experiments/audio/prepare-research.py models artifacts/audio-benchmark/model-comparison
+```
+
+For the alternative ASR benchmark, create a separate Python 3.13 environment with the base audio requirements, `requirements-qwen.txt` and `parakeet-mlx==0.5.2`. For chord training, install `mir_eval==0.8.2` in the main research environment. Do not add research dependencies to the web bundle. Model paths come from the generated `models.json`; `small` selects the already cached Whisper model. Use an engine name of `whisper`, `parakeet`, `qwen06` or `qwen17`:
+
+```sh
+experiments/audio/.venv/bin/python experiments/audio/benchmark-asr.py \
+  artifacts/audio-benchmark/model-comparison/jam-manifest.json whisper small \
+  artifacts/audio-benchmark/reproduction/whisper
+experiments/audio/.venv/bin/python experiments/audio/train-guitarset.py \
+  artifacts/audio-benchmark/guitarset artifacts/audio-benchmark/reproduction/training
+experiments/audio/.venv/bin/python experiments/audio/evaluate-guitarset.py \
+  artifacts/audio-benchmark/guitarset artifacts/audio-benchmark/reproduction/training
+```
+
+Inference/training run with Python network connections blocked. The training split groups complete compositions, selects the checkpoint only on validation and scores a held-out split. The small trained network **underperformed LV-Chordia** and is not deployed. The exact root/quality metric covers only the representable annotation subset and excludes inversion scoring. Use a fresh output directory when changing features, annotations or models; cached intermediate results are deliberately reused.

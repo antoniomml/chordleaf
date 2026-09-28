@@ -48,6 +48,9 @@ export async function audioImportMiddleware(req, res, next) {
   const engine = url.searchParams.get("engine") || "neural";
   if (!["neural", "baseline"].includes(engine))
     return reply(400, { error: "engine" });
+  const lyricsEngine = url.searchParams.get("lyricsEngine") || "whisper";
+  if (!["whisper", "qwen"].includes(lyricsEngine))
+    return reply(400, { error: "lyrics-engine" });
   if (busy) return reply(409, { error: "busy" });
   if (req.headers["content-type"] !== "application/octet-stream")
     return reply(415, { error: "type" });
@@ -74,7 +77,14 @@ export async function audioImportMiddleware(req, res, next) {
     directory = await mkdtemp(join(tmpdir(), "chordleaf-audio-"));
     const file = join(directory, "input");
     await writeFile(file, Buffer.concat(chunks));
-    const args = [script, file, "--engine", engine];
+    const args = [
+      script,
+      file,
+      "--engine",
+      engine,
+      "--lyrics-engine",
+      lyricsEngine,
+    ];
     if (url.searchParams.get("lyrics") === "false") args.push("--no-lyrics");
     const language = url.searchParams.get("language");
     if (["es", "en"].includes(language)) args.push("--language", language);

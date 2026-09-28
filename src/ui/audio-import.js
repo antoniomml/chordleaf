@@ -26,6 +26,8 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-file").disabled = !readiness?.available;
   }
   $("audio-engine").onchange = updateAvailability;
+  const lyricsUnavailable = () =>
+    readiness?.lyrics === false && !readiness?.qwen;
   function reset() {
     generation++;
     playbackRange = null;
@@ -48,6 +50,7 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-timeline").replaceChildren();
     $("audio-engine").disabled = false;
     $("audio-language").disabled = false;
+    $("audio-lyrics-engine").disabled = false;
     $("audio-lyrics").disabled = false;
     status("");
   }
@@ -63,22 +66,29 @@ export function setupAudioImport({ accept, reportError }) {
       if (current !== generation) return;
       readiness = data;
       $("audio-setup").hidden = Boolean(
-        data?.available && data.neural !== false && data.lyrics !== false,
+        data?.available &&
+        data.neural !== false &&
+        (data.lyrics !== false || data.qwen),
       );
       const messages = [];
       if (data?.neural === false)
         messages.push(
           t("Falta el modelo de acordes. Puedes elegir el detector básico."),
         );
-      if (data?.lyrics === false)
+      if (lyricsUnavailable())
         messages.push(
           t(
-            "Whisper no está instalado en este equipo. Puedes analizar sólo los acordes.",
+            "No hay un transcriptor instalado en este equipo. Puedes analizar sólo los acordes.",
           ),
         );
       $("audio-capabilities").textContent = messages.join(" ");
-      $("audio-lyrics").disabled = data?.lyrics === false;
-      if (data?.lyrics === false) $("audio-lyrics").checked = false;
+      $("audio-lyrics-engine").querySelector('[value="qwen"]').disabled =
+        !data?.qwen;
+      $("audio-lyrics-engine").querySelector('[value="whisper"]').disabled =
+        data?.lyrics === false;
+      $("audio-lyrics-engine").value = data?.qwen ? "qwen" : "whisper";
+      $("audio-lyrics").disabled = lyricsUnavailable();
+      if (lyricsUnavailable()) $("audio-lyrics").checked = false;
       status(
         data?.available
           ? "Analizador local disponible."
@@ -120,7 +130,8 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-cancel").hidden = true;
     $("audio-engine").disabled = false;
     $("audio-language").disabled = false;
-    $("audio-lyrics").disabled = readiness?.lyrics === false;
+    $("audio-lyrics-engine").disabled = false;
+    $("audio-lyrics").disabled = lyricsUnavailable();
     status("Análisis cancelado.");
   };
   $("audio-analyze").onclick = async () => {
@@ -136,7 +147,12 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-analyze").disabled = true;
     $("audio-file").disabled = true;
     $("audio-cancel").hidden = false;
-    for (const id of ["audio-engine", "audio-lyrics", "audio-language"])
+    for (const id of [
+      "audio-engine",
+      "audio-lyrics",
+      "audio-language",
+      "audio-lyrics-engine",
+    ])
       $(id).disabled = true;
     status(
       "Analizando en tu equipo… El audio no se envía a servicios externos.",
@@ -145,6 +161,7 @@ export function setupAudioImport({ accept, reportError }) {
       const query = new URLSearchParams({
         engine: $("audio-engine").value,
         lyrics: String($("audio-lyrics").checked),
+        lyricsEngine: $("audio-lyrics-engine").value,
         language: $("audio-language").value,
       });
       const response = await fetch(`/api/audio-import?${query}`, {
@@ -174,7 +191,15 @@ export function setupAudioImport({ accept, reportError }) {
       if (current !== generation) return;
       result = data;
       $("audio-warning").hidden = !data.warnings?.includes("lyrics-failed");
-      $("audio-engine-used").textContent = data.engines?.chords || "";
+      $("audio-timing-warning").hidden = !data.warnings?.includes(
+        "alignment-approximate",
+      );
+      $("audio-engine-used").textContent = [
+        data.engines?.chords,
+        data.engines?.lyrics,
+      ]
+        .filter(Boolean)
+        .join(" · ");
       $("audio-draft").value = analysisToText(data);
       $("audio-timeline").replaceChildren();
       for (const chord of data.chords) {
@@ -207,7 +232,8 @@ export function setupAudioImport({ accept, reportError }) {
         $("audio-cancel").hidden = true;
         $("audio-engine").disabled = false;
         $("audio-language").disabled = false;
-        $("audio-lyrics").disabled = readiness?.lyrics === false;
+        $("audio-lyrics-engine").disabled = false;
+        $("audio-lyrics").disabled = lyricsUnavailable();
       }
     }
   };
