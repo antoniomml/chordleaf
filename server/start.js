@@ -5,6 +5,16 @@ import { resolve, extname, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { securityHeaders, cacheControlFor } from "./security.js";
 import { webImportMiddleware } from "./web-import.js";
+const localAudio = process.env.CHORDLEAF_LOCAL_AUDIO === "1";
+if (
+  localAudio &&
+  process.env.HOST &&
+  !["127.0.0.1", "::1"].includes(process.env.HOST)
+)
+  throw new Error("Local audio requires a loopback listening address");
+const audioMiddleware = localAudio
+  ? (await import("./audio-import.js")).audioImportMiddleware
+  : (_req, _res, next) => next();
 const root = await realpath(fileURLToPath(new URL("../dist", import.meta.url)));
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -22,42 +32,44 @@ const types = {
 };
 const server = createServer((req, res) => {
   securityHeaders(res);
-  webImportMiddleware(req, res, async () => {
-    try {
-      if (!["GET", "HEAD"].includes(req.method)) {
-        res.writeHead(405).end();
-        return;
+  audioMiddleware(req, res, () =>
+    webImportMiddleware(req, res, async () => {
+      try {
+        if (!["GET", "HEAD"].includes(req.method)) {
+          res.writeHead(405).end();
+          return;
+        }
+        const pathname = decodeURIComponent(
+          new URL(req.url, "http://localhost").pathname,
+        );
+        const file = await realpath(
+          resolve(
+            root,
+            "." + (pathname.endsWith("/") ? pathname + "index.html" : pathname),
+          ),
+        );
+        if (!file.startsWith(root + sep) || !(await stat(file)).isFile())
+          throw new Error("Not found");
+        res.setHeader(
+          "Content-Type",
+          types[extname(file)] || "application/octet-stream",
+        );
+        res.setHeader("X-Content-Type-Options", "nosniff");
+        // The service worker must never be served from a stale cache.
+        res.setHeader(
+          "Cache-Control",
+          pathname === "/sw.js" ? "no-cache" : cacheControlFor(pathname),
+        );
+        if (req.method === "HEAD") res.end();
+        else
+          createReadStream(file)
+            .on("error", () => res.destroy())
+            .pipe(res);
+      } catch {
+        res.writeHead(404).end("Not found");
       }
-      const pathname = decodeURIComponent(
-        new URL(req.url, "http://localhost").pathname,
-      );
-      const file = await realpath(
-        resolve(
-          root,
-          "." + (pathname.endsWith("/") ? pathname + "index.html" : pathname),
-        ),
-      );
-      if (!file.startsWith(root + sep) || !(await stat(file)).isFile())
-        throw new Error("Not found");
-      res.setHeader(
-        "Content-Type",
-        types[extname(file)] || "application/octet-stream",
-      );
-      res.setHeader("X-Content-Type-Options", "nosniff");
-      // The service worker must never be served from a stale cache.
-      res.setHeader(
-        "Cache-Control",
-        pathname === "/sw.js" ? "no-cache" : cacheControlFor(pathname),
-      );
-      if (req.method === "HEAD") res.end();
-      else
-        createReadStream(file)
-          .on("error", () => res.destroy())
-          .pipe(res);
-    } catch {
-      res.writeHead(404).end("Not found");
-    }
-  });
+    }),
+  );
 });
 server.listen(
   Number(process.env.PORT) || 3000,

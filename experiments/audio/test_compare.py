@@ -29,6 +29,9 @@ class ComparisonTests(unittest.TestCase):
         self.assertEqual(parse_chord('D#M11'), parse_chord('Ebmaj11'))
         self.assertEqual(parse_chord('Bb7-9'), parse_chord('Bb7b9'))
         self.assertEqual(parse_chord('Ab9+11'), parse_chord('Ab9#11'))
+        self.assertEqual(parse_chord('Bm7/5-'), parse_chord('Bm7b5'))
+        self.assertEqual(parse_chord('E5+'), parse_chord('Eaug'))
+        self.assertEqual(parse_chord('Gaug7'), parse_chord('G7#5'))
 
     def test_harte_labels_keep_sevenths_and_degree_bass(self):
         examples={'D:hdim7':'Dm7b5','C#:min7':'C#m7','C#:maj/3':'C#/F',
@@ -36,6 +39,12 @@ class ComparisonTests(unittest.TestCase):
                   'Eb:maj7':'Ebmaj7','C:13':'C13','C:min9':'Cm9','N':'N'}
         for raw, expected in examples.items(): self.assertEqual(display_label(raw), expected)
         with self.assertRaises(ValueError): display_label('C:unrecognized')
+
+    def test_external_model_notation_is_equivalent(self):
+        result = align(['A#:min7', 'D#:7', 'G#:hdim7', 'F#:maj6'],
+                       ['Bbm7', 'Eb7', 'Abm7b5', 'Gb6'], shift=0, free_ends=False)
+        self.assertEqual(result['counts']['exact'], 4)
+        with self.assertRaises(ValueError): parse_chord('C:unknown')
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,4 +1,4 @@
-// Opt-in local Vite experiment. Never registered by the production server.
+// Opt-in local experiment. Public deployments do not register this endpoint.
 import { spawn } from "node:child_process";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";

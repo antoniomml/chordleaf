@@ -10,15 +10,26 @@ PITCH = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 
 
 def parse_chord(label):
+    # Guitar sheets sometimes use /5- as a diminished fifth, not a slash bass.
+    label = re.sub(r'm7/5-$', 'm7b5', label)
     match = re.fullmatch(r"([A-G])([#b]?)([^/]*)(?:/([A-G])([#b]?))?", label)
     if not match:
         raise ValueError(f"Unsupported reference chord: {label}")
     note, accidental, quality, bass, bass_acc = match.groups()
+    if quality.startswith(':'):
+        harte = {'maj': '', 'min': 'm', 'maj7': 'maj7', 'min7': 'm7',
+                 '7': '7', 'dim': 'dim', 'dim7': 'dim7', 'hdim7': 'm7b5',
+                 'aug': 'aug', 'minmaj7': 'mmaj7', 'maj6': '6', 'min6': 'm6',
+                 'sus2': 'sus2', 'sus4': 'sus4'}
+        if quality[1:] not in harte:
+            raise ValueError(f'Unsupported Harte quality: {label}')
+        quality = harte[quality[1:]]
     pitch = (PITCH[note] + (1 if accidental == "#" else -1 if accidental == "b" else 0)) % 12
     quality = re.sub(r"([+-])(5|9|11|13)", lambda m: ("#" if m[1] == "+" else "b") + m[2], quality)
     quality = re.sub(r"^M(?=\d)", "maj", quality)
+    quality = {"5+": "aug", "aug7": "7#5"}.get(quality, quality)
     family = ("dim" if quality.startswith("dim") or quality.startswith("m7b5") else
-              "aug" if quality.startswith("aug") else
+              "aug" if quality.startswith("aug") or quality == "7#5" else
               "sus" if "sus" in quality else
               "minor" if quality.startswith("m") and not quality.startswith("maj") else "major")
     bass_pitch = pitch if not bass else (PITCH[bass] + (1 if bass_acc == "#" else -1 if bass_acc == "b" else 0)) % 12

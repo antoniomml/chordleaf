@@ -87,6 +87,9 @@ def chords(audio):
 
 
 def analyze(path, lyrics=True, language=None, engine="neural"):
+    if os.environ.get("CHORDLEAF_AUDIO_OFFLINE") == "1":
+        from offline import require_offline
+        require_offline()
     audio = decode(path)
     if engine == "neural":
         from neural import recognize
@@ -103,16 +106,18 @@ def analyze(path, lyrics=True, language=None, engine="neural"):
     if lyrics:
         from faster_whisper import WhisperModel
         model_name = os.environ.get("CHORDLEAF_WHISPER_MODEL", "small")
-        model = WhisperModel(model_name, device="cpu", compute_type="int8")
+        model = WhisperModel(model_name, device="cpu", compute_type="int8",
+                             local_files_only=os.environ.get("CHORDLEAF_AUDIO_OFFLINE") == "1")
         segments, info = model.transcribe(
             audio, language=language, word_timestamps=True,
             vad_filter=False, condition_on_previous_text=False, beam_size=5,
         )
         for line, segment in enumerate(segments):
             for word in segment.words or []:
-                if word.word.strip() and word.end > word.start:
-                    result["words"].append({"start": max(0, word.start),
-                                            "end": min(result["duration"], word.end),
+                start, end = max(0, word.start), min(result["duration"], word.end)
+                if word.word.strip() and end > start:
+                    result["words"].append({"start": start,
+                                            "end": end,
                                             "text": word.word.strip(), "line": line})
         result["engines"]["lyrics"] = "faster-whisper/" + model_name
         result["language"] = info.language

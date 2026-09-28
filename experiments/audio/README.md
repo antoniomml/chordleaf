@@ -1,6 +1,6 @@
 # Audio import experiment
 
-This branch adds **New song → Import audio · Experiment**. It runs on a local Vite server, with an isolated Python worker. It is not enabled on chordleaf.com, the standalone production server or Vercel.
+This branch adds **New song → Import audio · Experiment**. It runs on your own computer, with an isolated Python worker. Both local Vite and the opt-in built-app launcher are supported. Public deployments (chordleaf.com/Vercel and the default production server) do not provide audio inference.
 
 ## Run
 
@@ -19,6 +19,20 @@ For a quick, lower-quality smoke test, set `CHORDLEAF_WHISPER_MODEL=tiny` when s
 The UI accepts MP3, WAV, M4A, FLAC and OGG, up to 30 MiB and 10 minutes. The worker probes the audio contents with PyAV, converts to mono 16 kHz and limits decoded duration. Browser playback depends on the browser's codec support; analysis can support a format that the browser cannot play.
 
 Listen using the interval buttons, edit the draft and create a song. **Download timing · JSON** preserves original word and chord intervals and engine names. The regular editable project currently saves only the text sheet: it does not embed audio or timing. Draft corrections do not update the original analysis JSON.
+
+## Run the built app locally, offline
+
+After the Python setup above, download Whisper once (this command receives no audio):
+
+```sh
+experiments/audio/.venv/bin/python -c 'from faster_whisper import WhisperModel; WhisperModel("small", device="cpu", compute_type="int8")'
+pnpm build
+pnpm start:local-audio
+```
+
+Open `http://127.0.0.1:3000` (override `PORT` if needed). The launcher forces loopback binding and cached-model-only transcription, and enables a Python audit guard against network connections. Missing models cause an error rather than an automatic download. `CHORDLEAF_AUDIO_PYTHON` can point to another installed environment; `CHORDLEAF_WHISPER_MODEL` can select a predownloaded model. Python's network guard is a regression safeguard, not an OS-level sandbox for native libraries.
+
+Each user's own computer serves its UI and performs inference. There is **no central processing server**. This is a developer distribution, not a packaged desktop installer; it still requires Node and Python. Hosting the static site alone does not install or start these components on visitors' computers. Browser-only deployment needs a separate ONNX/WASM/WebGPU port; see the [local deployment report](../../docs/audio-local-production.es.md).
 
 ## What actually runs
 
@@ -51,3 +65,15 @@ experiments/audio/.venv/bin/python experiments/audio/benchmark.py \
 ```
 
 A manifest entry has `id`, a local `audio` path, `pdf` filename, visually verified `chords`, optional `shift` in semitones (PDF → recording), `freeEnds` for an unknown excerpt location and a provenance `note`. The script decodes the same audio for both engines and saves raw intervals, timings, software versions and alignment traces. Without a fixed shift it searches all 12. Its untimed sequence agreement is **not** audio accuracy or a substitute for held-out timestamp annotations.
+
+## Full-song corpus audit
+
+`corpus.py` matches names ignoring accents/punctuation, records missing or ambiguous references, excludes PDFs without extracted text from scoring eligibility, and runs full-song neural inference with Python network connections blocked. Its outputs are **operational checks, not accuracy scores**. It preserves source hashes, errors and intervals and can resume existing results. Use a new output directory after changing models or inference code.
+
+```sh
+experiments/audio/.venv/bin/python experiments/audio/corpus.py \
+  /absolute/path/to/MP3 artifacts/audio-benchmark/pdf-inventory.json \
+  artifacts/audio-benchmark/full-corpus/results
+```
+
+`evaluate-passages.py` takes a manually reviewed manifest with `id`, `start`, `end`, `chords` and `split`; it compares only these passages, with a single transposition per passage, against saved full-song predictions. It keeps extensions, inversions and sequence gaps separate. Its optional short A–X–A smoothing variants are research comparisons, not enabled in the app. Partial sheets and alternate arrangements must not be silently expanded into training labels.

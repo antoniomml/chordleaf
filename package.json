@@ -31,7 +31,8 @@
     "start": "node server/start.js",
     "check": "pnpm format:check && pnpm test && SITE_URL=https://chordleaf.com pnpm build && pnpm check:metadata",
     "check:metadata": "node scripts/check-metadata.mjs",
-    "test:compatibility": "node tests/compatibility-browser.mjs"
+    "test:compatibility": "node tests/compatibility-browser.mjs",
+    "start:local-audio": "node scripts/start-local-audio.mjs"
   },
   "dependencies": {
     "docx": "^9.5.1",
