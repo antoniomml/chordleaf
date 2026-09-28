@@ -34,7 +34,7 @@
     "test:compatibility": "node tests/compatibility-browser.mjs"
   },
   "dependencies": {
-    "docx": "^9.5.1",
+    "docx": "^9.7.2",
     "dompurify": "^3.4.16",
     "jspdf": "^4.2.1",
     "mammoth": "^1.10.0",
