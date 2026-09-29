@@ -1,6 +1,6 @@
 # chordleaf changelog
 
-## 1.1.0 · September 29, 2026
+## 1.1.0 · September 30, 2026
 
 - Save without thinking about it: open songs are kept in the browser and return on the next visit, with no warning when leaving the page. Closing a song needs no confirmation and moves it to **Recent** (start page and New song), where it can be reopened or removed. Chordleaf asks the browser for persistent storage once there is real work to keep.
 - New start page with the Chordleaf brand, one short promise, **New song**, an original **example song** and your recent songs, instead of a long feature list and "No songs open".
