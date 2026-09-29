@@ -93,7 +93,10 @@ try {
     const content = await (await pdf.getPage(n)).getTextContent();
     pdfText.push(...content.items.map((item) => item.str.trim()));
   }
-  assert.equal(pdfText.includes("chordleaf.com"), false);
+  assert.equal(
+    pdfText.some((text) => text === "chordleaf.com"),
+    false,
+  );
   assert.ok(pdfText.includes("Do/Sol"));
   assert.ok(pdfText.includes("Rem7"));
   await page.waitForFunction(
