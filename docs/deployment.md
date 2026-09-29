@@ -43,7 +43,7 @@ Before enabling it:
 3. Set `CHORDLEAF_WEB_IMPORT_ENABLED=true` only in the environments where those controls are ready, then redeploy.
 4. Test one supported URL from each provider. Public sites can block data-center traffic even when imports work locally. Do not bypass their access controls; retain file/text import as the fallback.
 
-To stop imports quickly, set the variable to `false` and redeploy. A browser-origin check is defense in depth, not a distributed rate limiter; scripts can forge request headers. The code deliberately does not pretend that an in-memory counter protects independently scaled functions.
+To stop imports quickly, set the variable to `false` and redeploy. A browser-origin check is defense in depth, not a distributed rate limiter; scripts can forge request headers. Each process also keeps an in-memory limit of 30 imports per client every 10 minutes. That protects self-hosted servers, but independently scaled functions do not share it, so the firewall rule remains the real limit on Vercel. Self-hosted servers behind a reverse proxy that overwrites `X-Forwarded-For` can set `CHORDLEAF_TRUST_PROXY=true`; otherwise the socket address is used.
 
 ## 5. Harden headers and the domain
 
@@ -55,7 +55,13 @@ HSTS `preload` remains a separate operation: do not enable it without verifying 
 
 On September 26, 2026, the existing Vercel project rule **Limit song imports** was verified in the dashboard: enabled, Request Path equals `/api/import-web`, fixed window of 10 requests / 60 seconds, keyed by IP, response 429. No change or plan upgrade was needed. Recheck the rule if the project or endpoint moves; alerts for anomalies shown in this Hobby dashboard require Pro.
 
-## 6. Check the preview before launch
+## 6. Optional aggregate analytics
+
+Builds contain no analytics by default. To count launch visits without cookies, enable Web Analytics in the Vercel project, set `CHORDLEAF_ANALYTICS=vercel` for Production and redeploy. The build then loads `/_vercel/insights/script.js` from the same origin, which the existing CSP already allows, and replaces the "no analytics" section of both privacy pages with a description of what is counted. The service worker never caches `/_vercel/` requests. Remove the variable and redeploy to switch it off.
+
+Update any public claim of "no analytics" (for example in announcements) before enabling it.
+
+## 7. Check the preview before launch
 
 - Open the editor at desktop and phone widths in English and Spanish. Switch language after an edit and confirm the song stays intact.
 - Import an invented TXT, a selectable PDF and a DOCX. Export each format, reload, and check the saved song.

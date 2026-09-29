@@ -14,7 +14,10 @@ try {
     process.env.CHORDLEAF_URL || "http://localhost:5173",
   );
   await page
-    .getByRole("heading", { name: "No songs are open.", exact: true })
+    .getByRole("heading", {
+      name: "Your song, ready for rehearsal.",
+      exact: true,
+    })
     .waitFor();
   assert.equal(await page.locator(".page").count(), 0);
   assert.equal(await page.locator("#export").isDisabled(), true);

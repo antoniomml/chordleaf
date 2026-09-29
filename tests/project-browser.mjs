@@ -86,36 +86,21 @@ try {
       false,
     );
   }
-  assert.match(
-    await page.locator("#save-state").textContent(),
-    /PDF descargado · proyecto sin guardar/,
+  await page.waitForFunction(
+    () =>
+      document.querySelector("#save-state").textContent ===
+      "Guardado en este navegador",
   );
-  await page.locator(".tab-close").click();
-  assert.match(
-    await page.locator("#close-message").textContent(),
-    /PDF o Word/,
-  );
-  await page.locator("#cancel-close-x").click();
   await page.locator("#export").click();
   const projectReady = page.waitForEvent("download");
   await page.locator("#save-project").click();
   const project = await projectReady;
   assert.match(project.suggestedFilename(), /\.chordleaf\.json$/);
   const filePath = await project.path();
-  await page.locator('.rail [data-desktop-view="edit"]').click();
-  await page.locator("#source").fill("[C/G]Cambio posterior");
   await page.locator(".tab-close").click();
-  assert.match(
-    await page.locator("#close-message").textContent(),
-    /cambios posteriores/,
-  );
-  await page.locator("#cancel-close-x").click();
-  await page.locator("#source").fill("[C/G]Uno\n{new_page}\n[Dm7]Dos");
-  await page.locator(".tab-close").click();
-  assert.equal(
-    await page.locator("#close-dialog").evaluate((el) => el.open),
-    false,
-  );
+  await page.locator("#recent-list li").first().waitFor();
+  await page.locator("#recent-list .recent-remove").first().click();
+  assert.equal(await page.locator("#recent-list li").count(), 0);
   await page.reload();
   await page.locator("#empty-new").click();
   await page.locator("#open-project").click();

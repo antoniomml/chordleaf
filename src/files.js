@@ -40,7 +40,70 @@ export function txt(song) {
 }
 /** Portable ChordPro: metadata directives plus inline [chords], without editor extras. */
 export function chordPro(song) {
-  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n\n${song.text}`;
+  const head = [
+    song.title?.trim() && `{title: ${song.title.trim()}}`,
+    song.artist?.trim() && `{artist: ${song.artist.trim()}}`,
+    song.capo > 0 && `{capo: ${song.capo}}`,
+  ].filter(Boolean);
+  const body = song.text.replace(
+    /^(\s*)\{column\}(\s*)$/gm,
+    "$1{column_break}$2",
+  );
+  return head.length ? `${head.join("\n")}\n\n${body}` : body;
+}
+const SECTION_LABELS = {
+  chorus: () => t("Estribillo"),
+  bridge: () => t("Puente"),
+  verse: () => "",
+};
+const SECTION_ALIASES = { c: "chorus", v: "verse", b: "bridge" };
+/** Turn ChordPro directives into sheet lines; unknown directives are dropped
+ * instead of printing as lyrics. */
+function readChordProDirectives(lines, song) {
+  const directive = /^\s*\{\s*([a-z_]+)(?:\s*[:\s]\s*(.*?))?\s*\}\s*$/i;
+  if (!lines.some((line) => directive.test(line))) return lines;
+  const out = [];
+  for (const line of lines) {
+    if (/^#/.test(line)) continue;
+    const m = line.match(directive);
+    if (!m) {
+      out.push(line);
+      continue;
+    }
+    const name = m[1].toLowerCase();
+    let value = (m[2] ?? "").trim();
+    const label = value.match(/^label\s*=\s*"([^"]*)"$/i);
+    if (label) value = label[1];
+    const section = name.match(/^(?:start_of_|so)([a-z]+)$/)?.[1];
+    if (["t", "title"].includes(name)) song.title = value;
+    else if (["st", "subtitle", "artist", "composer"].includes(name)) {
+      if (!song.artist) song.artist = value;
+    } else if (name === "capo" && /^\d+$/.test(value))
+      song.capo = Number(value);
+    else if (
+      [
+        "c",
+        "comment",
+        "ci",
+        "comment_italic",
+        "cb",
+        "comment_box",
+        "highlight",
+      ].includes(name)
+    )
+      out.push(value ? `(${value})` : "");
+    else if (name === "chorus") out.push(`(${value || t("Estribillo")})`);
+    else if (["column_break", "colb", "column"].includes(name))
+      out.push("{column}");
+    else if (["new_page", "np", "new_physical_page", "npp"].includes(name))
+      out.push("{new_page}");
+    else if (section) {
+      const kind = SECTION_ALIASES[section] ?? section;
+      const text = value || SECTION_LABELS[kind]?.() || "";
+      if (text) out.push(`${text}:`);
+    }
+  }
+  return out;
 }
 /** Strip path separators and control characters from user-provided names. */
 export function downloadName(title, fallback) {
@@ -125,7 +188,8 @@ export async function exportSong(song, type) {
           ),
         );
         pdf.setFontSize(11);
-        pdf.text(`CAPO ${song.capo}`, l.margin, l.margin + l.header.capoY);
+        if (song.capo > 0)
+          pdf.text(`CAPO ${song.capo}`, l.margin, l.margin + l.header.capoY);
       }
       for (const column of page.columns)
         for (const row of column) {
@@ -298,7 +362,7 @@ export async function exportSong(song, type) {
           spacing: { before: 0, after: 0, line: 320, lineRule: "exact" },
           children: [
             new TextRun({
-              text: `CAPO ${song.capo}`,
+              text: song.capo > 0 ? `CAPO ${song.capo}` : " ",
               font: "Courier New",
               size: 22,
               color: "111111",
@@ -430,10 +494,22 @@ export async function exportSong(song, type) {
   });
   download(await Packer.toBlob(doc), name + ".docx");
 }
+const sectionPrefixRE =
+  /^(\s*(?:intro|outro|coro|estribillo|chorus|verse|verso|estrofa|puente|bridge|solo|interludio|interlude|instrumental|riff|final|pre-?coro|pre-?chorus)(?:\s*\(?[x×]?\d{1,2}[x×]?\)?)?\s*:\s*)(\S.*)$/iu;
 function alignText(lines) {
   const out = [];
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    const section = line.match(sectionPrefixRE);
+    if (section && !line.includes("[") && chordRow([{ text: section[2] }])) {
+      out.push(
+        section[1] +
+          section[2].replace(/\S+/g, (c) =>
+            chordRE.test(c) || unresolvedChordRE.test(c) ? `[${c}]` : c,
+          ),
+      );
+      continue;
+    }
     const matches = [...line.matchAll(/\S+/g)];
     if (chordRow([{ text: line }])) {
       // Brackets already express explicit chords. Preserve instrumental rows
@@ -446,7 +522,9 @@ function alignText(lines) {
       if (
         next.trim() &&
         !/^\s*(?:\{.*\}|\[[^\]]+\])(?:\s|$)/.test(next) &&
-        !matches.some((m) => /^[|:–—−-]+$/.test(m[0])) &&
+        !matches.some((m) =>
+          /^(?:[|:–—−-]+|\(?(?:[x×]\d{1,2}|\d{1,2}[x×])\)?)$/i.test(m[0]),
+        ) &&
         !chordRow([{ text: next }])
       ) {
         let lyric = next;
@@ -479,6 +557,10 @@ export function titleCase(value = "") {
     .replace(
       /(^|[\s\-–—/])([\p{L}])/gu,
       (_, gap, letter) => gap + letter.toLocaleUpperCase(),
+    )
+    .replace(
+      /\b([OD])'(\p{Ll})/gu,
+      (_, prefix, letter) => prefix + "'" + letter.toLocaleUpperCase(),
     );
 }
 export function importText(text, fallback) {
@@ -514,6 +596,7 @@ export function importText(text, fallback) {
       : Number(m[2]);
     return false;
   });
+  lines = readChordProDirectives(lines, song);
   const capo = lines.findIndex((l) =>
     /^(?:cejilla|capo)\s*[:=]?\s*\d+/i.test(l),
   );

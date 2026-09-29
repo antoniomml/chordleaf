@@ -40,7 +40,6 @@ try {
     await page.locator("#empty-new").click();
     await page.locator("#blank").click();
     await page.locator(".tab-close").first().click();
-    await page.locator("#confirm-close").click();
     await page.locator("#empty-new").waitFor();
 
     errors.length = 0;

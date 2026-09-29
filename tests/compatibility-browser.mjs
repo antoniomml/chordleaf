@@ -52,21 +52,22 @@ for (const engine of [chromium, firefox, webkit].filter(
     await second.waitForFunction(
       () =>
         document.querySelector(".workspace-locked h1")?.textContent ===
-        "Your workspace is open in another tab",
-    );
-    await second.evaluate(() =>
-      document.querySelector(".workspace-locked .primary").click(),
-    );
-    await second.waitForFunction(
-      () =>
-        document.querySelector(".workspace-locked .primary")?.disabled ===
-          true &&
-        document.querySelector(".workspace-locked .primary").textContent ===
-          "Waiting for the other tab to close…",
+        "Chordleaf is open in another tab",
     );
     assert.equal(
       await second.evaluate(() => !!document.querySelector("#source")),
       false,
+    );
+    // "Use here" asks the owner to save and pause instead of waiting for it.
+    const paused = page.waitForEvent("framenavigated");
+    await second.evaluate(() =>
+      document.querySelector(".workspace-locked .primary").click(),
+    );
+    await paused;
+    await page.waitForFunction(
+      () =>
+        document.querySelector(".workspace-locked h1")?.textContent ===
+        "Chordleaf is open in another tab",
     );
     await page.close();
     await second.waitForFunction(

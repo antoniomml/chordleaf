@@ -55,7 +55,13 @@ const server = createServer((req, res) => {
           .on("error", () => res.destroy())
           .pipe(res);
     } catch {
-      res.writeHead(404).end("Not found");
+      res.statusCode = 404;
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Cache-Control", "no-cache");
+      if (req.method === "HEAD") return res.end();
+      createReadStream(resolve(root, "404.html"))
+        .on("error", () => res.end("Not found"))
+        .pipe(res);
     }
   });
 });

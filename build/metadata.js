@@ -1821,6 +1821,79 @@ export function renderContentPage(options) {
 `;
 }
 
+export const ANALYTICS_SCRIPT =
+  '<script defer src="/_vercel/insights/script.js"></script>';
+const analyticsDisclosure = {
+  es: {
+    h: "Sin cookies de seguimiento, con estadísticas agregadas",
+    p: [
+      "Chordleaf no usa cookies de publicidad ni de medición y no incorpora píxeles de redes sociales. Tu visita no alimenta ningún perfil publicitario.",
+      "Para saber cuántas personas usan Chordleaf se cuentan visitas de forma agregada con Vercel Web Analytics, desde el propio dominio y sin cookies. Solo se registran la página, la web de procedencia, el país aproximado, el sistema, el navegador y el tipo de dispositivo; nunca el contenido de tus canciones. El identificador de visita se descarta en 24 horas.",
+      "El proveedor de alojamiento entrega los archivos estáticos y conserva registros técnicos de acceso con la misma finalidad que cualquier servidor web: operar el servicio, medir fallos y defenderlo de abusos. Chordleaf no cruza esos registros con ninguna identidad porque no hay identidades que cruzar.",
+    ],
+  },
+  en: {
+    h: "No tracking cookies, only aggregate statistics",
+    p: [
+      "Chordleaf does not use advertising or measurement cookies and does not embed social pixels. Your visit does not feed an advertising profile.",
+      "To know how many people use Chordleaf, visits are counted in aggregate with Vercel Web Analytics, from the project's own domain and without cookies. Only the page, referring site, approximate country, operating system, browser and device type are recorded, never the content of your songs. The visit identifier is discarded within 24 hours.",
+      "The hosting provider delivers the static files and keeps technical access logs for the same reasons any web server does: to run the service, spot failures and defend it from abuse. Chordleaf does not link those logs to an identity because there are no identities to link.",
+    ],
+  },
+};
+/** Only a build that loads the counter may describe it on the privacy page. */
+function disclosedPage(pair, locale, analytics) {
+  const page = pair[locale];
+  if (!analytics || pair.id !== "privacy") return page;
+  return {
+    ...page,
+    sections: page.sections.map((section, i) =>
+      i === 1 ? analyticsDisclosure[locale] : section,
+    ),
+  };
+}
+
+/** The missing URL has no reliable locale, so the page speaks both. */
+export function renderNotFoundPage(cssHref) {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#171a19" />
+    <meta name="robots" content="noindex" />
+    <title>Page not found · Chordleaf</title>
+    <link rel="icon" href="/logo.svg" />
+    ${cssHref ? `<link rel="stylesheet" href="${cssHref}" />` : ""}
+    <link rel="stylesheet" href="/content-pages.css" />
+  </head>
+  <body>
+    <div class="content-page">
+      <header class="content-header">
+        <a class="content-brand" href="/">
+          <img src="/logo.svg" alt="" width="26" height="26" />
+          Chordleaf
+        </a>
+      </header>
+      <main class="content-main" id="content">
+        <article class="content-shell">
+          <p class="content-kicker">404</p>
+          <h1>This page is not here.</h1>
+          <p class="content-lead">The link may be old or mistyped. Your songs are safe: they stay in your browser.</p>
+          <p class="content-cta-row"><a class="content-cta" href="/">Open Chordleaf</a></p>
+          <section lang="es">
+            <h2>Esta página no existe.</h2>
+            <p>Puede que el enlace sea antiguo o tenga un error. Tus canciones siguen guardadas en tu navegador.</p>
+            <p class="content-cta-row"><a class="content-cta" href="/es/">Abrir Chordleaf</a></p>
+          </section>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>
+`;
+}
+
 export function buildJsonLd(origin, locale) {
   const c = copy[locale === "es" ? "es" : "en"];
   const url = locale === "es" ? `${origin}/es/` : `${origin}/`;
@@ -1881,7 +1954,9 @@ export function buildSitemap(origin, lastmod) {
   );
 }
 
-export function metadataPlugin(site) {
+export function metadataPlugin(site, { analytics = false } = {}) {
+  const withAnalytics = (html) =>
+    analytics ? html.replace("</head>", `${ANALYTICS_SCRIPT}</head>`) : html;
   return {
     name: "chordleaf-public-metadata",
     generateBundle: {
@@ -1951,6 +2026,7 @@ export function metadataPlugin(site) {
               `<script type="application/ld+json">${buildJsonLd(origin, locale)}</script>`;
             html = html.replace("</head>", tags + "</head>");
           }
+          html = withAnalytics(html);
           this.emitFile({
             type: "asset",
             fileName: `${locale}/index.html`,
@@ -1961,18 +2037,20 @@ export function metadataPlugin(site) {
         const origin = site ? site.origin : null;
         for (const pair of contentPairs) {
           for (const locale of ["es", "en"]) {
-            const page = pair[locale];
-            if (!page) continue;
+            if (!pair[locale]) continue;
+            const page = disclosedPage(pair, locale, analytics);
             this.emitFile({
               type: "asset",
               fileName: `${locale}/${page.slug}/index.html`,
-              source: renderContentPage({
-                origin,
-                locale,
-                page,
-                pair,
-                cssHref,
-              }),
+              source: withAnalytics(
+                renderContentPage({
+                  origin,
+                  locale,
+                  page,
+                  pair,
+                  cssHref,
+                }),
+              ),
             });
           }
         }
@@ -1980,6 +2058,11 @@ export function metadataPlugin(site) {
           type: "asset",
           fileName: "content-pages.css",
           source: contentPagesCss,
+        });
+        this.emitFile({
+          type: "asset",
+          fileName: "404.html",
+          source: renderNotFoundPage(cssHref),
         });
         this.emitFile({
           type: "asset",

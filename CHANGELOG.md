@@ -1,5 +1,17 @@
 # chordleaf changelog
 
+## 1.1.0 · September 29, 2026
+
+- Save without thinking about it: open songs are kept in the browser and return on the next visit, with no warning when leaving the page. Closing a song needs no confirmation and moves it to **Recent** (start page and New song), where it can be reopened or removed. Chordleaf asks the browser for persistent storage once there is real work to keep.
+- New start page with the Chordleaf brand, one short promise, **New song**, an original **example song** and your recent songs, instead of a long feature list and "No songs open".
+- A second tab no longer waits forever: **Use here** asks the other tab to save and pause, then opens your songs.
+- ChordPro: import `{title}`, `{subtitle}`, comments, verse/chorus/bridge sections (with labels), `{chorus}`, column and page breaks, and ignore other directives and `#` comments instead of printing them as lyrics. Export omits empty metadata and a zero capo and writes `{column_break}`.
+- Imports recognise chord rows ending in repeat marks (`x2`, `(x4)`) and chords after section labels (`Intro:`, `Coro:`), keep names such as O'Sullivan, and no longer name untitled pastes "Imported song".
+- The web import server limits each client to 30 imports every 10 minutes and answers 429 with `Retry-After`.
+- Export menu with menu semantics and arrow-key navigation, grouped into sharing formats and portable copies. Ctrl/⌘ + S confirms the browser save and Ctrl/⌘ + Shift + S downloads the editable project.
+- Smaller details: capo 0 is no longer printed on PDF, Word or the preview; phone toasts no longer cover the page controls; a single `h1` in the app; a bilingual 404 page; the service worker skips jsPDF extras Chordleaf never uses (~350 KB); feedback link, code of conduct and a release badge that follows GitHub releases.
+- Optional cookie-free visit counting with Vercel Web Analytics (`CHORDLEAF_ANALYTICS=vercel`), off by default; enabling it updates the privacy pages automatically.
+
 ## 1.0.3 · September 26, 2026
 
 - Replace Cifra Club in the import screen with providers that still answer server downloads: LaCuerda, AcordesWeb, TusAcordes, Chordie and Ultimate Guitar. Saved Cifra Club HTML keeps parsing offline.

@@ -9,7 +9,7 @@ export function renderKeySettings(s, key) {
 
 export function renderDocumentSettings(s, transposeInfo = null) {
   const hasBlanks = blankLineCount(s.text) > 0;
-  return t`<h2 class="panel-title"><span>El documento</span><span class="muted">01</span></h2>
+  return t`<h2 class="panel-title"><span>El documento</span></h2>
     <div class="settings-meta-row"><label class="field">TÍTULO<input id="title" value="${esc(s.title)}" maxlength="90" placeholder="Nombre de la canción"></label>
     <label class="field">ARTISTA<input id="artist" value="${esc(s.artist)}" maxlength="100" placeholder="Nombre del artista"></label></div>
     <div id="document-options-content">
