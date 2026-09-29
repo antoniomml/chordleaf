@@ -73,7 +73,7 @@ The same build writes the sitemap covering the home pair plus every content pair
 
 ## Releases
 
-The current tagged release is **`v1.1.0`**. Before another release:
+The current tagged release is **`v1.1.1`**. Before another release:
 
 1. Update `version` in `package.json` and add its changes to `CHANGELOG.md`.
 2. Run frozen installation, formatting, tests, build and browser checks.
