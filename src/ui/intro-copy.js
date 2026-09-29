@@ -4,6 +4,7 @@ const copy = {
     label: "Features",
     guide: "User guide",
     source: "Open source on GitHub",
+    feedback: "Send feedback",
     links: [
       ["/en/guide/", "User guide"],
       ["/en/chord-sheet-maker/", "Chord sheet maker"],
@@ -31,6 +32,7 @@ const copy = {
     label: "Funciones",
     guide: "Guía de uso",
     source: "Código abierto en GitHub",
+    feedback: "Enviar comentarios",
     links: [
       ["/es/guia/", "Guía de uso"],
       ["/es/editor-de-acordes/", "Editor de acordes"],
@@ -56,7 +58,11 @@ const copy = {
   },
 };
 
-export function introHtml(locale) {
+/** The editor shows only the links; crawlable entry pages also list features. */
+export function introHtml(locale, { features = true } = {}) {
   const content = copy[locale === "es" ? "es" : "en"];
-  return `<section class="intro-features" aria-label="${content.label}">${content.features.map(([heading, body]) => `<div><h2>${heading}</h2><p>${body}</p></div>`).join("")}</section><nav class="intro-links" aria-label="${content.guide}">${content.links.map(([href, label]) => `<a href="${href}">${label}</a>`).join(" ")} <a href="https://github.com/antoniomml/chordleaf">${content.source}</a></nav>`;
+  const list = features
+    ? `<section class="intro-features" aria-label="${content.label}">${content.features.map(([heading, body]) => `<div><h2>${heading}</h2><p>${body}</p></div>`).join("")}</section>`
+    : "";
+  return `${list}<nav class="intro-links" aria-label="${content.guide}">${content.links.map(([href, label]) => `<a href="${href}">${label}</a>`).join(" ")} <a href="https://github.com/antoniomml/chordleaf">${content.source}</a> <a href="https://github.com/antoniomml/chordleaf/issues/new/choose">${content.feedback}</a></nav>`;
 }

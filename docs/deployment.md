@@ -43,7 +43,7 @@ Before enabling it:
 3. Set `CHORDLEAF_WEB_IMPORT_ENABLED=true` only in the environments where those controls are ready, then redeploy.
 4. Test one supported URL from each provider. Public sites can block data-center traffic even when imports work locally. Do not bypass their access controls; retain file/text import as the fallback.
 
-To stop imports quickly, set the variable to `false` and redeploy. A browser-origin check is defense in depth, not a distributed rate limiter; scripts can forge request headers. The code deliberately does not pretend that an in-memory counter protects independently scaled functions.
+To stop imports quickly, set the variable to `false` and redeploy. A browser-origin check is defense in depth, not a distributed rate limiter; scripts can forge request headers. Each process also keeps an in-memory limit of 30 imports per client every 10 minutes. That protects self-hosted servers, but independently scaled functions do not share it, so the firewall rule remains the real limit on Vercel. Self-hosted servers behind a reverse proxy that overwrites `X-Forwarded-For` can set `CHORDLEAF_TRUST_PROXY=true`; otherwise the socket address is used.
 
 ## 5. Harden headers and the domain
 

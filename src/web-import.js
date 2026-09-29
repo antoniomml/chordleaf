@@ -348,7 +348,7 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
         "La web no ofrece una versión de texto accesible de esta canción. Prueba otro enlace o importa un archivo.",
       ),
     );
-  const result = importText(text, title || t("Canción importada"));
+  const result = importText(text, title || "");
   if (LACUERDA_HOSTS.has(url.hostname))
     result.text = result.text
       .split("\n")
@@ -392,7 +392,7 @@ export async function importWebSong(value, { signal } = {}) {
   if (response.status === 429)
     throw new Error(
       t(
-        "Has hecho varias importaciones seguidas. Espera un minuto y vuelve a intentarlo.",
+        "Has hecho varias importaciones seguidas. Espera unos minutos o pega el texto de la canción.",
       ),
     );
   if (!response.headers.get("content-type")?.includes("application/json"))

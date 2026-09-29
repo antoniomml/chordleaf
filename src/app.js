@@ -18,6 +18,7 @@ import {
   transpose,
   diagram,
   transposeChord,
+  transposeSpelling,
   chords,
   chordRE,
 } from "./music.js";
@@ -37,10 +38,26 @@ import {
 } from "./project.js";
 import { registerServiceWorker } from "./pwa.js";
 import { setupLocalWebImport } from "./ui/local-web-import.js";
+import { setupMenu } from "./ui/menu.js";
 import { blankLineCount, compressBlankLines } from "./text-tools.js";
+import {
+  RECENT_KEY,
+  readRecent,
+  rememberClosed,
+  forget,
+  worthKeeping,
+} from "./recent-projects.js";
+import { exampleSong, chordRows } from "./example-song.js";
 const $ = (s) => document.querySelector(s);
 document.documentElement.lang = getLocale();
 const workspaceSession = await openWorkspaceSession($("#app"));
+workspaceSession.beforeHandOff = () => persist();
+let recent = [];
+try {
+  recent = readRecent(localStorage.getItem(RECENT_KEY));
+} catch {
+  /* Storage can be unavailable in private or restricted contexts. */
+}
 let songs, active, recoveryRaw, storedRaw;
 try {
   storedRaw =
@@ -88,6 +105,7 @@ let section = "document",
   previewTimer,
   toastTimer,
   lastSaveAnnouncement,
+  persistenceRequested = false,
   saveFailureNotified = false;
 const songViews = new Map();
 const songDesktopViews = new Map();
@@ -122,18 +140,9 @@ function persist() {
   }
   try {
     localStorage.setItem("chordleaf-v1", JSON.stringify({ songs, active }));
-    const current = song();
-    setSaveState(
-      current?.pdfExported
-        ? current.dirty || !current.projectSignature
-          ? t("PDF descargado · proyecto sin guardar")
-          : t("PDF descargado · proyecto guardado en archivo")
-        : current?.dirty || !current?.projectSignature
-          ? t("Sesión recuperable · proyecto sin guardar")
-          : t("Sesión recuperable · proyecto guardado en archivo"),
-      { announce: true },
-    );
+    setSaveState(t("Guardado en este navegador"), { announce: true });
     saveFailureNotified = false;
+    requestPersistentStorage();
     return true;
   } catch {
     setSaveState(t("No se pudo guardar la sesión · descarga el proyecto"), {
@@ -147,10 +156,24 @@ function persist() {
     return false;
   }
 }
+/** Ask once, after real content exists, so browsers keep songs under pressure. */
+function requestPersistentStorage() {
+  if (persistenceRequested || !songs.some(worthKeeping)) return;
+  persistenceRequested = true;
+  navigator.storage?.persist?.().catch(() => {});
+}
+function saveRecent() {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+    return true;
+  } catch {
+    toast(t("No se pudo guardar la lista de recientes."), "error");
+    return false;
+  }
+}
 function changed({ preserveTranspose = false } = {}) {
   if (!song()) return;
   if (!preserveTranspose) transposeHistory.delete(song().id);
-  song().pdfExported = false;
   song().dirty = projectSignature(song()) !== song().projectSignature;
   setSaveState(t("Guardando…"), { announce: true });
   clearTimeout(saveTimer);
@@ -178,17 +201,21 @@ function scrollToOption(element, options) {
   });
 }
 $("#app").innerHTML = t(shell.replace(/\s+/g, " "));
-$("#intro-content").innerHTML = introHtml(getLocale());
+$("#intro-content").innerHTML = introHtml(getLocale(), { features: false });
+const exportMenu = setupMenu($("#export"), $("#export-menu"));
 $("#toast").addEventListener("click", () => {
   clearTimeout(toastTimer);
   $("#toast").classList.remove("visible");
 });
 function renderTabs() {
+  $("#song-heading").textContent = song()
+    ? song().title || t("Nueva canción")
+    : "";
   $("#tabs").innerHTML =
     songs
       .map(
         (s) =>
-          t`<div class="tab ${s.id === active ? "active" : ""}"><button class="tab-select" data-id="${s.id}" ${s.id === active ? 'aria-current="page"' : ""}><span class="tab-icon">♫</span><span>${esc(s.title || t("Nueva canción"))}</span>${s.dirty ? t('<i title="Proyecto sin guardar"></i>') : ""}</button><button class="tab-close" data-close="${s.id}" aria-label="Cerrar ${esc(s.title)}">×</button></div>`,
+          t`<div class="tab ${s.id === active ? "active" : ""}"><button class="tab-select" data-id="${s.id}" ${s.id === active ? 'aria-current="page"' : ""}><span class="tab-icon" aria-hidden="true">♫</span><span>${esc(s.title || t("Nueva canción"))}</span></button><button class="tab-close" data-close="${s.id}" aria-label="Cerrar ${esc(s.title || t("Nueva canción"))}" title="${t("Cerrar y guardar en Recientes")}">×</button></div>`,
       )
       .join("") +
     (songs.length
@@ -221,20 +248,118 @@ function renderTabs() {
       tabList.scrollLeft += selected.right - viewport.right;
   }
 }
-let closing;
+/** Closing keeps the project in Recents; removing it from there is explicit. */
 function closeSong(id) {
   const target = songs.find((s) => s.id === id);
-  if (target.dirty || !target.projectSignature) {
-    closing = id;
-    $("#close-message").textContent = target.projectSignature
-      ? t(
-          "Hay cambios posteriores al proyecto guardado. Si cierras, esos cambios no estarán en el archivo. Guarda el proyecto otra vez para conservarlos.",
-        )
-      : t(
-          "Aunque hayas descargado un PDF o Word, no tienes un proyecto editable guardado. Si cierras, perderás la posibilidad de seguir editando esta copia.",
-        );
-    $("#close-dialog").showModal();
-  } else removeSong(id);
+  if (!target) return;
+  const kept = worthKeeping(target);
+  if (kept) {
+    recent = rememberClosed(recent, structuredClone(target));
+    if (!saveRecent()) return;
+  }
+  removeSong(id);
+  if (kept) toast(t("Canción cerrada. Puedes reabrirla desde Recientes."));
+}
+function reopenRecent(id) {
+  const entry = recent.find((item) => item.song.id === id);
+  if (!entry) return;
+  const opened = create(entry.song);
+  if (songs.some((s) => s.id === opened.id)) opened.id = crypto.randomUUID();
+  songs.push(opened);
+  recent = forget(recent, id);
+  saveRecent();
+  active = opened.id;
+  mobileView = "preview";
+  desktopView = "document";
+  songViews.set(active, mobileView);
+  songDesktopViews.set(active, desktopView);
+  musicSection = "key";
+  resetView();
+  if ($("#new-dialog").open) $("#new-dialog").close();
+  render();
+  persist();
+}
+function removeRecent(id) {
+  const index = recent.findIndex((item) => item.song.id === id);
+  if (index < 0) return;
+  recent = forget(recent, id);
+  saveRecent();
+  renderRecent();
+  // Keep keyboard focus inside the list after a removal.
+  const buttons = document.querySelectorAll(
+    `${$("#new-dialog").open ? "#dialog-recent-list" : "#recent-list"} .recent-open`,
+  );
+  (buttons[Math.min(index, buttons.length - 1)] ?? $("#empty-new"))?.focus();
+}
+const relativeTime = new Intl.RelativeTimeFormat(getLocale(), {
+  numeric: "auto",
+});
+function closedAgo(time) {
+  const minutes = Math.round((time - Date.now()) / 60000);
+  if (Math.abs(minutes) < 60) return relativeTime.format(minutes, "minute");
+  const hours = Math.round(minutes / 60);
+  if (Math.abs(hours) < 24) return relativeTime.format(hours, "hour");
+  const days = Math.round(hours / 24);
+  if (Math.abs(days) < 30) return relativeTime.format(days, "day");
+  return new Date(time).toLocaleDateString(getLocale());
+}
+function recentMarkup(entries) {
+  return entries
+    .map(({ song: s, closedAt }) => {
+      const title = esc(s.title || t("Canción sin título"));
+      return `<li><button class="recent-open" data-recent="${s.id}"><span class="recent-title">${title}</span><small>${esc([closedAgo(closedAt), s.artist].filter(Boolean).join(" · "))}</small></button><button class="recent-remove" data-recent-remove="${s.id}" aria-label="${t("Quitar de Recientes")}: ${title}" title="${t("Quitar de Recientes")}">×</button></li>`;
+    })
+    .join("");
+}
+function renderRecent() {
+  for (const [section, list, limit] of [
+    ["#recent-projects", "#recent-list", 6],
+    ["#dialog-recent", "#dialog-recent-list", 4],
+  ]) {
+    $(section).hidden = !recent.length;
+    $(list).innerHTML = recentMarkup(recent.slice(0, limit));
+  }
+}
+function recentClick(event) {
+  const remove = event.target.closest("[data-recent-remove]");
+  if (remove) return removeRecent(remove.dataset.recentRemove);
+  const open = event.target.closest("[data-recent]");
+  if (open) reopenRecent(open.dataset.recent);
+}
+function renderEntrySheet() {
+  const example = exampleSong(getLocale());
+  $("#entry-sheet").innerHTML =
+    `<div class="entry-page"><strong>${esc(example.title.toLocaleUpperCase())}</strong><small>${esc(example.artist)}</small><pre>${chordRows(
+      example.text,
+      6,
+    )
+      .map((row) => `<b>${esc(row.chords)}</b>\n${esc(row.lyric)}`)
+      .join("\n")}</pre></div>`;
+}
+async function openExample() {
+  const example = exampleSong(getLocale());
+  const s = create({ ...example });
+  const button = $("#example-song");
+  button.disabled = true;
+  try {
+    Object.assign(s, await fitSong(s));
+  } catch {
+    /* The default layout is still readable. */
+  } finally {
+    button.disabled = false;
+  }
+  songs.push(s);
+  active = s.id;
+  desktopView = "document";
+  mobileView = "preview";
+  songDesktopViews.set(active, desktopView);
+  songViews.set(active, mobileView);
+  musicSection = "key";
+  songMusicSections.set(active, musicSection);
+  resetView();
+  render();
+  persist();
+  toast(t("Canción de ejemplo abierta. Cámbiala a tu gusto o crea una nueva."));
 }
 function removeSong(id) {
   songs = songs.filter((s) => s.id !== id);
@@ -348,6 +473,16 @@ function renderSettings() {
         renderPages();
       }),
   );
+  document.querySelectorAll("[data-notation]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        s.notation = b.dataset.notation;
+        changed({ preserveTranspose: true });
+        renderSettings();
+        renderPages();
+        $(`[data-notation="${s.notation}"]`)?.focus();
+      }),
+  );
   $("#transpose-down").onclick = () => shift(-1);
   $("#transpose-up").onclick = () => shift(1);
   $("#capo-down").onclick = () => setCapo(s.capo - 1);
@@ -395,7 +530,8 @@ function updateNavigation() {
 }
 function transposeSong(n) {
   const s = song();
-  s.text = transpose(s.text, n);
+  const names = transposeSpelling(s.text, n);
+  s.text = transpose(s.text, n, names);
   s.chordShapes = Object.fromEntries(
     Object.entries(s.chordShapes || {}).map(([name, shape]) => {
       let offset = n;
@@ -403,14 +539,14 @@ function transposeSong(n) {
       while (played.length && Math.min(...played) + offset < 0) offset += 12;
       while (played.length && Math.max(...played) + offset > 24) offset -= 12;
       return [
-        transposeChord(name, n),
+        transposeChord(name, n, names),
         { ...shape, frets: shape.frets.map((f) => (f < 0 ? -1 : f + offset)) },
       ];
     }),
   );
   for (const sticker of s.chordStickers || [])
     if (Array.isArray(sticker.chords))
-      sticker.chords = sticker.chords.map((c) => transposeChord(c, n));
+      sticker.chords = sticker.chords.map((c) => transposeChord(c, n, names));
 }
 function shift(n) {
   const s = song();
@@ -475,6 +611,7 @@ function renderPages() {
   const s = song(),
     l = layout(s);
   $("#pages").innerHTML = renderPageMarkup(s, l, editing);
+  $("#pages .sheet-chord[data-chord]")?.setAttribute("tabindex", "0");
   $("#issue-editor").hidden = true;
   const issues = [...s.text.matchAll(/\[\?[^\[\]\n]{1,40}\]/g)].length;
   const noChords = !issues && !!s.text.trim() && !chords(s.text).length;
@@ -489,7 +626,7 @@ function renderPages() {
   else $("#pencil").setAttribute("aria-pressed", editing);
   $("#editing-hint").textContent = editing
     ? t("Pulsa un verso para editar letra y acordes.")
-    : t("Tu próxima canción empieza aquí.");
+    : "";
   observer?.disconnect();
   observer = new IntersectionObserver(
     (entries) => {
@@ -740,6 +877,7 @@ function render() {
   $("#empty-state").hidden = !empty;
   $("main").hidden = empty;
   $("#export").disabled = empty;
+  renderRecent();
   if (empty) {
     clearTimeout(previewTimer);
     previewTimer = undefined;
@@ -974,7 +1112,7 @@ $("#paste-import").onclick = async () => {
   const generation = importGeneration;
   $("#paste-import").disabled = true;
   try {
-    await acceptImport(importText(text, t("Canción importada")));
+    await acceptImport(importText(text, ""));
     if (generation === importGeneration) $("#import-text").value = "";
   } catch (error) {
     if (generation === importGeneration && $("#new-dialog").open)
@@ -1113,10 +1251,10 @@ $("#workspace-backup").onclick = () => {
     new Blob([serializeWorkspace(songs, active)], { type: "application/json" }),
     "chordleaf-workspace.json",
   );
-  $("#export-menu").hidden = true;
+  exportMenu.close({ focus: true });
 };
 $("#print-document").onclick = () => {
-  $("#export-menu").hidden = true;
+  exportMenu.close({ focus: true });
   // The print stylesheet paints only the A4 pages, whatever view is open.
   window.print();
 };
@@ -1148,29 +1286,18 @@ function saveProject(target = song()) {
   }
 }
 $("#save-project").onclick = () => {
-  $("#export-menu").hidden = true;
+  exportMenu.close({ focus: true });
   saveProject();
 };
-$("#export").onclick = () =>
-  ($("#export-menu").hidden = !$("#export-menu").hidden);
 document.querySelectorAll("[data-export]").forEach(
   (b) =>
     (b.onclick = async () => {
-      $("#export-menu").hidden = true;
+      exportMenu.close({ focus: true });
       const s = song();
-      const signature = projectSignature(s);
       try {
         toast(t("Preparando tu documento…"));
         await exportSong(structuredClone(s), b.dataset.export);
-        if (b.dataset.export === "pdf" && projectSignature(s) === signature) {
-          s.pdfExported = true;
-          persist();
-        }
-        toast(
-          t(
-            "Documento descargado. Guarda también el proyecto para poder seguir editándolo después.",
-          ),
-        );
+        toast(t("Documento descargado."));
       } catch (e) {
         toast(
           t("No se pudo exportar. Copia la letra del editor o descarga TXT. ") +
@@ -1181,7 +1308,6 @@ document.querySelectorAll("[data-export]").forEach(
     }),
 );
 document.addEventListener("click", (e) => {
-  if (!e.target.closest(".export-wrap")) $("#export-menu").hidden = true;
   const chord = e.target.closest("button[data-chord]");
   if (chord) {
     const input = $("#source"),
@@ -1237,21 +1363,16 @@ $("#fit").onclick = async () => {
     $("#fit").disabled = false;
   }
 };
-const closeCancelDialog = () => $("#close-dialog").close();
-$("#cancel-close-x").onclick = closeCancelDialog;
-$("#close-save-project").onclick = () => {
-  if (saveProject(songs.find((s) => s.id === closing))) {
-    $("#close-dialog").close();
-    removeSong(closing);
-  }
-};
-$("#confirm-close").onclick = () => {
-  removeSong(closing);
-  $("#close-dialog").close();
-};
+$("#recent-list").addEventListener("click", recentClick);
+$("#dialog-recent-list").addEventListener("click", recentClick);
+$("#example-song").onclick = openExample;
+renderEntrySheet();
 const tooltip = $("#chord-tooltip");
 function showChordTooltip(target) {
-  tooltip.innerHTML = `<strong>${esc(target.dataset.chord)}</strong>${diagram(target.dataset.chord, 0, (song().chordShapes?.[target.dataset.chord] || song().chordShapes?.[target.dataset.chord.replace(/\*$/, "")])?.frets)}`;
+  const title = target.classList.contains("sheet-chord")
+    ? target.textContent
+    : target.dataset.chord;
+  tooltip.innerHTML = `<strong>${esc(title)}</strong>${diagram(target.dataset.chord, 0, (song().chordShapes?.[target.dataset.chord] || song().chordShapes?.[target.dataset.chord.replace(/\*$/, "")])?.frets)}`;
   tooltip.hidden = false;
   const r = target.getBoundingClientRect();
   tooltip.style.left =
@@ -1281,6 +1402,33 @@ document.addEventListener("focusout", (event) => {
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") hideChordTooltip();
 });
+// Sheet chords form one Tab stop; arrows, Home and End move between them.
+$("#pages").addEventListener("keydown", (event) => {
+  const current = event.target.closest(".sheet-chord[data-chord]");
+  const step = {
+    ArrowRight: 1,
+    ArrowDown: 1,
+    ArrowLeft: -1,
+    ArrowUp: -1,
+    Home: -Infinity,
+    End: Infinity,
+  }[event.key];
+  if (!current || !step) return;
+  const all = [...$("#pages").querySelectorAll(".sheet-chord[data-chord]")];
+  const index = all.indexOf(current);
+  const next =
+    all[
+      step === -Infinity
+        ? 0
+        : step === Infinity
+          ? all.length - 1
+          : Math.max(0, Math.min(all.length - 1, index + step))
+    ];
+  event.preventDefault();
+  current.setAttribute("tabindex", "-1");
+  next.setAttribute("tabindex", "0");
+  next.focus();
+});
 const languagePicker = setupLanguagePicker({ persist, toast });
 // iOS keeps the layout viewport under the on-screen keyboard: mirror the
 // visual viewport height so the editor column stays usable.
@@ -1303,17 +1451,24 @@ window.addEventListener("resize", () => {
   resizePages();
 });
 window.addEventListener("beforeunload", (e) => {
-  persist();
-  if (!languagePicker.switching && songs.some((s) => s.dirty)) {
+  // Songs live in this browser; only warn when that copy could not be written.
+  if (!persist() && !languagePicker.switching && workspaceSession.held) {
     e.preventDefault();
     e.returnValue = "";
   }
 });
 document.addEventListener("keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-    e.preventDefault();
-    saveProject();
-  }
+  if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "s") return;
+  e.preventDefault();
+  if (!song()) return;
+  if (e.shiftKey) return saveProject();
+  clearTimeout(saveTimer);
+  if (persist())
+    toast(
+      t(
+        "Guardado en este navegador. Para llevarlo a otro sitio: Exportar → Descargar proyecto editable.",
+      ),
+    );
 });
 setupEditorTools({ resizePages });
 const chordPanel = setupChordsPanel({

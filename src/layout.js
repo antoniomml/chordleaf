@@ -1,4 +1,4 @@
-import { parseSong, chordRE, unresolvedChordRE } from "./music.js";
+import { parseSong, chordLabel, chordRE, unresolvedChordRE } from "./music.js";
 import { stickerGeometry } from "./dictionary.js";
 export const PAGE = { width: 595.28, height: 841.89 };
 function wrapText(text, capacity) {
@@ -48,9 +48,12 @@ export function layout(song, parsed = parseSong(song.text)) {
     capoY,
   };
   const label = (chord) =>
-    song.chordShapes?.[chord]?.star && !chord.endsWith("*")
-      ? chord + "*"
-      : chord;
+    chordLabel(
+      song.chordShapes?.[chord]?.star && !chord.endsWith("*")
+        ? chord + "*"
+        : chord,
+      song.notation,
+    );
   const rows = [];
   for (const line of parsed) {
     if (line.break) {
@@ -58,7 +61,11 @@ export function layout(song, parsed = parseSong(song.text)) {
       continue;
     }
     let lyric = line.lyric,
-      marks = line.marks.map((m) => ({ ...m, chord: label(m.chord) }));
+      marks = line.marks.map((m) => ({
+        ...m,
+        name: m.chord,
+        chord: m.issue ? m.chord : label(m.chord),
+      }));
     const section =
       lyric.match(
         /^\s*(?:\[[^\]]+\]|(?:intro|solo|instrumental|interludio|puente|final|outro)\s*:)\s*/i,

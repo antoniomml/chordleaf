@@ -51,8 +51,14 @@ export function pwaPlugin() {
         ]);
         // Cache lazy libraries and workers too: exporting offline must not
         // require first having exported once with an Internet connection.
+        // jsPDF lazily imports html2canvas and canvg for .html() and SVG, which
+        // Chordleaf never calls; caching them would only cost users ~350 KB.
+        const unusedPdfExtra = (output) =>
+          /[\\/]node_modules[\\/](?:html2canvas|canvg)[\\/]/.test(
+            output.facadeModuleId || "",
+          );
         for (const [name, output] of Object.entries(bundle)) {
-          if (name.startsWith("assets/"))
+          if (name.startsWith("assets/") && !unusedPdfExtra(output))
             resources.set(`/${name}`, output.code ?? output.source);
         }
         for (const name of publicFiles(path.join(root, "public"))) {

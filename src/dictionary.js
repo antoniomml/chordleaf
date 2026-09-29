@@ -1,4 +1,4 @@
-import { chords, diagram, fingering } from "./music.js";
+import { chordLabel, chords, diagram, fingering } from "./music.js";
 import { PAGE } from "./layout.js";
 import { MAX_STICKER_CHORDS, MAX_SONG_DIAGRAMS } from "./song-state.js";
 const chordCache = new WeakMap();
@@ -93,7 +93,7 @@ export function stickerSvg(song, sticker) {
     .map((name, i) => {
       const shape = song.chordShapes?.[name];
       const svg = diagram(name, 0, shape?.frets, { ink: "#000" });
-      return `<g transform="translate(${(i % columns) * cellWidth + (cellWidth - cell) / 2} ${Math.floor(i / columns) * rowHeight + (rowHeight - cell * 1.2) / 2})"><text x="${cell / 2}" y="${cell * 0.16}" text-anchor="middle" font-family="monospace" font-size="${cell * 0.15}" font-weight="bold">${escape(name)}${shape?.star && !name.endsWith("*") ? "*" : ""}</text>${svg.replace("<svg ", `<svg x="0" y="${cell * 0.2}" width="${cell}" height="${cell}" `)}</g>`;
+      return `<g transform="translate(${(i % columns) * cellWidth + (cellWidth - cell) / 2} ${Math.floor(i / columns) * rowHeight + (rowHeight - cell * 1.2) / 2})"><text x="${cell / 2}" y="${cell * 0.16}" text-anchor="middle" font-family="monospace" font-size="${cell * 0.15}" font-weight="bold">${escape(chordLabel(name, song.notation))}${shape?.star && !name.endsWith("*") ? "*" : ""}</text>${svg.replace("<svg ", `<svg x="0" y="${cell * 0.2}" width="${cell}" height="${cell}" `)}</g>`;
     })
     .join("")}</svg>`;
 }

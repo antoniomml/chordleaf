@@ -10,8 +10,8 @@ export default {
     "Paste the original LaCuerda, AcordesWeb, TusAcordes, Chordie or Ultimate Guitar link before opening the HTML.",
   "Selecciona la página guardada como HTML (.html o .htm).":
     "Select the page saved as HTML (.html or .htm).",
-  "Has hecho varias importaciones seguidas. Espera un minuto y vuelve a intentarlo.":
-    "You have made several imports in a row. Wait a minute and try again.",
+  "Has hecho varias importaciones seguidas. Espera unos minutos o pega el texto de la canción.":
+    "You have made several imports in a row. Wait a few minutes or paste the song text.",
   "Guardar proyecto editable": "Save editable project",
   "Abrir proyecto editable": "Open editable project",
   "Retomar una canción .chordleaf.json": "Resume a .chordleaf.json song",
@@ -28,6 +28,8 @@ export default {
     "Show chordleaf.com in the page footer",
   "Mostrar chordleaf.com en el pie": "Show chordleaf.com in the footer",
   "ACORDES Y CEJILLA": "CHORDS AND CAPO",
+  "NOTACIÓN EN LA HOJA": "NOTATION ON THE SHEET",
+  "Notación de los acordes en la hoja": "Chord notation on the sheet",
   "FORMATO DE PÁGINA": "PAGE LAYOUT",
   "Más opciones": "More options",
   "LIMPIAR TEXTO": "CLEAN TEXT",
@@ -525,4 +527,36 @@ export default {
   "No se pudieron restaurar los datos guardados. Exporta una copia de recuperación antes de continuar.":
     "Saved data could not be restored. Export a recovery copy before continuing.",
   Idioma: "Language",
+  "Chordleaf está abierto en otra pestaña": "Chordleaf is open in another tab",
+  "Puedes seguir aquí. La otra pestaña guardará tus canciones y se pausará.":
+    "You can continue here. The other tab will save your songs and pause.",
+  "Usar aquí": "Use here",
+  "Abriendo tus canciones…": "Opening your songs…",
+  "No se pudo guardar la lista de recientes.":
+    "Recent songs could not be saved.",
+  "Canción cerrada. Puedes reabrirla desde Recientes.":
+    "Song closed. You can reopen it from Recent.",
+  "Quitar de Recientes": "Remove from Recent",
+  "Cerrar y guardar en Recientes": "Close and keep in Recent",
+  "Canción de ejemplo abierta. Cámbiala a tu gusto o crea una nueva.":
+    "Example song opened. Change it as you like or start a new one.",
+  "Guardado en este navegador. Para llevarlo a otro sitio: Exportar → Descargar proyecto editable.":
+    "Saved in this browser. To take it elsewhere: Export → Download editable project.",
+  "Documento descargado.": "Document downloaded.",
+  "EDITOR DE LETRAS Y ACORDES": "LYRICS AND CHORDS EDITOR",
+  "Tu canción, lista para el ensayo.": "Your song, ready for rehearsal.",
+  "Escribe o importa la letra, coloca cada acorde en su sílaba y descarga una hoja clara en PDF o Word.":
+    "Write or import the lyrics, place each chord on its syllable and download a clear sheet as PDF or Word.",
+  "Ver un ejemplo": "See an example",
+  "Gratis, sin cuenta y tus canciones se quedan en este navegador.":
+    "Free, no account, and your songs stay in this browser.",
+  Recientes: "Recent",
+  Estribillo: "Chorus",
+  Puente: "Bridge",
+  "Descargar proyecto editable": "Download editable project",
+  "Para abrirlo en otro navegador · JSON":
+    "To open it in another browser · JSON",
+  "Copia de seguridad · JSON": "Backup · JSON",
+  "Todas las canciones abiertas": "Every open song",
+  "Para otras apps de acordes": "For other chord apps",
 };

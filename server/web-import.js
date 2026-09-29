@@ -120,6 +120,48 @@ export async function fetchSongPage(value, fetcher = fetch) {
     "La web redirige demasiadas veces. Copia el enlace final de la canción.",
   );
 }
+/** Per-client sliding window. Memory is per process, so on serverless hosts it
+ * only slows bursts that reach one instance; platform WAF rules stay the real
+ * limit. */
+export function createRateLimiter({
+  limit = 30,
+  windowMs = 10 * 60 * 1000,
+  maxClients = 5000,
+  now = Date.now,
+} = {}) {
+  const clients = new Map();
+  return function take(key) {
+    const time = now();
+    const recent = (clients.get(key) || []).filter((t) => time - t < windowMs);
+    if (recent.length >= limit) {
+      clients.set(key, recent);
+      return Math.ceil((recent[0] + windowMs - time) / 1000);
+    }
+    recent.push(time);
+    clients.delete(key);
+    clients.set(key, recent);
+    if (clients.size > maxClients) clients.delete(clients.keys().next().value);
+    return 0;
+  };
+}
+const importLimit = createRateLimiter();
+function clientKey(req) {
+  const headers = req.headers || {};
+  // Forwarded addresses are only trusted where the platform overwrites them.
+  const forwarded =
+    process.env.VERCEL || process.env.CHORDLEAF_TRUST_PROXY === "true"
+      ? headers["x-vercel-forwarded-for"] ||
+        headers["x-real-ip"] ||
+        headers["x-forwarded-for"]
+      : "";
+  return (
+    String(forwarded || "")
+      .split(",")[0]
+      .trim() ||
+    req.socket?.remoteAddress ||
+    "local"
+  );
+}
 export async function webImportMiddleware(req, res, next) {
   if (req.url?.split("?", 1)[0] !== "/api/import-web") return next();
   securityHeaders(res);
@@ -155,6 +197,18 @@ export async function webImportMiddleware(req, res, next) {
   if (req.url.length > 4096) {
     res.statusCode = 414;
     res.end(JSON.stringify({ error: "El enlace es demasiado largo." }));
+    return;
+  }
+  const retryAfter = importLimit(clientKey(req));
+  if (retryAfter) {
+    res.statusCode = 429;
+    res.setHeader("Retry-After", String(retryAfter));
+    res.end(
+      JSON.stringify({
+        error:
+          "Has hecho varias importaciones seguidas. Espera unos minutos o pega el texto de la canción.",
+      }),
+    );
     return;
   }
   const request = new URL(req.url, "http://localhost");

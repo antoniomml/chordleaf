@@ -14,6 +14,12 @@ try {
   await page.locator("#empty-new").waitFor();
   await page.addScriptTag({ content: axe.source });
   async function check(state) {
+    // A half-faded toast has no meaningful contrast; measure settled states.
+    await page.waitForFunction(() =>
+      document
+        .getAnimations()
+        .every((animation) => animation.playState !== "running"),
+    );
     const violations = await page.evaluate(() => axe.run());
     assert.deepEqual(
       violations.violations.map(({ id, nodes }) => ({
@@ -27,9 +33,20 @@ try {
 
   await check("empty workspace");
   assert.equal(
-    await page.getByRole("heading", { name: "Escribe a tu manera" }).count(),
+    await page
+      .getByRole("heading", {
+        level: 1,
+        name: "Tu canción, lista para el ensayo.",
+      })
+      .count(),
     1,
   );
+  await page.locator("#example-song").click();
+  await page.locator(".page").waitFor();
+  await check("example song");
+  await page.locator(".tab-close").first().click();
+  await page.locator("#recent-list li").first().waitFor();
+  await check("empty workspace with recent songs");
   await page.locator("#empty-new").click();
   await check("new-song dialog");
   await page.locator("#blank").click();
