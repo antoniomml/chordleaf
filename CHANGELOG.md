@@ -1,5 +1,10 @@
 # chordleaf changelog
 
+## 1.1.1 · September 30, 2026
+
+- Chords to review open one after another: saving a fix or choosing **Leave for later** moves to the next one, with progress ("1 of 3"), and closing the panel stops the review.
+- When the same unrecognised chord appears several times, one fix corrects all of them (the option is on by default).
+
 ## 1.1.0 · September 30, 2026
 
 - Save without thinking about it: open songs are kept in the browser and return on the next visit, with no warning when leaving the page. Closing a song needs no confirmation and moves it to **Recent** (start page and New song), where it can be reopened or removed. Chordleaf asks the browser for persistent storage once there is real work to keep.
