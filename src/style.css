@@ -980,10 +980,40 @@ main {
   color: #6c664e;
   line-height: 1.4;
 }
-.issue-editor > button[type="submit"] {
+.issue-editor-heading #issue-progress {
+  margin-left: 6px;
+  color: #6c664e;
+  font-size: 12px;
+  font-weight: 400;
+}
+.issue-editor label.issue-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  font-weight: 400;
+  cursor: pointer;
+}
+.issue-editor label.issue-all input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #4f6b35;
+}
+.issue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 3px;
+}
+.issue-actions button {
+  min-height: 34px;
   padding: 8px 12px;
   border-radius: 5px;
+}
+.issue-actions #issue-skip {
+  border: 1px solid #aab59b;
+  color: #3d4a36;
 }
 .preview-actions button:first-child {
   font-size: 10px;

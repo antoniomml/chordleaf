@@ -803,17 +803,55 @@ function resetView() {
   $("#editor-panel").scrollTop = 0;
   $("#line-numbers").scrollTop = 0;
 }
+/** Unresolved chords already left for later in this review pass. */
+const skippedIssues = new Set();
+const issueMarkers = () =>
+  [...song().text.matchAll(/\[\?([^\[\]\n]{1,40})\]/g)].map((m) => m[1]);
 function openIssue(el) {
   const panel = $("#issue-editor");
+  const raw = el.textContent;
+  const markers = issueMarkers();
+  const distinct = [...new Set(markers)];
+  const same = markers.filter((marker) => marker === raw).length;
   panel.dataset.line = el.dataset.issueLine;
   panel.dataset.offset = el.dataset.issueOffset;
-  $("#issue-value").value = el.textContent;
+  panel.dataset.raw = raw;
+  $("#issue-value").value = raw;
+  $("#issue-progress").textContent =
+    distinct.length > 1
+      ? t`${distinct.indexOf(raw) + 1} de ${distinct.length}`
+      : "";
+  $("#issue-all-row").hidden = same < 2;
+  $("#issue-all").checked = true;
+  $("#issue-all-label").textContent = t(
+    "Corregir las {n} veces que aparece",
+  ).replace("{n}", same);
   $("#issue-message").textContent = t(
     "Corrige el acorde o déjalo pendiente para más tarde.",
   );
   panel.hidden = false;
   $("#issue-value").focus();
   $("#issue-value").select();
+}
+/** Continue the review with the next chord that was not left for later. */
+function nextIssue() {
+  const next = [...document.querySelectorAll(".unresolved-chord")].find(
+    (el) => !skippedIssues.has(el.textContent),
+  );
+  if (next) {
+    scrollToOption(next, { block: "center" });
+    openIssue(next);
+    return;
+  }
+  $("#issue-editor").hidden = true;
+  const pending = issueMarkers().length;
+  toast(
+    pending
+      ? t("Revisión terminada. Quedan acordes pendientes para más tarde.")
+      : t("Todos los acordes revisados."),
+    pending ? "warning" : "success",
+  );
+  if (!$("#issue-count").hidden) $("#issue-count").focus();
 }
 $("#pages").addEventListener("click", (event) => {
   const issue = event.target.closest(".unresolved-chord");
@@ -840,11 +878,14 @@ $("#issue-count").onclick = () => {
     $("#source").focus();
     return;
   }
-  const issue = $(".unresolved-chord");
-  scrollToOption(issue, { block: "center" });
-  if (issue) openIssue(issue);
+  skippedIssues.clear();
+  nextIssue();
 };
 $("#issue-close").onclick = () => ($("#issue-editor").hidden = true);
+$("#issue-skip").onclick = () => {
+  skippedIssues.add($("#issue-editor").dataset.raw);
+  nextIssue();
+};
 $("#issue-editor").onsubmit = (event) => {
   event.preventDefault();
   const value = $("#issue-value").value.trim();
@@ -860,14 +901,19 @@ $("#issue-editor").onsubmit = (event) => {
     lines = song().text.split("\n"),
     marker = lines[line]?.slice(offset).match(/^\[\?[^\[\]\n]{1,40}\]/)?.[0];
   if (!marker) return renderPages();
-  lines[line] =
-    lines[line].slice(0, offset) +
-    `[${value}]` +
-    lines[line].slice(offset + marker.length);
-  song().text = lines.join("\n");
+  if ($("#issue-all").checked && !$("#issue-all-row").hidden)
+    song().text = song().text.split(marker).join(`[${value}]`);
+  else {
+    lines[line] =
+      lines[line].slice(0, offset) +
+      `[${value}]` +
+      lines[line].slice(offset + marker.length);
+    song().text = lines.join("\n");
+  }
   changed();
   renderSource();
   renderPages();
+  nextIssue();
 };
 function render() {
   renderTabs();

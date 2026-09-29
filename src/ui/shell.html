@@ -542,15 +542,23 @@
       </div>
       <form id="issue-editor" class="issue-editor" hidden>
         <div class="issue-editor-heading">
-          <strong>Revisar acorde</strong>
+          <strong>Revisar acorde <span id="issue-progress"></span></strong>
           <button type="button" id="issue-close" aria-label="Cerrar">×</button>
         </div>
         <label for="issue-value">Acorde correcto</label>
         <input id="issue-value" autocomplete="off" spellcheck="false" />
+        <label class="issue-all" id="issue-all-row" hidden
+          ><input id="issue-all" type="checkbox" checked /><span
+            id="issue-all-label"
+          ></span
+        ></label>
         <p id="issue-message" role="status">
           Corrige el acorde o déjalo pendiente para más tarde.
         </p>
-        <button type="submit" class="primary">Guardar acorde</button>
+        <div class="issue-actions">
+          <button type="submit" class="primary">Guardar acorde</button>
+          <button type="button" id="issue-skip">Dejar para después</button>
+        </div>
       </form>
       <div
         id="pages-scroll"

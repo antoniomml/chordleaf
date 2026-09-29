@@ -29,6 +29,11 @@ export default {
   "Mostrar chordleaf.com en el pie": "Show chordleaf.com in the footer",
   "ACORDES Y CEJILLA": "CHORDS AND CAPO",
   "NOTACIÓN EN LA HOJA": "NOTATION ON THE SHEET",
+  "Corregir las {n} veces que aparece": "Fix all {n} times it appears",
+  "Dejar para después": "Leave for later",
+  "Revisión terminada. Quedan acordes pendientes para más tarde.":
+    "Review finished. Some chords are left for later.",
+  "Todos los acordes revisados.": "All chords reviewed.",
   "Notación de los acordes en la hoja": "Chord notation on the sheet",
   "FORMATO DE PÁGINA": "PAGE LAYOUT",
   "Más opciones": "More options",
