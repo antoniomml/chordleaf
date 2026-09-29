@@ -1821,38 +1821,6 @@ export function renderContentPage(options) {
 `;
 }
 
-export const ANALYTICS_SCRIPT =
-  '<script defer src="/_vercel/insights/script.js"></script>';
-const analyticsDisclosure = {
-  es: {
-    h: "Sin cookies de seguimiento, con estadísticas agregadas",
-    p: [
-      "Chordleaf no usa cookies de publicidad ni de medición y no incorpora píxeles de redes sociales. Tu visita no alimenta ningún perfil publicitario.",
-      "Para saber cuántas personas usan Chordleaf se cuentan visitas de forma agregada con Vercel Web Analytics, desde el propio dominio y sin cookies. Solo se registran la página, la web de procedencia, el país aproximado, el sistema, el navegador y el tipo de dispositivo; nunca el contenido de tus canciones. El identificador de visita se descarta en 24 horas.",
-      "El proveedor de alojamiento entrega los archivos estáticos y conserva registros técnicos de acceso con la misma finalidad que cualquier servidor web: operar el servicio, medir fallos y defenderlo de abusos. Chordleaf no cruza esos registros con ninguna identidad porque no hay identidades que cruzar.",
-    ],
-  },
-  en: {
-    h: "No tracking cookies, only aggregate statistics",
-    p: [
-      "Chordleaf does not use advertising or measurement cookies and does not embed social pixels. Your visit does not feed an advertising profile.",
-      "To know how many people use Chordleaf, visits are counted in aggregate with Vercel Web Analytics, from the project's own domain and without cookies. Only the page, referring site, approximate country, operating system, browser and device type are recorded, never the content of your songs. The visit identifier is discarded within 24 hours.",
-      "The hosting provider delivers the static files and keeps technical access logs for the same reasons any web server does: to run the service, spot failures and defend it from abuse. Chordleaf does not link those logs to an identity because there are no identities to link.",
-    ],
-  },
-};
-/** Only a build that loads the counter may describe it on the privacy page. */
-function disclosedPage(pair, locale, analytics) {
-  const page = pair[locale];
-  if (!analytics || pair.id !== "privacy") return page;
-  return {
-    ...page,
-    sections: page.sections.map((section, i) =>
-      i === 1 ? analyticsDisclosure[locale] : section,
-    ),
-  };
-}
-
 /** The missing URL has no reliable locale, so the page speaks both. */
 export function renderNotFoundPage(cssHref) {
   return `<!doctype html>
@@ -1954,9 +1922,7 @@ export function buildSitemap(origin, lastmod) {
   );
 }
 
-export function metadataPlugin(site, { analytics = false } = {}) {
-  const withAnalytics = (html) =>
-    analytics ? html.replace("</head>", `${ANALYTICS_SCRIPT}</head>`) : html;
+export function metadataPlugin(site) {
   return {
     name: "chordleaf-public-metadata",
     generateBundle: {
@@ -2026,7 +1992,6 @@ export function metadataPlugin(site, { analytics = false } = {}) {
               `<script type="application/ld+json">${buildJsonLd(origin, locale)}</script>`;
             html = html.replace("</head>", tags + "</head>");
           }
-          html = withAnalytics(html);
           this.emitFile({
             type: "asset",
             fileName: `${locale}/index.html`,
@@ -2038,19 +2003,17 @@ export function metadataPlugin(site, { analytics = false } = {}) {
         for (const pair of contentPairs) {
           for (const locale of ["es", "en"]) {
             if (!pair[locale]) continue;
-            const page = disclosedPage(pair, locale, analytics);
+            const page = pair[locale];
             this.emitFile({
               type: "asset",
               fileName: `${locale}/${page.slug}/index.html`,
-              source: withAnalytics(
-                renderContentPage({
-                  origin,
-                  locale,
-                  page,
-                  pair,
-                  cssHref,
-                }),
-              ),
+              source: renderContentPage({
+                origin,
+                locale,
+                page,
+                pair,
+                cssHref,
+              }),
             });
           }
         }

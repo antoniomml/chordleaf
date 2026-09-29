@@ -142,6 +142,19 @@ try {
   );
   await page.keyboard.press("Escape");
   assert.equal(await page.locator("#chord-tooltip").isVisible(), false);
+  // Sheet chords are a single Tab stop navigated with the arrow keys.
+  assert.equal(
+    await page.locator('.sheet-chord[data-chord][tabindex="0"]').count(),
+    1,
+  );
+  await page.keyboard.press("ArrowRight");
+  assert.equal(
+    await page.evaluate(() => {
+      const all = [...document.querySelectorAll(".sheet-chord[data-chord]")];
+      return all.indexOf(document.activeElement);
+    }),
+    1,
+  );
   // The active song tab is marked for assistive technology.
   await page.locator("#tab-plus").click();
   await page.locator("#blank").click();

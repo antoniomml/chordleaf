@@ -72,6 +72,15 @@ try {
   await page.locator(".more-document-options summary").click();
   await page.locator("#showBrand").uncheck();
   assert.equal(await page.locator(".sheet-brand").count(), 0);
+  await page.locator('[data-notation="latin"]').click();
+  assert.equal(
+    await page.locator(".sheet-chord").first().textContent(),
+    "Do/Sol",
+  );
+  assert.equal(
+    await page.locator(".sheet-chord").first().getAttribute("data-chord"),
+    "C/G",
+  );
   await page.locator("#export").click();
   const pdfReady = page.waitForEvent("download");
   await page.locator('[data-export="pdf"]').click();
@@ -79,13 +88,14 @@ try {
   const pdf = await getDocument({
     data: new Uint8Array(await readFile(await pdfFile.path())),
   }).promise;
+  const pdfText = [];
   for (let n = 1; n <= pdf.numPages; n++) {
     const content = await (await pdf.getPage(n)).getTextContent();
-    assert.equal(
-      content.items.some((item) => item.str.trim() === "chordleaf.com"),
-      false,
-    );
+    pdfText.push(...content.items.map((item) => item.str.trim()));
   }
+  assert.equal(pdfText.includes("chordleaf.com"), false);
+  assert.ok(pdfText.includes("Do/Sol"));
+  assert.ok(pdfText.includes("Rem7"));
   await page.waitForFunction(
     () =>
       document.querySelector("#save-state").textContent ===
@@ -116,6 +126,10 @@ try {
     "[C/G]Uno\n{new_page}\n[Dm7]Dos",
   );
   assert.equal(await page.locator("#showBrand").isChecked(), false);
+  assert.equal(
+    await page.locator('[data-notation="latin"]').getAttribute("aria-pressed"),
+    "true",
+  );
   assert.equal(await page.locator(".page").count(), 2);
   assert.deepEqual(errors, []);
   console.log("Project save, close, reload and reopen checks passed");

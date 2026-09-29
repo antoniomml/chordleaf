@@ -28,6 +28,8 @@ export default {
     "Show chordleaf.com in the page footer",
   "Mostrar chordleaf.com en el pie": "Show chordleaf.com in the footer",
   "ACORDES Y CEJILLA": "CHORDS AND CAPO",
+  "NOTACIÓN EN LA HOJA": "NOTATION ON THE SHEET",
+  "Notación de los acordes en la hoja": "Chord notation on the sheet",
   "FORMATO DE PÁGINA": "PAGE LAYOUT",
   "Más opciones": "More options",
   "LIMPIAR TEXTO": "CLEAN TEXT",

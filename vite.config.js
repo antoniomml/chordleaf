@@ -15,12 +15,9 @@ if (
   throw new Error(
     "SITE_URL must be a public HTTPS origin without a path, query or credentials.",
   );
-const analytics = process.env.CHORDLEAF_ANALYTICS;
-if (analytics && analytics !== "vercel")
-  throw new Error('CHORDLEAF_ANALYTICS only supports "vercel".');
 export default defineConfig({
   plugins: [
-    metadataPlugin(site, { analytics: analytics === "vercel" }),
+    metadataPlugin(site),
     pwaPlugin(),
     {
       name: "chordleaf-web-import",

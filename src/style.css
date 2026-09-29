@@ -618,6 +618,10 @@ main {
   grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
 }
+.settings-row.notation-row {
+  grid-template-columns: 1fr;
+  margin-top: 12px;
+}
 .settings-meta-row {
   display: grid;
   grid-template-columns: 1fr;

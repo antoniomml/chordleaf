@@ -65,7 +65,7 @@ Songs and imported files are processed in your browser. Link downloads send the 
 
 Document settings include a checkbox for the `chordleaf.com` page footer. It is on for new songs and can be switched off for the preview, PDF and Word export.
 
-Both interface and document fonts are served by the app itself. There are no third-party font requests or analytics scripts; optional cookie-free visit counting is off by default and described in the [deployment guide](docs/deployment.md#6-optional-aggregate-analytics). See [privacy and storage](https://github.com/antoniomml/chordleaf/wiki/Privacy-and-storage).
+Both interface and document fonts are served by the app itself. There are no third-party font requests or analytics scripts. See [privacy and storage](https://github.com/antoniomml/chordleaf/wiki/Privacy-and-storage).
 
 ## Install it, print it
 

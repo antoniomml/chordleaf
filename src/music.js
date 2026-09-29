@@ -61,16 +61,77 @@ export function pc(n) {
     12
   );
 }
-export function transposeChord(c, n) {
+const SHARP_NAMES = [
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+  "A",
+  "A#",
+  "B",
+];
+const FLAT_NAMES = [
+  "C",
+  "Db",
+  "D",
+  "Eb",
+  "E",
+  "F",
+  "Gb",
+  "G",
+  "Ab",
+  "A",
+  "Bb",
+  "B",
+];
+/** Note names that follow the key signature; C major and A minor keep NOTES,
+ * whose mixed spelling suits their common borrowed chords. */
+export function keySpelling(root, minor) {
+  const major = minor ? (root + 3) % 12 : root;
+  if (major === 0) return NOTES;
+  // F#/Gb major and D#/Eb minor tie at six accidentals; use the usual names.
+  if (major === 6) return minor ? FLAT_NAMES : SHARP_NAMES;
+  return [1, 3, 5, 8, 10].includes(major) ? FLAT_NAMES : SHARP_NAMES;
+}
+export function transposeChord(c, n, names = NOTES) {
   return c.replace(
     /^[A-G][#b♯♭]?|(?<=\/)[A-G][#b♯♭]?/g,
-    (r) => NOTES[(pc(r) + (n % 12) + 12) % 12],
+    (r) => names[(pc(r) + (n % 12) + 12) % 12],
   );
 }
-export function transpose(text, n) {
+const LATIN = {
+  C: "Do",
+  D: "Re",
+  E: "Mi",
+  F: "Fa",
+  G: "Sol",
+  A: "La",
+  B: "Si",
+};
+/** Printed name of a chord. The source text always keeps letter names, so
+ * transposition, diagrams and ChordPro stay unambiguous. */
+export function chordLabel(chord, notation) {
+  if (notation !== "latin") return chord;
+  return chord.replace(/^[A-G]|(?<=\/)[A-G]/g, (letter) => LATIN[letter]);
+}
+function transposeWith(text, n, names) {
   return text.replace(/\[([^\]]+)\]/g, (all, c) =>
-    chordRE.test(c) ? `[${transposeChord(c, n)}]` : all,
+    chordRE.test(c) ? `[${transposeChord(c, n, names)}]` : all,
   );
+}
+/** Spelling for a song moved by n semitones, taken from its resulting key. */
+export function transposeSpelling(text, n) {
+  const key = keyInfo(transposeWith(text, n, NOTES));
+  return key ? keySpelling(key.root, key.minor) : NOTES;
+}
+export function transpose(text, n, names) {
+  if (n % 12 === 0) return text;
+  return transposeWith(text, n, names ?? transposeSpelling(text, n));
 }
 export function chords(text) {
   return [
@@ -142,8 +203,9 @@ export function keyInfo(text) {
       const qualities = minor
         ? ["m", "dim", "", "m", "m", "", ""]
         : ["", "m", "m", "", "", "m", "dim"];
+      const names = keySpelling(root, minor);
       const scale = intervals.map(
-        (v, i) => NOTES[(root + v) % 12] + qualities[i],
+        (v, i) => names[(root + v) % 12] + qualities[i],
       );
       let score = 0;
       for (const c of cs) {
@@ -166,7 +228,7 @@ export function keyInfo(text) {
         minor,
         scale,
         score,
-        name: NOTES[root] + (minor ? t(" menor") : t(" mayor")),
+        name: names[root] + (minor ? t(" menor") : t(" mayor")),
         degrees: minor
           ? ["i", "ii°", "III", "iv", "v", "VI", "VII"]
           : ["I", "ii", "iii", "IV", "V", "vi", "vii°"],

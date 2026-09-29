@@ -18,6 +18,7 @@ import {
   transpose,
   diagram,
   transposeChord,
+  transposeSpelling,
   chords,
   chordRE,
 } from "./music.js";
@@ -472,6 +473,16 @@ function renderSettings() {
         renderPages();
       }),
   );
+  document.querySelectorAll("[data-notation]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        s.notation = b.dataset.notation;
+        changed({ preserveTranspose: true });
+        renderSettings();
+        renderPages();
+        $(`[data-notation="${s.notation}"]`)?.focus();
+      }),
+  );
   $("#transpose-down").onclick = () => shift(-1);
   $("#transpose-up").onclick = () => shift(1);
   $("#capo-down").onclick = () => setCapo(s.capo - 1);
@@ -519,7 +530,8 @@ function updateNavigation() {
 }
 function transposeSong(n) {
   const s = song();
-  s.text = transpose(s.text, n);
+  const names = transposeSpelling(s.text, n);
+  s.text = transpose(s.text, n, names);
   s.chordShapes = Object.fromEntries(
     Object.entries(s.chordShapes || {}).map(([name, shape]) => {
       let offset = n;
@@ -527,14 +539,14 @@ function transposeSong(n) {
       while (played.length && Math.min(...played) + offset < 0) offset += 12;
       while (played.length && Math.max(...played) + offset > 24) offset -= 12;
       return [
-        transposeChord(name, n),
+        transposeChord(name, n, names),
         { ...shape, frets: shape.frets.map((f) => (f < 0 ? -1 : f + offset)) },
       ];
     }),
   );
   for (const sticker of s.chordStickers || [])
     if (Array.isArray(sticker.chords))
-      sticker.chords = sticker.chords.map((c) => transposeChord(c, n));
+      sticker.chords = sticker.chords.map((c) => transposeChord(c, n, names));
 }
 function shift(n) {
   const s = song();
@@ -599,6 +611,7 @@ function renderPages() {
   const s = song(),
     l = layout(s);
   $("#pages").innerHTML = renderPageMarkup(s, l, editing);
+  $("#pages .sheet-chord[data-chord]")?.setAttribute("tabindex", "0");
   $("#issue-editor").hidden = true;
   const issues = [...s.text.matchAll(/\[\?[^\[\]\n]{1,40}\]/g)].length;
   const noChords = !issues && !!s.text.trim() && !chords(s.text).length;
@@ -1356,7 +1369,10 @@ $("#example-song").onclick = openExample;
 renderEntrySheet();
 const tooltip = $("#chord-tooltip");
 function showChordTooltip(target) {
-  tooltip.innerHTML = `<strong>${esc(target.dataset.chord)}</strong>${diagram(target.dataset.chord, 0, (song().chordShapes?.[target.dataset.chord] || song().chordShapes?.[target.dataset.chord.replace(/\*$/, "")])?.frets)}`;
+  const title = target.classList.contains("sheet-chord")
+    ? target.textContent
+    : target.dataset.chord;
+  tooltip.innerHTML = `<strong>${esc(title)}</strong>${diagram(target.dataset.chord, 0, (song().chordShapes?.[target.dataset.chord] || song().chordShapes?.[target.dataset.chord.replace(/\*$/, "")])?.frets)}`;
   tooltip.hidden = false;
   const r = target.getBoundingClientRect();
   tooltip.style.left =
@@ -1385,6 +1401,33 @@ document.addEventListener("focusout", (event) => {
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") hideChordTooltip();
+});
+// Sheet chords form one Tab stop; arrows, Home and End move between them.
+$("#pages").addEventListener("keydown", (event) => {
+  const current = event.target.closest(".sheet-chord[data-chord]");
+  const step = {
+    ArrowRight: 1,
+    ArrowDown: 1,
+    ArrowLeft: -1,
+    ArrowUp: -1,
+    Home: -Infinity,
+    End: Infinity,
+  }[event.key];
+  if (!current || !step) return;
+  const all = [...$("#pages").querySelectorAll(".sheet-chord[data-chord]")];
+  const index = all.indexOf(current);
+  const next =
+    all[
+      step === -Infinity
+        ? 0
+        : step === Infinity
+          ? all.length - 1
+          : Math.max(0, Math.min(all.length - 1, index + step))
+    ];
+  event.preventDefault();
+  current.setAttribute("tabindex", "-1");
+  next.setAttribute("tabindex", "0");
+  next.focus();
 });
 const languagePicker = setupLanguagePicker({ persist, toast });
 // iOS keeps the layout viewport under the on-screen keyboard: mirror the

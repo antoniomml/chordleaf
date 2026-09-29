@@ -36,7 +36,7 @@ export function download(blob, name) {
   setTimeout(() => URL.revokeObjectURL(a.href), 30000);
 }
 export function txt(song) {
-  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordleaf: ${JSON.stringify({ chordShapes: song.chordShapes || {}, chordStickers: song.chordStickers || [], linked: song.linked === true, showBrand: song.showBrand !== false })}}\n\n${song.text}`;
+  return `{title: ${song.title}}\n{artist: ${song.artist}}\n{capo: ${song.capo}}\n{columns: ${song.columns}}\n{fontSize: ${song.fontSize}}\n{margin: ${song.margin}}\n{chordleaf: ${JSON.stringify({ chordShapes: song.chordShapes || {}, chordStickers: song.chordStickers || [], linked: song.linked === true, showBrand: song.showBrand !== false, ...(song.notation === "latin" ? { notation: "latin" } : {}) })}}\n\n${song.text}`;
 }
 /** Portable ChordPro: metadata directives plus inline [chords], without editor extras. */
 export function chordPro(song) {
@@ -581,6 +581,7 @@ export function importText(text, fallback) {
         if (typeof data.linked === "boolean") song.linked = data.linked;
         if (typeof data.showBrand === "boolean")
           song.showBrand = data.showBrand;
+        if (data.notation === "latin") song.notation = "latin";
       } catch {
         /* Ignore malformed optional editor metadata. */
       }

@@ -7,10 +7,12 @@
 - A second tab no longer waits forever: **Use here** asks the other tab to save and pause, then opens your songs.
 - ChordPro: import `{title}`, `{subtitle}`, comments, verse/chorus/bridge sections (with labels), `{chorus}`, column and page breaks, and ignore other directives and `#` comments instead of printing them as lyrics. Export omits empty metadata and a zero capo and writes `{column_break}`.
 - Imports recognise chord rows ending in repeat marks (`x2`, `(x4)`) and chords after section labels (`Intro:`, `Coro:`), keep names such as O'Sullivan, and no longer name untitled pastes "Imported song".
+- **Latin notation** for the sheet, PDF, Word and diagrams: choose **C D E** or **Do Re Mi** in the document settings. The editor, TXT and ChordPro keep letter names.
+- Transposition spells chords in the resulting key (Ab major gives `Db`, not `C#`; B major gives `D#`, not `Eb`), and the key panel uses the same names.
+- Chords on the sheet are a single Tab stop; arrow keys, Home and End move between them.
 - The web import server limits each client to 30 imports every 10 minutes and answers 429 with `Retry-After`.
 - Export menu with menu semantics and arrow-key navigation, grouped into sharing formats and portable copies. Ctrl/⌘ + S confirms the browser save and Ctrl/⌘ + Shift + S downloads the editable project.
 - Smaller details: capo 0 is no longer printed on PDF, Word or the preview; phone toasts no longer cover the page controls; a single `h1` in the app; a bilingual 404 page; the service worker skips jsPDF extras Chordleaf never uses (~350 KB); feedback link, code of conduct and a release badge that follows GitHub releases.
-- Optional cookie-free visit counting with Vercel Web Analytics (`CHORDLEAF_ANALYTICS=vercel`), off by default; enabling it updates the privacy pages automatically.
 
 ## 1.0.3 · September 26, 2026
 
