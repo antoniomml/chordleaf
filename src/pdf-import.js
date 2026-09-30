@@ -1,6 +1,6 @@
 import { t } from "./i18n.js";
 import { chordRE, unresolvedChordRE } from "./music.js";
-const separatorRE = /^[|:–—−\-]+$/;
+const separatorRE = /^(?:[|:–—−\-]+|\(?(?:[x×]\d{1,2}|\d{1,2}[x×])\)?)$/i;
 const cleanChord = (t) => t.replace(/[\[\]]/g, "");
 const chordToken = (t) =>
   chordRE.test(cleanChord(t)) || unresolvedChordRE.test(cleanChord(t));

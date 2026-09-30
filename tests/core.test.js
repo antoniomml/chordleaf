@@ -9,6 +9,7 @@ import {
   chords,
   fingerings,
   chordRE,
+  chordLabel,
 } from "../src/music.js";
 import { layout, PAGE } from "../src/layout.js";
 import { importText } from "../src/files.js";
@@ -287,4 +288,25 @@ test("consecutive instrumental rows, bracketed chords and section labels stay se
     "[F#] [F#5+] [F#6] [F7] [A#m]\n[A#m7(5-)] [D#7(9-)] [G#m] [G#m7(5-)]\n\n[C] [G]\n[Puente]\nUna canción",
   );
   assert.ok(!imported.includes("[["));
+});
+
+test("transposed chords follow the spelling of the resulting key", () => {
+  assert.equal(
+    transpose("[A] [Dmaj7/F#] [E] [C#m]", 1),
+    "[Bb] [Ebmaj7/G] [F] [Dm]",
+  );
+  assert.equal(
+    transpose("[A] [Dmaj7/F#] [E] [C#m]", 2),
+    "[B] [Emaj7/G#] [F#] [D#m]",
+  );
+  assert.equal(transpose("[G] [C] [D] [Em]", -2), "[F] [Bb] [C] [Dm]");
+  assert.equal(transpose("[Dm] [Gm] [A7]", 1), "[Ebm] [Abm] [Bb7]");
+  assert.equal(transpose("[Bb] [Eb]", 12), "[Bb] [Eb]");
+});
+
+test("Latin notation renames roots and bass notes only", () => {
+  assert.equal(chordLabel("C#m7/G#", "latin"), "Do#m7/Sol#");
+  assert.equal(chordLabel("Bbmaj7", "latin"), "Sibmaj7");
+  assert.equal(chordLabel("Fadd9", "latin"), "Faadd9");
+  assert.equal(chordLabel("Asus4", "english"), "Asus4");
 });

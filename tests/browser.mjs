@@ -73,33 +73,35 @@ await page.locator('[data-export="pdf"]').click();
 await (await waiting).saveAs("artifacts/multipage.pdf");
 await page.locator('.rail [data-desktop-view="edit"]').click();
 await source.fill(original + "\n[G]Cambio");
+// Reloading never asks to leave: the song is already saved in this browser.
+let leavePrompt = false;
+page.on("dialog", (dialog) => {
+  leavePrompt = true;
+  dialog.dismiss();
+});
+await page.waitForTimeout(450);
+await page.reload();
+assert.equal(leavePrompt, false);
+assert.equal(await source.inputValue(), original + "\n[G]Cambio");
+// Closing needs no confirmation and keeps the song in Recents.
 await page.locator(".tab-close").first().click();
-assert.equal(await page.locator("#close-dialog").isVisible(), true);
-assert.equal(await page.locator("#close-save-project .button-icon").count(), 1);
-assert.equal(await page.locator("#confirm-close .button-icon").count(), 1);
+await page.locator("#empty-state").waitFor();
+assert.equal(await page.locator(".tab").count(), 0);
 assert.equal(
-  (await page.locator("#confirm-close").textContent()).trim(),
-  "Descartar",
+  await page.locator("#recent-list .recent-title").first().textContent(),
+  "Al otro lado",
 );
-await page.locator("#cancel-close-x").click();
-assert.equal(
-  await page.locator("#close-dialog").evaluate((el) => el.open),
-  false,
-);
-await page.locator(".tab-close").first().click();
-assert.equal(await page.locator("#close-dialog").isVisible(), true);
-await page.locator("#cancel-close-x").click();
-// Saving from the close prompt downloads the project and closes that song.
-const tabsBeforeSave = await page.locator(".tab").count();
-await page.locator(".tab-close").first().click();
-const closeSave = page.waitForEvent("download");
-await page.locator("#close-save-project").click();
-await (await closeSave).saveAs("artifacts/close-save-project.json");
-assert.equal(
-  await page.locator("#close-dialog").evaluate((el) => el.open),
-  false,
-);
-assert.equal(await page.locator(".tab").count(), tabsBeforeSave - 1);
+await page.reload();
+await page.locator("#recent-list .recent-open").first().click();
+assert.equal(await page.locator(".tab").count(), 1);
+await page.locator('.rail [data-desktop-view="edit"]').click();
+assert.equal(await source.inputValue(), original + "\n[G]Cambio");
+assert.equal(await page.locator("#recent-list li").count(), 0);
+await page.locator("#export").click();
+const projectDownload = page.waitForEvent("download");
+await page.locator("#save-project").click();
+await (await projectDownload).saveAs("artifacts/close-save-project.json");
+await source.fill(original);
 await page.locator("#new").click();
 await page.locator("#file").setInputFiles("artifacts/sample.pdf");
 await page.waitForFunction(

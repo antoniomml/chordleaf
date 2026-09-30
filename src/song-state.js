@@ -94,6 +94,7 @@ export function createSong(data = {}) {
         ? data.projectSignature
         : null,
     showBrand: data.showBrand !== false,
+    notation: data.notation === "latin" ? "latin" : "english",
     fontSize: number(data.fontSize, 10, 7, 20),
     margin: number(data.margin, 10, 5, 35),
     columns: data.columns === 2 ? 2 : 1,

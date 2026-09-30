@@ -1,6 +1,6 @@
 {
   "name": "chordleaf",
-  "version": "1.1.0-beta.1",
+  "version": "1.2.0-beta.1",
   "description": "A local-first workspace for lyrics, guitar chords and printable rehearsal sheets.",
   "private": true,
   "type": "module",
@@ -41,7 +41,7 @@
     "test:desktop": "node scripts/desktop/test.mjs"
   },
   "dependencies": {
-    "docx": "^9.5.1",
+    "docx": "^9.8.1",
     "dompurify": "^3.4.16",
     "jspdf": "^4.2.1",
     "mammoth": "^1.10.0",
@@ -52,8 +52,8 @@
     "axe-core": "^4.13.0",
     "electron": "44.4.5",
     "electron-builder": "26.15.3",
-    "prettier": "^3.9.8",
-    "vite": "^8.3.0"
+    "prettier": "^3.9.9",
+    "vite": "^8.3.1"
   },
   "engines": {
     "node": "24.x"

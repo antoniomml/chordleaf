@@ -1,6 +1,6 @@
 # Contributing to Chordleaf
 
-You do not need to write code to help. Report confusing controls, suggest clearer explanations, or share an idea through the repository's issue templates. Use a short invented song example instead of private or copyrighted material.
+You do not need to write code to help. Report confusing controls, suggest clearer explanations, or share an idea through the repository's issue templates. Use a short invented song example instead of private or copyrighted material. Everyone taking part follows the [code of conduct](CODE_OF_CONDUCT.md).
 
 For code changes, start with the [development guide](docs/development.md). Use Node.js 24 and the pinned pnpm version. Keep documentation and code identifiers in English, and update both English and Spanish interface copy. Preserve user song content exactly.
 

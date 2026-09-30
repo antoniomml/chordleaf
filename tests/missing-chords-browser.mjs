@@ -99,8 +99,35 @@ try {
     await page.locator(".sticker-image > svg > g > text").allTextContents(),
     ["C", "F#7/A#*", "A7/C#*"],
   );
+
+  // Unresolved chords are reviewed one after another; identical ones at once.
+  await page.locator('.rail [data-desktop-view="edit"]').click();
+  await page
+    .locator("#source")
+    .fill(
+      "[?Em/Em6]Uno [?H7]dos\n[?Em/Em6]tres [?Xq]cuatro\n[?Em/Em6]cinco [?H7]seis",
+    );
+  await page.locator('.rail [data-desktop-view="document"]').click();
+  await page.locator("#issue-count").click();
+  const editor = page.locator("#issue-editor");
+  assert.equal(await page.locator("#issue-value").inputValue(), "Em/Em6");
+  assert.equal(await page.locator("#issue-progress").textContent(), "1 de 3");
+  assert.match(await editor.locator("#issue-all-label").textContent(), /3/);
+  await page.locator("#issue-value").fill("Em6");
+  await editor.locator('button[type="submit"]').click();
+  assert.equal(await page.locator("#issue-value").inputValue(), "H7");
+  await page.locator("#issue-value").fill("B7");
+  await editor.locator('button[type="submit"]').click();
+  assert.equal(await page.locator("#issue-value").inputValue(), "Xq");
+  await page.locator("#issue-skip").click();
+  assert.equal(await editor.isVisible(), false);
+  assert.equal(
+    await page.locator("#source").inputValue(),
+    "[Em6]Uno [B7]dos\n[Em6]tres [?Xq]cuatro\n[Em6]cinco [B7]seis",
+  );
+  assert.equal(await page.locator(".unresolved-chord").count(), 1);
   console.log(
-    "Missing chord choices, manual positions and sticker stacking passed",
+    "Missing chord choices, manual positions, sticker stacking and chord review passed",
   );
 } finally {
   await browser.close();

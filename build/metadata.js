@@ -1821,6 +1821,47 @@ export function renderContentPage(options) {
 `;
 }
 
+/** The missing URL has no reliable locale, so the page speaks both. */
+export function renderNotFoundPage(cssHref) {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#171a19" />
+    <meta name="robots" content="noindex" />
+    <title>Page not found · Chordleaf</title>
+    <link rel="icon" href="/logo.svg" />
+    ${cssHref ? `<link rel="stylesheet" href="${cssHref}" />` : ""}
+    <link rel="stylesheet" href="/content-pages.css" />
+  </head>
+  <body>
+    <div class="content-page">
+      <header class="content-header">
+        <a class="content-brand" href="/">
+          <img src="/logo.svg" alt="" width="26" height="26" />
+          Chordleaf
+        </a>
+      </header>
+      <main class="content-main" id="content">
+        <article class="content-shell">
+          <p class="content-kicker">404</p>
+          <h1>This page is not here.</h1>
+          <p class="content-lead">The link may be old or mistyped. Your songs are safe: they stay in your browser.</p>
+          <p class="content-cta-row"><a class="content-cta" href="/">Open Chordleaf</a></p>
+          <section lang="es">
+            <h2>Esta página no existe.</h2>
+            <p>Puede que el enlace sea antiguo o tenga un error. Tus canciones siguen guardadas en tu navegador.</p>
+            <p class="content-cta-row"><a class="content-cta" href="/es/">Abrir Chordleaf</a></p>
+          </section>
+        </article>
+      </main>
+    </div>
+  </body>
+</html>
+`;
+}
+
 export function buildJsonLd(origin, locale) {
   const c = copy[locale === "es" ? "es" : "en"];
   const url = locale === "es" ? `${origin}/es/` : `${origin}/`;
@@ -1961,8 +2002,8 @@ export function metadataPlugin(site) {
         const origin = site ? site.origin : null;
         for (const pair of contentPairs) {
           for (const locale of ["es", "en"]) {
+            if (!pair[locale]) continue;
             const page = pair[locale];
-            if (!page) continue;
             this.emitFile({
               type: "asset",
               fileName: `${locale}/${page.slug}/index.html`,
@@ -1980,6 +2021,11 @@ export function metadataPlugin(site) {
           type: "asset",
           fileName: "content-pages.css",
           source: contentPagesCss,
+        });
+        this.emitFile({
+          type: "asset",
+          fileName: "404.html",
+          source: renderNotFoundPage(cssHref),
         });
         this.emitFile({
           type: "asset",

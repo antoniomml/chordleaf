@@ -71,3 +71,14 @@ test("a diagram keeps its page when the song becomes shorter", () => {
   });
   assert.equal(layout(song).pages.length, 2);
 });
+
+test("Latin notation survives projects and TXT, and is omitted by default", async () => {
+  const { importText, txt } = await import("../src/files.js");
+  const latin = createSong({ title: "N", text: "[G]a", notation: "latin" });
+  assert.equal(restoreProject(serializeProject(latin)).notation, "latin");
+  assert.equal(importText(txt(latin), "x").notation, "latin");
+  assert.equal(
+    "notation" in JSON.parse(serializeProject(createSong())).song,
+    false,
+  );
+});

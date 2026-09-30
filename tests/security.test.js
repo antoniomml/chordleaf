@@ -120,3 +120,20 @@ test("web imports require explicit activation on Vercel", async () => {
     }
   }
 });
+test("web import rate limit blocks bursts per client and recovers", async () => {
+  const { createRateLimiter } = await import("../server/web-import.js");
+  let time = 0;
+  const take = createRateLimiter({ limit: 2, windowMs: 1000, now: () => time });
+  assert.equal(take("a"), 0);
+  assert.equal(take("a"), 0);
+  assert.equal(take("b"), 0);
+  time = 400;
+  assert.equal(take("a"), 1);
+  time = 1001;
+  assert.equal(take("a"), 0);
+  const bounded = createRateLimiter({ limit: 1, maxClients: 2, now: () => 0 });
+  bounded("x");
+  bounded("y");
+  bounded("z");
+  assert.equal(bounded("x"), 0);
+});

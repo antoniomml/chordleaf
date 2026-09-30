@@ -12,6 +12,7 @@ export function projectData(song) {
     margin,
     columns,
     showBrand,
+    notation,
     chordShapes,
     chordStickers,
   } = song;
@@ -25,6 +26,8 @@ export function projectData(song) {
     margin,
     columns,
     showBrand,
+    // Omitted by default so projects saved before this option keep their signature.
+    ...(notation === "latin" ? { notation } : {}),
     chordShapes,
     chordStickers,
   };
