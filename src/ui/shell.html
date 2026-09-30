@@ -585,33 +585,7 @@
   <h1 id="new-heading">Una nueva canción.</h1>
   <p id="new-description">De una idea a tu próxima hoja de acordes.</p>
   <section id="new-menu">
-    <button id="open-project" class="choice">
-      <span class="choice-icon" aria-hidden="true">▣</span>
-      <div>
-        <strong>Abrir proyecto editable</strong
-        ><small>Retomar una canción .chordleaf.json</small>
-      </div>
-      <b>→</b></button
-    ><button id="import" class="choice">
-      <span class="choice-icon" aria-hidden="true"
-        ><svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M12 16V3m0 0L7.5 7.5M12 3l4.5 4.5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"
-          /></svg
-      ></span>
-      <div>
-        <strong>Importar texto o archivo</strong
-        ><small>Pega texto o abre TXT, PDF o Word (.docx)</small>
-      </div>
-      <b>→</b></button
-    ><button id="web" class="choice">
+    <button id="web" class="choice">
       <span class="choice-icon" aria-hidden="true"
         ><svg
           viewBox="0 0 24 24"
@@ -632,15 +606,54 @@
           >LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar</small
         >
       </div>
-      <b>→</b></button
-    ><button id="audio" class="choice">
+      <b>→</b>
+    </button>
+    <button id="import" class="choice">
+      <span class="choice-icon" aria-hidden="true"
+        ><svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M12 16V3m0 0L7.5 7.5M12 3l4.5 4.5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"
+          /></svg
+      ></span>
+      <div>
+        <strong>Abrir documento</strong><small>PDF, Word, TXT o ChordPro</small>
+      </div>
+      <b>→</b>
+    </button>
+    <button
+      id="clipboard-import"
+      class="choice"
+      disabled
+      aria-describedby="clipboard-hint"
+    >
+      <span class="choice-icon" aria-hidden="true">▤</span>
+      <div>
+        <strong>Pegar del portapapeles</strong
+        ><small id="clipboard-hint">Comprobando el portapapeles…</small>
+      </div>
+      <b>→</b>
+    </button>
+    <div id="clipboard-access" hidden>
+      <button id="clipboard-enable" type="button" class="audio-text-button">
+        Permitir portapapeles
+      </button>
+    </div>
+    <button id="audio" class="choice">
       <span class="choice-icon" aria-hidden="true">♫</span>
       <div>
-        <strong>Importar audio</strong
+        <strong>Importar audio <span class="choice-beta">Beta</span></strong
         ><small>Letra, acordes y tiempos desde una grabación</small>
       </div>
-      <b>→</b></button
-    ><button id="blank" class="choice">
+      <b>→</b>
+    </button>
+    <button id="blank" class="choice">
       <span class="choice-icon" aria-hidden="true"
         ><svg
           viewBox="0 0 24 24"
@@ -661,6 +674,14 @@
       </div>
       <b>→</b>
     </button>
+    <button id="open-project" class="choice">
+      <span class="choice-icon" aria-hidden="true">▣</span>
+      <div>
+        <strong>Abrir proyecto editable</strong
+        ><small>Retomar una canción .chordleaf.json</small>
+      </div>
+      <b>→</b>
+    </button>
     <section
       id="dialog-recent"
       class="recent-projects compact"
@@ -672,16 +693,8 @@
     </section>
   </section>
   <section id="text-import" hidden>
-    <label id="import-paste-field" class="field"
-      >LETRA Y ACORDES<textarea
-        id="import-text"
-        rows="5"
-        placeholder="Pega aquí la letra con sus acordes…"
-      ></textarea>
-    </label>
     <div class="dialog-actions">
-      <button id="choose-file">Abrir archivo</button
-      ><button id="paste-import" class="primary">Importar texto</button>
+      <button id="choose-file" class="primary">Elegir documento</button>
     </div>
   </section>
   <form id="web-import" hidden>
@@ -728,22 +741,29 @@
     </div>
     <p id="audio-capabilities" class="web-help" role="status" hidden></p>
     <div id="audio-upload-controls">
-      <label id="audio-drop" class="audio-drop" for="audio-file">
+      <div
+        id="audio-drop"
+        class="audio-drop"
+        role="button"
+        tabindex="0"
+        aria-labelledby="audio-file-name"
+        aria-describedby="audio-file-limit"
+      >
         <span class="audio-drop-icon" aria-hidden="true">♫</span>
         <strong id="audio-file-name">Elige una grabación</strong>
         <span>o arrástrala aquí</span>
         <small id="audio-file-limit"
           >MP3, WAV, M4A, FLAC u OGG · 30 MB · 10 min</small
         >
-        <input
-          id="audio-file"
-          type="file"
-          accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg"
-          aria-describedby="audio-file-limit"
-        />
-      </label>
+      </div>
+      <input
+        id="audio-file"
+        type="file"
+        accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg"
+        hidden
+      />
       <div class="audio-song-options">
-        <label class="audio-option"
+        <label id="audio-lyrics-option" class="audio-option"
           ><input id="audio-lyrics" type="checkbox" checked /> Incluir la
           letra</label
         >
@@ -757,15 +777,7 @@
         >
       </div>
       <div class="audio-model-line">
-        <span id="audio-model-name"></span
-        ><button
-          id="audio-enable-lyrics"
-          class="audio-text-button"
-          type="button"
-          hidden
-        >
-          Activar la letra
-        </button>
+        <span id="audio-model-name"></span>
       </div>
     </div>
     <audio id="audio-player" controls preload="metadata" hidden></audio>

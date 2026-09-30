@@ -1,6 +1,7 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import axe from "axe-core";
 const browser = await chromium.launch({ headless: true });
 const url = process.env.CHORDLEAF_URL || "http://localhost:5173";
 try {
@@ -10,8 +11,12 @@ try {
   });
   const page = await context.newPage();
   const uploads = [],
+    downloads = [],
+    runtimeResponses = [],
     errors = [];
   page.on("request", (request) => {
+    if (/\/models\/|ort-wasm|huggingface/.test(request.url()))
+      downloads.push(request.url());
     if (
       request.method() === "POST" ||
       new URL(request.url()).pathname.startsWith("/api/audio-import")
@@ -19,6 +24,10 @@ try {
       uploads.push(request.url());
   });
   page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (/ort-wasm/.test(response.url()))
+      runtimeResponses.push(response.fromServiceWorker());
+  });
   await page.addInitScript(() =>
     Object.defineProperty(navigator, "gpu", { value: undefined }),
   );
@@ -49,19 +58,106 @@ try {
   await page
     .locator("#audio-browser-model-dialog")
     .waitFor({ state: "visible" });
+  await page.evaluate(axe.source);
+  async function checkAccessibility(state) {
+    const result = await page.evaluate(() => axe.run());
+    assert.deepEqual(
+      result.violations.map(({ id, nodes }) => ({
+        id,
+        targets: nodes.map(({ target }) => target),
+      })),
+      [],
+      state,
+    );
+  }
+  await checkAccessibility("browser model selection");
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.ok(
+    await page
+      .locator("#audio-browser-model-dialog")
+      .evaluate((el) => el.scrollWidth <= el.clientWidth),
+  );
+  await checkAccessibility("mobile browser model selection");
+  await page.setViewportSize({ width: 1280, height: 1000 });
   assert.equal(await page.locator("#browser-model-qwen").isDisabled(), true);
+  assert.equal(await page.locator("#browser-chords-remove").isVisible(), false);
+  assert.match(
+    await page.locator("#browser-chords-state").textContent(),
+    /13 MB/,
+  );
   assert.deepEqual(uploads, []);
   await page.locator("#browser-model-chords").click();
-  await page.waitForFunction(
-    () =>
-      document
-        .querySelector("#browser-model-status")
-        .textContent.includes("Modelos listos"),
-    {},
-    { timeout: 120000 },
-  );
-  await page.locator("#browser-model-chords").click();
+  assert.deepEqual(downloads, []);
+  await page.locator("#browser-model-next").click();
+  await page
+    .locator("#audio-browser-model-dialog")
+    .waitFor({ state: "hidden", timeout: 120000 });
   assert.equal(await page.locator("#audio-lyrics").isChecked(), false);
+  assert.equal(await page.locator("#audio-lyrics").isDisabled(), true);
+  assert.ok(
+    await page
+      .locator("#audio-lyrics-option")
+      .evaluate((el) => parseFloat(getComputedStyle(el).opacity) < 0.5),
+  );
+  assert.equal(await page.locator("#audio-enable-lyrics").count(), 0);
+  assert.equal(await page.locator(".audio-capture").count(), 0);
+  await checkAccessibility("audio file and disabled lyrics");
+  const downloaded = downloads.length;
+  await page.locator("#audio-model-settings").click();
+  await page
+    .locator("#audio-browser-model-dialog")
+    .waitFor({ state: "visible" });
+  assert.match(
+    await page.locator("#browser-chords-state").textContent(),
+    /Ya en tu dispositivo/,
+  );
+  assert.equal(await page.locator("#browser-chords-remove").isVisible(), true);
+  assert.equal(await page.locator("#browser-qwen-remove").isVisible(), false);
+  assert.equal(
+    await page.locator("#browser-model-next").textContent(),
+    "Siguiente",
+  );
+  await page.locator("#browser-model-next").click();
+  await page
+    .locator("#audio-browser-model-dialog")
+    .waitFor({ state: "hidden" });
+  assert.equal(downloads.length, downloaded);
+  const runtimeDownloaded = runtimeResponses.length;
+  // An interrupted voice download can be removed without discarding the
+  // usable chord engine. This fixture registers only a small config file.
+  const catalog = JSON.parse(
+    await readFile(
+      new URL("../src/browser-audio/catalog.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const voiceConfig = catalog.qwen.find((file) => file.name === "config.json");
+  await page.evaluate(async (url) => {
+    const cache = await caches.open("chordleaf-audio-models-v1");
+    await cache.put(url, new Response("{}"));
+  }, voiceConfig.url);
+  await page.locator("#audio-model-settings").click();
+  await page.locator("#browser-qwen-remove").waitFor({ state: "visible" });
+  await page.locator("#browser-qwen-remove").click();
+  await page.locator("#browser-qwen-remove").waitFor({ state: "hidden" });
+  assert.match(
+    await page.locator("#browser-chords-state").textContent(),
+    /Ya en tu dispositivo/,
+  );
+  assert.equal(
+    await page.evaluate(
+      async (url) =>
+        Boolean(
+          await (await caches.open("chordleaf-audio-models-v1")).match(url),
+        ),
+      voiceConfig.url,
+    ),
+    false,
+  );
+  await page.locator("#browser-model-next").click();
+  await page
+    .locator("#audio-browser-model-dialog")
+    .waitFor({ state: "hidden" });
   const buffer = Buffer.alloc(44 + 22050 * 2);
   buffer.write("RIFF");
   buffer.writeUInt32LE(buffer.length - 8, 4);
@@ -83,9 +179,11 @@ try {
       ) / 6;
     buffer.writeInt16LE(Math.round(value * 32767), 44 + 2 * i);
   }
-  await page
-    .locator("#audio-file")
-    .setInputFiles({ name: "Acorde local.wav", mimeType: "audio/wav", buffer });
+  const picker = page.waitForEvent("filechooser");
+  await page.locator("#audio-file-name").click();
+  await (
+    await picker
+  ).setFiles({ name: "Acorde local.wav", mimeType: "audio/wav", buffer });
   await page.locator("#audio-analyze").click();
   await page
     .locator("#audio-result")
@@ -142,6 +240,26 @@ try {
     await context.setOffline(false);
   }
   assert.deepEqual(errors, []);
+  assert.deepEqual(
+    downloads.slice(downloaded).filter((url) => !/ort-wasm/.test(url)),
+    [],
+  );
+  if (await page.evaluate(() => Boolean(navigator.serviceWorker?.controller))) {
+    assert.ok(runtimeResponses.slice(runtimeDownloaded).length > 0);
+    assert.ok(runtimeResponses.slice(runtimeDownloaded).every(Boolean));
+  }
+  await page.locator("#audio-model-settings").click();
+  await page.locator("#browser-chords-remove").click();
+  await page.locator("#browser-chords-remove").waitFor({ state: "hidden" });
+  assert.match(
+    await page.locator("#browser-chords-state").textContent(),
+    /13 MB/,
+  );
+  assert.equal(await page.locator("#audio-file").isDisabled(), true);
+  assert.equal(
+    await page.locator("#browser-model-next").textContent(),
+    "Descargar y continuar",
+  );
   const english = await browser.newPage({ locale: "en-US" });
   await english.addInitScript(() =>
     Object.defineProperty(navigator, "gpu", { value: undefined }),
@@ -154,16 +272,16 @@ try {
     .waitFor({ state: "visible" });
   assert.match(
     await english.locator("#audio-browser-model-dialog h2").textContent(),
-    /Prepare audio import/,
+    /What would you like to get/,
   );
   assert.match(
-    await english.locator("#browser-model-chords").textContent(),
-    /Download chords/,
+    await english.locator("#browser-chords-state").textContent(),
+    /Download.*13 MB/,
   );
   await english.locator("#browser-model-close").click();
   assert.equal(
     await english.getByText("Use audio from YouTube", { exact: true }).count(),
-    1,
+    0,
   );
   await english.close();
   console.log(

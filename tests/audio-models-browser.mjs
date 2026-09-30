@@ -97,8 +97,8 @@ try {
   await page.locator("#audio-model-later").click();
   await page.locator("#import-back").click();
   await page.locator("#audio").click();
-  await page.waitForFunction(() =>
-    document.querySelector("#audio-status").textContent.includes("Todo listo"),
+  await page.waitForFunction(
+    () => !document.querySelector("#audio-file").disabled,
   );
   assert.equal(await page.locator("#audio-model-dialog").isVisible(), false);
   await page.locator("#audio-model-settings").click();
@@ -148,8 +148,8 @@ try {
   await page.reload();
   await page.locator("#empty-new").click();
   await page.locator("#audio").click();
-  await page.waitForFunction(() =>
-    document.querySelector("#audio-status").textContent.includes("Todo listo"),
+  await page.waitForFunction(
+    () => !document.querySelector("#audio-file").disabled,
   );
   assert.equal(await page.locator("#audio-model-dialog").isVisible(), false);
   // The saved Whisper preference wins even when Qwen becomes available later.
@@ -179,8 +179,8 @@ try {
   await lighter.keyboard.press("Escape");
   await lighter.locator("#import-back").click();
   await lighter.locator("#audio").click();
-  await lighter.waitForFunction(() =>
-    document.querySelector("#audio-status").textContent.includes("Ready"),
+  await lighter.waitForFunction(
+    () => !document.querySelector("#audio-file").disabled,
   );
   assert.equal(await lighter.locator("#audio-model-dialog").isVisible(), false);
   console.log(

@@ -5,7 +5,6 @@ import { browserReadiness, browserHardware } from "../browser-audio/models.js";
 import languages from "../audio-languages.json" with { type: "json" };
 import { installedLyricModel, readAudioSettings } from "../audio-models.js";
 import { t } from "../i18n.js";
-import { setupAudioCapture } from "./audio-capture.js";
 import { setupAudioPreview } from "./audio-preview.js";
 import {
   analysisToText,
@@ -50,14 +49,7 @@ export function setupAudioImport({ accept, reportError }) {
   const status = (message) => {
     $("audio-status").textContent = t(message);
   };
-  const capture = setupAudioCapture((file) => {
-    const transfer = new DataTransfer();
-    transfer.items.add(file);
-    $("audio-file").files = transfer.files;
-    $("audio-file").dispatchEvent(new Event("change"));
-  }, reportError);
   function updateAvailability() {
-    capture.setBusy(analysisRunning);
     const ready = readiness?.available && readiness.neural !== false;
     const file = $("audio-file").files[0];
     $("audio-analyze").disabled =
@@ -72,9 +64,21 @@ export function setupAudioImport({ accept, reportError }) {
       String(!ready || analysisRunning),
     );
     $("audio-language-field").hidden = !$("audio-lyrics").checked;
+    $("audio-lyrics-option").classList.toggle(
+      "is-disabled",
+      $("audio-lyrics").disabled,
+    );
+    $("audio-lyrics-option").setAttribute(
+      "aria-disabled",
+      String($("audio-lyrics").disabled),
+    );
+    $("audio-drop").tabIndex = $("audio-file").disabled ? -1 : 0;
     $("audio-analyze").textContent = t(
       $("audio-lyrics").checked ? "Obtener letra y acordes" : "Obtener acordes",
     );
+    $("audio-model-name").textContent = $("audio-lyrics").checked
+      ? `${lyricModel === "qwen" ? "Qwen" : "Whisper"} · LV-Chordia`
+      : "LV-Chordia";
   }
   $("audio-lyrics").onchange = updateAvailability;
   const lyricsUnavailable = () =>
@@ -89,7 +93,6 @@ export function setupAudioImport({ accept, reportError }) {
     },
   );
   function reset() {
-    capture.close();
     analysisRunning = false;
     desktopModels.close();
     desktopModels.setAnalyzing(false);
@@ -147,21 +150,22 @@ export function setupAudioImport({ accept, reportError }) {
       lyricModel = window.chordleafDesktop
         ? installedLyricModel(data, readAudioSettings().model)
         : "qwen";
-      $("audio-model-name").textContent = lyricsUnavailable()
-        ? t("Sólo acordes · La letra se puede activar en Modelos y ajustes.")
-        : `${t("Letra con")} ${lyricModel === "qwen" ? "Qwen" : "Whisper"}`;
       $("audio-model-name").dataset.model = lyricModel;
-      $("audio-enable-lyrics").hidden = !lyricsUnavailable();
       $("audio-lyrics").disabled = lyricsUnavailable();
-      if (hadNoLyrics && !lyricsUnavailable()) $("audio-lyrics").checked = true;
+      if (
+        window.chordleafDesktop &&
+        (hadNoLyrics || !refreshOnly) &&
+        !lyricsUnavailable()
+      )
+        $("audio-lyrics").checked = true;
       if (lyricsUnavailable()) $("audio-lyrics").checked = false;
       desktopModels.configure(data);
       status(
         data?.available
-          ? "Todo listo. Elige una grabación."
+          ? ""
           : window.chordleafDesktop
             ? "El analizador local no está activado."
-            : "Descarga los modelos en Modelos y ajustes.",
+            : "",
       );
       updateAvailability();
     } catch (error) {
@@ -192,9 +196,19 @@ export function setupAudioImport({ accept, reportError }) {
       throw new Error("Playback requires a local blob URL");
     player.src = encodeURI(objectURL);
     player.hidden = false;
-    status("Grabación lista.");
+    status("");
   };
   const drop = $("audio-drop");
+  drop.onclick = (event) => {
+    if (event.target !== $("audio-file") && !$("audio-file").disabled)
+      $("audio-file").click();
+  };
+  drop.onkeydown = (event) => {
+    if (["Enter", " "].includes(event.key)) {
+      event.preventDefault();
+      if (!$("audio-file").disabled) $("audio-file").click();
+    }
+  };
   drop.ondragover = (event) => {
     event.preventDefault();
     if (!$("audio-file").disabled) drop.classList.add("is-dragging");
@@ -239,9 +253,7 @@ export function setupAudioImport({ accept, reportError }) {
     await window.chordleafDesktop?.cancelAnalysis().catch(() => {});
     controller = new AbortController();
     const current = ++generation;
-    capture.close();
     analysisRunning = true;
-    capture.setBusy(true);
     desktopModels.setAnalyzing(true);
     result = null;
     playbackRange = null;
@@ -251,6 +263,7 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-file").disabled = true;
     $("audio-cancel").hidden = false;
     for (const id of ["audio-lyrics", "audio-language"]) $(id).disabled = true;
+    updateAvailability();
     status("Obteniendo letra y acordes… Puedes seguir escuchando el audio.");
     try {
       let analysis;

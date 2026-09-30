@@ -72,8 +72,8 @@ try {
   await page.locator("#import-back").click();
   available = true;
   await page.locator("#audio").click();
-  await page.waitForFunction(() =>
-    document.querySelector("#audio-status").textContent.includes("Todo listo"),
+  await page.waitForFunction(
+    () => !document.querySelector("#audio-file").disabled,
   );
   // Valid PCM silence: UI lifecycle tests do not call a model.
   const buffer = Buffer.alloc(44 + 16000 * 2 * 6);

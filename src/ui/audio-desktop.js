@@ -153,7 +153,6 @@ export function setupDesktopModels(refresh, busyChanged) {
       render();
     };
   $("audio-model-settings").onclick = show;
-  $("audio-enable-lyrics").onclick = show;
   $("audio-model-close").onclick = () => dialog.close();
   $("audio-model-later").onclick = () => dialog.close();
   $("audio-model-continue").onclick = async () => {

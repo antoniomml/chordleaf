@@ -24,17 +24,37 @@ export async function browserReadiness() {
   if (!self.caches || !self.isSecureContext)
     return { available: false, neural: false, qwen: false };
   const cache = await caches.open(MODEL_CACHE);
-  async function installed(bundle) {
-    for (const file of resources(bundle))
-      if (!(await cache.match(absolute(file.url)))) return false;
-    return true;
-  }
-  const neural = await installed("chords");
+  const cached = new Map();
+  for (const file of resources("qwen"))
+    cached.set(file.url, Boolean(await cache.match(absolute(file.url))));
+  const installed = (bundle) =>
+    resources(bundle).every((file) => cached.get(file.url));
+  const hasFiles = (modelNames) =>
+    modelNames.some((name) =>
+      catalog[name].some((file) => cached.get(file.url)),
+    );
+  const missingBytes = (bundle) =>
+    resources(bundle).reduce(
+      (sum, file) => sum + (cached.get(file.url) ? 0 : file.bytes || 0),
+      0,
+    );
+  const neural = installed("chords");
+  const qwenDownloaded = installed("qwen");
   return {
     available: neural,
     neural,
     lyrics: false,
-    qwen: neural && (await installed("qwen")) && (await browserHardware()).gpu,
+    qwen: qwenDownloaded && (await browserHardware()).gpu,
+    qwenDownloaded,
+    runtimeDownloaded: Object.values(runtimeURLs).every((url) =>
+      cached.get(url),
+    ),
+    hasQwenFiles: hasFiles(["qwen", "aligner"]),
+    hasChordFiles: hasFiles(["chords"]),
+    missingBytes: {
+      qwen: missingBytes("qwen"),
+      chords: missingBytes("chords"),
+    },
   };
 }
 export async function downloadBrowserModels(bundle, signal, progress) {
@@ -120,6 +140,16 @@ export async function readBrowserModel(model, filename, type) {
     );
   return type === "json" ? response.json() : response.arrayBuffer();
 }
-export async function removeBrowserModels() {
-  await caches.delete(MODEL_CACHE);
+export async function removeBrowserModels(bundle) {
+  if (!bundle) return caches.delete(MODEL_CACHE);
+  const names =
+    bundle === "qwen"
+      ? ["qwen", "aligner"]
+      : bundle === "chords"
+        ? ["chords"]
+        : null;
+  if (!names) throw new Error("Unknown browser model");
+  const cache = await caches.open(MODEL_CACHE);
+  for (const name of names)
+    for (const file of catalog[name]) await cache.delete(absolute(file.url));
 }

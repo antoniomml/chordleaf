@@ -1,5 +1,44 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Abrir documento": "Open document",
+  "Elegir documento": "Choose document",
+  "PDF, Word, TXT o ChordPro": "PDF, Word, TXT or ChordPro",
+  "PDF, Word, TXT o ChordPro. Se convierten en letra y acordes editables.":
+    "PDF, Word, TXT or ChordPro. Converted into editable lyrics and chords.",
+  "Pegar del portapapeles": "Paste from clipboard",
+  "Comprobando el portapapeles…": "Checking clipboard…",
+  "Crear canción con el texto copiado": "Create a song from copied text",
+  "Portapapeles vacío": "Clipboard is empty",
+  "Portapapeles no disponible en este navegador":
+    "Clipboard unavailable in this browser",
+  "Acceso al portapapeles bloqueado": "Clipboard access is blocked",
+  "Permite el acceso para pegar": "Allow access to paste",
+  "Permitir portapapeles": "Allow clipboard access",
+  "No se pudo acceder al portapapeles": "Could not access the clipboard",
+  "¿Qué quieres obtener?": "What would you like to get?",
+  "Elige los modelos para analizar en tu equipo.":
+    "Choose models to analyze on your device.",
+  "Modelos de audio": "Audio models",
+  "Sólo acordes": "Chords only",
+  "Puedes añadir la letra después": "You can add lyrics later",
+  Siguiente: "Next",
+  Borrar: "Delete",
+  "Se guardan en este navegador y se reutilizan entre canciones.":
+    "Stored in this browser and reused for every song.",
+  "Se guardan en este navegador y se reutilizan entre canciones. Motor local: 25 MB adicionales.":
+    "Stored in this browser and reused for every song. Local runtime: an additional 25 MB.",
+  "✓ Ya en tu dispositivo": "✓ Already on your device",
+  "Descarga · ": "Download · ",
+  "Descargar y continuar": "Download and continue",
+  "Se descargan una vez en este navegador y se reutilizan entre canciones. Motor local: 25 MB adicionales.":
+    "Download once in this browser and reuse for every song. Local runtime: an additional 25 MB.",
+  "Necesita WebGPU · Recomendado con 8 GB de memoria o más":
+    "Requires WebGPU · Recommended with at least 8 GB of memory",
+  "La letra no está disponible en este navegador. Necesita WebGPU compatible.":
+    "Lyrics are unavailable in this browser. Compatible WebGPU is required.",
+  "Descargando modelos…": "Downloading models…",
+  "Descarga pausada. Puedes continuar más tarde.":
+    "Download paused. You can continue later.",
   "Comprobando la instalación…": "Checking installation…",
   "Importar audio": "Import audio",
   "Tu audio permanece en este equipo.": "Your audio stays on this device.",

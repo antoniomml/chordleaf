@@ -13,18 +13,22 @@ try {
   assert.deepEqual(
     await page.locator("#new-dialog .choice strong").allTextContents(),
     [
-      "Abrir proyecto editable",
-      "Importar texto o archivo",
       "Importar desde una web",
-      "Importar audio",
+      "Abrir documento",
+      "Pegar del portapapeles",
+      "Importar audio Beta",
       "Empezar de cero",
+      "Abrir proyecto editable",
     ],
   );
   await page.locator("#import").click();
-  await page
-    .locator("#import-text")
-    .fill("{title: Prueba}\n" + "G      D\nVuelve la mañana\n".repeat(30));
-  await page.locator("#paste-import").click();
+  await page.locator("#file").setInputFiles({
+    name: "Prueba.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "{title: Prueba}\n" + "G      D\nVuelve la mañana\n".repeat(30),
+    ),
+  });
   await page.locator(".page").waitFor();
   assert.equal(await page.locator(".page").count(), 1);
   assert.equal(
