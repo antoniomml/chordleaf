@@ -1,6 +1,6 @@
 {
   "name": "chordleaf",
-  "version": "1.1.1",
+  "version": "1.2.0-beta.2",
   "description": "A local-first workspace for lyrics, guitar chords and printable rehearsal sheets.",
   "private": true,
   "type": "module",
@@ -24,25 +24,37 @@
     "preview": "vite preview",
     "test": "node --test tests/*.test.js",
     "test:e2e": "node scripts/test-e2e.mjs",
-    "format": "prettier --write src tests scripts build server api vercel.json vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
+    "format": "prettier --write desktop src tests scripts build server api vercel.json vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
     "docs:screenshots": "node scripts/docs-screenshots.mjs",
     "pwa:icons": "node scripts/pwa-icons.mjs",
-    "format:check": "prettier --check src tests scripts build server api vercel.json vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
+    "format:check": "prettier --check desktop src tests scripts build server api vercel.json vite.config.js docs *.md index.html package.json pnpm-workspace.yaml .github",
     "start": "node server/start.js",
     "check": "pnpm format:check && pnpm test && SITE_URL=https://chordleaf.com pnpm build && pnpm check:metadata",
     "check:metadata": "node scripts/check-metadata.mjs",
-    "test:compatibility": "node tests/compatibility-browser.mjs"
+    "test:compatibility": "node tests/compatibility-browser.mjs",
+    "start:local-audio": "node scripts/start-local-audio.mjs",
+    "audio:setup": "node scripts/setup-local-audio.mjs",
+    "desktop:runtime": "node scripts/desktop/runtime.mjs",
+    "desktop:dev": "electron desktop",
+    "desktop:pack": "pnpm build && node scripts/desktop/stage.mjs && electron-builder --config desktop/builder.cjs --dir",
+    "desktop:dist": "pnpm build && node scripts/desktop/stage.mjs && electron-builder --config desktop/builder.cjs",
+    "test:desktop": "node scripts/desktop/test.mjs"
   },
   "dependencies": {
+    "@huggingface/transformers": "4.3.0",
     "docx": "^9.8.1",
     "dompurify": "^3.4.16",
+    "fft.js": "4.0.4",
     "jspdf": "^4.2.1",
     "mammoth": "^1.10.0",
+    "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
     "pdfjs-dist": "^6.3.289"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "axe-core": "^4.13.0",
+    "electron": "44.4.5",
+    "electron-builder": "26.15.3",
     "prettier": "^3.9.9",
     "vite": "^8.3.1"
   },

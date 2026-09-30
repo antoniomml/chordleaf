@@ -61,7 +61,7 @@ test("chords after the end of a verse do not split its final word", () => {
   assert.equal(p.lyric.trim(), "Naturally");
   assert.ok(p.marks[1].at > p.lyric.trim().length);
 });
-test("crowded chords stack without inserting spaces into the lyrics", () => {
+test("crowded chords reserve horizontal space on one row without changing source anchors", () => {
   const l = layout({
     title: "",
     artist: "",
@@ -71,8 +71,16 @@ test("crowded chords stack without inserting spaces into the lyrics", () => {
     text: "[Cmaj7]a[Dmaj7]b[Am]c",
   });
   const r = l.pages[0].columns[0][0];
-  assert.equal(r.lyric, "abc");
-  assert.equal(new Set(r.marks.map((m) => m.lane)).size, 3);
+  assert.equal(r.lyric.replace(/\s/g, ""), "abc");
+  assert.deepEqual(
+    r.marks.map((m) => m.at),
+    [0, 1, 2],
+  );
+  assert.deepEqual(
+    r.marks.map((m) => m.x),
+    [0, 6, 12],
+  );
+  assert.equal(new Set(r.marks.map((m) => m.lane)).size, 1);
 });
 test("instrumental separators share a line with chords", () => {
   const l = layout({

@@ -585,33 +585,7 @@
   <h1 id="new-heading">Una nueva canción.</h1>
   <p id="new-description">De una idea a tu próxima hoja de acordes.</p>
   <section id="new-menu">
-    <button id="open-project" class="choice">
-      <span class="choice-icon" aria-hidden="true">▣</span>
-      <div>
-        <strong>Abrir proyecto editable</strong
-        ><small>Retomar una canción .chordleaf.json</small>
-      </div>
-      <b>→</b></button
-    ><button id="import" class="choice">
-      <span class="choice-icon" aria-hidden="true"
-        ><svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M12 16V3m0 0L7.5 7.5M12 3l4.5 4.5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"
-          /></svg
-      ></span>
-      <div>
-        <strong>Importar texto o archivo</strong
-        ><small>Pega texto o abre TXT, PDF o Word (.docx)</small>
-      </div>
-      <b>→</b></button
-    ><button id="web" class="choice">
+    <button id="web" class="choice">
       <span class="choice-icon" aria-hidden="true"
         ><svg
           viewBox="0 0 24 24"
@@ -632,8 +606,48 @@
           >LaCuerda, AcordesWeb, TusAcordes, Chordie o Ultimate Guitar</small
         >
       </div>
-      <b>→</b></button
-    ><button id="blank" class="choice">
+      <b>→</b>
+    </button>
+    <button id="import" class="choice">
+      <span class="choice-icon" aria-hidden="true"
+        ><svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M12 16V3m0 0L7.5 7.5M12 3l4.5 4.5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"
+          /></svg
+      ></span>
+      <div>
+        <strong>Abrir documento</strong><small>PDF, Word, TXT o ChordPro</small>
+      </div>
+      <b>→</b>
+    </button>
+    <button
+      id="clipboard-import"
+      class="choice"
+      aria-describedby="clipboard-hint"
+    >
+      <span class="choice-icon" aria-hidden="true">▤</span>
+      <div>
+        <strong>Pegar del portapapeles</strong
+        ><small id="clipboard-hint">Crear canción con el texto copiado</small>
+      </div>
+      <b>→</b>
+    </button>
+    <button id="audio" class="choice">
+      <span class="choice-icon" aria-hidden="true">♫</span>
+      <div>
+        <strong>Importar audio <span class="choice-beta">Beta</span></strong
+        ><small>Letra, acordes y tiempos desde una grabación</small>
+      </div>
+      <b>→</b>
+    </button>
+    <button id="blank" class="choice">
       <span class="choice-icon" aria-hidden="true"
         ><svg
           viewBox="0 0 24 24"
@@ -654,6 +668,14 @@
       </div>
       <b>→</b>
     </button>
+    <button id="open-project" class="choice">
+      <span class="choice-icon" aria-hidden="true">▣</span>
+      <div>
+        <strong>Abrir proyecto editable</strong
+        ><small>Retomar una canción .chordleaf.json</small>
+      </div>
+      <b>→</b>
+    </button>
     <section
       id="dialog-recent"
       class="recent-projects compact"
@@ -665,16 +687,8 @@
     </section>
   </section>
   <section id="text-import" hidden>
-    <label id="import-paste-field" class="field"
-      >LETRA Y ACORDES<textarea
-        id="import-text"
-        rows="5"
-        placeholder="Pega aquí la letra con sus acordes…"
-      ></textarea>
-    </label>
     <div class="dialog-actions">
-      <button id="choose-file">Abrir archivo</button
-      ><button id="paste-import" class="primary">Importar texto</button>
+      <button id="choose-file" class="primary">Elegir documento</button>
     </div>
   </section>
   <form id="web-import" hidden>
@@ -693,6 +707,101 @@
       Importar canción
     </button>
   </form>
+  <section id="audio-import" hidden>
+    <div class="audio-toolbar">
+      <span class="audio-local-badge">Experimental</span>
+      <button
+        id="audio-model-settings"
+        type="button"
+        class="audio-text-button"
+        hidden
+      >
+        Modelos y ajustes
+      </button>
+    </div>
+    <div id="audio-setup" class="audio-unavailable" hidden>
+      <strong>Importa audio con Chordleaf para escritorio</strong>
+      <p>La letra y los acordes se analizan en tu ordenador.</p>
+      <a
+        id="audio-desktop-download"
+        hidden
+        target="_blank"
+        rel="noopener noreferrer"
+        >Descargar para Mac con Apple Silicon</a
+      >
+      <span id="audio-desktop-pending"
+        >La versión para Mac está en preparación.</span
+      >
+    </div>
+    <p id="audio-capabilities" class="web-help" role="status" hidden></p>
+    <div id="audio-upload-controls">
+      <div
+        id="audio-drop"
+        class="audio-drop"
+        role="button"
+        tabindex="0"
+        aria-labelledby="audio-file-name"
+        aria-describedby="audio-file-limit"
+      >
+        <span class="audio-drop-icon" aria-hidden="true">♫</span>
+        <strong id="audio-file-name">Elige una grabación</strong>
+        <span>o arrástrala aquí</span>
+        <small id="audio-file-limit"
+          >MP3, WAV, M4A, FLAC u OGG · 30 MB · 10 min</small
+        >
+      </div>
+      <input
+        id="audio-file"
+        type="file"
+        accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg"
+        hidden
+      />
+      <div class="audio-song-options">
+        <label id="audio-lyrics-option" class="audio-option"
+          ><input id="audio-lyrics" type="checkbox" checked /> Incluir la
+          letra</label
+        >
+        <label
+          id="audio-language-field"
+          class="audio-language-field"
+          for="audio-language"
+          >Idioma<select id="audio-language">
+            <option value="auto">Detectar automáticamente</option>
+          </select></label
+        >
+      </div>
+      <div class="audio-model-line">
+        <span id="audio-model-name"></span>
+      </div>
+    </div>
+    <audio id="audio-player" controls preload="metadata" hidden></audio>
+    <div id="audio-analysis-actions" class="dialog-actions">
+      <button id="audio-analyze" class="primary" disabled>
+        Obtener letra y acordes
+      </button>
+    </div>
+    <div id="audio-progress-view" hidden>
+      <div class="audio-progress-symbol" aria-hidden="true">♫</div>
+      <h2>Preparando tu canción</h2>
+      <p id="audio-progress-file"></p>
+      <div class="audio-progress-label">
+        <span id="audio-progress-stage" role="status" aria-live="polite"></span
+        ><strong id="audio-progress-percent"></strong>
+      </div>
+      <progress
+        id="audio-analysis-progress"
+        max="100"
+        aria-label="Progreso del análisis"
+      ></progress>
+      <p class="audio-progress-hint">
+        Puede tardar unos minutos. Mantén esta ventana abierta.
+      </p>
+      <button id="audio-cancel" class="audio-text-button" hidden>
+        Cancelar análisis
+      </button>
+    </div>
+    <p id="audio-status" class="web-help" role="status" aria-live="polite"></p>
+  </section>
   <p id="import-error" role="alert" hidden></p>
   <details id="web-local-options" hidden>
     <summary>¿Tienes la página guardada?</summary>
@@ -719,6 +828,99 @@
     accept=".txt,.pdf,.docx,.cho,.chordpro,.json"
     hidden
   />
+</dialog>
+<dialog
+  id="audio-model-dialog"
+  aria-labelledby="audio-model-heading"
+  aria-describedby="audio-model-intro"
+>
+  <button
+    id="audio-model-close"
+    class="dialog-close"
+    type="button"
+    aria-label="Cerrar ajustes de audio"
+  >
+    ×
+  </button>
+  <p class="eyebrow">IMPORTACIÓN DE AUDIO</p>
+  <h2 id="audio-model-heading">Prepara tu equipo</h2>
+  <p id="audio-model-intro">
+    Elige un modelo para la letra. Se descarga una vez y funciona sin conexión.
+  </p>
+  <div class="audio-chord-model">
+    <span aria-hidden="true">✓</span>
+    <div>
+      <strong>Acordes · LV-Chordia</strong
+      ><small id="audio-chord-model-state"
+        >Incluido en la aplicación. Sin descarga adicional.</small
+      >
+    </div>
+  </div>
+  <p id="audio-recommendation" class="web-help"></p>
+  <fieldset id="audio-model-choices" class="audio-model-choices">
+    <legend>Letra · Opcional</legend>
+    <label class="audio-model-card"
+      ><input type="radio" name="audio-model" value="none" /><span
+        ><strong>Ninguna</strong
+        ><small>Sólo acordes · Puedes añadir la letra después</small></span
+      ></label
+    >
+    <label class="audio-model-card"
+      ><input type="radio" name="audio-model" value="qwen" /><span
+        ><span class="audio-card-title"
+          ><strong>Qwen</strong
+          ><small id="audio-qwen-recommended" class="audio-recommended" hidden
+            >Recomendado</small
+          ></span
+        ><span>Más precisión en nuestras pruebas.</span
+        ><small>3,8 GB · Apple Silicon · 16 GB recomendados</small
+        ><small id="audio-qwen-installed" class="audio-installed" hidden
+          >Instalado</small
+        ></span
+      ></label
+    >
+    <label class="audio-model-card"
+      ><input type="radio" name="audio-model" value="whisper" /><span
+        ><span class="audio-card-title"
+          ><strong>Whisper</strong
+          ><small
+            id="audio-whisper-recommended"
+            class="audio-recommended"
+            hidden
+            >Recomendado</small
+          ></span
+        ><span>Menos memoria y una descarga más pequeña.</span
+        ><small>0,5 GB · Funciona con CPU</small
+        ><small id="audio-whisper-installed" class="audio-installed" hidden
+          >Instalado</small
+        ></span
+      ></label
+    >
+  </fieldset>
+  <p
+    id="audio-model-status"
+    class="audio-model-status"
+    role="status"
+    aria-live="polite"
+  ></p>
+  <div class="dialog-actions audio-model-actions">
+    <button id="audio-model-continue" class="primary" type="button">
+      Descargar modelo</button
+    ><button id="audio-cancel-models" type="button" hidden>
+      Cancelar descarga</button
+    ><button id="audio-model-later" class="audio-text-button" type="button">
+      Ahora sólo acordes
+    </button>
+  </div>
+  <details class="audio-storage-options">
+    <summary>Gestionar almacenamiento</summary>
+    <button id="audio-remove-models" type="button">
+      Eliminar modelos de letra
+    </button>
+  </details>
+  <p class="privacy-note">
+    Sólo se descargan modelos. Tu audio permanece en este equipo.
+  </p>
 </dialog>
 <dialog id="editor-dialog" aria-labelledby="expanded-title">
   <header class="expanded-header">

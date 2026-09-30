@@ -18,7 +18,7 @@ try {
       await page
         .locator("#new-menu > button")
         .evaluateAll((buttons) => buttons.map((button) => button.id)),
-      ["open-project", "import", "web", "blank"],
+      ["web", "import", "clipboard-import", "audio", "blank", "open-project"],
     );
     for (const selector of [
       "#text-import",
@@ -30,10 +30,7 @@ try {
   }
   await page.locator("#empty-new").click();
   await menu();
-  assert.equal(
-    await page.evaluate(() => document.activeElement.id),
-    "open-project",
-  );
+  assert.equal(await page.evaluate(() => document.activeElement.id), "web");
   await page.locator("#web").click();
   assert.equal(await page.locator("#new-menu").isVisible(), false);
   assert.equal(await page.locator("#text-import").isVisible(), false);
@@ -49,8 +46,13 @@ try {
   await page.locator("#import").click();
   assert.equal(await page.locator("#new-menu").isVisible(), false);
   assert.equal(await page.locator("#web-import").isVisible(), false);
-  await page.locator("#import-text").fill("[Solo] [C] [G]");
-  await page.locator("#paste-import").click();
+  assert.equal(await page.locator("#import-text").count(), 0);
+  await page.locator("#file").setInputFiles({
+    name: "Solo.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("[Solo] [C] [G]"),
+  });
+  await page.locator("#new-dialog").waitFor({ state: "hidden" });
   await page.locator("#new").click();
   await menu();
   await page.locator("#web").click();

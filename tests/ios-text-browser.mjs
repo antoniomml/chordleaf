@@ -45,7 +45,7 @@ try {
   await page.locator("#mobile-tab-plus").click();
   await page.locator("#import").click();
   await checkTextControls();
-  await page.locator("#import-text").fill("[G]Texto importado");
+  assert.equal(await page.locator("#import-text").count(), 0);
   assert.equal(await page.evaluate(() => visualViewport.scale), scale);
   await page.locator("#import-back").click();
   await page.locator("#web").click();

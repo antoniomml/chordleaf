@@ -1,5 +1,275 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  Experimental: "Experimental",
+  "Puede haber errores en la letra, los acordes y su posición.":
+    "Lyrics, chords and their placement may contain errors.",
+  "Letra · Opcional": "Lyrics · Optional",
+  Ninguna: "None",
+  "Necesario · 13 MB": "Required · 13 MB",
+  "Acordes · LV-Chordia": "Chords · LV-Chordia",
+  "Ligero · Funciona sin WebGPU": "Lightweight · Works without WebGPU",
+  "Mayor capacidad · Incluye alineador de letra":
+    "Larger model · Includes lyric alignment",
+  "Necesita WebGPU compatible. Puedes usar Whisper en este navegador.":
+    "Requires compatible WebGPU. You can use Whisper in this browser.",
+  "Preparando tu canción": "Preparing your song",
+  "Progreso del análisis": "Analysis progress",
+  "Puede tardar unos minutos. Mantén esta ventana abierta.":
+    "This may take a few minutes. Keep this window open.",
+  "Preparando el audio…": "Preparing audio…",
+  "Cargando Whisper…": "Loading Whisper…",
+  "Cargando Qwen…": "Loading Qwen…",
+  "Obteniendo letra y acordes…": "Getting lyrics and chords…",
+  "Obteniendo letra…": "Transcribing lyrics…",
+  "Situando la letra…": "Aligning lyrics…",
+  "Detectando acordes…": "Detecting chords…",
+
+  "Este navegador ha alcanzado su límite de almacenamiento para Chordleaf. Los modelos ya guardados se conservan. Puedes reintentar, liberar datos de sitios en sus ajustes o usar otro navegador.":
+    "This browser has reached its storage limit for Chordleaf. Models already saved are kept. You can retry, free up site data in its settings, or use another browser.",
+  "No se han detectado letra ni acordes. Prueba otra grabación.":
+    "No lyrics or chords were detected. Try another recording.",
+  "No se pudo obtener la letra. Puedes añadirla en el editor.":
+    "Lyrics could not be obtained. You can add them in the editor.",
+  "Hay tramos de letra incompletos. Puedes corregirlos en el editor.":
+    "Some lyrics are incomplete. You can correct them in the editor.",
+  "Algunos tiempos son aproximados. Revisa la posición de los acordes.":
+    "Some timings are approximate. Review the placement of the chords.",
+  "Abriendo la canción…": "Opening the song…",
+
+  "Abrir documento": "Open document",
+  "Elegir documento": "Choose document",
+  "PDF, Word, TXT o ChordPro": "PDF, Word, TXT or ChordPro",
+  "PDF, Word, TXT o ChordPro. Se convierten en letra y acordes editables.":
+    "PDF, Word, TXT or ChordPro. Converted into editable lyrics and chords.",
+  "Pegar del portapapeles": "Paste from clipboard",
+  "Comprobando el portapapeles…": "Checking clipboard…",
+  "Crear canción con el texto copiado": "Create a song from copied text",
+  "Portapapeles vacío": "Clipboard is empty",
+  "Portapapeles no disponible en este navegador":
+    "Clipboard unavailable in this browser",
+  "Acceso al portapapeles bloqueado": "Clipboard access is blocked",
+  "Permite el acceso para pegar": "Allow access to paste",
+  "Permitir portapapeles": "Allow clipboard access",
+  "No se pudo acceder al portapapeles": "Could not access the clipboard",
+  "¿Qué quieres obtener?": "What would you like to get?",
+  "Elige los modelos para analizar en tu equipo.":
+    "Choose models to analyze on your device.",
+  "Modelos de audio": "Audio models",
+  "Sólo acordes": "Chords only",
+  "Puedes añadir la letra después": "You can add lyrics later",
+  Siguiente: "Next",
+  Borrar: "Delete",
+  "Se guardan en este navegador y se reutilizan entre canciones.":
+    "Stored in this browser and reused for every song.",
+  "Se guardan en este navegador y se reutilizan entre canciones. Motor local: 25 MB adicionales.":
+    "Stored in this browser and reused for every song. Local runtime: an additional 25 MB.",
+  "✓ Ya en tu dispositivo": "✓ Already on your device",
+  "Descarga · ": "Download · ",
+  "Descargar y continuar": "Download and continue",
+  "Se descargan una vez en este navegador y se reutilizan entre canciones. Motor local: 25 MB adicionales.":
+    "Download once in this browser and reuse for every song. Local runtime: an additional 25 MB.",
+  "Necesita WebGPU · Recomendado con 8 GB de memoria o más":
+    "Requires WebGPU · Recommended with at least 8 GB of memory",
+  "La letra no está disponible en este navegador. Necesita WebGPU compatible.":
+    "Lyrics are unavailable in this browser. Compatible WebGPU is required.",
+  "Descargando modelos…": "Downloading models…",
+  "Descarga pausada. Puedes continuar más tarde.":
+    "Download paused. You can continue later.",
+  "Comprobando la instalación…": "Checking installation…",
+  "Importar audio": "Import audio",
+  "Tu audio permanece en este equipo.": "Your audio stays on this device.",
+  "● En tu equipo": "● On your device",
+  "Modelos y ajustes": "Models and settings",
+  "Descargando modelo…": "Downloading model…",
+  "Importa audio con Chordleaf para escritorio":
+    "Import audio with Chordleaf for desktop",
+  "La letra y los acordes se analizan en tu ordenador.":
+    "Lyrics and chords are analyzed on your computer.",
+  "La versión para Mac está en preparación.":
+    "The Mac release is in preparation.",
+  "Elige una grabación": "Choose a recording",
+  "o arrástrala aquí": "or drag it here",
+  "Incluir la letra": "Include lyrics",
+  Idioma: "Language",
+  "Activar la letra": "Enable lyrics",
+  "Obtener letra y acordes": "Get lyrics and chords",
+  "Obtener acordes": "Get chords",
+  "Revisa la canción": "Review your song",
+  "Cambiar audio": "Change audio",
+  "Escucha los acordes y corrige el borrador antes de guardarlo.":
+    "Listen to the chords and correct the draft before saving.",
+  "No se pudo obtener la letra. Puedes añadirla al borrador.":
+    "Lyrics could not be transcribed. You can add them to the draft.",
+  "Algunos tiempos son aproximados. Revisa esos tramos al escuchar.":
+    "Some timings are approximate. Review those passages as you listen.",
+  "Repetir tramo": "Loop passage",
+  "Guardar tiempos · JSON": "Save timings · JSON",
+  "Sobre los tiempos y el análisis": "About timings and analysis",
+  "La canción guarda el borrador editado. El JSON conserva también los tiempos originales; editar el texto no los cambia.":
+    "The song saves your edited draft. JSON also preserves the original timings; editing the text does not change them.",
+  "Cerrar ajustes de audio": "Close audio settings",
+  "IMPORTACIÓN DE AUDIO": "AUDIO IMPORT",
+  "Prepara tu equipo": "Prepare your device",
+  "Elige un modelo para la letra. Se descarga una vez y funciona sin conexión.":
+    "Choose a lyric model. Download it once and use it offline.",
+  "Modelo de letra": "Lyric model",
+  "Más precisión en nuestras pruebas.": "More accurate in our tests.",
+  "3,8 GB · Apple Silicon · 16 GB recomendados":
+    "3.8 GB · Apple Silicon · 16 GB recommended",
+  "Menos memoria y una descarga más pequeña.":
+    "Less memory and a smaller download.",
+  "0,5 GB · Funciona con CPU": "0.5 GB · Runs on CPU",
+  Instalado: "Installed",
+  Recomendado: "Recommended",
+  "Acordes · LV-Chordia": "Chords · LV-Chordia",
+  "Incluido en la aplicación. Sin descarga adicional.":
+    "Included with the app. No extra download.",
+  "Descargar modelo": "Download model",
+  "Ahora sólo acordes": "Just chords for now",
+  "Gestionar almacenamiento": "Manage storage",
+  "Sólo se descargan modelos. Tu audio permanece en este equipo.":
+    "Only models are downloaded. Your audio stays on this device.",
+  "Descargando… Puedes continuar más tarde.":
+    "Downloading… You can resume later.",
+  "Modelo listo. Continúa para importar tu canción.":
+    "Model ready. Continue to import your song.",
+  "Descarga pausada. Puedes reintentar cuando quieras.":
+    "Download paused. Retry whenever you are ready.",
+  "Necesitas al menos 6 GB libres. Libera espacio y reintenta.":
+    "You need at least 6 GB free. Clear some space and retry.",
+  "No se pudo descargar. Comprueba la conexión y reintenta.":
+    "Download failed. Check your connection and retry.",
+  "No disponible. Reinstala la aplicación para recuperar los acordes.":
+    "Unavailable. Reinstall the app to restore chord detection.",
+  "Usar este modelo": "Use this model",
+  "Reintentar descarga": "Retry download",
+  "Descargar Qwen · 3,8 GB": "Download Qwen · 3.8 GB",
+  "Descargar Whisper · 0,5 GB": "Download Whisper · 0.5 GB",
+  "Cerrar ajustes": "Close settings",
+  "Recomendamos Qwen para este equipo.": "We recommend Qwen for this device.",
+  "Recomendamos Whisper para consumir menos memoria.":
+    "We recommend Whisper to use less memory.",
+  "Whisper es la opción más ligera. Puedes elegir Qwen si tienes Apple Silicon.":
+    "Whisper is the lighter option. You can choose Qwen on Apple Silicon.",
+  "El modelo de acordes no está disponible. Revisa la instalación local.":
+    "The chord model is unavailable. Check the local installation.",
+  "Sólo acordes · La letra se puede activar en Modelos y ajustes.":
+    "Chords only · Enable lyrics in Models and settings.",
+  "Letra con": "Lyrics with",
+  "Todo listo. Elige una grabación.": "Ready. Choose a recording.",
+  "Grabación lista.": "Recording ready.",
+  "Elige otra grabación.": "Choose another recording.",
+  "Obteniendo letra y acordes… Puedes seguir escuchando el audio.":
+    "Getting lyrics and chords… You can keep listening to the audio.",
+  "Borrador listo.": "Draft ready.",
+  "Acordes listos. Puedes añadir la letra al borrador.":
+    "Chords ready. You can add lyrics to the draft.",
+
+  "La importación de audio necesita Chordleaf para escritorio. Los modelos se ejecutan en tu ordenador; esta web no recibe el audio.":
+    "Audio import requires Chordleaf for desktop. Models run on your computer; this website does not receive the audio.",
+  "Descargar para Mac con Apple Silicon": "Download for Apple Silicon Mac",
+  "La primera versión está en preparación para Mac con Apple Silicon.":
+    "The first release is being prepared for Apple Silicon Mac.",
+  "Modelos de letra en este equipo": "Lyric models on this computer",
+  "Qwen ofrece la mejor letra en nuestras pruebas. Recomendamos 16 GB de memoria. La descarga inicial necesita Internet; después puedes analizar sin conexión.":
+    "Qwen produces the best lyrics in our tests. We recommend 16 GB of memory. The initial download needs Internet; afterwards you can analyze offline.",
+  "Instalar Qwen · 3,8 GB": "Install Qwen · 3.8 GB",
+  "Instalar Whisper · 0,5 GB": "Install Whisper · 0.5 GB",
+  "Cancelar descarga": "Cancel download",
+  "Eliminar modelos de letra": "Remove lyric models",
+  "Los acordes funcionan sin descargar estos modelos. Puedes importar y exportar tus canciones mediante una copia JSON; la web y la aplicación guardan bibliotecas separadas.":
+    "Chords work without downloading these models. You can import and export your songs using a JSON backup; the website and desktop app keep separate libraries.",
+  "Los modelos se guardan en este equipo. Tus canciones no se suben.":
+    "Models are stored on this computer. Your songs are not uploaded.",
+  "Descargando modelos… Puedes cancelar y continuar más tarde.":
+    "Downloading models… You can cancel and resume later.",
+  "Modelos instalados. Ya puedes transcribir la letra.":
+    "Models installed. You can now transcribe lyrics.",
+  "Descarga cancelada. Puedes continuar más tarde.":
+    "Download cancelled. You can resume later.",
+  "Necesitas al menos 6 GB libres para instalar los modelos.":
+    "You need at least 6 GB of free space to install the models.",
+  "No se pudo completar la descarga. Comprueba la conexión y vuelve a intentarlo.":
+    "The download could not be completed. Check your connection and try again.",
+
+  "TRANSCRIPTOR DE LETRA": "LYRIC TRANSCRIBER",
+  "Whisper · CPU": "Whisper · CPU",
+  "Qwen3 · Apple Silicon": "Qwen3 · Apple Silicon",
+  "Algunos tiempos son aproximados: se han agrupado palabras para conservar la letra. Escucha y revisa esos tramos.":
+    "Some timings are approximate: words have been grouped to preserve the lyrics. Listen and review those passages.",
+  "Falta el modelo de acordes. Puedes elegir el detector básico.":
+    "The chord model is missing. You can select the baseline detector.",
+  "No hay un transcriptor instalado en este equipo. Puedes analizar sólo los acordes.":
+    "No lyric transcriber is installed on this computer. You can analyze chords only.",
+  "Analizando en tu equipo… El audio no se envía a servicios externos.":
+    "Analyzing on your computer\u2026 Audio is not sent to external services.",
+  "El audio debe durar entre 1 segundo y 10 minutos.":
+    "Audio must be between 1 second and 10 minutes long.",
+  "No se puede leer este audio. Prueba a convertirlo a WAV o MP3.":
+    "This audio cannot be read. Try converting it to WAV or MP3.",
+  "El análisis ha superado el tiempo máximo. Prueba un fragmento más corto.":
+    "Analysis timed out. Try a shorter excerpt.",
+  "No se pudo transcribir la letra. Los acordes están disponibles; puedes añadir la letra al borrador o revisar la instalación del transcriptor.":
+    "Lyrics could not be transcribed. Chords are available; you can add lyrics to the draft or check the transcriber installation.",
+  "Repetir el intervalo seleccionado": "Loop selected interval",
+  "El proyecto guarda la letra y los acordes. Descarga el análisis JSON para conservar los tiempos originales y una copia del borrador corregido. Las correcciones no cambian los tiempos del modelo.":
+    "The project saves lyrics and chords. Download the analysis JSON to keep original timings and a copy of the corrected draft. Corrections do not change model timings.",
+
+  "DETECTOR DE ACORDES": "CHORD DETECTOR",
+  "Neuronal · Séptimas, extensiones e inversiones":
+    "Neural · Sevenths, extensions and inversions",
+  "Referencia · Solo mayores y menores": "Baseline · Major and minor only",
+  "El transcriptor local extrae la letra. El modelo neuronal estima acordes, extensiones y bajos invertidos. Revisa el resultado: puede simplificar armonías o inventar palabras.":
+    "The local transcriber extracts lyrics. The neural model estimates chords, extensions and bass inversions. Review the result: it may simplify harmonies or invent words.",
+  "Importar audio · Experimento": "Import audio · Experiment",
+  "Letra, acordes y tiempos desde una grabación":
+    "Lyrics, chords and timing from a recording",
+  "De una grabación a un borrador de letra y acordes.":
+    "From a recording to a draft of lyrics and chords.",
+  "El audio se analiza en tu ordenador con el servicio local. No se guarda en el proyecto.":
+    "Audio is analyzed on your computer by the local service. It is not saved in the project.",
+  "El transcriptor local extrae la letra. Un detector experimental estima acordes mayores y menores. Revisa el resultado: puede confundir acordes o inventar palabras.":
+    "The local transcriber extracts lyrics. An experimental detector estimates major and minor chords. Review the result: it may confuse chords or invent words.",
+  "Esta prueba requiere iniciar el analizador en una copia local de Chordleaf. Consulta experiments/audio/README.md en el proyecto.":
+    "This experiment requires starting the analyzer in a local copy of Chordleaf. See experiments/audio/README.md in the project.",
+  "ARCHIVO DE AUDIO": "AUDIO FILE",
+  "MP3, WAV, M4A, FLAC u OGG · Hasta 30 MB y 10 minutos.":
+    "MP3, WAV, M4A, FLAC or OGG · Up to 30 MB and 10 minutes.",
+  "Transcribir también la letra": "Also transcribe lyrics",
+  "IDIOMA DE LA VOZ": "VOICE LANGUAGE",
+  "Detectar automáticamente": "Detect automatically",
+  "Analizar audio": "Analyze audio",
+  "Cancelar análisis": "Cancel analysis",
+  "Pulsa un intervalo para escucharlo. N indica silencio o armonía no identificada. Los cambios dentro de una palabra se colocan al inicio de esa palabra.":
+    "Select an interval to listen. N means silence or unidentified harmony. Changes within a word are placed at the start of that word.",
+  "Acordes en el tiempo": "Chords over time",
+  "BORRADOR EDITABLE": "EDITABLE DRAFT",
+  "El proyecto guarda la letra y los acordes. Descarga el análisis JSON para conservar los tiempos originales; las correcciones del borrador no cambian ese análisis.":
+    "The project saves lyrics and chords. Download the JSON analysis to keep the original timing; draft edits do not change that analysis.",
+  "Descargar tiempos · JSON": "Download timing · JSON",
+  "Crear canción": "Create song",
+  "Comprobando el analizador local…": "Checking the local analyzer…",
+  "Analizador local disponible.": "Local analyzer available.",
+  "El analizador local no está activado.": "The local analyzer is not enabled.",
+  "El audio supera el límite de 30 MB.": "Audio exceeds the 30 MB limit.",
+  "Listo para analizar. Máximo 10 minutos.":
+    "Ready to analyze. Maximum 10 minutes.",
+  "Análisis cancelado.": "Analysis canceled.",
+  "Analizando audio… La primera vez se descarga Whisper; puede tardar varios minutos.":
+    "Analyzing audio… Whisper downloads on the first run; this may take several minutes.",
+  "Ya hay un análisis en curso. Espera unos segundos.":
+    "An analysis is already running. Wait a few seconds.",
+  "No se pudo analizar. Comprueba el formato, la duración y la instalación local.":
+    "Analysis failed. Check the format, duration and local installation.",
+  "Sin acorde": "No chord",
+  "Borrador listo. Escucha y corrige antes de crear la canción.":
+    "Draft ready. Listen and correct it before creating the song.",
+  "Sin letra transcrita. Puedes revisar los acordes y añadir la letra.":
+    "No lyrics transcribed. You can review the chords and add lyrics.",
+  "El análisis no se ha completado.": "Analysis did not complete.",
+  "Añade letra o acordes antes de crear la canción.":
+    "Add lyrics or chords before creating the song.",
+
   "¿Tienes la página guardada?": "Have a saved copy of the page?",
   "Puedes abrir el archivo HTML de la canción guardado desde tu navegador. Se procesa en tu dispositivo, sin subirlo al servidor.":
     "You can open the song’s HTML file saved from your browser. It is processed on your device without uploading it.",
@@ -198,6 +468,9 @@ export default {
   Vista: "View",
   "Herramientas musicales": "Music tools",
   "Vista previa": "Preview",
+  "Vista previa de letra y acordes": "Lyrics and chords preview",
+  "Hay tramos de letra incompletos. Revísalos al escuchar la canción.":
+    "Some lyric passages are incomplete. Review them while listening to the song.",
   "Consultar tonalidad": "View key",
   Tonalidad: "Key",
   "Explorar y crear acordes": "Explore and create chords",
@@ -564,4 +837,74 @@ export default {
   "Copia de seguridad · JSON": "Backup · JSON",
   "Todas las canciones abiertas": "Every open song",
   "Para otras apps de acordes": "For other chord apps",
+  "Prepara la importación de audio": "Prepare audio import",
+  "Los modelos se guardan en este navegador. Tu audio y la letra permanecen en tu equipo.":
+    "Models are stored in this browser. Your audio and lyrics stay on your device.",
+  "Letra y acordes · Qwen 0,6B": "Lyrics and chords · Qwen 0.6B",
+  "Qwen, alineador y acordes complejos. Necesita WebGPU; recomendamos 8 GB de memoria o más.":
+    "Qwen, alignment and complex chords. Requires WebGPU; we recommend at least 8 GB of memory.",
+  "Sólo acordes · LV-Chordia": "Chords only · LV-Chordia",
+  "También funciona sin WebGPU. Puedes añadir la letra después.":
+    "Works without WebGPU too. Add lyrics afterwards.",
+  "Además se descarga el motor de ejecución, unos 25 MB. La primera descarga requiere conexión; después podrás analizar sin conexión. El navegador puede borrar modelos si necesita espacio.":
+    "The runtime adds about 25 MB. Connect for the first download; afterwards you can analyze offline. The browser may remove models if it needs space.",
+  "WebGPU disponible. Qwen recomendado para este navegador.":
+    "WebGPU available. Qwen is recommended for this browser.",
+  "La letra necesita un navegador con WebGPU compatible. Prueba Chrome o Edge actualizado; mientras puedes importar sólo acordes.":
+    "Lyrics require a browser with compatible WebGPU. Try an up-to-date Chrome or Edge; you can import chords meanwhile.",
+  "Listo · Usar letra y acordes": "Ready · Use lyrics and chords",
+  "Listo · Usar sólo acordes": "Ready · Use chords only",
+  "Descargar letra y acordes · ": "Download lyrics and chords · ",
+  "Descargar acordes · 13 MB": "Download chords · 13 MB",
+  "Descargando modelos públicos…": "Downloading public models…",
+  "Descargando · ": "Downloading · ",
+  "Modelos listos en este navegador.": "Models ready in this browser.",
+  "Descarga pausada. Los archivos completos se conservan para reintentar.":
+    "Download paused. Completed files are kept for retry.",
+  "Descarga los modelos en Modelos y ajustes.":
+    "Download the models in Models and settings.",
+  "Pausar descarga": "Pause download",
+  "Usar audio de YouTube": "Use audio from YouTube",
+  "Abre el vídeo y captura el audio mientras se reproduce. Elige su pestaña y activa «Compartir audio». Sólo guardamos el audio en este navegador.":
+    "Open the video and capture audio while it plays. Choose its tab and enable “Share audio”. We only keep audio in this browser.",
+  "Enlace de YouTube": "YouTube link",
+  "Abrir vídeo": "Open video",
+  "Capturar audio de una pestaña": "Capture audio from a tab",
+  "Terminar y usar audio": "Finish and use audio",
+  "Cancelar captura": "Cancel capture",
+  "Disponible en navegadores que permiten compartir el audio de una pestaña, como Chrome y Edge. Máximo 10 minutos.":
+    "Available in browsers with tab audio sharing, such as Chrome and Edge. Maximum 10 minutes.",
+  "Capturando sólo audio · ": "Capturing audio only · ",
+  " s. Reproduce el vídeo desde el principio.":
+    " s. Play the video from the beginning.",
+  "Audio listo para analizar en tu equipo.":
+    "Audio ready to analyze on your device.",
+  "Captura cancelada. Puedes seleccionar un archivo de audio.":
+    "Capture cancelled. You can select an audio file.",
+  "Captura cancelada.": "Capture cancelled.",
+  "Leyendo el audio en tu navegador…": "Reading audio in your browser…",
+  "Cargando Qwen en la GPU…": "Loading Qwen on the GPU…",
+  "Cargando los tiempos de la letra…": "Loading lyric timing…",
+  "Obteniendo letra · ": "Getting lyrics · ",
+  "Situando la letra · ": "Aligning lyrics · ",
+  "Preparando los acordes…": "Preparing chords…",
+  "Analizando acordes · ": "Analyzing chords · ",
+  "No se pudieron obtener los acordes en este navegador. Prueba un fragmento más corto o Chrome/Edge actualizado.":
+    "Could not analyze chords in this browser. Try a shorter clip or an up-to-date Chrome/Edge.",
+  "No hay suficiente espacio en el navegador. Libera unos 3 GB y reintenta.":
+    "Not enough browser storage. Free about 3 GB and retry.",
+  "No se pudo descargar el modelo. Comprueba la conexión.":
+    "Could not download the model. Check your connection.",
+  "Descarga incompleta": "Incomplete download",
+  "Tamaño de modelo incorrecto": "Incorrect model size",
+  "El modelo descargado no coincide con la versión verificada.":
+    "The downloaded model does not match the verified version.",
+  "Introduce un enlace de YouTube válido.": "Enter a valid YouTube link.",
+  "Introduce un enlace HTTPS de YouTube.": "Enter an HTTPS YouTube link.",
+  "Introduce el enlace de un vídeo de YouTube.": "Enter a YouTube video link.",
+  "No se ha compartido audio. Usa Chrome o Edge, elige una pestaña y activa Compartir audio.":
+    "No audio was shared. Use Chrome or Edge, choose a tab and enable Share audio.",
+  "Este navegador no permite grabar el audio de una pestaña.":
+    "This browser cannot record tab audio.",
+  "No se pudo grabar el audio de la pestaña.": "Could not record tab audio.",
 };

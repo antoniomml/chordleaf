@@ -69,11 +69,16 @@ test("Vercel adapter rejects unsupported methods and applies security headers", 
   assert.equal(res.headers.Allow, "GET");
   assert.equal(res.headers["Cache-Control"], "no-store");
   assert.match(res.headers["Content-Security-Policy"], /script-src 'self'/);
+  assert.match(
+    res.headers["Content-Security-Policy"],
+    /media-src 'self' blob:/,
+  );
 });
 test("web imports require explicit activation on Vercel", async () => {
   const previous = {
     VERCEL: process.env.VERCEL,
     CHORDLEAF_WEB_IMPORT_ENABLED: process.env.CHORDLEAF_WEB_IMPORT_ENABLED,
+    VITE_FEATURE_WEB_IMPORT: process.env.VITE_FEATURE_WEB_IMPORT,
   };
   process.env.VERCEL = "1";
   delete process.env.CHORDLEAF_WEB_IMPORT_ENABLED;
@@ -89,6 +94,14 @@ test("web imports require explicit activation on Vercel", async () => {
     );
     assert.equal(res.statusCode, 503);
     process.env.CHORDLEAF_WEB_IMPORT_ENABLED = "true";
+    process.env.VITE_FEATURE_WEB_IMPORT = "false";
+    const featureOff = response();
+    await handler(
+      { url: "/api/import-web", method: "GET", headers: {} },
+      featureOff,
+    );
+    assert.equal(featureOff.statusCode, 503);
+    delete process.env.VITE_FEATURE_WEB_IMPORT;
     const crossSite = response();
     await handler(
       {

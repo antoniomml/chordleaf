@@ -1,5 +1,19 @@
 # chordleaf changelog
 
+## 1.2.0-beta.2 · September 30, 2026 · Candidate
+
+- Simplify audio import with a one-time model setup dialog, explicit downloads, memory-based recommendations and saved model preferences. Use neural chord detection only, add drag-and-drop and a focused review screen, and offer ten shared lyric languages.
+- Improve lyric phrasing and chord placement, preserve transcription punctuation and add a live chord-over-lyric preview. Bound Qwen decoding per fragment and retry pathological repetition loops without losing the rest of the song; mark incomplete lyrics and approximate alignment repairs for review.
+
+## 1.2.0-beta.1 · September 30, 2026 · Candidate
+
+- Add local audio import with timed chord and lyric review, editable drafts, interval playback and JSON timing export.
+- Use LV-Chordia for extended chords and offer Qwen3-ASR with forced alignment or Whisper for lyrics. Preserve chord results if transcription fails and mark approximate word groups.
+- Package an Apple Silicon desktop candidate with its own Python runtime and in-app model installation, cancellation and removal. Audio inference remains on each user’s device.
+- Keep desktop storage on a stable private origin, isolate the renderer, authenticate the internal service and preserve libraries across restarts.
+- Add pinned runtime/model manifests, desktop CI and a signing/notarization release gate. Public installer availability remains disabled until that gate is completed.
+- Document actual model comparisons and the experimental GuitarSet training result; the trained research model is not deployed.
+
 ## 1.1.1 · September 30, 2026
 
 - Chords to review open one after another: saving a fix or choosing **Leave for later** moves to the next one, with progress ("1 of 3"), and closing the panel stops the review.

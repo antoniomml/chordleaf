@@ -2,7 +2,12 @@
 // module reloading is never served from a cache, and failures stay silent: the
 // editor keeps working without offline support.
 export function registerServiceWorker() {
-  if (!import.meta.env.PROD || !("serviceWorker" in navigator)) return;
+  if (
+    location.protocol === "chordleaf:" ||
+    !import.meta.env.PROD ||
+    !("serviceWorker" in navigator)
+  )
+    return;
   const register = () => {
     navigator.serviceWorker
       .register("/sw.js", { updateViaCache: "none" })

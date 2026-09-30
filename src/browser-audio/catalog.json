@@ -1,0 +1,196 @@
+{
+  "whisper": [
+    {
+      "name": "onnx/encoder_model_quantized.onnx",
+      "url": "https://huggingface.co/onnx-community/whisper-base_timestamped/resolve/608c49e61301901684bc36cac8f74b95ff6b5a8e/onnx/encoder_model_quantized.onnx",
+      "bytes": 23159167,
+      "sha256": "2714484ebe1bae7c1646e8eadb768bb9d415cf11763466d21f23039a29c62e6f"
+    },
+    {
+      "name": "onnx/decoder_model_merged_quantized.onnx",
+      "url": "https://huggingface.co/onnx-community/whisper-base_timestamped/resolve/608c49e61301901684bc36cac8f74b95ff6b5a8e/onnx/decoder_model_merged_quantized.onnx",
+      "bytes": 53712708,
+      "sha256": "cf9a8d5bcddc0917a0078135b484cedcaf44f28909cd91910abd29dced9171db"
+    },
+    {
+      "name": "config.json",
+      "url": "https://huggingface.co/onnx-community/whisper-base_timestamped/resolve/608c49e61301901684bc36cac8f74b95ff6b5a8e/config.json",
+      "bytes": 2243,
+      "sha256": "f4d0608f7d918166da7edb3e188de5ef1bfe70d9802e785d271fd88111e9cf4b"
+    },
+    {
+      "name": "generation_config.json",
+      "url": "https://huggingface.co/onnx-community/whisper-base_timestamped/resolve/608c49e61301901684bc36cac8f74b95ff6b5a8e/generation_config.json",
+      "bytes": 3832,
+      "sha256": "61070cf8de25b1e9256e8e102ded49d8d24a8369ed36ef84fdf21549e68125a0"
+    },
+    {
+      "name": "preprocessor_config.json",
+      "url": "https://huggingface.co/onnx-community/whisper-base_timestamped/resolve/608c49e61301901684bc36cac8f74b95ff6b5a8e/preprocessor_config.json",
+      "bytes": 339,
+      "sha256": "a6a76d28c93edb273669eb9e0b0636a2bddbb1272c3261e47b7ca6dfdbac1b8d"
+    },
+    {
+      "name": "tokenizer.json",
+      "url": "https://huggingface.co/onnx-community/whisper-base_timestamped/resolve/608c49e61301901684bc36cac8f74b95ff6b5a8e/tokenizer.json",
+      "bytes": 2480466,
+      "sha256": "27fc476bfe7f17299480be2273fc0608e4d5a99aba2ab5dec5374b4482d1a566"
+    },
+    {
+      "name": "tokenizer_config.json",
+      "url": "https://huggingface.co/onnx-community/whisper-base_timestamped/resolve/608c49e61301901684bc36cac8f74b95ff6b5a8e/tokenizer_config.json",
+      "bytes": 282682,
+      "sha256": "2e036e4dbacfdeb7242c7d4ec4149f4a16e86026048f94d1637e3a8ee9c6a573"
+    }
+  ],
+  "qwen": [
+    {
+      "name": "encoder.fp16.onnx",
+      "url": "https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX/resolve/4a01b95fafe2c9e3af77e33c18bbb7de349c62f6/encoder.fp16.onnx",
+      "bytes": 376261247,
+      "sha256": "af2a517a3d873a401ec9f64a81711e3d780fc8b085fd36f9366f9ac17a54411b"
+    },
+    {
+      "name": "decoder_init.q4f16.onnx",
+      "url": "https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX/resolve/4a01b95fafe2c9e3af77e33c18bbb7de349c62f6/decoder_init.q4f16.onnx",
+      "bytes": 348427,
+      "sha256": "328a14a46d7284bb6dc5242bc9f6029b013a6f2c42579f9e72dadbaa96ba511d"
+    },
+    {
+      "name": "decoder_step.q4f16.onnx",
+      "url": "https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX/resolve/4a01b95fafe2c9e3af77e33c18bbb7de349c62f6/decoder_step.q4f16.onnx",
+      "bytes": 350380,
+      "sha256": "27f4588874d1e50a539aed8de424107a8b934a1a5b13368c3a36b467ffcf2024"
+    },
+    {
+      "name": "decoder_weights.q4f16.data",
+      "url": "https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX/resolve/4a01b95fafe2c9e3af77e33c18bbb7de349c62f6/decoder_weights.q4f16.data",
+      "bytes": 344670208,
+      "sha256": "898d0c82aad4cae494a4241639c73f9c8e79486fea3b4bac918883397b8f0bcc"
+    },
+    {
+      "name": "embed_tokens.int8.bin",
+      "url": "https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX/resolve/4a01b95fafe2c9e3af77e33c18bbb7de349c62f6/embed_tokens.int8.bin",
+      "bytes": 155582464,
+      "sha256": "9ec07c97a15cb9defb675656edeed0370bc3e7b2c478d1eefe6f948fc6516513"
+    },
+    {
+      "name": "embed_scales.f32.bin",
+      "url": "https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX/resolve/4a01b95fafe2c9e3af77e33c18bbb7de349c62f6/embed_scales.f32.bin",
+      "bytes": 607744,
+      "sha256": "acce138a5f06f1233faa4a8a359903b3c303efc0ce37818ad8cf0f9be11fc9b3"
+    },
+    {
+      "name": "prompt_config.json",
+      "url": "https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX/resolve/4a01b95fafe2c9e3af77e33c18bbb7de349c62f6/prompt_config.json",
+      "bytes": 2578,
+      "sha256": "282e0cba43d48f0799c665e2687bea950cbb090bc1def85578d6cdf369c08970"
+    },
+    {
+      "name": "mel_filters.json",
+      "url": "https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX/resolve/4a01b95fafe2c9e3af77e33c18bbb7de349c62f6/mel_filters.json",
+      "bytes": 132427,
+      "sha256": "dcdaf139353616855b4f85e304c075f5f3442573d40637ae0f031db705626181"
+    },
+    {
+      "name": "config.json",
+      "url": "https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX/resolve/4a01b95fafe2c9e3af77e33c18bbb7de349c62f6/config.json",
+      "bytes": 1302,
+      "sha256": "fe938913b8c7e8b09bec97179308bcadb2c9e01a2a42ef8c08d37f97e54cc8da"
+    },
+    {
+      "name": "tokenizer.json",
+      "url": "https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX/resolve/4a01b95fafe2c9e3af77e33c18bbb7de349c62f6/tokenizer.json",
+      "bytes": 11429377,
+      "sha256": "bd2a97b55c8f7f9c328c73ee9b9178771037e9f566dfca8e238a063d41cbac92"
+    },
+    {
+      "name": "tokenizer_config.json",
+      "url": "https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX/resolve/4a01b95fafe2c9e3af77e33c18bbb7de349c62f6/tokenizer_config.json",
+      "bytes": 12488,
+      "sha256": "784c92a0a81fbbc440afb89842f8c16c8da28dfb9ff381fcea585b84f4eed7d1"
+    }
+  ],
+  "aligner": [
+    {
+      "name": "onnx/model_q4.onnx",
+      "url": "https://huggingface.co/valoomba/Qwen3-ForcedAligner-0.6B-ONNX/resolve/261c9ed100c1b18a4a1fbc488e05625dc9a4ae5c/onnx/model_q4.onnx",
+      "bytes": 1048397349,
+      "sha256": "59b528896d70b34e57838e160d16d5f7cfc02d86c7c6ad46cdc57c25c15497b7"
+    },
+    {
+      "name": "config.json",
+      "url": "https://huggingface.co/valoomba/Qwen3-ForcedAligner-0.6B-ONNX/resolve/261c9ed100c1b18a4a1fbc488e05625dc9a4ae5c/config.json",
+      "bytes": 5725,
+      "sha256": "91f38394bd8117ad2ccbdfc0942d9c100a7482d4c43688674ef2a40fe64eb061"
+    },
+    {
+      "name": "preprocessor_config.json",
+      "url": "https://huggingface.co/valoomba/Qwen3-ForcedAligner-0.6B-ONNX/resolve/261c9ed100c1b18a4a1fbc488e05625dc9a4ae5c/preprocessor_config.json",
+      "bytes": 357,
+      "sha256": "0443a40d411d3caad769e7b59971fa6eae75926ed4b7e337e60da909eb38c1f7"
+    },
+    {
+      "name": "tokenizer.json",
+      "url": "https://huggingface.co/valoomba/Qwen3-ForcedAligner-0.6B-ONNX/resolve/261c9ed100c1b18a4a1fbc488e05625dc9a4ae5c/tokenizer.json",
+      "bytes": 11429733,
+      "sha256": "e95e4127f5ea82f89695f00bb3c143eb7edd411e6096e27ff56319397f481e77"
+    },
+    {
+      "name": "tokenizer_config.json",
+      "url": "https://huggingface.co/valoomba/Qwen3-ForcedAligner-0.6B-ONNX/resolve/261c9ed100c1b18a4a1fbc488e05625dc9a4ae5c/tokenizer_config.json",
+      "bytes": 12696,
+      "sha256": "bee4786e25db33d3e8acb4c7a37c4ccf8d5a3d843b9cafb75a91d4ba774ad38f"
+    }
+  ],
+  "chords": [
+    {
+      "name": "cqt.onnx",
+      "url": "/models/lv-chordia-web-v1/cqt.onnx",
+      "bytes": 28227,
+      "sha256": "315cdaf5934e132c0fed3aa0921757d8314f669b4f41289ab2126fd730e08c0a"
+    },
+    {
+      "name": "manifest.json",
+      "url": "/models/lv-chordia-web-v1/manifest.json",
+      "bytes": 48325,
+      "sha256": "112888d7a42de00f9900d2f7ccf154f039ea720529b92085aeedc29a1ab987a3"
+    },
+    {
+      "name": "net-0.onnx",
+      "url": "/models/lv-chordia-web-v1/net-0.onnx",
+      "bytes": 1894972,
+      "sha256": "b3b49947912b35234e235ff4d383fb34302957dea3dda408af9757ec828feefe"
+    },
+    {
+      "name": "net-1.onnx",
+      "url": "/models/lv-chordia-web-v1/net-1.onnx",
+      "bytes": 1894972,
+      "sha256": "63419b3ed29fc6ebbf653c77435f8cb5883dc6f2bb0eb6a433e927d65c05edc2"
+    },
+    {
+      "name": "net-2.onnx",
+      "url": "/models/lv-chordia-web-v1/net-2.onnx",
+      "bytes": 1894972,
+      "sha256": "52fe196bdbe2efee8cd2b845e55f6497c39d47a557b8d2a799565c54ffbbf338"
+    },
+    {
+      "name": "net-3.onnx",
+      "url": "/models/lv-chordia-web-v1/net-3.onnx",
+      "bytes": 1894972,
+      "sha256": "82903b8141fa26a13da6cd822cae3f09a741a1e6191d054239d22daa35021cad"
+    },
+    {
+      "name": "net-4.onnx",
+      "url": "/models/lv-chordia-web-v1/net-4.onnx",
+      "bytes": 1894972,
+      "sha256": "d3571b1018d22c266c48d8d308214404c8347a974107ab836e8f56e278466ed1"
+    },
+    {
+      "name": "tuning-kernels.f32",
+      "url": "/models/lv-chordia-web-v1/tuning-kernels.f32",
+      "bytes": 3120768,
+      "sha256": "b96caee856dbc76afa571ca15ae435bc5d8957f3f1ab033d1be983fc9eb330e6"
+    }
+  ]
+}

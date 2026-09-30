@@ -71,3 +71,7 @@ Promote the reviewed preview only after the applicable launch priorities are res
 ## References
 
 [Vite deployment](https://vite.dev/guide/static-deploy), [Vercel Node.js functions](https://vercel.com/docs/functions/runtimes/node-js), [Vercel configuration](https://vercel.com/docs/project-configuration/vercel-json), [Vercel WAF rate limiting](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting).
+
+## Optional desktop audio
+
+The public deployment never runs the audio models. The native Mac candidate and release gates are documented in [desktop-release.es.md](desktop-release.es.md). Leave `VITE_DESKTOP_DOWNLOAD_URL` unset until a signed, notarized installer has been verified. Then set it to the exact official GitHub release DMG URL and rebuild a preview before promotion. The renderer validates the installer URL namespace; this does not replace the signing/notarization release gate.

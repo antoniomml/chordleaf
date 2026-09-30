@@ -1,0 +1,3681 @@
+{
+  "version": 1,
+  "sampleRate": 22050,
+  "hop": 512,
+  "heads": [
+    "triad",
+    "bass",
+    "seventh",
+    "ninth",
+    "eleventh",
+    "thirteenth"
+  ],
+  "sizes": [
+    73,
+    13,
+    4,
+    4,
+    3,
+    3
+  ],
+  "transitionPenalty": 30,
+  "dictionary": [
+    {
+      "array": [
+        0,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "rawLabel": "N",
+      "label": "N"
+    },
+    {
+      "array": [
+        13,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:min/b7",
+      "label": "Cm/Bb"
+    },
+    {
+      "array": [
+        14,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:min/b7",
+      "label": "C#m/B"
+    },
+    {
+      "array": [
+        15,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:min/b7",
+      "label": "Dm/C"
+    },
+    {
+      "array": [
+        16,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:min/b7",
+      "label": "Ebm/Db"
+    },
+    {
+      "array": [
+        17,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:min/b7",
+      "label": "Em/D"
+    },
+    {
+      "array": [
+        18,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:min/b7",
+      "label": "Fm/Eb"
+    },
+    {
+      "array": [
+        19,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:min/b7",
+      "label": "F#m/E"
+    },
+    {
+      "array": [
+        20,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:min/b7",
+      "label": "Gm/F"
+    },
+    {
+      "array": [
+        21,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:min/b7",
+      "label": "Abm/Gb"
+    },
+    {
+      "array": [
+        22,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:min/b7",
+      "label": "Am/G"
+    },
+    {
+      "array": [
+        23,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:min/b7",
+      "label": "Bbm/Ab"
+    },
+    {
+      "array": [
+        24,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:min/b7",
+      "label": "Bm/A"
+    },
+    {
+      "array": [
+        13,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:min/2",
+      "label": "Cm/D"
+    },
+    {
+      "array": [
+        14,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:min/2",
+      "label": "C#m/Eb"
+    },
+    {
+      "array": [
+        15,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:min/2",
+      "label": "Dm/E"
+    },
+    {
+      "array": [
+        16,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:min/2",
+      "label": "Ebm/F"
+    },
+    {
+      "array": [
+        17,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:min/2",
+      "label": "Em/Gb"
+    },
+    {
+      "array": [
+        18,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:min/2",
+      "label": "Fm/G"
+    },
+    {
+      "array": [
+        19,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:min/2",
+      "label": "F#m/Ab"
+    },
+    {
+      "array": [
+        20,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:min/2",
+      "label": "Gm/A"
+    },
+    {
+      "array": [
+        21,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:min/2",
+      "label": "Abm/Bb"
+    },
+    {
+      "array": [
+        22,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:min/2",
+      "label": "Am/B"
+    },
+    {
+      "array": [
+        23,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:min/2",
+      "label": "Bbm/C"
+    },
+    {
+      "array": [
+        24,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:min/2",
+      "label": "Bm/Db"
+    },
+    {
+      "array": [
+        1,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:maj/b7",
+      "label": "C/Bb"
+    },
+    {
+      "array": [
+        2,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:maj/b7",
+      "label": "C#/B"
+    },
+    {
+      "array": [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:maj/b7",
+      "label": "D/C"
+    },
+    {
+      "array": [
+        4,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:maj/b7",
+      "label": "Eb/Db"
+    },
+    {
+      "array": [
+        5,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:maj/b7",
+      "label": "E/D"
+    },
+    {
+      "array": [
+        6,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:maj/b7",
+      "label": "F/Eb"
+    },
+    {
+      "array": [
+        7,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:maj/b7",
+      "label": "F#/E"
+    },
+    {
+      "array": [
+        8,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:maj/b7",
+      "label": "G/F"
+    },
+    {
+      "array": [
+        9,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:maj/b7",
+      "label": "Ab/Gb"
+    },
+    {
+      "array": [
+        10,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:maj/b7",
+      "label": "A/G"
+    },
+    {
+      "array": [
+        11,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:maj/b7",
+      "label": "Bb/Ab"
+    },
+    {
+      "array": [
+        12,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:maj/b7",
+      "label": "B/A"
+    },
+    {
+      "array": [
+        1,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:maj/2",
+      "label": "C/D"
+    },
+    {
+      "array": [
+        2,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:maj/2",
+      "label": "C#/Eb"
+    },
+    {
+      "array": [
+        3,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:maj/2",
+      "label": "D/E"
+    },
+    {
+      "array": [
+        4,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:maj/2",
+      "label": "Eb/F"
+    },
+    {
+      "array": [
+        5,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:maj/2",
+      "label": "E/Gb"
+    },
+    {
+      "array": [
+        6,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:maj/2",
+      "label": "F/G"
+    },
+    {
+      "array": [
+        7,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:maj/2",
+      "label": "F#/Ab"
+    },
+    {
+      "array": [
+        8,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:maj/2",
+      "label": "G/A"
+    },
+    {
+      "array": [
+        9,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:maj/2",
+      "label": "Ab/Bb"
+    },
+    {
+      "array": [
+        10,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:maj/2",
+      "label": "A/B"
+    },
+    {
+      "array": [
+        11,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:maj/2",
+      "label": "Bb/C"
+    },
+    {
+      "array": [
+        12,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:maj/2",
+      "label": "B/Db"
+    },
+    {
+      "array": [
+        25,
+        0,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:sus4(b7)",
+      "label": "C7sus4"
+    },
+    {
+      "array": [
+        26,
+        1,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:sus4(b7)",
+      "label": "C#7sus4"
+    },
+    {
+      "array": [
+        27,
+        2,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:sus4(b7)",
+      "label": "D7sus4"
+    },
+    {
+      "array": [
+        28,
+        3,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:sus4(b7)",
+      "label": "Eb7sus4"
+    },
+    {
+      "array": [
+        29,
+        4,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:sus4(b7)",
+      "label": "E7sus4"
+    },
+    {
+      "array": [
+        30,
+        5,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:sus4(b7)",
+      "label": "F7sus4"
+    },
+    {
+      "array": [
+        31,
+        6,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:sus4(b7)",
+      "label": "F#7sus4"
+    },
+    {
+      "array": [
+        32,
+        7,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:sus4(b7)",
+      "label": "G7sus4"
+    },
+    {
+      "array": [
+        33,
+        8,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:sus4(b7)",
+      "label": "Ab7sus4"
+    },
+    {
+      "array": [
+        34,
+        9,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:sus4(b7)",
+      "label": "A7sus4"
+    },
+    {
+      "array": [
+        35,
+        10,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:sus4(b7)",
+      "label": "Bb7sus4"
+    },
+    {
+      "array": [
+        36,
+        11,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:sus4(b7)",
+      "label": "B7sus4"
+    },
+    {
+      "array": [
+        37,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:sus2",
+      "label": "Csus2"
+    },
+    {
+      "array": [
+        38,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:sus2",
+      "label": "C#sus2"
+    },
+    {
+      "array": [
+        39,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:sus2",
+      "label": "Dsus2"
+    },
+    {
+      "array": [
+        40,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:sus2",
+      "label": "Ebsus2"
+    },
+    {
+      "array": [
+        41,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:sus2",
+      "label": "Esus2"
+    },
+    {
+      "array": [
+        42,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:sus2",
+      "label": "Fsus2"
+    },
+    {
+      "array": [
+        43,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:sus2",
+      "label": "F#sus2"
+    },
+    {
+      "array": [
+        44,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:sus2",
+      "label": "Gsus2"
+    },
+    {
+      "array": [
+        45,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:sus2",
+      "label": "Absus2"
+    },
+    {
+      "array": [
+        46,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:sus2",
+      "label": "Asus2"
+    },
+    {
+      "array": [
+        47,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:sus2",
+      "label": "Bbsus2"
+    },
+    {
+      "array": [
+        48,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:sus2",
+      "label": "Bsus2"
+    },
+    {
+      "array": [
+        25,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:sus4",
+      "label": "Csus4"
+    },
+    {
+      "array": [
+        26,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:sus4",
+      "label": "C#sus4"
+    },
+    {
+      "array": [
+        27,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:sus4",
+      "label": "Dsus4"
+    },
+    {
+      "array": [
+        28,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:sus4",
+      "label": "Ebsus4"
+    },
+    {
+      "array": [
+        29,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:sus4",
+      "label": "Esus4"
+    },
+    {
+      "array": [
+        30,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:sus4",
+      "label": "Fsus4"
+    },
+    {
+      "array": [
+        31,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:sus4",
+      "label": "F#sus4"
+    },
+    {
+      "array": [
+        32,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:sus4",
+      "label": "Gsus4"
+    },
+    {
+      "array": [
+        33,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:sus4",
+      "label": "Absus4"
+    },
+    {
+      "array": [
+        34,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:sus4",
+      "label": "Asus4"
+    },
+    {
+      "array": [
+        35,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:sus4",
+      "label": "Bbsus4"
+    },
+    {
+      "array": [
+        36,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:sus4",
+      "label": "Bsus4"
+    },
+    {
+      "array": [
+        1,
+        0,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "C:13",
+      "label": "C13"
+    },
+    {
+      "array": [
+        2,
+        1,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "C#:13",
+      "label": "C#13"
+    },
+    {
+      "array": [
+        3,
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "D:13",
+      "label": "D13"
+    },
+    {
+      "array": [
+        4,
+        3,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "Eb:13",
+      "label": "Eb13"
+    },
+    {
+      "array": [
+        5,
+        4,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "E:13",
+      "label": "E13"
+    },
+    {
+      "array": [
+        6,
+        5,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "F:13",
+      "label": "F13"
+    },
+    {
+      "array": [
+        7,
+        6,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "F#:13",
+      "label": "F#13"
+    },
+    {
+      "array": [
+        8,
+        7,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "G:13",
+      "label": "G13"
+    },
+    {
+      "array": [
+        9,
+        8,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "Ab:13",
+      "label": "Ab13"
+    },
+    {
+      "array": [
+        10,
+        9,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "A:13",
+      "label": "A13"
+    },
+    {
+      "array": [
+        11,
+        10,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "Bb:13",
+      "label": "Bb13"
+    },
+    {
+      "array": [
+        12,
+        11,
+        2,
+        1,
+        1,
+        1
+      ],
+      "rawLabel": "B:13",
+      "label": "B13"
+    },
+    {
+      "array": [
+        1,
+        0,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "C:11",
+      "label": "C11"
+    },
+    {
+      "array": [
+        2,
+        1,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "C#:11",
+      "label": "C#11"
+    },
+    {
+      "array": [
+        3,
+        2,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "D:11",
+      "label": "D11"
+    },
+    {
+      "array": [
+        4,
+        3,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "Eb:11",
+      "label": "Eb11"
+    },
+    {
+      "array": [
+        5,
+        4,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "E:11",
+      "label": "E11"
+    },
+    {
+      "array": [
+        6,
+        5,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "F:11",
+      "label": "F11"
+    },
+    {
+      "array": [
+        7,
+        6,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "F#:11",
+      "label": "F#11"
+    },
+    {
+      "array": [
+        8,
+        7,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "G:11",
+      "label": "G11"
+    },
+    {
+      "array": [
+        9,
+        8,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "Ab:11",
+      "label": "Ab11"
+    },
+    {
+      "array": [
+        10,
+        9,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "A:11",
+      "label": "A11"
+    },
+    {
+      "array": [
+        11,
+        10,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "Bb:11",
+      "label": "Bb11"
+    },
+    {
+      "array": [
+        12,
+        11,
+        2,
+        1,
+        1,
+        0
+      ],
+      "rawLabel": "B:11",
+      "label": "B11"
+    },
+    {
+      "array": [
+        13,
+        0,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "C:min9",
+      "label": "Cm9"
+    },
+    {
+      "array": [
+        14,
+        1,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "C#:min9",
+      "label": "C#m9"
+    },
+    {
+      "array": [
+        15,
+        2,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "D:min9",
+      "label": "Dm9"
+    },
+    {
+      "array": [
+        16,
+        3,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:min9",
+      "label": "Ebm9"
+    },
+    {
+      "array": [
+        17,
+        4,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "E:min9",
+      "label": "Em9"
+    },
+    {
+      "array": [
+        18,
+        5,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "F:min9",
+      "label": "Fm9"
+    },
+    {
+      "array": [
+        19,
+        6,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "F#:min9",
+      "label": "F#m9"
+    },
+    {
+      "array": [
+        20,
+        7,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "G:min9",
+      "label": "Gm9"
+    },
+    {
+      "array": [
+        21,
+        8,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:min9",
+      "label": "Abm9"
+    },
+    {
+      "array": [
+        22,
+        9,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "A:min9",
+      "label": "Am9"
+    },
+    {
+      "array": [
+        23,
+        10,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:min9",
+      "label": "Bbm9"
+    },
+    {
+      "array": [
+        24,
+        11,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "B:min9",
+      "label": "Bm9"
+    },
+    {
+      "array": [
+        1,
+        0,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "C:9",
+      "label": "C9"
+    },
+    {
+      "array": [
+        2,
+        1,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "C#:9",
+      "label": "C#9"
+    },
+    {
+      "array": [
+        3,
+        2,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "D:9",
+      "label": "D9"
+    },
+    {
+      "array": [
+        4,
+        3,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:9",
+      "label": "Eb9"
+    },
+    {
+      "array": [
+        5,
+        4,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "E:9",
+      "label": "E9"
+    },
+    {
+      "array": [
+        6,
+        5,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "F:9",
+      "label": "F9"
+    },
+    {
+      "array": [
+        7,
+        6,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "F#:9",
+      "label": "F#9"
+    },
+    {
+      "array": [
+        8,
+        7,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "G:9",
+      "label": "G9"
+    },
+    {
+      "array": [
+        9,
+        8,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:9",
+      "label": "Ab9"
+    },
+    {
+      "array": [
+        10,
+        9,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "A:9",
+      "label": "A9"
+    },
+    {
+      "array": [
+        11,
+        10,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:9",
+      "label": "Bb9"
+    },
+    {
+      "array": [
+        12,
+        11,
+        2,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "B:9",
+      "label": "B9"
+    },
+    {
+      "array": [
+        1,
+        0,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "C:maj9",
+      "label": "Cmaj9"
+    },
+    {
+      "array": [
+        2,
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "C#:maj9",
+      "label": "C#maj9"
+    },
+    {
+      "array": [
+        3,
+        2,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "D:maj9",
+      "label": "Dmaj9"
+    },
+    {
+      "array": [
+        4,
+        3,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:maj9",
+      "label": "Ebmaj9"
+    },
+    {
+      "array": [
+        5,
+        4,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "E:maj9",
+      "label": "Emaj9"
+    },
+    {
+      "array": [
+        6,
+        5,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "F:maj9",
+      "label": "Fmaj9"
+    },
+    {
+      "array": [
+        7,
+        6,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "F#:maj9",
+      "label": "F#maj9"
+    },
+    {
+      "array": [
+        8,
+        7,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "G:maj9",
+      "label": "Gmaj9"
+    },
+    {
+      "array": [
+        9,
+        8,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:maj9",
+      "label": "Abmaj9"
+    },
+    {
+      "array": [
+        10,
+        9,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "A:maj9",
+      "label": "Amaj9"
+    },
+    {
+      "array": [
+        11,
+        10,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:maj9",
+      "label": "Bbmaj9"
+    },
+    {
+      "array": [
+        12,
+        11,
+        1,
+        1,
+        0,
+        0
+      ],
+      "rawLabel": "B:maj9",
+      "label": "Bmaj9"
+    },
+    {
+      "array": [
+        49,
+        0,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:dim7",
+      "label": "Cdim7"
+    },
+    {
+      "array": [
+        50,
+        1,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:dim7",
+      "label": "C#dim7"
+    },
+    {
+      "array": [
+        51,
+        2,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:dim7",
+      "label": "Ddim7"
+    },
+    {
+      "array": [
+        52,
+        3,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:dim7",
+      "label": "Ebdim7"
+    },
+    {
+      "array": [
+        53,
+        4,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:dim7",
+      "label": "Edim7"
+    },
+    {
+      "array": [
+        54,
+        5,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:dim7",
+      "label": "Fdim7"
+    },
+    {
+      "array": [
+        55,
+        6,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:dim7",
+      "label": "F#dim7"
+    },
+    {
+      "array": [
+        56,
+        7,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:dim7",
+      "label": "Gdim7"
+    },
+    {
+      "array": [
+        57,
+        8,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:dim7",
+      "label": "Abdim7"
+    },
+    {
+      "array": [
+        58,
+        9,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:dim7",
+      "label": "Adim7"
+    },
+    {
+      "array": [
+        59,
+        10,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:dim7",
+      "label": "Bbdim7"
+    },
+    {
+      "array": [
+        60,
+        11,
+        3,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:dim7",
+      "label": "Bdim7"
+    },
+    {
+      "array": [
+        49,
+        0,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:hdim7",
+      "label": "Cm7b5"
+    },
+    {
+      "array": [
+        50,
+        1,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:hdim7",
+      "label": "C#m7b5"
+    },
+    {
+      "array": [
+        51,
+        2,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:hdim7",
+      "label": "Dm7b5"
+    },
+    {
+      "array": [
+        52,
+        3,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:hdim7",
+      "label": "Ebm7b5"
+    },
+    {
+      "array": [
+        53,
+        4,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:hdim7",
+      "label": "Em7b5"
+    },
+    {
+      "array": [
+        54,
+        5,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:hdim7",
+      "label": "Fm7b5"
+    },
+    {
+      "array": [
+        55,
+        6,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:hdim7",
+      "label": "F#m7b5"
+    },
+    {
+      "array": [
+        56,
+        7,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:hdim7",
+      "label": "Gm7b5"
+    },
+    {
+      "array": [
+        57,
+        8,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:hdim7",
+      "label": "Abm7b5"
+    },
+    {
+      "array": [
+        58,
+        9,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:hdim7",
+      "label": "Am7b5"
+    },
+    {
+      "array": [
+        59,
+        10,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:hdim7",
+      "label": "Bbm7b5"
+    },
+    {
+      "array": [
+        60,
+        11,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:hdim7",
+      "label": "Bm7b5"
+    },
+    {
+      "array": [
+        13,
+        0,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:min7",
+      "label": "Cm7"
+    },
+    {
+      "array": [
+        14,
+        1,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:min7",
+      "label": "C#m7"
+    },
+    {
+      "array": [
+        15,
+        2,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:min7",
+      "label": "Dm7"
+    },
+    {
+      "array": [
+        16,
+        3,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:min7",
+      "label": "Ebm7"
+    },
+    {
+      "array": [
+        17,
+        4,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:min7",
+      "label": "Em7"
+    },
+    {
+      "array": [
+        18,
+        5,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:min7",
+      "label": "Fm7"
+    },
+    {
+      "array": [
+        19,
+        6,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:min7",
+      "label": "F#m7"
+    },
+    {
+      "array": [
+        20,
+        7,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:min7",
+      "label": "Gm7"
+    },
+    {
+      "array": [
+        21,
+        8,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:min7",
+      "label": "Abm7"
+    },
+    {
+      "array": [
+        22,
+        9,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:min7",
+      "label": "Am7"
+    },
+    {
+      "array": [
+        23,
+        10,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:min7",
+      "label": "Bbm7"
+    },
+    {
+      "array": [
+        24,
+        11,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:min7",
+      "label": "Bm7"
+    },
+    {
+      "array": [
+        1,
+        0,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:7",
+      "label": "C7"
+    },
+    {
+      "array": [
+        2,
+        1,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:7",
+      "label": "C#7"
+    },
+    {
+      "array": [
+        3,
+        2,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:7",
+      "label": "D7"
+    },
+    {
+      "array": [
+        4,
+        3,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:7",
+      "label": "Eb7"
+    },
+    {
+      "array": [
+        5,
+        4,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:7",
+      "label": "E7"
+    },
+    {
+      "array": [
+        6,
+        5,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:7",
+      "label": "F7"
+    },
+    {
+      "array": [
+        7,
+        6,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:7",
+      "label": "F#7"
+    },
+    {
+      "array": [
+        8,
+        7,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:7",
+      "label": "G7"
+    },
+    {
+      "array": [
+        9,
+        8,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:7",
+      "label": "Ab7"
+    },
+    {
+      "array": [
+        10,
+        9,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:7",
+      "label": "A7"
+    },
+    {
+      "array": [
+        11,
+        10,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:7",
+      "label": "Bb7"
+    },
+    {
+      "array": [
+        12,
+        11,
+        2,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:7",
+      "label": "B7"
+    },
+    {
+      "array": [
+        1,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:maj7",
+      "label": "Cmaj7"
+    },
+    {
+      "array": [
+        2,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:maj7",
+      "label": "C#maj7"
+    },
+    {
+      "array": [
+        3,
+        2,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:maj7",
+      "label": "Dmaj7"
+    },
+    {
+      "array": [
+        4,
+        3,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:maj7",
+      "label": "Ebmaj7"
+    },
+    {
+      "array": [
+        5,
+        4,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:maj7",
+      "label": "Emaj7"
+    },
+    {
+      "array": [
+        6,
+        5,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:maj7",
+      "label": "Fmaj7"
+    },
+    {
+      "array": [
+        7,
+        6,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:maj7",
+      "label": "F#maj7"
+    },
+    {
+      "array": [
+        8,
+        7,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:maj7",
+      "label": "Gmaj7"
+    },
+    {
+      "array": [
+        9,
+        8,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:maj7",
+      "label": "Abmaj7"
+    },
+    {
+      "array": [
+        10,
+        9,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:maj7",
+      "label": "Amaj7"
+    },
+    {
+      "array": [
+        11,
+        10,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:maj7",
+      "label": "Bbmaj7"
+    },
+    {
+      "array": [
+        12,
+        11,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:maj7",
+      "label": "Bmaj7"
+    },
+    {
+      "array": [
+        13,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:min/5",
+      "label": "Cm/G"
+    },
+    {
+      "array": [
+        14,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:min/5",
+      "label": "C#m/Ab"
+    },
+    {
+      "array": [
+        15,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:min/5",
+      "label": "Dm/A"
+    },
+    {
+      "array": [
+        16,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:min/5",
+      "label": "Ebm/Bb"
+    },
+    {
+      "array": [
+        17,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:min/5",
+      "label": "Em/B"
+    },
+    {
+      "array": [
+        18,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:min/5",
+      "label": "Fm/C"
+    },
+    {
+      "array": [
+        19,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:min/5",
+      "label": "F#m/Db"
+    },
+    {
+      "array": [
+        20,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:min/5",
+      "label": "Gm/D"
+    },
+    {
+      "array": [
+        21,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:min/5",
+      "label": "Abm/Eb"
+    },
+    {
+      "array": [
+        22,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:min/5",
+      "label": "Am/E"
+    },
+    {
+      "array": [
+        23,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:min/5",
+      "label": "Bbm/F"
+    },
+    {
+      "array": [
+        24,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:min/5",
+      "label": "Bm/Gb"
+    },
+    {
+      "array": [
+        13,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:min/b3",
+      "label": "Cm/Eb"
+    },
+    {
+      "array": [
+        14,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:min/b3",
+      "label": "C#m/E"
+    },
+    {
+      "array": [
+        15,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:min/b3",
+      "label": "Dm/F"
+    },
+    {
+      "array": [
+        16,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:min/b3",
+      "label": "Ebm/Gb"
+    },
+    {
+      "array": [
+        17,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:min/b3",
+      "label": "Em/G"
+    },
+    {
+      "array": [
+        18,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:min/b3",
+      "label": "Fm/Ab"
+    },
+    {
+      "array": [
+        19,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:min/b3",
+      "label": "F#m/A"
+    },
+    {
+      "array": [
+        20,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:min/b3",
+      "label": "Gm/Bb"
+    },
+    {
+      "array": [
+        21,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:min/b3",
+      "label": "Abm/B"
+    },
+    {
+      "array": [
+        22,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:min/b3",
+      "label": "Am/C"
+    },
+    {
+      "array": [
+        23,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:min/b3",
+      "label": "Bbm/Db"
+    },
+    {
+      "array": [
+        24,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:min/b3",
+      "label": "Bm/D"
+    },
+    {
+      "array": [
+        1,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:maj/5",
+      "label": "C/G"
+    },
+    {
+      "array": [
+        2,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:maj/5",
+      "label": "C#/Ab"
+    },
+    {
+      "array": [
+        3,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:maj/5",
+      "label": "D/A"
+    },
+    {
+      "array": [
+        4,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:maj/5",
+      "label": "Eb/Bb"
+    },
+    {
+      "array": [
+        5,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:maj/5",
+      "label": "E/B"
+    },
+    {
+      "array": [
+        6,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:maj/5",
+      "label": "F/C"
+    },
+    {
+      "array": [
+        7,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:maj/5",
+      "label": "F#/Db"
+    },
+    {
+      "array": [
+        8,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:maj/5",
+      "label": "G/D"
+    },
+    {
+      "array": [
+        9,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:maj/5",
+      "label": "Ab/Eb"
+    },
+    {
+      "array": [
+        10,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:maj/5",
+      "label": "A/E"
+    },
+    {
+      "array": [
+        11,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:maj/5",
+      "label": "Bb/F"
+    },
+    {
+      "array": [
+        12,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:maj/5",
+      "label": "B/Gb"
+    },
+    {
+      "array": [
+        1,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:maj/3",
+      "label": "C/E"
+    },
+    {
+      "array": [
+        2,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:maj/3",
+      "label": "C#/F"
+    },
+    {
+      "array": [
+        3,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:maj/3",
+      "label": "D/Gb"
+    },
+    {
+      "array": [
+        4,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:maj/3",
+      "label": "Eb/G"
+    },
+    {
+      "array": [
+        5,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:maj/3",
+      "label": "E/Ab"
+    },
+    {
+      "array": [
+        6,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:maj/3",
+      "label": "F/A"
+    },
+    {
+      "array": [
+        7,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:maj/3",
+      "label": "F#/Bb"
+    },
+    {
+      "array": [
+        8,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:maj/3",
+      "label": "G/B"
+    },
+    {
+      "array": [
+        9,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:maj/3",
+      "label": "Ab/C"
+    },
+    {
+      "array": [
+        10,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:maj/3",
+      "label": "A/Db"
+    },
+    {
+      "array": [
+        11,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:maj/3",
+      "label": "Bb/D"
+    },
+    {
+      "array": [
+        12,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:maj/3",
+      "label": "B/Eb"
+    },
+    {
+      "array": [
+        49,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:dim",
+      "label": "Cdim"
+    },
+    {
+      "array": [
+        50,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:dim",
+      "label": "C#dim"
+    },
+    {
+      "array": [
+        51,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:dim",
+      "label": "Ddim"
+    },
+    {
+      "array": [
+        52,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:dim",
+      "label": "Ebdim"
+    },
+    {
+      "array": [
+        53,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:dim",
+      "label": "Edim"
+    },
+    {
+      "array": [
+        54,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:dim",
+      "label": "Fdim"
+    },
+    {
+      "array": [
+        55,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:dim",
+      "label": "F#dim"
+    },
+    {
+      "array": [
+        56,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:dim",
+      "label": "Gdim"
+    },
+    {
+      "array": [
+        57,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:dim",
+      "label": "Abdim"
+    },
+    {
+      "array": [
+        58,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:dim",
+      "label": "Adim"
+    },
+    {
+      "array": [
+        59,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:dim",
+      "label": "Bbdim"
+    },
+    {
+      "array": [
+        60,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:dim",
+      "label": "Bdim"
+    },
+    {
+      "array": [
+        61,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:aug",
+      "label": "Caug"
+    },
+    {
+      "array": [
+        62,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:aug",
+      "label": "C#aug"
+    },
+    {
+      "array": [
+        63,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:aug",
+      "label": "Daug"
+    },
+    {
+      "array": [
+        64,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:aug",
+      "label": "Ebaug"
+    },
+    {
+      "array": [
+        65,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:aug",
+      "label": "Eaug"
+    },
+    {
+      "array": [
+        66,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:aug",
+      "label": "Faug"
+    },
+    {
+      "array": [
+        67,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:aug",
+      "label": "F#aug"
+    },
+    {
+      "array": [
+        68,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:aug",
+      "label": "Gaug"
+    },
+    {
+      "array": [
+        69,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:aug",
+      "label": "Abaug"
+    },
+    {
+      "array": [
+        70,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:aug",
+      "label": "Aaug"
+    },
+    {
+      "array": [
+        71,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:aug",
+      "label": "Bbaug"
+    },
+    {
+      "array": [
+        72,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:aug",
+      "label": "Baug"
+    },
+    {
+      "array": [
+        13,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:min",
+      "label": "Cm"
+    },
+    {
+      "array": [
+        14,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:min",
+      "label": "C#m"
+    },
+    {
+      "array": [
+        15,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:min",
+      "label": "Dm"
+    },
+    {
+      "array": [
+        16,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:min",
+      "label": "Ebm"
+    },
+    {
+      "array": [
+        17,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:min",
+      "label": "Em"
+    },
+    {
+      "array": [
+        18,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:min",
+      "label": "Fm"
+    },
+    {
+      "array": [
+        19,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:min",
+      "label": "F#m"
+    },
+    {
+      "array": [
+        20,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:min",
+      "label": "Gm"
+    },
+    {
+      "array": [
+        21,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:min",
+      "label": "Abm"
+    },
+    {
+      "array": [
+        22,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:min",
+      "label": "Am"
+    },
+    {
+      "array": [
+        23,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:min",
+      "label": "Bbm"
+    },
+    {
+      "array": [
+        24,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:min",
+      "label": "Bm"
+    },
+    {
+      "array": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C:maj",
+      "label": "C"
+    },
+    {
+      "array": [
+        2,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "C#:maj",
+      "label": "C#"
+    },
+    {
+      "array": [
+        3,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "D:maj",
+      "label": "D"
+    },
+    {
+      "array": [
+        4,
+        3,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Eb:maj",
+      "label": "Eb"
+    },
+    {
+      "array": [
+        5,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "E:maj",
+      "label": "E"
+    },
+    {
+      "array": [
+        6,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F:maj",
+      "label": "F"
+    },
+    {
+      "array": [
+        7,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "F#:maj",
+      "label": "F#"
+    },
+    {
+      "array": [
+        8,
+        7,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "G:maj",
+      "label": "G"
+    },
+    {
+      "array": [
+        9,
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Ab:maj",
+      "label": "Ab"
+    },
+    {
+      "array": [
+        10,
+        9,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "A:maj",
+      "label": "A"
+    },
+    {
+      "array": [
+        11,
+        10,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "Bb:maj",
+      "label": "Bb"
+    },
+    {
+      "array": [
+        12,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rawLabel": "B:maj",
+      "label": "B"
+    }
+  ],
+  "files": [
+    {
+      "name": "cqt.onnx",
+      "bytes": 28227,
+      "sha256": "315cdaf5934e132c0fed3aa0921757d8314f669b4f41289ab2126fd730e08c0a"
+    },
+    {
+      "name": "net-0.onnx",
+      "bytes": 1894972,
+      "sha256": "b3b49947912b35234e235ff4d383fb34302957dea3dda408af9757ec828feefe"
+    },
+    {
+      "name": "net-1.onnx",
+      "bytes": 1894972,
+      "sha256": "63419b3ed29fc6ebbf653c77435f8cb5883dc6f2bb0eb6a433e927d65c05edc2"
+    },
+    {
+      "name": "net-2.onnx",
+      "bytes": 1894972,
+      "sha256": "52fe196bdbe2efee8cd2b845e55f6497c39d47a557b8d2a799565c54ffbbf338"
+    },
+    {
+      "name": "net-3.onnx",
+      "bytes": 1894972,
+      "sha256": "82903b8141fa26a13da6cd822cae3f09a741a1e6191d054239d22daa35021cad"
+    },
+    {
+      "name": "net-4.onnx",
+      "bytes": 1894972,
+      "sha256": "d3571b1018d22c266c48d8d308214404c8347a974107ab836e8f56e278466ed1"
+    },
+    {
+      "name": "tuning-kernels.f32",
+      "bytes": 3120768,
+      "sha256": "b96caee856dbc76afa571ca15ae435bc5d8957f3f1ab033d1be983fc9eb330e6"
+    }
+  ],
+  "kernelShape": [
+    36,
+    1,
+    512
+  ],
+  "tuningSteps": 21,
+  "tuningResolution": 0.05,
+  "preprocessing": "nnAudio CQT2010v2 with estimated tuning; approximate librosa hybrid CQT"
+}

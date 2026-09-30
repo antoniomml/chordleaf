@@ -38,6 +38,9 @@ import {
 } from "./project.js";
 import { registerServiceWorker } from "./pwa.js";
 import { setupLocalWebImport } from "./ui/local-web-import.js";
+import { setupAudioImport } from "./ui/audio-import.js";
+import { resolveFeatureFlags } from "./feature-flags.js";
+import { setupClipboardImport } from "./ui/clipboard-import.js";
 import { setupMenu } from "./ui/menu.js";
 import { blankLineCount, compressBlankLines } from "./text-tools.js";
 import {
@@ -1027,61 +1030,94 @@ document.querySelectorAll("[data-harmony-view]").forEach((button) => {
 });
 let importGeneration = 0,
   importController;
+const features = resolveFeatureFlags(import.meta.env);
+$("#audio").hidden = !features.audioImport;
+$("#web").hidden = !features.webImport;
+const audioImport = features.audioImport
+  ? setupAudioImport({
+      accept: (data, options) => acceptImport(data, { ...options, edit: true }),
+      reportError: importError,
+    })
+  : { reset() {}, open() {} };
+const clipboardImport = setupClipboardImport({
+  active: () => $("#new-dialog").open && !$("#new-menu").hidden,
+  accept: (text) => acceptImport(importText(text, "")),
+  reportError: importError,
+});
+$("#audio").onclick = () => importScreen("audio");
 function importScreen(screen) {
+  if (
+    (screen === "audio" && !features.audioImport) ||
+    (screen === "web" && !features.webImport)
+  )
+    return;
+  $("#new-dialog").dataset.screen = screen;
+  audioImport.reset();
   importController?.abort();
   importController = new AbortController();
   importGeneration++;
+  clipboardImport.reset();
   localWebImport.reset();
   $("#new-menu").hidden = screen !== "menu";
   $("#text-import").hidden = screen !== "text";
   $("#web-import").hidden = screen !== "web";
+  $("#audio-import").hidden = screen !== "audio";
   $("#import-back").hidden = screen === "menu";
   $("#new-heading").textContent = {
     menu: t("Una nueva canción."),
-    text: t("Importar texto o archivo."),
+    text: t("Abrir documento"),
     web: t("Importar desde una web."),
+    audio: t("Importar audio"),
   }[screen];
   $("#new-description").textContent = {
     menu: t("De una idea a tu próxima hoja de acordes."),
     text: t(
-      "Pega la letra con sus acordes o abre un archivo TXT, PDF o Word (.docx).",
+      "PDF, Word, TXT o ChordPro. Se convierten en letra y acordes editables.",
     ),
     web: t("Pega el enlace de la canción que quieres tocar."),
+    audio: t("Puede haber errores en la letra, los acordes y su posición."),
   }[screen];
   $("#import-privacy").textContent =
-    screen === "web"
-      ? t("El servidor descarga únicamente la página del enlace.")
-      : t("Los archivos se procesan aquí, en tu navegador.");
+    screen === "audio"
+      ? t("Tu audio permanece en este equipo.")
+      : screen === "web"
+        ? t("El servidor descarga únicamente la página del enlace.")
+        : t("Los archivos se procesan aquí, en tu navegador.");
   $("#import-error").hidden = true;
   $("#import-error").textContent = "";
   $("#web-submit").disabled = false;
   $("#web-submit").textContent = t("Importar canción");
   $("#choose-file").disabled = false;
-  $("#choose-file").textContent = t("Abrir archivo");
-  $("#paste-import").disabled = false;
-  $("#import-paste-field").hidden = false;
-  $("#paste-import").hidden = false;
-  $("#file").accept = ".txt,.pdf,.docx,.cho,.chordpro,.json";
+  $("#choose-file").textContent = t("Elegir documento");
+  $("#file").accept = ".txt,.pdf,.docx,.cho,.chordpro";
   $("#new-dialog").scrollTop = 0;
   if (screen === "web") $("#web-url").focus();
-  else if (screen === "text") $("#import-text").focus();
-  else $("#open-project").focus();
+  else if (screen === "audio") {
+    audioImport.open();
+    $("#audio-drop").focus();
+  } else if (screen === "text") $("#choose-file").focus();
+  else {
+    $("#new-menu .choice:not([hidden])").focus();
+    if ($("#new-dialog").open) clipboardImport.refresh();
+  }
 }
 function openNewSong() {
   $("#web-url").value = "";
-  $("#import-text").value = "";
   $("#file").value = "";
   importScreen("menu");
   $("#new-dialog").showModal();
-  $("#open-project").focus();
+  $("#new-menu .choice:not([hidden])").focus();
+  clipboardImport.refresh();
 }
 $("#new").onclick = openNewSong;
 $("#mobile-tab-plus").onclick = openNewSong;
 $("#empty-new").onclick = openNewSong;
 $("#import-back").onclick = () => importScreen("menu");
 $("#new-dialog").addEventListener("close", () => {
+  audioImport.reset();
   importController?.abort();
   importGeneration++;
+  clipboardImport.reset();
 });
 $("#new-dialog .dialog-close").onclick = () => $("#new-dialog").close();
 $("#blank").onclick = () => {
@@ -1101,8 +1137,11 @@ $("#blank").onclick = () => {
   persist();
   $("#title")?.focus();
 };
-async function acceptImport(data) {
+async function acceptImport(data, { edit = false, signal } = {}) {
   const generation = importGeneration;
+  const importSignal = signal
+    ? AbortSignal.any([signal, importController.signal])
+    : importController.signal;
   if (data.text.length > MAX_TEXT_LENGTH)
     throw new Error(
       t(
@@ -1110,14 +1149,15 @@ async function acceptImport(data) {
       ),
     );
   const s = create({ ...data, dirty: true });
-  Object.assign(s, await fitSong(s, { signal: importController.signal }));
+  Object.assign(s, await fitSong(s, { signal: importSignal }));
+  importSignal.throwIfAborted();
   if (generation !== importGeneration || !$("#new-dialog").open) return;
   songs.push(s);
   active = s.id;
-  desktopView = "document";
+  desktopView = edit ? "edit" : "document";
   songDesktopViews.set(active, desktopView);
   resetView();
-  mobileView = "preview";
+  mobileView = edit ? "edit" : "preview";
   songViews.set(active, mobileView);
   songMusicSections.set(active, musicSection);
   $("#new-dialog").close();
@@ -1135,38 +1175,21 @@ function importError(error) {
   $("#import-error").hidden = false;
   $("#import-error").textContent = t(error.message);
 }
-$("#import").onclick = () => importScreen("text");
+$("#import").onclick = () => {
+  importScreen("text");
+  $("#file").click();
+};
 $("#open-project").onclick = () => {
   importScreen("text");
   $("#new-heading").textContent = t("Abrir proyecto editable.");
   $("#new-description").textContent = t(
     "Selecciona el archivo .chordleaf.json de una canción guardada.",
   );
-  $("#import-paste-field").hidden = true;
-  $("#paste-import").hidden = true;
   $("#choose-file").textContent = t("Seleccionar proyecto");
   $("#file").accept = ".chordleaf.json,.json";
   $("#choose-file").focus();
 };
 $("#choose-file").onclick = () => $("#file").click();
-$("#paste-import").onclick = async () => {
-  const text = $("#import-text").value;
-  if (!text.trim())
-    return importError(
-      new Error(t("Pega la letra y los acordes antes de importar.")),
-    );
-  const generation = importGeneration;
-  $("#paste-import").disabled = true;
-  try {
-    await acceptImport(importText(text, ""));
-    if (generation === importGeneration) $("#import-text").value = "";
-  } catch (error) {
-    if (generation === importGeneration && $("#new-dialog").open)
-      importError(error);
-  } finally {
-    if (generation === importGeneration) $("#paste-import").disabled = false;
-  }
-};
 $("#web").onclick = () => importScreen("web");
 const localWebImport = setupLocalWebImport({
   onChange() {
@@ -1197,6 +1220,7 @@ const localWebImport = setupLocalWebImport({
 });
 $("#web-import").onsubmit = async (e) => {
   e.preventDefault();
+  if (!features.webImport) return;
   importController?.abort();
   importController = new AbortController();
   const generation = ++importGeneration;
@@ -1239,7 +1263,6 @@ $("#file").onchange = async (e) => {
   const signal = importController.signal;
   const generation = importGeneration;
   $("#choose-file").disabled = true;
-  $("#paste-import").disabled = true;
   $("#choose-file").textContent = t("Importando…");
   try {
     if (file.name.toLowerCase().endsWith(".json")) {
@@ -1286,8 +1309,7 @@ $("#file").onchange = async (e) => {
   } finally {
     if (generation === importGeneration) {
       $("#choose-file").disabled = false;
-      $("#paste-import").disabled = false;
-      $("#choose-file").textContent = t("Abrir archivo");
+      $("#choose-file").textContent = t("Elegir documento");
       e.target.value = "";
     }
   }
