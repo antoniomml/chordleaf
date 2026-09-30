@@ -3536,3 +3536,44 @@ select:focus-visible {
 #audio-result #audio-timeline {
   max-height: 110px;
 }
+
+.audio-browser-model-dialog {
+  max-width: 560px;
+  width: calc(100% - 32px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  color: #e5e7df;
+  background: #202321;
+}
+.audio-browser-model-dialog::backdrop {
+  background: #0008;
+}
+.audio-browser-model-dialog p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.audio-browser-model-dialog .audio-model-card {
+  display: block;
+  padding: 16px;
+  margin: 12px 0;
+}
+.audio-browser-model-dialog progress {
+  width: 100%;
+}
+
+.audio-capture {
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+.audio-capture summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.audio-capture p {
+  line-height: 1.5;
+}
+.audio-capture input {
+  width: 100%;
+  margin-top: 6px;
+}

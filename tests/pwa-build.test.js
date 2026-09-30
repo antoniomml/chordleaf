@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { pwaPlugin } from "../build/pwa.js";
+import { runInNewContext } from "node:vm";
 
 function generate(code) {
   const result = {};
@@ -19,6 +20,8 @@ function generate(code) {
       "assets/lazy-export.js": { code: "export default 1" },
       "assets/editor.css": { source: "body{}" },
       "assets/pdf.worker.mjs": { source: "self.onmessage=()=>{}" },
+      "assets/ort-wasm-runtime.wasm": { source: "large runtime" },
+      "assets/ort-wasm-runtime.mjs": { source: "runtime loader" },
     },
   );
   return result;
@@ -45,5 +48,41 @@ test("offline builds are deterministic and change the cache when resources chang
   ])
     assert.ok(paths.includes(resource), `${resource} must be precached`);
   assert.ok(!paths.some((resource) => resource.startsWith("/api/")));
+  assert.ok(
+    !paths.some((resource) => resource.includes("ort-wasm-")),
+    "model runtime download requires explicit setup",
+  );
+  assert.ok(!paths.some((resource) => resource.startsWith("/models/")));
   assert.ok(JSON.parse(first["release.json"]).version);
+});
+
+test("PWA activation preserves downloaded audio models while removing the old shell", async () => {
+  const source = generate("export default 1")["sw.js"];
+  const current = source.match(/const CACHE_VERSION = "([^"]+)"/)[1];
+  const handlers = {},
+    removed = [];
+  let work;
+  runInNewContext(source, {
+    self: {
+      addEventListener(name, handler) {
+        handlers[name] = handler;
+      },
+      clients: { claim: async () => {} },
+    },
+    caches: {
+      keys: async () => [
+        "chordleaf-old-shell",
+        current,
+        "chordleaf-audio-models-v1",
+      ],
+      delete: async (key) => removed.push(key),
+    },
+  });
+  handlers.activate({
+    waitUntil(promise) {
+      work = promise;
+    },
+  });
+  await work;
+  assert.deepEqual(removed, ["chordleaf-old-shell"]);
 });

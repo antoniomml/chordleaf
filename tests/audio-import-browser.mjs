@@ -21,6 +21,13 @@ try {
     locale: "es-ES",
     viewport: { width: 1280, height: 1000 },
   });
+  await page.addInitScript(() => {
+    window.chordleafDesktop = {
+      system: async () => ({ platform: "darwin", arch: "arm64", memoryGB: 16 }),
+      models: async () => ({ stage: "idle", active: false }),
+      cancelAnalysis: async () => true,
+    };
+  });
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   let available = false,
@@ -56,7 +63,11 @@ try {
   await page.goto(url);
   await page.locator("#empty-new").click();
   await page.locator("#audio").click();
-  await page.locator("#audio-setup").waitFor({ state: "visible" });
+  await page.waitForFunction(() =>
+    document
+      .querySelector("#audio-status")
+      .textContent.includes("no está activado"),
+  );
   assert.equal(await page.locator("#audio-analyze").isDisabled(), true);
   await page.locator("#import-back").click();
   available = true;

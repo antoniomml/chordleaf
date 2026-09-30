@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8" />
+<title>Prueba local de Qwen WebGPU</title>
+<style>body{font:16px system-ui;max-width:850px;margin:40px auto;padding:20px}button{padding:12px}pre{white-space:pre-wrap}</style>
+<h1>Qwen ASR 0,6B · navegador</h1>
+<p>Los fragmentos de prueba permanecen en este Mac. No se envían audios al servidor.</p>
+<button id="run">Ejecutar comparación</button>
+<button id="youtube">Probar acceso directo a YouTube</button>
+<pre id="youtube-result"></pre>
+<pre id="status">Preparado</pre>
+<pre id="results"></pre>
+<script type="module">
+import Worker from '../../src/browser-audio/research.worker.js?worker';
+const status = document.querySelector('#status'), results = document.querySelector('#results');
+document.querySelector('#youtube').onclick = async()=> {
+  const result = document.querySelector('#youtube-result');
+  try { const response=await fetch('https://www.youtube.com/watch?v=M7lc1UVf-VE',{credentials:'omit'}); result.textContent='Respuesta accesible: '+response.status; }
+  catch(error) {result.textContent='Acceso directo bloqueado: '+error.message;}
+};
+document.querySelector('#run').onclick = async () => {
+  try {
+    status.textContent = navigator.gpu ? 'WebGPU disponible. Preparando…' : 'WebGPU no disponible';
+    const clips = await (await fetch('/__audio-research/clips.json')).json();
+    for (const clip of clips) clip.audio = new Float32Array(await (await fetch('/__audio-research/'+clip.file)).arrayBuffer());
+    const worker = new Worker();
+    worker.onmessage = ({data}) => {
+      if(data.status) status.textContent = data.status;
+      if(data.result) results.textContent += JSON.stringify(data.result,null,2)+'\n';
+      if(data.error) { status.textContent = data.error+'\n'+data.stack; worker.terminate(); }
+      if(data.complete) { status.textContent = 'Prueba completada'; worker.terminate(); }
+    };
+    worker.onerror = (error) => status.textContent = error.message;
+    worker.postMessage({clips}, clips.map(c=>c.audio.buffer));
+  } catch(error) {status.textContent=error.stack;}
+};
+</script>
+</html>

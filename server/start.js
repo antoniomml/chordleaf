@@ -20,6 +20,7 @@ const root = await realpath(
     fileURLToPath(new URL("../dist", import.meta.url)),
 );
 const types = {
+  ".wasm": "application/wasm",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript",
   ".mjs": "text/javascript",

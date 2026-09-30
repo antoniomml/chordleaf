@@ -58,7 +58,12 @@ export function pwaPlugin() {
             output.facadeModuleId || "",
           );
         for (const [name, output] of Object.entries(bundle)) {
-          if (name.startsWith("assets/") && !unusedPdfExtra(output))
+          if (
+            name.startsWith("assets/") &&
+            !name.endsWith(".wasm") &&
+            !name.includes("ort-wasm-") &&
+            !unusedPdfExtra(output)
+          )
             resources.set(`/${name}`, output.code ?? output.source);
         }
         for (const name of publicFiles(path.join(root, "public"))) {

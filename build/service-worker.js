@@ -29,7 +29,9 @@ async function networkFirst(request) {
 // Hashed Vite assets are immutable: serve from cache and fill it on miss.
 async function cacheFirst(request) {
   const cache = await caches.open(CACHE_VERSION);
-  const cached = await cache.match(request);
+  const cached =
+    (await cache.match(request)) ||
+    (await (await caches.open("chordleaf-audio-models-v1")).match(request));
   if (cached) return cached;
   try {
     return await put(cache, request, await fetch(request));
@@ -79,7 +81,10 @@ self.addEventListener("activate", (event) => {
         Promise.all(
           keys
             .filter(
-              (key) => key.startsWith("chordleaf-") && key !== CACHE_VERSION,
+              (key) =>
+                key.startsWith("chordleaf-") &&
+                !key.startsWith("chordleaf-audio-") &&
+                key !== CACHE_VERSION,
             )
             .map((key) => caches.delete(key)),
         ),

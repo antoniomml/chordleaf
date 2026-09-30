@@ -127,3 +127,22 @@ experiments/audio/.venv/bin/python experiments/audio/evaluate-guitarset.py \
 ```
 
 Inference/training run with Python network connections blocked. The training split groups complete compositions, selects the checkpoint only on validation and scores a held-out split. The small trained network **underperformed LV-Chordia** and is not deployed. The exact root/quality metric covers only the representable annotation subset and excludes inversion scoring. Use a fresh output directory when changing features, annotations or models; cached intermediate results are deliberately reused.
+
+## Conversión para navegador
+
+La aplicación web ejecuta Qwen ASR 0,6B, ForcedAligner y las cinco redes LV-Chordia en un Worker. Consultar [descargas, pruebas reales y límites](../../docs/audio-browser-youtube.es.md). El detector conserva 301 estados de acordes y seis cabezas estructurales. La estimación de afinación y un banco CQT con 21 ajustes preceden a la inferencia. No es un detector reducido a mayor/menor.
+
+Para reproducir la conversión, usar un entorno de investigación aislado con las dependencias neuronales y `requirements-browser-export.txt`:
+
+```sh
+python experiments/audio/download-browser-research.py
+python experiments/audio/export-browser-chords.py
+python experiments/audio/build-browser-catalog.py
+python experiments/audio/prepare-browser-clips.py /ruta/local/a/los/MP3
+python experiments/audio/benchmark-browser-chords.py
+CHORDLEAF_AUDIO_RESEARCH=1 pnpm dev --host 127.0.0.1 --port 5190
+```
+
+La página `/experiments/browser-audio/` es una herramienta de desarrollo para comparar los tres fragmentos privados, no forma parte de la compilación pública. Los modelos de voz descargados, PCM, referencias y resultados quedan en `artifacts/browser-audio`, ignorado por Git. `prepare-browser-clips.py` requiere que estén disponibles los tres archivos nombrados en su lista; se puede adaptar esa lista para otras referencias. El middleware de investigación sólo sirve archivos estáticos y se activa explícitamente en desarrollo; la inferencia se hace en el navegador.
+
+Los archivos de acordes distribuidos en `public/models/lv-chordia-web-v1` y su catálogo de integridad son datos públicos del modelo. No contienen canciones del usuario. Las pruebas automatizadas de navegador descargan esos pesos pequeños, calculan acordes reales en WASM y repiten sin conexión; no descargan los modelos de voz de unos 2 GB en CI.

@@ -1,57 +1,60 @@
-# Navegador y audio de YouTube · revisión del 30 de septiembre de 2026
+# Audio en el navegador y YouTube · 30 de septiembre de 2026
 
-Es viable investigar una importación íntegra dentro del navegador de una web pública, sin servidor de procesamiento. **Todavía no está implementada en Chordleaf.** El importador actual sí funciona en un navegador local, acompañado del motor Python instalado en ese mismo ordenador. El empaquetado de escritorio conserva ese motor y facilita su instalación.
+La rama `codex/audio-import-experiment` incorpora una importación íntegra en el navegador: Web Audio decodifica el archivo, un Worker ejecuta los modelos ONNX y la interfaz permite escuchar, corregir y crear la canción. No llama a `/api/audio-import` ni envía audio o letra a un servidor. La aplicación de escritorio conserva su motor nativo.
 
-## Qué funcionaba antes y qué funciona hoy
+## Modelos y descarga
 
-La interfaz llama a `/api/audio-import`; el servicio local lanza Python para detectar acordes y transcribir. La aplicación de escritorio usa un puente al mismo tipo de motor. El código actual no ha sustituido una implementación neuronal JavaScript que funcionase en producción: esa implementación no existe en la rama. Publicar los archivos de la web no instala Python, MLX ni los pesos en los ordenadores de sus visitantes.
+| Parte     | Modelo                                                                                             | Descarga              |
+| --------- | -------------------------------------------------------------------------------------------------- | --------------------- |
+| Letra     | [Qwen3-ASR 0,6B, ONNX q4f16](https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX)             | 889.398.642 bytes     |
+| Tiempos   | [Qwen3 ForcedAligner 0,6B, ONNX q4](https://huggingface.co/valoomba/Qwen3-ForcedAligner-0.6B-ONNX) | 1.059.845.860 bytes   |
+| Acordes   | LV-Chordia: cinco redes CNN + BiLSTM, frontend CQT con afinación y decodificador temporal          | 12.672.180 bytes      |
+| Ejecución | ONNX Runtime Web, WASM asyncify y JavaScript, servido por la propia web                            | Aproximadamente 27 MB |
 
-| Modalidad                                                  | ¿Importa audio hoy?         | Dónde calcula                                |
-| ---------------------------------------------------------- | --------------------------- | -------------------------------------------- |
-| Navegador con Chordleaf y motor servidos desde `127.0.0.1` | Sí, con modelos disponibles | Python en ese ordenador                      |
-| Candidato de escritorio Apple Silicon                      | Sí, con modelos instalados  | Motor incluido en ese ordenador              |
-| Web pública, sin instalación adicional                     | No con el motor actual      | Pendiente de portar a JavaScript/WASM/WebGPU |
+El modal muestra los tamaños antes de descargar. Los modelos de voz vienen de revisiones inmutables de Hugging Face; el catálogo fija tamaño y SHA-256. Se comprueban ambos antes de guardar cada archivo. Los archivos completos se reutilizan al reintentar; un archivo incompleto se vuelve a descargar entero. No se descargan modelos automáticamente al visitar la página.
 
-El servicio local comprueba socket, host y origen. No se propone abrirlo a cualquier web mediante CORS para convertir la página pública en un cliente del motor privado.
+Los archivos se guardan en Cache Storage, separados de la caché de la aplicación. Una actualización de la PWA conserva los modelos. La opción **Eliminar modelos** elimina esa caché; los audios seleccionados no se guardan allí. Las canciones sólo se guardan al crear el proyecto. El navegador puede desalojar cachés por falta de espacio: la interfaz vuelve a comprobar su disponibilidad.
 
-## Vía para una web sin instalación nativa
+Qwen requiere WebGPU con `shader-f16`, contexto seguro HTTPS o localhost y memoria suficiente. Recomendamos Chrome o Edge y al menos 8 GB de memoria; la detección de WebGPU no garantiza que cualquier GPU tenga memoria suficiente. Sin WebGPU está disponible la importación de **sólo acordes**, mediante WASM. Whisper sigue siendo una alternativa de escritorio; **no se ha incorporado un transcriptor Whisper de navegador**.
 
-[Transformers.js documenta Whisper multilingüe, fragmentación de audios largos y tiempos por palabra](https://huggingface.co/docs/transformers.js/api/pipelines). [ONNX Runtime Web ejecuta modelos en WASM o WebGPU](https://onnxruntime.ai/docs/tutorials/web/); WASM admite todos sus operadores ONNX, mientras que los proveedores GPU admiten un subconjunto. Estas capacidades demuestran que la arquitectura es posible, no que el conjunto de Chordleaf esté validado.
+## Qué se ha medido
 
-Hay además una [conversión comunitaria de Qwen3-ASR **0,6B** preparada para navegador](https://huggingface.co/jiangzhuo9357/Qwen3-ASR-0.6B-ONNX). Su ficha publica una variante WebGPU q4f16 de aproximadamente 0,7 GB más unos 156 MB de embeddings y otros recursos; exige `shader-f16`. La variante q4 publica aproximadamente 1,1 GB más esos recursos. Son cifras del autor, no mediciones nuestras. Su validación web usa ocho clips hablados en chino, inglés y japonés, incluyendo un Apple M4; no evalúa nuestras canciones españolas ni aporta el alineador de palabras que utiliza Chordleaf. No equivale al Qwen 1,7B MLX elegido en nuestras pruebas.
+Pruebas privadas en el navegador integrado de Codex, Chromium con WebGPU, Apple M4 y 16 GB. Los audios de referencia permanecen fuera del repositorio.
 
-La [herramienta de exportación Qwen ASR a ONNX](https://github.com/andrewleech/qwen3-asr-onnx) también ofrece 1,7B. Sus pruebas de ONNX Runtime con proveedor WebGPU en Python no deben confundirse con una integración terminada en el navegador. Las conversiones Qwen de modelos de texto tampoco prueban compatibilidad de Qwen ASR.
+- Tres fragmentos de 25 segundos, desde el segundo 30 de _Guantanamera_, _More Than Words_ y _Por qué te vas_: Qwen tardó aproximadamente 1,6–2 segundos por fragmento una vez cargado en la repetición completa; el alineador, 2,5–3,4 segundos. Una ejecución anterior de Qwen tardó hasta 3 segundos. La cadena completa de los tres fragmentos tardó 23,3 segundos, incluyendo carga del alineador y de acordes, pero excluyendo descarga y carga inicial de Qwen.
+- Las cinco redes ONNX tienen un error absoluto máximo de aproximadamente `4e-6`–`1,5e-5` frente a PyTorch cuando reciben las mismas características.
+- El frontend con estimación de afinación alcanzó 100 %, 99,91 % y 99,91 % de coincidencia por cuadro con el detector Python original en esos fragmentos. El navegador real produjo 100 % de coincidencia con las etiquetas de esa conversión ONNX, sobre el mismo PCM. **Son pruebas de equivalencia, no precisión musical frente a una anotación humana o los PDFs**.
+- _Guantanamera_ completa, 193,30 segundos: 46,51 segundos de análisis, 60 intervalos de acordes. Hubo errores de transcripción, tiempos aproximados y una repetición artificial de vocales. Esa prueba motivó un límite de ciclos repetidos y cortes de audio cercanos a puntos de menor energía; su efecto se comprueba por separado.
+- Tras introducir cortes cercanos a puntos de menor energía y un límite de ciclos repetidos, Guantanamera se volvió a completar en 50,98 segundos: desapareció la larga repetición artificial de vocales y no hubo aviso de letra parcial en esa ejecución. Persisten palabras erróneas y tiempos aproximados; no se ha calculado una tasa de error frente a una letra revisada.
+- _More Than Words_ completa, 255,51 segundos: 58,05 segundos de análisis, con tiempos aproximados. La letra resulta más legible que la de Guantanamera; también aparecen errores y una palabra inventada en la introducción instrumental.
+- _Por qué te vas_ completa, 205,39 segundos: 50,01 segundos de análisis y 77 intervalos de acordes, con tiempos aproximados.
+- Con el servidor de archivos apagado, se recargó la PWA y se completó letra, alineado y acordes de un fragmento de 25 segundos en 11,75 segundos, usando la caché local.
+- Una prueba de carga de diez minutos, construida repitiendo un fragmento privado, completó los acordes en 39,68 segundos, con 313 intervalos. Es una prueba del límite de duración en este M4, no una evaluación musical ni una garantía para móviles.
+- Una prueba automatizada ejecutó los modelos reales de acordes en WASM, repitió el cálculo sin conexión y obtuvo los mismos intervalos. No hubo POST ni solicitudes a `/api/audio-import`.
 
-Orden propuesto para validar el port:
+La letra cantada requiere revisión. El modelo puede inventar palabras durante instrumentales, perder finales de frases o repetir sílabas. Se limita la generación y se avisa cuando queda parcial. El alineador también puede dar tiempos invertidos, repetidos o fuera del fragmento: se conservan sus salidas originales en el JSON y se agrupan los tramos inconsistentes como aproximados, conservando el orden de la letra. No se presentan esos grupos como tiempos exactos por palabra.
 
-1. Mantener el formato de resultados, la revisión y la colocación de acordes existentes. Incorporar una prueba aislada de Whisper multilingüe con tiempos por palabra, descarga explícita y ejecución en un Worker.
-2. Exportar las cinco redes de LV-Chordia y reproducir su preprocesamiento CQT y decodificación temporal. Comparar características, salidas numéricas y eventos finales con Python sobre exactamente los mismos audios, antes de evaluar velocidad. Cambiarlo por un detector de tríadas reduciría el vocabulario que pidió el usuario.
-3. Comparar Qwen 0,6B web y, si resulta viable, 1,7B con el motor local actual. Medir letra cantada y tiempos, incluyendo el coste y la viabilidad del alineador. No adoptar el modelo menor sólo porque se ejecute en WebGPU.
-4. Medir memoria máxima, tiempo completo, cancelación, canciones de hasta diez minutos y compatibilidad real de navegadores/dispositivos. Detectar capacidades, ofrecer una alternativa WASM cuando sea practicable y explicar los equipos que no puedan completar la importación.
-5. Probar caché, eliminación de modelos y uso sin conexión después de descargar la aplicación y sus recursos. Comprobar tráfico: los archivos de audio no deben enviarse a servidores.
+Falta una evaluación de precisión sobre anotaciones temporales revisadas, comparaciones de letra con referencias completas, equipos con poca memoria y una matriz amplia de navegadores. Estas pruebas no convierten el resultado en una transcripción definitiva ni garantizan prestaciones idénticas en todos los equipos.
 
-En producción se servirían la web, los recursos del runtime y los pesos descargables. El servidor distribuye archivos; el equipo del visitante calcula. Eso conserva el requisito de no alojar un servicio de inferencia, aunque la descarga inicial sí necesita Internet. No se ha medido todavía una duración ni una precisión para esta futura implementación.
+## YouTube sin servidor
 
-## YouTube: basta el audio
+Sólo se necesita audio para el análisis. Sin embargo, pegar un enlace no da acceso al audio bruto desde otra web: [CORS depende de los permisos de YouTube](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS). Una prueba real desde el navegador obtuvo `Failed to fetch` al intentar leer directamente una página de YouTube. El [ejemplo de navegador de YouTube.js](https://github.com/LuanRT/YouTube.js/blob/main/examples/browser/README.md), aunque está señalado como antiguo, requiere un proxy. La [API oficial del reproductor](https://developers.google.com/youtube/iframe_api_reference) no ofrece una descarga del audio para procesarlo.
 
-[yt-dlp permite seleccionar `bestaudio`, un flujo sólo de audio](https://github.com/yt-dlp/yt-dlp#format-selection). No hace falta descargar el vídeo ni convertir obligatoriamente a MP3. El motor actual decodifica el contenido con PyAV antes de obtener PCM; la futura integración deberá comprobar el contenedor recibido y aceptar o adaptar formatos como WebM/Opus y M4A/AAC en la entrada y reproducción, además de los formatos hoy anunciados por la interfaz.
+La interfaz incorpora una alternativa local: **Usar audio de YouTube → Abrir vídeo → Capturar audio de una pestaña**. El usuario elige la pestaña en el selector del navegador, activa compartir audio y reproduce el vídeo. **Terminar y usar audio** crea un archivo local WebM/Opus o M4A, que entra en el mismo importador. La captura dura lo mismo que la reproducción y no es una descarga automática por enlace.
 
-La vía más directa en escritorio o en el servicio local sería: enlace → descarga temporal de audio → validación de tamaño/duración → importador existente → limpieza al terminar o cancelar. La descarga usa red, pero la inferencia conserva su bloqueo de red. El extractor debe ejecutarse separado de esa fase. Faltan implementar y probar el campo de enlace, progreso, cancelación, límites y errores. No se ha añadido un campo que prometa una descarga inexistente.
+[La captura con `getDisplayMedia`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia) requiere permiso en cada sesión y la disponibilidad de audio depende del navegador y del sistema. Se solicita vídeo porque la API lo exige, pero MediaRecorder recibe exclusivamente las pistas de audio; no se graba el vídeo. Se cierran todas las pistas al terminar o cancelar, y se aplican límites de 30 MB y 10 minutos. Sin pista de audio se muestra un error y se libera la captura. No se solicitan cámara ni micrófono. La autorización real del selector la debe hacer el usuario; las pruebas automatizadas de limpieza usan pistas sintéticas.
 
-El mantenimiento forma parte de la viabilidad: [yt-dlp requiere un runtime JavaScript compatible y componentes EJS para YouTube](https://github.com/yt-dlp/yt-dlp/wiki/EJS). No se garantiza compatibilidad permanente ante cambios de YouTube.
+## Probar y publicar
 
-En una web sin instalación hay un problema adicional a los modelos: [la API oficial del reproductor permite controlar la reproducción](https://developers.google.com/youtube/iframe_api_reference), pero no expone una descarga del audio bruto para inferencia. Las solicitudes entre orígenes [requieren permiso del servidor mediante CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS). Por ello, pegar un enlace y embeber un reproductor no resuelve la adquisición del audio. Un extractor central introduciría un servidor del que el usuario quiere prescindir; una extensión o aplicación auxiliar exigiría instalación. La entrada por archivo local sigue siendo la vía más directa para una primera versión íntegra en navegador.
+En este Mac está servida la compilación estática de prueba en **http://127.0.0.1:5191/**. Abrir **Nueva canción → Importar audio**. Los modelos descargados en otro puerto, dominio o navegador pertenecen a otro origen y requieren una descarga inicial en éste.
 
-Una integración pública también debe limitarse a las descargas autorizadas por el servicio o con los permisos exigidos por las [condiciones de YouTube](https://www.youtube.com/static?template=terms). Seleccionar sólo audio no cambia ese requisito.
-
-## Prueba local preparada en este Mac
-
-La revisión actual está servida en `http://127.0.0.1:5188/`, con Qwen y LV-Chordia disponibles. Abrir **Nueva canción → Importar audio**, seleccionar una grabación y pulsar **Obtener letra y acordes**. No hay que reinstalar el candidato de escritorio para esta prueba. El navegador muestra «Letra con Qwen» y «Todo listo. Elige una grabación» cuando está preparado.
-
-El servicio iniciado durante esta revisión usa el Python portátil y los modelos ya descargados. Si se detiene, desde la raíz del proyecto se puede arrancar con:
+Para reproducir una compilación sin Python:
 
 ```sh
-PORT=5188 CHORDLEAF_AUDIO_PYTHON="$PWD/artifacts/desktop/runtime/python/bin/python3" HF_HOME="$PWD/artifacts/desktop/model-test-profile/models" pnpm start:local-audio
+pnpm build
+pnpm start
 ```
 
-Este comando depende de esos artefactos locales y de `dist` ya compilado; no es una receta de instalación para cualquier visitante. La biblioteca del navegador local pertenece a ese origen y no se sincroniza con producción. La aplicación nativa anterior conserva la revisión con la que se empaquetó; actualizar esta rama no actualiza aquel instalador.
+En producción basta publicar la web estática con las cabeceras de `vercel.json`. Los pesos de voz se descargan directamente de Hugging Face; la web distribuye sus recursos y los pesos pequeños de acordes. **No se necesita servidor de inferencia, GPU alojada ni API de pago por canción**. El alojamiento y la transferencia de archivos siguen sujetos a los límites del proveedor; no se promete un coste cero para tráfico ilimitado. No se ha desplegado todavía esta revisión en el dominio público.
+
+Licencias y atribuciones: [`public/licenses/browser-audio.txt`](../public/licenses/browser-audio.txt). Scripts de conversión y comparación: `experiments/audio/`; sus salidas y los audios privados quedan en `artifacts/browser-audio`, ignorado por Git.

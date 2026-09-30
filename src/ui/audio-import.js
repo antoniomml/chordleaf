@@ -1,8 +1,11 @@
 import { desktopDownloadURL } from "../desktop-release.js";
 import { setupDesktopModels } from "./audio-desktop.js";
+import { setupBrowserModels } from "./audio-browser.js";
+import { browserReadiness, browserHardware } from "../browser-audio/models.js";
 import languages from "../audio-languages.json" with { type: "json" };
 import { installedLyricModel, readAudioSettings } from "../audio-models.js";
 import { t } from "../i18n.js";
+import { setupAudioCapture } from "./audio-capture.js";
 import { setupAudioPreview } from "./audio-preview.js";
 import {
   analysisToText,
@@ -47,7 +50,14 @@ export function setupAudioImport({ accept, reportError }) {
   const status = (message) => {
     $("audio-status").textContent = t(message);
   };
+  const capture = setupAudioCapture((file) => {
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    $("audio-file").files = transfer.files;
+    $("audio-file").dispatchEvent(new Event("change"));
+  }, reportError);
   function updateAvailability() {
+    capture.setBusy(analysisRunning);
     const ready = readiness?.available && readiness.neural !== false;
     const file = $("audio-file").files[0];
     $("audio-analyze").disabled =
@@ -69,7 +79,9 @@ export function setupAudioImport({ accept, reportError }) {
   $("audio-lyrics").onchange = updateAvailability;
   const lyricsUnavailable = () =>
     readiness?.lyrics === false && !readiness?.qwen;
-  const desktopModels = setupDesktopModels(
+  const desktopModels = (
+    window.chordleafDesktop ? setupDesktopModels : setupBrowserModels
+  )(
     () => open(true),
     (busy) => {
       modelsBusy = busy;
@@ -77,6 +89,7 @@ export function setupAudioImport({ accept, reportError }) {
     },
   );
   function reset() {
+    capture.close();
     analysisRunning = false;
     desktopModels.close();
     desktopModels.setAnalyzing(false);
@@ -115,16 +128,15 @@ export function setupAudioImport({ accept, reportError }) {
     controller = new AbortController();
     status("Comprobando el analizador local…");
     try {
-      const response = await fetch("/api/audio-import", {
-        signal: controller.signal,
-      });
-      const data = response.ok && (await response.json());
+      const data = window.chordleafDesktop
+        ? await fetch("/api/audio-import", { signal: controller.signal }).then(
+            (r) => (r.ok ? r.json() : null),
+          )
+        : await browserReadiness();
       if (current !== generation) return;
       const hadNoLyrics = readiness?.lyrics === false && !readiness?.qwen;
       readiness = data;
-      $("audio-setup").hidden = Boolean(
-        window.chordleafDesktop || data?.available,
-      );
+      $("audio-setup").hidden = true;
       const missingChords = data?.available && data.neural === false;
       $("audio-capabilities").hidden = !missingChords;
       $("audio-capabilities").textContent = missingChords
@@ -132,13 +144,14 @@ export function setupAudioImport({ accept, reportError }) {
             "El modelo de acordes no está disponible. Revisa la instalación local.",
           )
         : "";
-      lyricModel = installedLyricModel(data, readAudioSettings().model);
+      lyricModel = window.chordleafDesktop
+        ? installedLyricModel(data, readAudioSettings().model)
+        : "qwen";
       $("audio-model-name").textContent = lyricsUnavailable()
         ? t("Sólo acordes · La letra se puede activar en Modelos y ajustes.")
         : `${t("Letra con")} ${lyricModel === "qwen" ? "Qwen" : "Whisper"}`;
       $("audio-model-name").dataset.model = lyricModel;
-      $("audio-enable-lyrics").hidden =
-        !window.chordleafDesktop || !lyricsUnavailable();
+      $("audio-enable-lyrics").hidden = !lyricsUnavailable();
       $("audio-lyrics").disabled = lyricsUnavailable();
       if (hadNoLyrics && !lyricsUnavailable()) $("audio-lyrics").checked = true;
       if (lyricsUnavailable()) $("audio-lyrics").checked = false;
@@ -146,7 +159,9 @@ export function setupAudioImport({ accept, reportError }) {
       status(
         data?.available
           ? "Todo listo. Elige una grabación."
-          : "El analizador local no está activado.",
+          : window.chordleafDesktop
+            ? "El analizador local no está activado."
+            : "Descarga los modelos en Modelos y ajustes.",
       );
       updateAvailability();
     } catch (error) {
@@ -224,7 +239,9 @@ export function setupAudioImport({ accept, reportError }) {
     await window.chordleafDesktop?.cancelAnalysis().catch(() => {});
     controller = new AbortController();
     const current = ++generation;
+    capture.close();
     analysisRunning = true;
+    capture.setBusy(true);
     desktopModels.setAnalyzing(true);
     result = null;
     playbackRange = null;
@@ -236,36 +253,52 @@ export function setupAudioImport({ accept, reportError }) {
     for (const id of ["audio-lyrics", "audio-language"]) $(id).disabled = true;
     status("Obteniendo letra y acordes… Puedes seguir escuchando el audio.");
     try {
-      const query = new URLSearchParams({
-        engine: "neural",
-        lyrics: String($("audio-lyrics").checked),
-        lyricsEngine: lyricModel,
-        language: $("audio-language").value,
-      });
-      const response = await fetch(`/api/audio-import?${query}`, {
-        method: "POST",
-        body: file,
-        headers: { "Content-Type": "application/octet-stream" },
-        signal: controller.signal,
-      });
-      if (!response.ok) {
-        if (response.status === 409)
-          throw new Error("Ya hay un análisis en curso. Espera unos segundos.");
-        const body = await response.json().catch(() => ({}));
-        const messages = {
-          duration: "El audio debe durar entre 1 segundo y 10 minutos.",
-          decode:
-            "No se puede leer este audio. Prueba a convertirlo a WAV o MP3.",
-          timeout:
-            "El análisis ha superado el tiempo máximo. Prueba un fragmento más corto.",
-          size: "El audio supera el límite de 30 MB.",
-        };
-        throw new Error(
-          messages[body.error] ||
-            "No se pudo analizar. Comprueba el formato, la duración y la instalación local.",
-        );
+      let analysis;
+      if (!window.chordleafDesktop) {
+        const { analyzeBrowserAudio } =
+          await import("../browser-audio/analyze.js");
+        analysis = await analyzeBrowserAudio(file, {
+          signal: controller.signal,
+          lyrics: $("audio-lyrics").checked,
+          language: $("audio-language").value,
+          gpu: (await browserHardware()).gpu,
+          progress: status,
+        });
+      } else {
+        const query = new URLSearchParams({
+          engine: "neural",
+          lyrics: String($("audio-lyrics").checked),
+          lyricsEngine: lyricModel,
+          language: $("audio-language").value,
+        });
+        const response = await fetch(`/api/audio-import?${query}`, {
+          method: "POST",
+          body: file,
+          headers: { "Content-Type": "application/octet-stream" },
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          if (response.status === 409)
+            throw new Error(
+              "Ya hay un análisis en curso. Espera unos segundos.",
+            );
+          const body = await response.json().catch(() => ({}));
+          const messages = {
+            duration: "El audio debe durar entre 1 segundo y 10 minutos.",
+            decode:
+              "No se puede leer este audio. Prueba a convertirlo a WAV o MP3.",
+            timeout:
+              "El análisis ha superado el tiempo máximo. Prueba un fragmento más corto.",
+            size: "El audio supera el límite de 30 MB.",
+          };
+          throw new Error(
+            messages[body.error] ||
+              "No se pudo analizar. Comprueba el formato, la duración y la instalación local.",
+          );
+        }
+        analysis = await response.json();
       }
-      const data = validateAnalysis(await response.json());
+      const data = validateAnalysis(analysis);
       if (current !== generation) return;
       result = data;
       $("audio-warning").hidden = !data.warnings?.includes("lyrics-failed");
