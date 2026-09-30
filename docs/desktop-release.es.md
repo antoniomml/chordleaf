@@ -1,10 +1,12 @@
 # Distribución de escritorio: audio local
 
-La primera distribución es **Chordleaf 1.2.0-beta.1 para Mac con Apple Silicon**, con macOS 15 o posterior y 16 GB de memoria recomendados. Es una beta del importador: las letras, armonías y tiempos deben revisarse. Windows, Linux e Intel no están empaquetados en esta versión.
+La primera distribución es **Chordleaf 1.2.0-beta.2 para Mac con Apple Silicon**, con macOS 15 o posterior y 16 GB de memoria recomendados. Es una beta del importador: las letras, armonías y tiempos deben revisarse. Windows, Linux e Intel no están empaquetados en esta versión.
 
 ## Qué recibe el usuario
 
-Un instalador DMG con Chordleaf, Electron y un Python portátil con las dependencias y los cinco detectores de LV-Chordia. No necesita Node, Python, Homebrew, una cuenta ni comandos. Los modelos de letra se descargan desde la pestaña de audio: Qwen3-ASR 1.7B + ForcedAligner (~3,8 GB), o Whisper small (~0,5 GB). La instalación comprueba espacio libre; permite cancelar y reintentar aprovechando los archivos de caché completos. El progreso indica el estado de la operación, no un porcentaje inventado de bytes descargados.
+Un instalador DMG con Chordleaf, Electron y un Python portátil con las dependencias y los cinco detectores de LV-Chordia. No necesita Node, Python, Homebrew, una cuenta ni comandos. La primera visita a Importar audio ofrece un modal de preparación. El usuario elige y confirma la descarga de un modelo de letra: Qwen3-ASR 1.7B + ForcedAligner (~3,8 GB), o Whisper small (~0,5 GB). La instalación comprueba espacio libre; permite cancelar y reintentar aprovechando los archivos de caché completos. El progreso indica el estado de la operación, no un porcentaje inventado de bytes descargados. El modal no vuelve a abrirse automáticamente; se recupera desde **Modelos y ajustes**. La elección se guarda. Qwen se recomienda en Apple Silicon con al menos 16 GB de RAM; en los demás casos se recomienda Whisper. Es una heurística de memoria, no una prueba de velocidad en cada equipo. LV-Chordia aparece como incluido y es el único detector del importador.
+
+El selector de idioma ofrece detección automática y diez idiomas: español, inglés, francés, alemán, italiano, portugués, japonés, coreano, chino y ruso. Los dos motores y el alineador admiten estos idiomas con los mismos pesos. La ampliación del selector no significa que se haya medido la precisión en canciones de los diez idiomas; el benchmark conserva sus muestras de español e inglés.
 
 Tras descargar los modelos se puede analizar sin conexión. El audio entra por el selector de archivos y permanece en el equipo. La instalación inicial sólo recibe pesos desde Hugging Face; no acepta audio. Eliminar los modelos de letra no elimina canciones. Los modelos de acordes forman parte de la aplicación.
 
@@ -33,7 +35,7 @@ pnpm test:desktop
 pnpm desktop:dist
 ```
 
-El resultado aparece en `release-desktop/Chordleaf-1.2.0-beta.1-mac-arm64.dmg`. El build local sin credenciales es un **candidato sin firma de distribución**, no una publicación validada por Gatekeeper. No se deben dar instrucciones para desactivar las protecciones del sistema.
+El resultado aparece en `release-desktop/Chordleaf-1.2.0-beta.2-mac-arm64.dmg`. El build local sin credenciales es un **candidato sin firma de distribución**, no una publicación validada por Gatekeeper. No se deben dar instrucciones para desactivar las protecciones del sistema.
 
 La prueba `test:desktop` usa un perfil independiente, comprueba el Python incluido, acordes neuronales, aislamiento del renderer y persistencia tras reiniciar. Para verificar modelos reales y audio propio:
 
@@ -47,11 +49,13 @@ En la prueba local, Guantanamera completó el análisis desde el paquete con 142
 
 ### Integración con main · 30 de septiembre de 2026
 
-La rama del experimento incorpora `main` hasta la versión 1.1.1 (`e0af736`), conservando la nueva página de inicio, autoguardado, canciones recientes, notación latina y revisión consecutiva de acordes. La beta de audio pasa a 1.2.0-beta.1.
+La rama del experimento incorpora `main` hasta la versión 1.1.1 (`e0af736`), conservando la nueva página de inicio, autoguardado, canciones recientes, notación latina y revisión consecutiva de acordes. La beta de audio pasa a 1.2.0-beta.2.
 
-Se comprobaron 138 tests de Node, 16 de Python y las 23 suites de navegador, con Chromium y WebKit en las suites que comparan motores. Firefox no pudo arrancar en este equipo por un error de su perfil, pero las 23 suites y la prueba de compatibilidad con Chromium, Firefox y WebKit pasaron después en CI Linux. El Mac Apple Silicon de CI también construyó y probó el candidato. El test nativo analiza audio con el Python incluido, crea una canción y verifica su persistencia después de cerrar y abrir la aplicación. Un test adicional mata un proceso de inferencia activo y comprueba que su directorio de audio temporal desaparece antes de completar el cierre.
+Antes del rediseño del importador se comprobaron 138 tests de Node, 16 de Python y las 23 suites de navegador, con Chromium y WebKit en las suites que comparan motores. Firefox no pudo arrancar en este equipo por un error de su perfil, pero las 23 suites y la prueba de compatibilidad con Chromium, Firefox y WebKit pasaron después en CI Linux. El Mac Apple Silicon de CI también construyó y probó el candidato. El test nativo analiza audio con el Python incluido, crea una canción y verifica su persistencia después de cerrar y abrir la aplicación. Un test adicional mata un proceso de inferencia activo y comprueba que su directorio de audio temporal desaparece antes de completar el cierre.
 
 El paquete actualizado arrancó con un perfil vacío y volvió a analizar Guantanamera con Qwen y LV-Chordia: 142 grupos, reproducción real y cierre normal del proceso. El DMG pasó `hdiutil verify`. Estas comprobaciones verifican integración y funcionamiento; no constituyen una nueva medida de precisión musical. La puerta de publicación rechazó el candidato sin firma, como corresponde.
+
+El rediseño de beta.2 añade una suite de preparación de modelos: recomendaciones para 8 y 32 GB, descarga explícita, cancelación, reintento, persistencia de la elección, ausencia de avisos repetidos y envío de un idioma nuevo al analizador. Pasaron las 24 suites de navegador, 138 tests de Node y 16 de Python, además de la importación nativa y persistencia. La revisión de accesibilidad del modal de preparación no detectó infracciones con axe. Se inspeccionaron las pantallas de preparación e importación en escritorio y móvil.
 
 ## Firma y publicación
 
@@ -76,3 +80,9 @@ No se ha cambiado el despliegue público ni se ha activado procesamiento de audi
 - [Distribución macOS con electron-builder v26](https://www.electron.build/v26/docs/mac/).
 - [Python Build Standalone: ejecución y redistribución](https://gregoryszorc.com/docs/python-build-standalone/main/running.html).
 - [Resultados medidos de los modelos](audio-model-comparison.es.md).
+
+## Navegador y ejecución local
+
+Actualmente, la app de escritorio incluye el motor. También se puede abrir la interfaz en un navegador iniciando el servicio local con `pnpm start:local-audio`; en ese caso los modelos se ejecutan en el Python de ese equipo, fuera del navegador. La web pública no ejecuta el motor ni recibe audio.
+
+La ejecución dentro del navegador es técnicamente posible para modelos compatibles con WASM/WebGPU y formatos como ONNX. Este pipeline de LV-Chordia/Python y Qwen/MLX no está convertido ni validado para ese entorno; no basta con mostrar un botón de descarga. [Transformers.js](https://huggingface.co/docs/transformers.js/en/index) documenta la ejecución en navegador. Los idiomas de alineación se contrastaron con la [ficha oficial de Qwen3-ForcedAligner](https://huggingface.co/Qwen/Qwen3-ForcedAligner-0.6B).

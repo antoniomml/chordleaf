@@ -16,7 +16,7 @@ try {
       "Abrir proyecto editable",
       "Importar texto o archivo",
       "Importar desde una web",
-      "Importar audio · Experimento",
+      "Importar audio",
       "Empezar de cero",
     ],
   );

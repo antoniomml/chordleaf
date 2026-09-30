@@ -1,4 +1,5 @@
 // Opt-in local experiment. Public deployments do not register this endpoint.
+import languages from "../src/audio-languages.json" with { type: "json" };
 import { audioReadiness } from "./audio-readiness.js";
 import { spawn } from "node:child_process";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
@@ -100,7 +101,7 @@ export async function audioImportMiddleware(req, res, next) {
     ];
     if (url.searchParams.get("lyrics") === "false") args.push("--no-lyrics");
     const language = url.searchParams.get("language");
-    if (["es", "en"].includes(language)) args.push("--language", language);
+    if (Object.hasOwn(languages, language)) args.push("--language", language);
     if (res.destroyed) return;
     const output = await new Promise((resolve, reject) => {
       child = spawn(python, args, {

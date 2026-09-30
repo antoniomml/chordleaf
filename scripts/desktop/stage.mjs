@@ -4,11 +4,18 @@ const root = resolve(import.meta.dirname, "../..");
 const stage = join(root, "artifacts/desktop/app");
 await rm(stage, { recursive: true, force: true });
 await mkdir(stage, { recursive: true });
+// Separate resource input: electron-builder excludes extraResources sources
+// from ASAR, while the local server also needs its own shared-language copy.
+await cp(
+  join(root, "src/audio-languages.json"),
+  join(root, "artifacts/desktop/audio-languages.json"),
+);
 // Explicit allowlist: no songs, PDFs, credentials, experiments or model caches.
 for (const entry of [
   "desktop",
   "server",
   "src/web-sources.js",
+  "src/audio-languages.json",
   "src/i18n.js",
   "src/locales/en.js",
   "dist",

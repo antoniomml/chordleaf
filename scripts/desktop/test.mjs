@@ -56,7 +56,8 @@ try {
     await page.locator("#empty-new").click();
   else await page.locator("#new").click();
   await page.locator("#audio").click();
-  await page.locator("#audio-desktop-setup").evaluate((el) => (el.open = true));
+  await page.locator("#audio-model-dialog").waitFor({ state: "visible" });
+  await page.locator("#audio-model-later").click();
   const buffer = Buffer.alloc(44 + 16000 * 2 * 6);
   buffer.write("RIFF", 0);
   buffer.writeUInt32LE(buffer.length - 8, 4);

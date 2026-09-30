@@ -1,5 +1,9 @@
 # chordleaf changelog
 
+## 1.2.0-beta.2 · September 30, 2026 · Candidate
+
+- Simplify audio import with a one-time model setup dialog, explicit downloads, memory-based recommendations and saved model preferences. Use neural chord detection only, add drag-and-drop and a focused review screen, and offer ten shared lyric languages.
+
 ## 1.2.0-beta.1 · September 30, 2026 · Candidate
 
 - Add local audio import with timed chord and lyric review, editable drafts, interval playback and JSON timing export.

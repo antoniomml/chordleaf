@@ -18,8 +18,8 @@ try {
   assert.equal(await page.evaluate(() => typeof window.require), "undefined");
   await page.locator("#empty-new").click();
   await page.locator("#audio").click();
-  await page.locator("#audio-desktop-setup").waitFor({ state: "visible" });
-  assert.equal(await page.locator("#audio-install-qwen").isEnabled(), true);
+  await page.locator("#audio-model-dialog").waitFor({ state: "visible" });
+  assert.equal(await page.locator("#audio-model-continue").isEnabled(), true);
   console.log(
     "Packaged app starts with a clean profile, bundled runtime, chord models and model installation controls.",
   );

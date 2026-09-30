@@ -1,5 +1,7 @@
 import { desktopDownloadURL } from "../desktop-release.js";
 import { setupDesktopModels } from "./audio-desktop.js";
+import languages from "../audio-languages.json" with { type: "json" };
+import { installedLyricModel, readAudioSettings } from "../audio-models.js";
 import { t } from "../i18n.js";
 import {
   analysisToText,
@@ -22,6 +24,13 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-desktop-download").hidden = false;
     $("audio-desktop-pending").hidden = true;
   }
+  for (const [value, language] of Object.entries(languages)) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = language.label;
+    $("audio-language").append(option);
+  }
+  let lyricModel = "whisper";
   let controller,
     generation = 0,
     objectURL,
@@ -34,9 +43,7 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-status").textContent = t(message);
   };
   function updateAvailability() {
-    const ready =
-      readiness?.available &&
-      ($("audio-engine").value !== "neural" || readiness.neural !== false);
+    const ready = readiness?.available && readiness.neural !== false;
     const file = $("audio-file").files[0];
     $("audio-analyze").disabled =
       !ready ||
@@ -44,9 +51,17 @@ export function setupAudioImport({ accept, reportError }) {
       analysisRunning ||
       !file ||
       file.size > 30 * 1024 * 1024;
-    $("audio-file").disabled = !readiness?.available;
+    $("audio-file").disabled = !ready || analysisRunning;
+    $("audio-drop").setAttribute(
+      "aria-disabled",
+      String(!ready || analysisRunning),
+    );
+    $("audio-language-field").hidden = !$("audio-lyrics").checked;
+    $("audio-analyze").textContent = t(
+      $("audio-lyrics").checked ? "Obtener letra y acordes" : "Obtener acordes",
+    );
   }
-  $("audio-engine").onchange = updateAvailability;
+  $("audio-lyrics").onchange = updateAvailability;
   const lyricsUnavailable = () =>
     readiness?.lyrics === false && !readiness?.qwen;
   const desktopModels = setupDesktopModels(
@@ -71,6 +86,10 @@ export function setupAudioImport({ accept, reportError }) {
     result = null;
     readiness = null;
     $("audio-capabilities").textContent = "";
+    $("audio-capabilities").hidden = true;
+    $("audio-upload-controls").hidden = false;
+    $("audio-analysis-actions").hidden = false;
+    $("audio-file-name").textContent = t("Elige una grabación");
     $("audio-warning").hidden = true;
     $("audio-file").value = "";
     $("audio-result").hidden = true;
@@ -80,9 +99,7 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-file").disabled = false;
     $("audio-create").disabled = false;
     $("audio-timeline").replaceChildren();
-    $("audio-engine").disabled = false;
     $("audio-language").disabled = false;
-    $("audio-lyrics-engine").disabled = false;
     $("audio-lyrics").disabled = false;
     status("");
   }
@@ -99,37 +116,30 @@ export function setupAudioImport({ accept, reportError }) {
       if (current !== generation) return;
       const hadNoLyrics = readiness?.lyrics === false && !readiness?.qwen;
       readiness = data;
-      if (window.chordleafDesktop && data?.lyrics === false && !data?.qwen)
-        $("audio-desktop-setup").open = true;
       $("audio-setup").hidden = Boolean(
-        window.chordleafDesktop ||
-        (data?.available &&
-          data.neural !== false &&
-          (data.lyrics !== false || data.qwen)),
+        window.chordleafDesktop || data?.available,
       );
-      const messages = [];
-      if (data?.neural === false)
-        messages.push(
-          t("Falta el modelo de acordes. Puedes elegir el detector básico."),
-        );
-      if (lyricsUnavailable())
-        messages.push(
-          t(
-            "No hay un transcriptor instalado en este equipo. Puedes analizar sólo los acordes.",
-          ),
-        );
-      $("audio-capabilities").textContent = messages.join(" ");
-      $("audio-lyrics-engine").querySelector('[value="qwen"]').disabled =
-        !data?.qwen;
-      $("audio-lyrics-engine").querySelector('[value="whisper"]').disabled =
-        data?.lyrics === false;
-      $("audio-lyrics-engine").value = data?.qwen ? "qwen" : "whisper";
+      const missingChords = data?.available && data.neural === false;
+      $("audio-capabilities").hidden = !missingChords;
+      $("audio-capabilities").textContent = missingChords
+        ? t(
+            "El modelo de acordes no está disponible. Revisa la instalación local.",
+          )
+        : "";
+      lyricModel = installedLyricModel(data, readAudioSettings().model);
+      $("audio-model-name").textContent = lyricsUnavailable()
+        ? t("Sólo acordes · La letra se puede activar en Modelos y ajustes.")
+        : `${t("Letra con")} ${lyricModel === "qwen" ? "Qwen" : "Whisper"}`;
+      $("audio-model-name").dataset.model = lyricModel;
+      $("audio-enable-lyrics").hidden =
+        !window.chordleafDesktop || !lyricsUnavailable();
       $("audio-lyrics").disabled = lyricsUnavailable();
       if (hadNoLyrics && !lyricsUnavailable()) $("audio-lyrics").checked = true;
       if (lyricsUnavailable()) $("audio-lyrics").checked = false;
+      desktopModels.configure(data);
       status(
         data?.available
-          ? "Analizador local disponible."
+          ? "Todo listo. Elige una grabación."
           : "El analizador local no está activado.",
       );
       updateAvailability();
@@ -155,12 +165,38 @@ export function setupAudioImport({ accept, reportError }) {
     if (!file) return;
     if (file.size > 30 * 1024 * 1024)
       return reportError(new Error("El audio supera el límite de 30 MB."));
+    $("audio-file-name").textContent = file.name;
     objectURL = URL.createObjectURL(file);
     if (!objectURL.startsWith("blob:"))
       throw new Error("Playback requires a local blob URL");
     player.src = encodeURI(objectURL);
     player.hidden = false;
-    status("Listo para analizar. Máximo 10 minutos.");
+    status("Grabación lista.");
+  };
+  const drop = $("audio-drop");
+  drop.ondragover = (event) => {
+    event.preventDefault();
+    if (!$("audio-file").disabled) drop.classList.add("is-dragging");
+  };
+  drop.ondragleave = () => drop.classList.remove("is-dragging");
+  drop.ondrop = (event) => {
+    event.preventDefault();
+    drop.classList.remove("is-dragging");
+    if ($("audio-file").disabled || !event.dataTransfer?.files.length) return;
+    const transfer = new DataTransfer();
+    transfer.items.add(event.dataTransfer.files[0]);
+    $("audio-file").files = transfer.files;
+    $("audio-file").dispatchEvent(new Event("change"));
+  };
+  $("audio-another").onclick = () => {
+    $("audio-result").hidden = true;
+    $("audio-upload-controls").hidden = false;
+    $("audio-analysis-actions").hidden = false;
+    $("audio-file").value = "";
+    $("audio-file").onchange();
+    $("audio-file-name").textContent = t("Elige una grabación");
+    status("Elige otra grabación.");
+    $("audio-file").click();
   };
   $("audio-cancel").onclick = () => {
     analysisRunning = false;
@@ -170,9 +206,7 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-file").disabled = false;
     updateAvailability();
     $("audio-cancel").hidden = true;
-    $("audio-engine").disabled = false;
     $("audio-language").disabled = false;
-    $("audio-lyrics-engine").disabled = false;
     $("audio-lyrics").disabled = lyricsUnavailable();
     desktopModels.setAnalyzing(false);
     status("Análisis cancelado.");
@@ -193,21 +227,13 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-analyze").disabled = true;
     $("audio-file").disabled = true;
     $("audio-cancel").hidden = false;
-    for (const id of [
-      "audio-engine",
-      "audio-lyrics",
-      "audio-language",
-      "audio-lyrics-engine",
-    ])
-      $(id).disabled = true;
-    status(
-      "Analizando en tu equipo… El audio no se envía a servicios externos.",
-    );
+    for (const id of ["audio-lyrics", "audio-language"]) $(id).disabled = true;
+    status("Obteniendo letra y acordes… Puedes seguir escuchando el audio.");
     try {
       const query = new URLSearchParams({
-        engine: $("audio-engine").value,
+        engine: "neural",
         lyrics: String($("audio-lyrics").checked),
-        lyricsEngine: $("audio-lyrics-engine").value,
+        lyricsEngine: lyricModel,
         language: $("audio-language").value,
       });
       const response = await fetch(`/api/audio-import?${query}`, {
@@ -260,10 +286,12 @@ export function setupAudioImport({ accept, reportError }) {
         $("audio-timeline").append(button);
       }
       $("audio-result").hidden = false;
+      $("audio-upload-controls").hidden = true;
+      $("audio-analysis-actions").hidden = true;
       status(
         data.words.length
-          ? "Borrador listo. Escucha y corrige antes de crear la canción."
-          : "Sin letra transcrita. Puedes revisar los acordes y añadir la letra.",
+          ? "Borrador listo."
+          : "Acordes listos. Puedes añadir la letra al borrador.",
       );
     } catch (error) {
       if (current === generation && error.name !== "AbortError") {
@@ -276,9 +304,7 @@ export function setupAudioImport({ accept, reportError }) {
         desktopModels.setAnalyzing(false);
         updateAvailability();
         $("audio-cancel").hidden = true;
-        $("audio-engine").disabled = false;
         $("audio-language").disabled = false;
-        $("audio-lyrics-engine").disabled = false;
         $("audio-lyrics").disabled = lyricsUnavailable();
       }
     }

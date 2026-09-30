@@ -11,6 +11,7 @@ import unicodedata
 import os
 from pathlib import Path
 import sys
+from languages import LANGUAGES
 from offline import require_offline
 
 ASR_ID='mlx-community/Qwen3-ASR-1.7B-8bit'
@@ -74,7 +75,7 @@ def transcribe(path, language=None):
     audio=decode(path);duration=len(audio)/RATE
     asr_path,align_path=paths()
     model=load(asr_path,strict=True)
-    result=model.generate(audio,max_tokens=8192,temperature=0,language={'en':'English','es':'Spanish'}.get(language),chunk_duration=30)
+    result=model.generate(audio,max_tokens=8192,temperature=0,language=LANGUAGES.get(language, {}).get('qwen'),chunk_duration=30)
     transcript=result.text;segments=result.segments
     del model;gc.collect();mx.clear_cache()
     aligner=load(align_path,strict=True)
@@ -84,7 +85,7 @@ def transcribe(path, language=None):
         if not text:continue
         start,end=segment['start'],min(duration,segment['end'])
         aligned=aligner.generate(audio[round(start*RATE):round(end*RATE)],text=text,
-                                 language=segment.get('language') or {'es':'Spanish','en':'English'}.get(language,'English'))
+                                 language=segment.get('language') or LANGUAGES.get(language, {}).get('qwen', 'English'))
         raw.extend({'start':start+w.start_time,'end':start+w.end_time,'text':w.text,'line':line} for w in aligned.items)
         grouped,adjustments=aligned_groups(aligned.items,start,end,line)
         # Some aligners omit tokens altogether. Keep the original transcript
@@ -100,7 +101,7 @@ def transcribe(path, language=None):
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('file',nargs='?');p.add_argument('--language',choices=['es','en']);p.add_argument('--check',action='store_true');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('file',nargs='?');p.add_argument('--language',choices=list(LANGUAGES));p.add_argument('--check',action='store_true');a=p.parse_args()
     require_offline()
     try:
         with redirect_stdout(sys.stderr):

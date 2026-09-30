@@ -1034,6 +1034,7 @@ const audioImport = setupAudioImport({
 });
 $("#audio").onclick = () => importScreen("audio");
 function importScreen(screen) {
+  $("#new-dialog").dataset.screen = screen;
   audioImport.reset();
   importController?.abort();
   importController = new AbortController();
@@ -1048,7 +1049,7 @@ function importScreen(screen) {
     menu: t("Una nueva canción."),
     text: t("Importar texto o archivo."),
     web: t("Importar desde una web."),
-    audio: t("Importar audio · Experimento"),
+    audio: t("Importar audio"),
   }[screen];
   $("#new-description").textContent = {
     menu: t("De una idea a tu próxima hoja de acordes."),
@@ -1060,9 +1061,7 @@ function importScreen(screen) {
   }[screen];
   $("#import-privacy").textContent =
     screen === "audio"
-      ? t(
-          "El audio se analiza en tu ordenador con el servicio local. No se guarda en el proyecto.",
-        )
+      ? t("Tu audio permanece en este equipo.")
       : screen === "web"
         ? t("El servidor descarga únicamente la página del enlace.")
         : t("Los archivos se procesan aquí, en tu navegador.");

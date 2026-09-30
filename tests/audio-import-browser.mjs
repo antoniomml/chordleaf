@@ -62,7 +62,7 @@ try {
   available = true;
   await page.locator("#audio").click();
   await page.waitForFunction(() =>
-    document.querySelector("#audio-status").textContent.includes("disponible"),
+    document.querySelector("#audio-status").textContent.includes("Todo listo"),
   );
   // Valid PCM silence: UI lifecycle tests do not call a model.
   const buffer = Buffer.alloc(44 + 16000 * 2 * 6);
@@ -103,7 +103,7 @@ try {
   qwen = true;
   await page.locator("#audio").click();
   await page.waitForFunction(
-    () => document.querySelector("#audio-lyrics-engine").value === "qwen",
+    () => document.querySelector("#audio-model-name").dataset.model === "qwen",
   );
   assert.equal(await page.locator("#audio-lyrics").isDisabled(), false);
   await upload();

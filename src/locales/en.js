@@ -1,5 +1,95 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Comprobando la instalación…": "Checking installation…",
+  "Importar audio": "Import audio",
+  "Tu audio permanece en este equipo.": "Your audio stays on this device.",
+  "● En tu equipo": "● On your device",
+  "Modelos y ajustes": "Models and settings",
+  "Descargando modelo…": "Downloading model…",
+  "Importa audio con Chordleaf para escritorio":
+    "Import audio with Chordleaf for desktop",
+  "La letra y los acordes se analizan en tu ordenador.":
+    "Lyrics and chords are analyzed on your computer.",
+  "La versión para Mac está en preparación.":
+    "The Mac release is in preparation.",
+  "Elige una grabación": "Choose a recording",
+  "o arrástrala aquí": "or drag it here",
+  "Incluir la letra": "Include lyrics",
+  Idioma: "Language",
+  "Activar la letra": "Enable lyrics",
+  "Obtener letra y acordes": "Get lyrics and chords",
+  "Obtener acordes": "Get chords",
+  "Revisa la canción": "Review your song",
+  "Cambiar audio": "Change audio",
+  "Escucha los acordes y corrige el borrador antes de guardarlo.":
+    "Listen to the chords and correct the draft before saving.",
+  "No se pudo obtener la letra. Puedes añadirla al borrador.":
+    "Lyrics could not be transcribed. You can add them to the draft.",
+  "Algunos tiempos son aproximados. Revisa esos tramos al escuchar.":
+    "Some timings are approximate. Review those passages as you listen.",
+  "Repetir tramo": "Loop passage",
+  "Guardar tiempos · JSON": "Save timings · JSON",
+  "Sobre los tiempos y el análisis": "About timings and analysis",
+  "La canción guarda el borrador editado. El JSON conserva también los tiempos originales; editar el texto no los cambia.":
+    "The song saves your edited draft. JSON also preserves the original timings; editing the text does not change them.",
+  "Cerrar ajustes de audio": "Close audio settings",
+  "IMPORTACIÓN DE AUDIO": "AUDIO IMPORT",
+  "Prepara tu equipo": "Prepare your device",
+  "Elige un modelo para la letra. Se descarga una vez y funciona sin conexión.":
+    "Choose a lyric model. Download it once and use it offline.",
+  "Modelo de letra": "Lyric model",
+  "Más precisión en nuestras pruebas.": "More accurate in our tests.",
+  "3,8 GB · Apple Silicon · 16 GB recomendados":
+    "3.8 GB · Apple Silicon · 16 GB recommended",
+  "Menos memoria y una descarga más pequeña.":
+    "Less memory and a smaller download.",
+  "0,5 GB · Funciona con CPU": "0.5 GB · Runs on CPU",
+  Instalado: "Installed",
+  Recomendado: "Recommended",
+  "Acordes · LV-Chordia": "Chords · LV-Chordia",
+  "Incluido en la aplicación. Sin descarga adicional.":
+    "Included with the app. No extra download.",
+  "Descargar modelo": "Download model",
+  "Ahora sólo acordes": "Just chords for now",
+  "Gestionar almacenamiento": "Manage storage",
+  "Sólo se descargan modelos. Tu audio permanece en este equipo.":
+    "Only models are downloaded. Your audio stays on this device.",
+  "Descargando… Puedes continuar más tarde.":
+    "Downloading… You can resume later.",
+  "Modelo listo. Continúa para importar tu canción.":
+    "Model ready. Continue to import your song.",
+  "Descarga pausada. Puedes reintentar cuando quieras.":
+    "Download paused. Retry whenever you are ready.",
+  "Necesitas al menos 6 GB libres. Libera espacio y reintenta.":
+    "You need at least 6 GB free. Clear some space and retry.",
+  "No se pudo descargar. Comprueba la conexión y reintenta.":
+    "Download failed. Check your connection and retry.",
+  "No disponible. Reinstala la aplicación para recuperar los acordes.":
+    "Unavailable. Reinstall the app to restore chord detection.",
+  "Usar este modelo": "Use this model",
+  "Reintentar descarga": "Retry download",
+  "Descargar Qwen · 3,8 GB": "Download Qwen · 3.8 GB",
+  "Descargar Whisper · 0,5 GB": "Download Whisper · 0.5 GB",
+  "Cerrar ajustes": "Close settings",
+  "Recomendamos Qwen para este equipo.": "We recommend Qwen for this device.",
+  "Recomendamos Whisper para consumir menos memoria.":
+    "We recommend Whisper to use less memory.",
+  "Whisper es la opción más ligera. Puedes elegir Qwen si tienes Apple Silicon.":
+    "Whisper is the lighter option. You can choose Qwen on Apple Silicon.",
+  "El modelo de acordes no está disponible. Revisa la instalación local.":
+    "The chord model is unavailable. Check the local installation.",
+  "Sólo acordes · La letra se puede activar en Modelos y ajustes.":
+    "Chords only · Enable lyrics in Models and settings.",
+  "Letra con": "Lyrics with",
+  "Todo listo. Elige una grabación.": "Ready. Choose a recording.",
+  "Grabación lista.": "Recording ready.",
+  "Elige otra grabación.": "Choose another recording.",
+  "Obteniendo letra y acordes… Puedes seguir escuchando el audio.":
+    "Getting lyrics and chords… You can keep listening to the audio.",
+  "Borrador listo.": "Draft ready.",
+  "Acordes listos. Puedes añadir la letra al borrador.":
+    "Chords ready. You can add lyrics to the draft.",
+
   "La importación de audio necesita Chordleaf para escritorio. Los modelos se ejecutan en tu ordenador; esta web no recibe el audio.":
     "Audio import requires Chordleaf for desktop. Models run on your computer; this website does not receive the audio.",
   "Descargar para Mac con Apple Silicon": "Download for Apple Silicon Mac",

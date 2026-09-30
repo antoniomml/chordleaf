@@ -80,7 +80,7 @@ test("shutdown terminates inference and waits for temporary audio removal", asyn
   await writeFile(
     script,
     `const fs = require('node:fs');
-fs.writeFileSync(${JSON.stringify(marker)}, JSON.stringify({pid: process.pid, directory: process.env.CHORDLEAF_AUDIO_TMPDIR}));
+fs.writeFileSync(${JSON.stringify(marker)}, JSON.stringify({pid: process.pid, directory: process.env.CHORDLEAF_AUDIO_TMPDIR, args: process.argv.slice(2)}));
 setInterval(() => {}, 1000);`,
   );
   const original = process.env.CHORDLEAF_AUDIO_PYTHON;
@@ -98,7 +98,7 @@ setInterval(() => {}, 1000);`,
   let pending;
   try {
     pending = fetch(
-      `http://127.0.0.1:${server.address().port}/api/audio-import`,
+      `http://127.0.0.1:${server.address().port}/api/audio-import?language=fr`,
       {
         method: "POST",
         headers: { "Content-Type": "application/octet-stream" },
@@ -116,6 +116,7 @@ setInterval(() => {}, 1000);`,
       }
     }
     assert.ok(worker, "the inference worker must start");
+    assert.deepEqual(worker.args.slice(-2), ["--language", "fr"]);
     assert.equal((await stat(join(worker.directory, "input"))).isFile(), true);
     await controlled.shutdownAudioJobs();
     assert.equal((await pending).status, 422);

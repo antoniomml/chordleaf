@@ -31,7 +31,9 @@ try {
     await page.locator("#empty-new").click();
   else await page.locator("#new").click();
   await page.locator("#audio").click();
-  await page.locator("#audio-desktop-setup").evaluate((el) => (el.open = true));
+  if (!(await page.locator("#audio-model-dialog").isVisible()))
+    await page.locator("#audio-model-settings").click();
+  await page.locator('[name="audio-model"][value="qwen"]').check();
   console.log("Checking installed models");
   let ready = await page.evaluate(async () =>
     (await fetch("/api/audio-import")).json(),
@@ -48,19 +50,20 @@ try {
     throw new Error("Model status timed out");
   }
   if (!ready.qwen) {
-    await page.locator("#audio-install-qwen").click();
+    await page.locator("#audio-model-continue").click();
     await waitModels((state) => state.active);
     await page.locator("#audio-cancel-models").click();
     await waitModels((state) => !state.active);
-    await page.locator("#audio-install-qwen").click();
+    await page.locator("#audio-model-continue").click();
     await waitModels(
       (state) => !state.active && state.stage === "complete",
       900000,
     );
     console.log("Model installation cancelled, resumed and completed.");
   }
+  await page.locator("#audio-model-continue").click();
   await page.waitForFunction(
-    () => document.querySelector("#audio-lyrics-engine").value === "qwen",
+    () => document.querySelector("#audio-model-name").dataset.model === "qwen",
     null,
     { timeout: 60000 },
   );

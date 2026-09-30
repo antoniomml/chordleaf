@@ -25,6 +25,10 @@ module.exports = {
   electronVersion: "44.4.5",
   extraResources: [
     {
+      from: "artifacts/desktop/audio-languages.json",
+      to: "audio/audio-languages.json",
+    },
+    {
       from: "artifacts/desktop/runtime",
       to: "runtime",
       filter: ["**/*", "!**/__pycache__/**", "!**/*.pyc"],
@@ -34,6 +38,7 @@ module.exports = {
       to: "audio",
       filter: [
         "analyze.py",
+        "languages.py",
         "neural.py",
         "offline.py",
         "qwen_worker.py",

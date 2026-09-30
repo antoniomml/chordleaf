@@ -12,7 +12,7 @@ import { randomBytes } from "node:crypto";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { mkdir, readFile } from "node:fs/promises";
-import { homedir } from "node:os";
+import { homedir, totalmem } from "node:os";
 import { APP_ORIGIN, trustedURL, externalURL, boundedBody } from "./policy.mjs";
 import { modelManager } from "./models.mjs";
 
@@ -178,6 +178,11 @@ else {
         event.senderFrame === window.webContents.mainFrame &&
         trustedURL(event.senderFrame.url);
       for (const [channel, action] of Object.entries({
+        "audio:system": () => ({
+          platform: process.platform,
+          arch: process.arch,
+          memoryGB: Math.round(totalmem() / 1024 ** 3),
+        }),
         "audio:cancel": () => {
           cancelAudioJobs();
           return true;

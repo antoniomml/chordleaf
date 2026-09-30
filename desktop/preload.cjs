@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld(
   "chordleafDesktop",
   Object.freeze({
+    system: () => ipcRenderer.invoke("audio:system"),
     cancelAnalysis: () => ipcRenderer.invoke("audio:cancel"),
     models: () => ipcRenderer.invoke("models:status"),
     install: (model) => ipcRenderer.invoke("models:install", model),

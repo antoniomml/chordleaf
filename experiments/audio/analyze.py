@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 import sys
+from languages import LANGUAGES
 
 import av
 import numpy as np
@@ -146,7 +147,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("file")
     parser.add_argument("--no-lyrics", action="store_true")
-    parser.add_argument("--language", choices=["es", "en"])
+    parser.add_argument("--language", choices=list(LANGUAGES))
     parser.add_argument("--engine", choices=["neural", "baseline"], default="neural")
     parser.add_argument("--lyrics-engine", choices=["whisper", "qwen"], default="whisper")
     args = parser.parse_args()
