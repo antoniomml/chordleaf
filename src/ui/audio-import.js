@@ -9,6 +9,11 @@ import {
 
 export function setupAudioImport({ accept, reportError }) {
   const $ = (id) => document.getElementById(id);
+  // Bind specifically to an audio element; a generic .src sink could target
+  // an executable element if the shell were accidentally changed.
+  const player = document.querySelector("audio#audio-player");
+  if (!(player instanceof HTMLAudioElement))
+    throw new Error("Missing audio playback element");
   const desktopURL = desktopDownloadURL(
     import.meta.env.VITE_DESKTOP_DOWNLOAD_URL,
   );
@@ -59,8 +64,8 @@ export function setupAudioImport({ accept, reportError }) {
     playbackRange = null;
     controller?.abort();
     window.chordleafDesktop?.cancelAnalysis().catch(() => {});
-    $("audio-player").pause();
-    $("audio-player").removeAttribute("src");
+    player.pause();
+    player.removeAttribute("src");
     if (objectURL) URL.revokeObjectURL(objectURL);
     objectURL = null;
     result = null;
@@ -69,7 +74,7 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-warning").hidden = true;
     $("audio-file").value = "";
     $("audio-result").hidden = true;
-    $("audio-player").hidden = true;
+    player.hidden = true;
     $("audio-analyze").disabled = true;
     $("audio-cancel").hidden = true;
     $("audio-file").disabled = false;
@@ -140,9 +145,9 @@ export function setupAudioImport({ accept, reportError }) {
     playbackRange = null;
     $("audio-result").hidden = true;
     $("import-error").hidden = true;
-    $("audio-player").pause();
-    $("audio-player").removeAttribute("src");
-    $("audio-player").hidden = true;
+    player.pause();
+    player.removeAttribute("src");
+    player.hidden = true;
     if (objectURL) URL.revokeObjectURL(objectURL);
     objectURL = null;
     const file = $("audio-file").files[0];
@@ -151,8 +156,8 @@ export function setupAudioImport({ accept, reportError }) {
     if (file.size > 30 * 1024 * 1024)
       return reportError(new Error("El audio supera el límite de 30 MB."));
     objectURL = URL.createObjectURL(file);
-    $("audio-player").src = objectURL;
-    $("audio-player").hidden = false;
+    player.src = objectURL;
+    player.hidden = false;
     status("Listo para analizar. Máximo 10 minutos.");
   };
   $("audio-cancel").onclick = () => {
@@ -247,10 +252,8 @@ export function setupAudioImport({ accept, reportError }) {
         button.textContent = `${formatAudioTime(chord.start)}–${formatAudioTime(chord.end)} · ${chord.label === "N" ? t("Sin acorde") : chord.label}`;
         button.onclick = () => {
           playbackRange = chord;
-          $("audio-player").currentTime = chord.start;
-          $("audio-player")
-            .play()
-            .catch(() => {});
+          player.currentTime = chord.start;
+          player.play().catch(() => {});
         };
         $("audio-timeline").append(button);
       }
@@ -278,8 +281,7 @@ export function setupAudioImport({ accept, reportError }) {
       }
     }
   };
-  $("audio-player").ontimeupdate = () => {
-    const player = $("audio-player");
+  player.ontimeupdate = () => {
     if (playbackRange && player.currentTime >= playbackRange.end) {
       if ($("audio-loop").checked) player.currentTime = playbackRange.start;
       else {
