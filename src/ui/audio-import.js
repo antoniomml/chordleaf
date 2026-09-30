@@ -156,7 +156,9 @@ export function setupAudioImport({ accept, reportError }) {
     if (file.size > 30 * 1024 * 1024)
       return reportError(new Error("El audio supera el límite de 30 MB."));
     objectURL = URL.createObjectURL(file);
-    player.src = objectURL;
+    if (!objectURL.startsWith("blob:"))
+      throw new Error("Playback requires a local blob URL");
+    player.src = encodeURI(objectURL);
     player.hidden = false;
     status("Listo para analizar. Máximo 10 minutos.");
   };
