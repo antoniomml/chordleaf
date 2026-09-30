@@ -54,7 +54,9 @@ else {
     server?.closeAllConnections();
     server?.close();
     Promise.allSettled([manager?.shutdown(), shutdownAudioJobs?.()]).finally(
-      () => app.quit(),
+      // will-quit runs after every window's unload and storage save. Once
+      // cleanup finishes, exit directly rather than re-entering the quit cycle.
+      () => app.exit(0),
     );
   });
   app.whenReady().then(async () => {
@@ -184,14 +186,20 @@ else {
         "models:install": (model) => manager.install(model),
         "models:cancel": () => manager.cancel(),
         "models:remove": async () => {
+          const spanish = app.getLocale().startsWith("es");
           const result = await dialog.showMessageBox(window, {
             type: "question",
-            buttons: ["Cancel", "Remove models"],
+            buttons: spanish
+              ? ["Cancelar", "Eliminar modelos"]
+              : ["Cancel", "Remove models"],
             defaultId: 0,
             cancelId: 0,
-            message: "Remove downloaded lyric models?",
-            detail:
-              "Your songs and documents will be kept. Models can be downloaded again.",
+            message: spanish
+              ? "¿Eliminar los modelos de letra descargados?"
+              : "Remove downloaded lyric models?",
+            detail: spanish
+              ? "Tus canciones y documentos se conservarán. Puedes volver a descargar los modelos."
+              : "Your songs and documents will be kept. Models can be downloaded again.",
           });
           if (result.response === 1) {
             cancelAudioJobs();
@@ -228,11 +236,11 @@ else {
             ? ["Seguir trabajando", "Cerrar"]
             : ["Keep working", "Close"],
           message: spanish
-            ? "¿Cerrar Chordleaf sin exportar una copia?"
-            : "Close Chordleaf without exporting a backup?",
+            ? "No se pudieron guardar los últimos cambios. ¿Cerrar igualmente?"
+            : "Your latest changes could not be saved. Close anyway?",
           detail: spanish
-            ? "La biblioteca queda guardada en este equipo. Exporta una copia JSON para conservarla fuera de la aplicación."
-            : "Your library stays on this computer. Export a JSON backup to keep a copy outside the app.",
+            ? "Sigue trabajando y exporta una copia JSON para conservar los cambios fuera de la aplicación."
+            : "Keep working and export a JSON backup to preserve your changes outside the app.",
         });
         // Electron's preventDefault here permits the otherwise prevented close.
         if (choice === 1) event.preventDefault();

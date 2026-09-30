@@ -2,6 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createServer, request } from "node:http";
 import { audioImportMiddleware } from "../server/audio-import.js";
+import { mkdtemp, readFile, writeFile, stat, rm } from "node:fs/promises";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { setTimeout as delay } from "node:timers/promises";
 
 test("local audio endpoint is opt-in and rejects cross-origin and oversized uploads", async () => {
   const original = process.env.CHORDLEAF_AUDIO_PYTHON;
@@ -66,5 +70,67 @@ test("local audio endpoint is opt-in and rejects cross-origin and oversized uplo
     if (original === undefined) delete process.env.CHORDLEAF_AUDIO_PYTHON;
     else process.env.CHORDLEAF_AUDIO_PYTHON = original;
     await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+test("shutdown terminates inference and waits for temporary audio removal", async () => {
+  const scratch = await mkdtemp(join(tmpdir(), "chordleaf-shutdown-test-"));
+  const marker = join(scratch, "started.json");
+  const script = join(scratch, "analyze.py");
+  await writeFile(
+    script,
+    `const fs = require('node:fs');
+fs.writeFileSync(${JSON.stringify(marker)}, JSON.stringify({pid: process.pid, directory: process.env.CHORDLEAF_AUDIO_TMPDIR}));
+setInterval(() => {}, 1000);`,
+  );
+  const original = process.env.CHORDLEAF_AUDIO_PYTHON;
+  process.env.CHORDLEAF_AUDIO_PYTHON = process.execPath;
+  // Load the analyzer with a controlled worker; keep the public module unchanged.
+  const previousScripts = process.env.CHORDLEAF_AUDIO_SCRIPTS;
+  process.env.CHORDLEAF_AUDIO_SCRIPTS = scratch;
+  const controlled = await import(
+    `../server/audio-import.js?shutdown=${Date.now()}`
+  );
+  const server = createServer((req, res) =>
+    controlled.audioImportMiddleware(req, res, () => res.writeHead(404).end()),
+  );
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  let pending;
+  try {
+    pending = fetch(
+      `http://127.0.0.1:${server.address().port}/api/audio-import`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream" },
+        body: "private test audio",
+      },
+    );
+    let worker;
+    const deadline = Date.now() + 5000;
+    while (Date.now() < deadline) {
+      try {
+        worker = JSON.parse(await readFile(marker, "utf8"));
+        break;
+      } catch {
+        await delay(20);
+      }
+    }
+    assert.ok(worker, "the inference worker must start");
+    assert.equal((await stat(join(worker.directory, "input"))).isFile(), true);
+    await controlled.shutdownAudioJobs();
+    assert.equal((await pending).status, 422);
+    await assert.rejects(stat(worker.directory), { code: "ENOENT" });
+    assert.throws(() => process.kill(worker.pid, 0), { code: "ESRCH" });
+  } finally {
+    server.closeAllConnections();
+    await controlled.shutdownAudioJobs();
+    await pending?.catch(() => {});
+    await new Promise((resolve) => server.close(resolve));
+    if (original === undefined) delete process.env.CHORDLEAF_AUDIO_PYTHON;
+    else process.env.CHORDLEAF_AUDIO_PYTHON = original;
+    if (previousScripts === undefined)
+      delete process.env.CHORDLEAF_AUDIO_SCRIPTS;
+    else process.env.CHORDLEAF_AUDIO_SCRIPTS = previousScripts;
+    await rm(scratch, { recursive: true, force: true });
   }
 });

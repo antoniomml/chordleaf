@@ -45,6 +45,14 @@ Esta prueba usa `artifacts/desktop/model-test-profile`; puede descargar los mode
 
 En la prueba local, Guantanamera completó el análisis desde el paquete con 142 grupos de palabras y acordes de LV-Chordia. También se ejecutó el Python incluido bajo `sandbox-exec` con `(deny network*)` y ambos modelos completaron el análisis. Es una comprobación adicional de funcionamiento sin red; la aplicación distribuida conserva la protección de Python descrita arriba. La descarga nueva, cancelación y continuación se probaron en un perfil independiente.
 
+### Integración con main · 30 de septiembre de 2026
+
+La rama del experimento incorpora `main` hasta la versión 1.1.1 (`e0af736`), conservando la nueva página de inicio, autoguardado, canciones recientes, notación latina y revisión consecutiva de acordes. La beta de audio pasa a 1.2.0-beta.1.
+
+Se comprobaron 138 tests de Node, 16 de Python y las 23 suites de navegador, con Chromium y WebKit en las suites que comparan motores. Firefox no pudo arrancar en este equipo por un error de su perfil; queda pendiente esa comprobación. El test nativo analiza audio con el Python incluido, crea una canción y verifica su persistencia después de cerrar y abrir la aplicación. Un test adicional mata un proceso de inferencia activo y comprueba que su directorio de audio temporal desaparece antes de completar el cierre.
+
+El paquete actualizado arrancó con un perfil vacío y volvió a analizar Guantanamera con Qwen y LV-Chordia: 142 grupos, reproducción real y cierre normal del proceso. El DMG pasó `hdiutil verify`. Estas comprobaciones verifican integración y funcionamiento; no constituyen una nueva medida de precisión musical. La puerta de publicación rechazó el candidato sin firma, como corresponde.
+
 ## Firma y publicación
 
 Se necesita un certificado **Developer ID Application**, con su clave privada, y acceso de notarización de Apple. Un certificado **Apple Development** no sirve para esta distribución. Configurar las credenciales como secretos del repositorio, nunca en archivos versionados ni en un chat:
