@@ -2,12 +2,12 @@ import AnalysisWorker from "./analyze.worker.js?worker";
 
 export async function analyzeBrowserAudio(
   file,
-  { signal, lyrics, language, gpu, progress },
+  { signal, lyrics, language, gpu, progress, lyricsEngine },
 ) {
   signal.throwIfAborted();
   if (file.size > 30 * 1024 * 1024)
     throw new Error("El audio supera el límite de 30 MB.");
-  progress("Leyendo el audio en tu navegador…");
+  progress({ stage: "Preparando el audio…", percent: 1 });
   const context = new AudioContext();
   let decoded;
   try {
@@ -71,9 +71,9 @@ export async function analyzeBrowserAudio(
       if (data.error) finish(null, new Error(data.error));
       if (data.result) finish(data.result);
     };
-    worker.postMessage({ audio, harmony, lyrics, language, gpu }, [
-      audio.buffer,
-      harmony.buffer,
-    ]);
+    worker.postMessage(
+      { audio, harmony, lyrics, language, gpu, lyricsEngine },
+      [audio.buffer, harmony.buffer],
+    );
   });
 }

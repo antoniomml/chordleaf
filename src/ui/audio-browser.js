@@ -8,7 +8,7 @@ import {
 } from "../browser-audio/models.js";
 
 const preferenceKey = "chordleaf-browser-audio-mode";
-function preference() {
+export function browserAudioPreference() {
   try {
     return localStorage.getItem(preferenceKey);
   } catch {
@@ -26,19 +26,25 @@ export function setupBrowserModels(refresh, busyChanged) {
   dialog.className = "audio-browser-model-dialog";
   dialog.setAttribute("aria-labelledby", "browser-model-heading");
   dialog.innerHTML = t`<button type="button" id="browser-model-close" class="dialog-close" aria-label="Cerrar">×</button>
-    <h2 id="browser-model-heading">¿Qué quieres obtener?</h2>
-    <p>Elige los modelos para analizar en tu equipo.</p>
-    <fieldset class="browser-model-choices"><legend class="visually-hidden">Modelos de audio</legend>
+    <h2 id="browser-model-heading">Modelos de audio</h2>
+    <div class="browser-chord-required"><div><strong>Acordes · LV-Chordia</strong><small>Necesario · 13 MB</small></div>
+      <div class="browser-model-storage"><span id="browser-chords-state"></span><button type="button" id="browser-chords-download" class="audio-text-button">Descargar</button><button type="button" id="browser-chords-remove" class="audio-text-button" hidden>Borrar</button></div>
+    </div>
+    <fieldset class="browser-model-choices"><legend>Letra · Opcional</legend>
+      <div class="browser-model-card" data-bundle="chords">
+        <label for="browser-model-chords"><input type="radio" name="browser-audio-model" id="browser-model-chords" value="chords" />
+          <span><strong>Ninguna</strong><small>Sólo acordes · Puedes añadir la letra después</small></span></label>
+      </div>
+      <div class="browser-model-card" data-bundle="whisper">
+        <label for="browser-model-whisper"><input type="radio" name="browser-audio-model" id="browser-model-whisper" value="whisper" aria-describedby="browser-whisper-state" />
+          <span><strong>Whisper Base</strong><small>Ligero · Funciona sin WebGPU</small></span><span id="browser-whisper-recommended" class="choice-beta" hidden>Recomendado</span></label>
+        <div class="browser-model-storage"><span id="browser-whisper-state"></span><button type="button" id="browser-whisper-remove" class="audio-text-button" hidden>Borrar</button></div>
+      </div>
       <div class="browser-model-card" data-bundle="qwen">
         <label for="browser-model-qwen"><input type="radio" name="browser-audio-model" id="browser-model-qwen" value="qwen" aria-describedby="browser-qwen-state browser-model-device" />
-          <span><strong>Letra y acordes</strong><small>Qwen 0,6B + LV-Chordia</small></span><span id="browser-model-recommended" class="choice-beta" hidden>Recomendado</span></label>
+          <span><strong>Qwen 0,6B</strong><small>Mayor capacidad · Incluye alineador de letra</small></span><span id="browser-model-recommended" class="choice-beta" hidden>Recomendado</span></label>
         <div class="browser-model-storage"><span id="browser-qwen-state"></span><button type="button" id="browser-qwen-remove" class="audio-text-button" hidden>Borrar</button></div>
         <small id="browser-model-device"></small>
-      </div>
-      <div class="browser-model-card" data-bundle="chords">
-        <label for="browser-model-chords"><input type="radio" name="browser-audio-model" id="browser-model-chords" value="chords" aria-describedby="browser-chords-state" />
-          <span><strong>Sólo acordes</strong><small>LV-Chordia · Puedes añadir la letra después</small></span></label>
-        <div class="browser-model-storage"><span id="browser-chords-state"></span><button type="button" id="browser-chords-remove" class="audio-text-button" hidden>Borrar</button></div>
       </div>
     </fieldset>
     <p id="browser-model-note" class="browser-model-note"></p>
@@ -60,10 +66,14 @@ export function setupBrowserModels(refresh, busyChanged) {
     return value;
   });
   const installed = (bundle) =>
-    bundle === "qwen" ? ready.qwenDownloaded : ready.neural;
+    bundle === "qwen"
+      ? ready.qwenDownloaded
+      : bundle === "whisper"
+        ? ready.whisperDownloaded
+        : ready.neural;
   function render() {
     const busy = Boolean(controller) || analyzing || checking;
-    for (const bundle of ["qwen", "chords"]) {
+    for (const bundle of ["qwen", "whisper", "chords"]) {
       const radio = $("browser-model-" + bundle);
       radio.disabled = busy || (bundle === "qwen" && !hardware?.gpu);
       radio.checked = selected === bundle;
@@ -71,27 +81,39 @@ export function setupBrowserModels(refresh, busyChanged) {
       card.classList.toggle("is-selected", radio.checked);
       card.classList.toggle("is-disabled", bundle === "qwen" && !hardware?.gpu);
       const state = $("browser-" + bundle + "-state");
-      state.classList.toggle("is-installed", Boolean(installed(bundle)));
-      state.textContent = installed(bundle)
+      const saved =
+        bundle === "qwen"
+          ? ready.qwenVoiceDownloaded
+          : bundle === "whisper"
+            ? ready.whisperVoiceDownloaded
+            : ready.neural;
+      state.classList.toggle("is-installed", Boolean(saved));
+      state.textContent = saved
         ? t("✓ Ya en tu dispositivo")
-        : t`Descarga · ${sizeLabel(ready.missingBytes?.[bundle] ?? bundleBytes(bundle))}`;
+        : t`Descarga · ${sizeLabel(Math.max(0, (ready.missingBytes?.[bundle] ?? bundleBytes(bundle)) - (bundle === "chords" ? 0 : (ready.missingBytes?.chords ?? bundleBytes("chords")))))}`;
       const remove = $("browser-" + bundle + "-remove");
       remove.hidden = !(bundle === "qwen"
         ? ready.hasQwenFiles
-        : ready.hasChordFiles);
+        : bundle === "whisper"
+          ? ready.hasWhisperFiles
+          : ready.hasChordFiles);
       remove.disabled = busy;
     }
     $("browser-model-device").textContent = t(
       hardware?.gpu
         ? "Necesita WebGPU · Recomendado con 8 GB de memoria o más"
-        : "La letra no está disponible en este navegador. Necesita WebGPU compatible.",
+        : "Necesita WebGPU compatible. Puedes usar Whisper en este navegador.",
     );
-    $("browser-model-recommended").hidden = !hardware?.gpu;
+    const recommendQwen = hardware?.gpu && hardware?.memory >= 8;
+    $("browser-model-recommended").hidden = !recommendQwen;
+    $("browser-whisper-recommended").hidden = Boolean(recommendQwen);
     $("browser-model-note").textContent = t(
       ready.runtimeDownloaded
         ? "Se guardan en este navegador y se reutilizan entre canciones."
         : "Se guardan en este navegador y se reutilizan entre canciones. Motor local: 25 MB adicionales.",
     );
+    $("browser-chords-download").hidden = Boolean(ready.neural);
+    $("browser-chords-download").disabled = busy;
     $("browser-model-next").disabled =
       busy || !selected || (selected === "qwen" && !hardware?.gpu);
     $("browser-model-next").textContent = t(
@@ -105,7 +127,10 @@ export function setupBrowserModels(refresh, busyChanged) {
   }
   function applySelection() {
     const checkbox = document.getElementById("audio-lyrics");
-    checkbox.checked = selected === "qwen" && Boolean(ready.qwen);
+    checkbox.checked =
+      selected === "qwen"
+        ? Boolean(ready.qwen)
+        : selected === "whisper" && Boolean(ready.whisper);
     checkbox.dispatchEvent(new Event("change"));
     try {
       localStorage.setItem(preferenceKey, selected);
@@ -118,13 +143,16 @@ export function setupBrowserModels(refresh, busyChanged) {
     const data = await browserReadiness();
     if (current !== generation) return false;
     ready = data;
-    const saved = preference();
+    const saved = browserAudioPreference();
     selected =
-      saved === "chords" || !hardware?.gpu
-        ? "chords"
-        : saved === "qwen" || ready.qwen || !ready.available
+      ["chords", "whisper", "qwen"].includes(saved) &&
+      (saved !== "qwen" || hardware?.gpu)
+        ? saved
+        : ready.qwen
           ? "qwen"
-          : "chords";
+          : hardware?.gpu && hardware?.memory >= 8
+            ? "qwen"
+            : "whisper";
     render();
     return true;
   }
@@ -147,14 +175,11 @@ export function setupBrowserModels(refresh, busyChanged) {
       $("browser-model-" + selected).focus();
     }
   }
-  $("browser-model-qwen").onchange = () => {
-    selected = "qwen";
-    render();
-  };
-  $("browser-model-chords").onchange = () => {
-    selected = "chords";
-    render();
-  };
+  for (const bundle of ["qwen", "whisper", "chords"])
+    $("browser-model-" + bundle).onchange = () => {
+      selected = bundle;
+      render();
+    };
   for (const card of dialog.querySelectorAll(".browser-model-card"))
     card.onclick = (event) => {
       if (event.target.closest("button, input, label")) return;
@@ -164,9 +189,8 @@ export function setupBrowserModels(refresh, busyChanged) {
         render();
       }
     };
-  $("browser-model-next").onclick = async () => {
+  async function download(bundle, continueToSong = true) {
     const current = generation;
-    const bundle = selected;
     let success = installed(bundle);
     if (!success) {
       controller = new AbortController();
@@ -203,9 +227,9 @@ export function setupBrowserModels(refresh, busyChanged) {
     try {
       ready = await browserReadiness();
       if (current !== generation) return;
-      if (success) applySelection();
+      if (success && continueToSong) applySelection();
       await refresh();
-      if (success && current === generation) {
+      if (success && continueToSong && current === generation) {
         dialog.close();
         document.getElementById("audio-drop").focus();
       }
@@ -213,7 +237,9 @@ export function setupBrowserModels(refresh, busyChanged) {
       checking = false;
       render();
     }
-  };
+  }
+  $("browser-model-next").onclick = () => download(selected);
+  $("browser-chords-download").onclick = () => download("chords", false);
   $("browser-model-stop").onclick = () => controller?.abort();
   function close() {
     generation++;
@@ -225,7 +251,7 @@ export function setupBrowserModels(refresh, busyChanged) {
     if (analyzing) event.preventDefault();
     else close();
   });
-  for (const bundle of ["qwen", "chords"])
+  for (const bundle of ["qwen", "whisper", "chords"])
     $("browser-" + bundle + "-remove").onclick = async () => {
       const current = generation;
       checking = true;

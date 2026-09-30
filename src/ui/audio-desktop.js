@@ -27,7 +27,8 @@ export function setupDesktopModels(refresh, busyChanged) {
     .catch(() => null);
   const radios = [...dialog.querySelectorAll('[name="audio-model"]')];
   const installed = (model) =>
-    model === "qwen" ? Boolean(readiness.qwen) : Boolean(readiness.lyrics);
+    model === "none" ||
+    (model === "qwen" ? Boolean(readiness.qwen) : Boolean(readiness.lyrics));
   function render(state = lastState) {
     lastState = state;
     const busy = Boolean(state.active || analyzing || checking);
@@ -69,7 +70,7 @@ export function setupDesktopModels(refresh, busyChanged) {
       busy || !selected || radios.find((r) => r.value === selected)?.disabled;
     $("audio-model-continue").textContent = t(
       installed(selected)
-        ? "Usar este modelo"
+        ? "Siguiente"
         : state.stage === "cancelled" || state.stage === "error"
           ? "Reintentar descarga"
           : selected === "qwen"
@@ -77,6 +78,9 @@ export function setupDesktopModels(refresh, busyChanged) {
             : "Descargar Whisper · 0,5 GB",
     );
     $("audio-cancel-models").hidden = !state.active;
+    $("audio-remove-models").closest("details").hidden =
+      !readiness.qwen && !readiness.lyrics;
+    $("audio-model-later").hidden = true;
     $("audio-remove-models").disabled =
       busy || (!readiness.qwen && !readiness.lyrics);
     $("audio-model-later").disabled = analyzing;
@@ -160,6 +164,8 @@ export function setupDesktopModels(refresh, busyChanged) {
       settings.model = selected;
       saveAudioSettings(settings);
       await refreshModels();
+      $("audio-lyrics").checked = selected !== "none";
+      $("audio-lyrics").dispatchEvent(new Event("change"));
       dialog.close();
     } else await action(() => bridge.install(selected));
   };

@@ -12,7 +12,7 @@ export function readAudioSettings() {
     const settings = JSON.parse(localStorage.getItem(AUDIO_SETTINGS_KEY));
     return {
       seen: settings?.seen === true,
-      model: ["qwen", "whisper"].includes(settings?.model)
+      model: ["qwen", "whisper", "none"].includes(settings?.model)
         ? settings.model
         : null,
     };
@@ -26,7 +26,7 @@ export function saveAudioSettings(settings) {
       AUDIO_SETTINGS_KEY,
       JSON.stringify({
         seen: settings.seen === true,
-        model: ["qwen", "whisper"].includes(settings.model)
+        model: ["qwen", "whisper", "none"].includes(settings.model)
           ? settings.model
           : null,
       }),

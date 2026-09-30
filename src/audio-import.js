@@ -1,3 +1,4 @@
+import { lyricLineStarts } from "./audio-lyric-lines.js";
 import { chordRE } from "./music.js";
 
 export function validateAnalysis(data) {
@@ -71,17 +72,16 @@ function sheetWords(words) {
 export function analysisToText(input) {
   const data = validateAnalysis(input);
   const chords = data.chords.filter((c) => c.label !== "N");
+  const words = sheetWords(data.words);
+  const starts = lyricLineStarts(words);
   const lines = [];
   let line = "",
     previous,
     active,
-    characters = 0,
-    count = 0,
     index = 0;
   const flush = () => {
     if (line.trim()) lines.push(line.trim());
     line = "";
-    characters = count = 0;
   };
   const instrumental = (events) => {
     flush();
@@ -93,17 +93,10 @@ export function analysisToText(input) {
           .join(" "),
       );
   };
-  for (const word of sheetWords(data.words)) {
+  for (let position = 0; position < words.length; position++) {
+    const word = words[position];
     const gap = previous ? word.start - previous.end : Infinity;
-    if (
-      previous &&
-      (gap > 1.2 ||
-        (gap > 0.55 && count >= 3) ||
-        /[.!?。！？]$/u.test(previous.text) ||
-        characters + word.text.length > 64 ||
-        (word.line !== previous.line && count >= 6 && gap > 0.2))
-    )
-      flush();
+    if (starts.has(position)) flush();
     // Breaths are part of the lyric phrase, not instrumental interludes.
     if (gap > 3) {
       const events = [];
@@ -132,8 +125,6 @@ export function analysisToText(input) {
     if (!line && !prefix && active && active.end > word.start)
       prefix = `[${active.label}]`;
     line += (line ? " " : "") + prefix + word.text;
-    characters += word.text.length + 1;
-    count++;
     previous = word;
     if (overflow) instrumental(sounding ? changes : changes.slice(1));
   }

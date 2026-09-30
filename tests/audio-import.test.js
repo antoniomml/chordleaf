@@ -112,16 +112,16 @@ test("coarse multi-word timing distributes chord anchors and keeps raw data inta
   assert.deepEqual(data, original);
 });
 
-test("lines follow lyric punctuation and keep sounding chords above later verses", () => {
+test("short ASR punctuation does not orphan a word or invent a verse", () => {
   const data = example();
   data.words = [
     { start: 2, end: 3, text: "Hoy.", line: 0 },
     { start: 3, end: 4, text: "Canto", line: 0 },
   ];
   data.chords = [{ start: 0, end: 12, label: "C" }];
-  assert.equal(analysisToText(data), "[C]\n[C]Hoy.\n[C]Canto");
+  assert.equal(analysisToText(data), "[C]\n[C]Hoy. Canto");
   data.chords[0].end = 2;
-  assert.equal(analysisToText(data), "[C]\nHoy.\nCanto");
+  assert.equal(analysisToText(data), "[C]\nHoy. Canto");
 });
 
 test("an implausibly long vowel cannot stack a whole solo above one word", () => {

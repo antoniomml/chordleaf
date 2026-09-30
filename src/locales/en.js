@@ -1,5 +1,29 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  Experimental: "Experimental",
+  "Puede haber errores en la letra, los acordes y su posición.":
+    "Lyrics, chords and their placement may contain errors.",
+  "Letra · Opcional": "Lyrics · Optional",
+  Ninguna: "None",
+  "Necesario · 13 MB": "Required · 13 MB",
+  "Acordes · LV-Chordia": "Chords · LV-Chordia",
+  "Ligero · Funciona sin WebGPU": "Lightweight · Works without WebGPU",
+  "Mayor capacidad · Incluye alineador de letra":
+    "Larger model · Includes lyric alignment",
+  "Necesita WebGPU compatible. Puedes usar Whisper en este navegador.":
+    "Requires compatible WebGPU. You can use Whisper in this browser.",
+  "Preparando tu canción": "Preparing your song",
+  "Progreso del análisis": "Analysis progress",
+  "Puede tardar unos minutos. Mantén esta ventana abierta.":
+    "This may take a few minutes. Keep this window open.",
+  "Preparando el audio…": "Preparing audio…",
+  "Cargando Whisper…": "Loading Whisper…",
+  "Cargando Qwen…": "Loading Qwen…",
+  "Obteniendo letra y acordes…": "Getting lyrics and chords…",
+  "Obteniendo letra…": "Transcribing lyrics…",
+  "Situando la letra…": "Aligning lyrics…",
+  "Detectando acordes…": "Detecting chords…",
+
   "Este navegador ha alcanzado su límite de almacenamiento para Chordleaf. Los modelos ya guardados se conservan. Puedes reintentar, liberar datos de sitios en sus ajustes o usar otro navegador.":
     "This browser has reached its storage limit for Chordleaf. Models already saved are kept. You can retry, free up site data in its settings, or use another browser.",
   "No se han detectado letra ni acordes. Prueba otra grabación.":

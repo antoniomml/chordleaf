@@ -1,6 +1,7 @@
 import * as ort from "onnxruntime-web/webgpu";
 import { runtimeURLs } from "./runtime.js";
 import { readBrowserModel } from "./models.js";
+import { loadBrowserWhisper } from "./whisper.js";
 import { loadQwen } from "./qwen.js";
 import { loadBrowserAligner } from "./aligner.js";
 import { recognizeBrowserChords } from "./chords.js";
@@ -10,10 +11,18 @@ ort.env.wasm.numThreads = 1;
 ort.env.wasm.proxy = false;
 ort.env.wasm.wasmPaths = runtimeURLs;
 self.onmessage = async ({ data }) => {
-  const progress = (status) => self.postMessage({ status });
+  const progress = (stage, percent) =>
+    self.postMessage({ status: { stage, percent } });
   try {
     const started = performance.now();
-    const { audio, harmony, lyrics, language, gpu } = data,
+    const {
+        audio,
+        harmony,
+        lyrics,
+        language,
+        gpu,
+        lyricsEngine = "qwen",
+      } = data,
       duration = audio.length / 16000;
     const result = {
       version: 1,
@@ -26,50 +35,114 @@ self.onmessage = async ({ data }) => {
     };
     if (lyrics) {
       try {
-        const transcripts = [];
-        let model;
-        try {
-          model = await loadQwen(readBrowserModel, progress);
-          for (const { start: offset, end } of audioChunks(audio)) {
-            const clip = audio.subarray(offset, end);
-            if (clip.length < 1600) continue;
-            progress(
-              `Obteniendo letra · ${Math.floor(offset / 16000)} / ${Math.ceil(duration)} s`,
-            );
-            const text = await model.transcribe(clip, language);
-            if (text.partial) result.warnings.push("lyrics-partial");
-            transcripts.push({ audio: clip, offset: offset / 16000, ...text });
+        if (lyricsEngine === "whisper") {
+          progress("Cargando Whisper…", 6);
+          const model = await loadBrowserWhisper();
+          try {
+            const chunks = audioChunks(audio);
+            for (let i = 0; i < chunks.length; i++) {
+              const { start, end } = chunks[i];
+              progress("Obteniendo letra…", 10 + (72 * start) / audio.length);
+              const output = await model.transcribe(
+                audio.subarray(start, end),
+                language,
+              );
+              if (output.partial) result.warnings.push("lyrics-partial");
+              const raw = (output.chunks || [])
+                .map((word) => ({
+                  text: String(word.text || "").trim(),
+                  start: word.timestamp?.[0] ?? NaN,
+                  end: word.timestamp?.[1] ?? NaN,
+                }))
+                .filter((word) => word.text);
+              if (!raw.length && output.text?.trim()) {
+                raw.push({
+                  text: output.text.trim(),
+                  start: 0,
+                  end: (end - start) / 16000,
+                });
+                result.warnings.push("alignment-approximate");
+              }
+              result.rawAlignment.push(
+                ...raw.map((word) => ({
+                  ...word,
+                  start: Number.isFinite(word.start)
+                    ? word.start + start / 16000
+                    : null,
+                  end: Number.isFinite(word.end)
+                    ? word.end + start / 16000
+                    : null,
+                })),
+              );
+              const normalized = normalizeWords(
+                raw,
+                (end - start) / 16000,
+                start / 16000,
+                i,
+              );
+              result.words.push(...normalized.words);
+              if (normalized.approximate)
+                result.warnings.push("alignment-approximate");
+              progress("Obteniendo letra…", 10 + (72 * end) / audio.length);
+            }
+            result.engines.lyrics = "Whisper-Base/ONNX-q8";
+          } finally {
+            await model.dispose();
           }
-        } finally {
-          await model?.dispose();
-        }
-        result.engines.lyrics = "Qwen3-ASR-0.6B/ONNX-q4f16";
-        let aligner;
-        try {
-          aligner = await loadBrowserAligner(readBrowserModel, progress);
-          for (let i = 0; i < transcripts.length; i++) {
-            const clip = transcripts[i];
-            progress(`Situando la letra · ${i + 1}/${transcripts.length}`);
-            const raw = await aligner.align(clip.audio, clip.text, language);
-            result.rawAlignment.push(
-              ...raw.map((w) => ({
-                ...w,
-                start: w.start + clip.offset,
-                end: w.end + clip.offset,
-              })),
-            );
-            const normalized = normalizeWords(
-              raw,
-              clip.audio.length / 16000,
-              clip.offset,
-              i,
-            );
-            result.words.push(...normalized.words);
-            if (normalized.approximate)
-              result.warnings.push("alignment-approximate");
+        } else {
+          const transcripts = [];
+          let model;
+          try {
+            progress("Cargando Qwen…", 6);
+            model = await loadQwen(readBrowserModel, () => {});
+            for (const { start: offset, end } of audioChunks(audio)) {
+              const clip = audio.subarray(offset, end);
+              if (clip.length < 1600) continue;
+              progress("Obteniendo letra…", 10 + (52 * offset) / audio.length);
+              const text = await model.transcribe(clip, language);
+              if (text.partial) result.warnings.push("lyrics-partial");
+              transcripts.push({
+                audio: clip,
+                offset: offset / 16000,
+                ...text,
+              });
+              progress("Obteniendo letra…", 10 + (52 * end) / audio.length);
+            }
+          } finally {
+            await model?.dispose();
           }
-        } finally {
-          await aligner?.dispose();
+          result.engines.lyrics = "Qwen3-ASR-0.6B/ONNX-q4f16";
+          let aligner;
+          try {
+            progress("Situando la letra…", 64);
+            aligner = await loadBrowserAligner(readBrowserModel, () => {});
+            for (let i = 0; i < transcripts.length; i++) {
+              const clip = transcripts[i];
+              progress(
+                "Situando la letra…",
+                64 + (18 * i) / transcripts.length,
+              );
+              const raw = await aligner.align(clip.audio, clip.text, language);
+              result.rawAlignment.push(
+                ...raw.map((w) => ({
+                  ...w,
+                  start: w.start + clip.offset,
+                  end: w.end + clip.offset,
+                })),
+              );
+              const normalized = normalizeWords(
+                raw,
+                clip.audio.length / 16000,
+                clip.offset,
+                i,
+              );
+              result.words.push(...normalized.words);
+              if (normalized.approximate)
+                result.warnings.push("alignment-approximate");
+            }
+          } finally {
+            await aligner?.dispose();
+          }
         }
       } catch (error) {
         // Keep the chord import usable, but retain a local diagnostic so a
@@ -85,7 +158,11 @@ self.onmessage = async ({ data }) => {
     result.chords = await recognizeBrowserChords(
       harmony,
       readBrowserModel,
-      progress,
+      (_, fraction = 0) =>
+        progress(
+          "Detectando acordes…",
+          (lyrics ? 84 : 8) + (lyrics ? 13 : 89) * fraction,
+        ),
       gpu,
     );
     result.warnings = [...new Set(result.warnings)];

@@ -317,3 +317,10 @@ NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Whisper Base timestamped ONNX conversion, onnx-community.
+Base model license: Apache-2.0, as declared by openai/whisper-base.
+https://huggingface.co/onnx-community/whisper-base_timestamped
+Based on OpenAI Whisper Base, https://huggingface.co/openai/whisper-base
+Revision: 608c49e61301901684bc36cac8f74b95ff6b5a8e
+Weights are downloaded only after explicit user action, not redistributed here.

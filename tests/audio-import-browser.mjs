@@ -136,7 +136,10 @@ try {
   });
   await page.locator("#audio-analyze").click();
   await page.waitForFunction(() => window.fitWaiting);
-  assert.match(await page.locator("#audio-status").textContent(), /Abriendo/);
+  assert.match(
+    await page.locator("#audio-progress-stage").textContent(),
+    /Abriendo/,
+  );
   await page.locator("#audio-cancel").click();
   await page.evaluate(() => window.releaseFit());
   await page.waitForTimeout(50);

@@ -6,6 +6,9 @@ import json
 
 ROOT = Path('artifacts/browser-audio/models')
 MODELS = {
+ 'whisper': ('onnx-community/whisper-base_timestamped', '608c49e61301901684bc36cac8f74b95ff6b5a8e', [
+   'onnx/encoder_model_quantized.onnx', 'onnx/decoder_model_merged_quantized.onnx',
+   'config.json', 'generation_config.json', 'preprocessor_config.json', 'tokenizer.json', 'tokenizer_config.json']),
  'qwen': ('jiangzhuo9357/Qwen3-ASR-0.6B-ONNX', '4a01b95fafe2c9e3af77e33c18bbb7de349c62f6', [
    'encoder.fp16.onnx','decoder_init.q4f16.onnx','decoder_step.q4f16.onnx',
    'decoder_weights.q4f16.data','embed_tokens.int8.bin','embed_scales.f32.bin',

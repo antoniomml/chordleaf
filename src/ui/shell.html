@@ -709,7 +709,7 @@
   </form>
   <section id="audio-import" hidden>
     <div class="audio-toolbar">
-      <span class="audio-local-badge">● En tu equipo</span>
+      <span class="audio-local-badge">Experimental</span>
       <button
         id="audio-model-settings"
         type="button"
@@ -777,8 +777,28 @@
     <audio id="audio-player" controls preload="metadata" hidden></audio>
     <div id="audio-analysis-actions" class="dialog-actions">
       <button id="audio-analyze" class="primary" disabled>
-        Obtener letra y acordes</button
-      ><button id="audio-cancel" hidden>Cancelar análisis</button>
+        Obtener letra y acordes
+      </button>
+    </div>
+    <div id="audio-progress-view" hidden>
+      <div class="audio-progress-symbol" aria-hidden="true">♫</div>
+      <h2>Preparando tu canción</h2>
+      <p id="audio-progress-file"></p>
+      <div class="audio-progress-label">
+        <span id="audio-progress-stage" role="status" aria-live="polite"></span
+        ><strong id="audio-progress-percent"></strong>
+      </div>
+      <progress
+        id="audio-analysis-progress"
+        max="100"
+        aria-label="Progreso del análisis"
+      ></progress>
+      <p class="audio-progress-hint">
+        Puede tardar unos minutos. Mantén esta ventana abierta.
+      </p>
+      <button id="audio-cancel" class="audio-text-button" hidden>
+        Cancelar análisis
+      </button>
     </div>
     <p id="audio-status" class="web-help" role="status" aria-live="polite"></p>
   </section>
@@ -827,9 +847,24 @@
   <p id="audio-model-intro">
     Elige un modelo para la letra. Se descarga una vez y funciona sin conexión.
   </p>
+  <div class="audio-chord-model">
+    <span aria-hidden="true">✓</span>
+    <div>
+      <strong>Acordes · LV-Chordia</strong
+      ><small id="audio-chord-model-state"
+        >Incluido en la aplicación. Sin descarga adicional.</small
+      >
+    </div>
+  </div>
   <p id="audio-recommendation" class="web-help"></p>
   <fieldset id="audio-model-choices" class="audio-model-choices">
-    <legend>Modelo de letra</legend>
+    <legend>Letra · Opcional</legend>
+    <label class="audio-model-card"
+      ><input type="radio" name="audio-model" value="none" /><span
+        ><strong>Ninguna</strong
+        ><small>Sólo acordes · Puedes añadir la letra después</small></span
+      ></label
+    >
     <label class="audio-model-card"
       ><input type="radio" name="audio-model" value="qwen" /><span
         ><span class="audio-card-title"
@@ -862,15 +897,6 @@
       ></label
     >
   </fieldset>
-  <div class="audio-chord-model">
-    <span aria-hidden="true">✓</span>
-    <div>
-      <strong>Acordes · LV-Chordia</strong
-      ><small id="audio-chord-model-state"
-        >Incluido en la aplicación. Sin descarga adicional.</small
-      >
-    </div>
-  </div>
   <p
     id="audio-model-status"
     class="audio-model-status"

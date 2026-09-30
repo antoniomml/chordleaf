@@ -193,9 +193,30 @@ test("distributed chord assets match their pinned integrity and keep extended vo
   assert.ok(manifest.dictionary.length > 300);
   assert.ok(manifest.dictionary.some((c) => c.label.includes("maj7")));
   assert.ok(manifest.dictionary.some((c) => c.label.includes("/")));
-  for (const file of [...catalog.qwen, ...catalog.aligner])
+  for (const file of [...catalog.qwen, ...catalog.aligner, ...catalog.whisper])
     assert.match(
       file.url,
       /^https:\/\/huggingface\.co\/[^/]+\/[^/]+\/resolve\/[0-9a-f]{40}\//,
     );
+});
+
+test("missing speech timestamps preserve valid anchors and mark repaired words approximate", () => {
+  for (const value of [NaN, Infinity, undefined, null]) {
+    const raw = [
+      { text: "Hola", start: 1, end: 2 },
+      { text: "mundo", start: value, end: 3 },
+    ];
+    const result = normalizeWords(raw, 5, 10, 1);
+    assert.equal(result.approximate, true);
+    assert.deepEqual(result.words, [
+      { text: "Hola", start: 11, end: 12, line: 1, timing: "word" },
+      { text: "mundo", start: 12, end: 13, line: 1, timing: "grouped" },
+    ]);
+    validateAnalysis({
+      version: 1,
+      duration: 15,
+      words: result.words,
+      chords: [],
+    });
+  }
 });

@@ -79,6 +79,7 @@ try {
     .waitFor({ state: "visible" });
   await page.evaluate(axe.source);
   async function checkAccessibility(state) {
+    await page.evaluate(axe.source);
     const result = await page.evaluate(() => axe.run());
     assert.deepEqual(
       result.violations.map(({ id, nodes }) => ({
@@ -105,6 +106,7 @@ try {
     /13 MB/,
   );
   assert.deepEqual(uploads, []);
+  await page.screenshot({ path: "artifacts/audio-browser-models.png" });
   await page.locator("#browser-model-chords").click();
   assert.deepEqual(downloads, []);
   await page.locator("#browser-model-next").click();
@@ -343,10 +345,17 @@ try {
     .setInputFiles({ name: "Cancelar.wav", mimeType: "audio/wav", buffer });
   await page.locator("#audio-analyze").click();
   await page.waitForFunction(() =>
-    /Preparando los acordes|Analizando acordes/.test(
-      document.querySelector("#audio-status").textContent,
+    /Detectando acordes/.test(
+      document.querySelector("#audio-progress-stage").textContent,
     ),
   );
+  assert.equal(await page.locator("#audio-upload-controls").isVisible(), false);
+  assert.equal(await page.locator("#audio-model-settings").isVisible(), false);
+  assert.match(
+    await page.locator("#audio-progress-percent").textContent(),
+    /\d+ %/,
+  );
+  await checkAccessibility("analysis progress");
   await page.locator("#audio-cancel").click();
   await page.waitForFunction(() =>
     document.querySelector("#audio-status").textContent.includes("cancelado"),
@@ -416,7 +425,7 @@ try {
     .waitFor({ state: "visible" });
   assert.match(
     await english.locator("#audio-browser-model-dialog h2").textContent(),
-    /What would you like to get/,
+    /Audio models/,
   );
   assert.match(
     await english.locator("#browser-chords-state").textContent(),

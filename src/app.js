@@ -1064,7 +1064,7 @@ function importScreen(screen) {
       "PDF, Word, TXT o ChordPro. Se convierten en letra y acordes editables.",
     ),
     web: t("Pega el enlace de la canción que quieres tocar."),
-    audio: t("De una grabación a un borrador de letra y acordes."),
+    audio: t("Puede haber errores en la letra, los acordes y su posición."),
   }[screen];
   $("#import-privacy").textContent =
     screen === "audio"

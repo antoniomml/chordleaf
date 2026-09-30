@@ -4,6 +4,7 @@ import { runtimeURLs } from "./runtime.js";
 export const MODEL_CACHE = "chordleaf-audio-models-v1";
 export const bundles = {
   chords: ["chords"],
+  whisper: ["chords", "whisper"],
   qwen: ["chords", "qwen", "aligner"],
 };
 export const bundleBytes = (bundle) =>
@@ -25,7 +26,7 @@ export async function browserReadiness() {
     return { available: false, neural: false, qwen: false };
   const cache = await caches.open(MODEL_CACHE);
   const cached = new Map();
-  for (const file of resources("qwen"))
+  for (const file of [...resources("qwen"), ...resources("whisper")])
     cached.set(file.url, Boolean(await cache.match(absolute(file.url))));
   const installed = (bundle) =>
     resources(bundle).every((file) => cached.get(file.url));
@@ -38,14 +39,21 @@ export async function browserReadiness() {
       (sum, file) => sum + (cached.get(file.url) ? 0 : file.bytes || 0),
       0,
     );
+  const voiceInstalled = (names) =>
+    names.every((name) => catalog[name].every((file) => cached.get(file.url)));
   const neural = installed("chords");
   const qwenDownloaded = installed("qwen");
   return {
     available: neural,
     neural,
-    lyrics: false,
+    lyrics: installed("whisper"),
+    whisper: installed("whisper"),
+    whisperDownloaded: installed("whisper"),
+    hasWhisperFiles: hasFiles(["whisper"]),
     qwen: qwenDownloaded && (await browserHardware()).gpu,
     qwenDownloaded,
+    qwenVoiceDownloaded: voiceInstalled(["qwen", "aligner"]),
+    whisperVoiceDownloaded: voiceInstalled(["whisper"]),
     runtimeDownloaded: Object.values(runtimeURLs).every((url) =>
       cached.get(url),
     ),
@@ -53,6 +61,7 @@ export async function browserReadiness() {
     hasChordFiles: hasFiles(["chords"]),
     missingBytes: {
       qwen: missingBytes("qwen"),
+      whisper: missingBytes("whisper"),
       chords: missingBytes("chords"),
     },
   };
@@ -156,9 +165,11 @@ export async function removeBrowserModels(bundle) {
   const names =
     bundle === "qwen"
       ? ["qwen", "aligner"]
-      : bundle === "chords"
-        ? ["chords"]
-        : null;
+      : bundle === "whisper"
+        ? ["whisper"]
+        : bundle === "chords"
+          ? ["chords"]
+          : null;
   if (!names) throw new Error("Unknown browser model");
   const cache = await caches.open(MODEL_CACHE);
   for (const name of names)

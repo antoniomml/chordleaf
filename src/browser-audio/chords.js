@@ -122,7 +122,7 @@ export async function recognizeBrowserChords(
   await frontend.release();
   const probabilities = [];
   for (let model = 0; model < 5; model++) {
-    progress(`Analizando acordes · ${model + 1}/5`);
+    progress(`Analizando acordes · ${model + 1}/5`, 0.1 + (0.9 * model) / 5);
     const session = await ort.InferenceSession.create(
       await read("chords", `net-${model}.onnx`),
       { executionProviders: providers },
@@ -137,6 +137,7 @@ export async function recognizeBrowserChords(
       tensor.dispose();
     }
     await session.release();
+    progress("Analizando acordes…", 0.1 + (0.9 * (model + 1)) / 5);
   }
   features.dispose();
   return decodeChordProbabilities(probabilities, manifest, duration);

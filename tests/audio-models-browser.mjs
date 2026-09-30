@@ -94,7 +94,8 @@ try {
     true,
   );
   await page.screenshot({ path: "artifacts/audio-onboarding-mobile.png" });
-  await page.locator("#audio-model-later").click();
+  await page.locator('[name="audio-model"][value="none"]').check();
+  await page.locator("#audio-model-continue").click();
   await page.locator("#import-back").click();
   await page.locator("#audio").click();
   await page.waitForFunction(
@@ -129,6 +130,15 @@ try {
   await page.waitForFunction(
     () => !document.querySelector("#audio-model-dialog").open,
   );
+  await page.locator("#audio-model-settings").click();
+  await page.locator('[name="audio-model"][value="none"]').check();
+  await page.locator("#audio-model-continue").click();
+  await page.locator("#audio-model-dialog").waitFor({ state: "hidden" });
+  assert.equal(await page.locator("#audio-lyrics").isChecked(), false);
+  await page.locator("#audio-model-settings").click();
+  await page.locator('[name="audio-model"][value="whisper"]').check();
+  await page.locator("#audio-model-continue").click();
+  await page.locator("#audio-model-dialog").waitFor({ state: "hidden" });
   assert.equal(await page.locator("#audio-lyrics").isChecked(), true);
   assert.match(
     await page.locator("#audio-model-name").textContent(),
