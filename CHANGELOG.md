@@ -1,5 +1,13 @@
 # chordleaf changelog
 
+## 1.2.0 · September 30, 2026
+
+- Import audio locally in the browser with LV-Chordia for chords and optional Whisper or Qwen3-ASR for lyrics. Download models explicitly, reuse them on the device and open the resulting song directly in the editor. The audio importer remains experimental.
+- Make the required chord model a selected card alongside the optional lyric choices, with matching download controls and clearer section headings.
+- Emit chords at detected changes, without repeating held harmony at each new lyric line. Keep introductions separate from the first sung phrase and avoid piling a solo above one sustained syllable.
+- Balance lyric line lengths and keep crowded chord labels in one row across the preview, PDF and Word exports.
+- Add independent build-time flags for audio and web import. Audio processing stays on the user’s device; public desktop installers still require signing and notarization.
+
 ## 1.2.0-beta.2 · September 30, 2026 · Candidate
 
 - Simplify audio import with a one-time model setup dialog, explicit downloads, memory-based recommendations and saved model preferences. Use neural chord detection only, add drag-and-drop and a focused review screen, and offer ten shared lyric languages.

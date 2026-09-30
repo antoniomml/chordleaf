@@ -181,7 +181,7 @@ try {
   assert.equal(await page.locator("#source").isVisible(), true);
   assert.equal(
     await page.locator("#source").inputValue(),
-    "[Cmaj7]\n[Cmaj7]Hola [G7/B]mundo",
+    "[Intro] [Cmaj7]\nHola [G7/B]mundo",
   );
   assert.match(await page.locator("#toast").textContent(), /aproximados/);
   assert.equal(await page.locator("#audio-create").count(), 0);
