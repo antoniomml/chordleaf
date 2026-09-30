@@ -71,7 +71,17 @@ function sheetWords(words) {
 
 export function analysisToText(input) {
   const data = validateAnalysis(input);
-  const chords = data.chords.filter((c) => c.label !== "N");
+  const chords = [];
+  for (const chord of data.chords) {
+    const prior = chords.at(-1);
+    if (chord.label === "N") continue;
+    if (
+      prior?.label === chord.label &&
+      Math.abs(prior.end - chord.start) < 0.001
+    )
+      prior.end = chord.end;
+    else chords.push({ ...chord });
+  }
   const words = sheetWords(data.words);
   const starts = lyricLineStarts(words);
   const lines = [];
@@ -100,7 +110,11 @@ export function analysisToText(input) {
     // Breaths are part of the lyric phrase, not instrumental interludes.
     if (gap > 3) {
       const events = [];
-      while (index < chords.length && chords[index].start < word.start - 0.75) {
+      while (
+        index < chords.length &&
+        (chords[index].start < word.start - 0.75 ||
+          chords[index].end <= word.start)
+      ) {
         const chord = chords[index++];
         active = chord;
         events.push(chord);
@@ -110,7 +124,18 @@ export function analysisToText(input) {
     let prefix = "";
     const sounding = active?.end > word.start ? active : null;
     const changes = [];
-    while (index < chords.length && chords[index].start < word.end) {
+    const next = words[position + 1];
+    // A change near the end of a sung word belongs to the next onset, rather
+    // than jumping backwards to the beginning of the current word. Long
+    // interludes still retain their separate instrumental progression.
+    const cutoff =
+      next &&
+      next.start - word.end <= 3 &&
+      word.end - word.start <= 2 &&
+      !["grouped", "segment"].includes(word.timing)
+        ? Math.min(word.end, (word.start + next.start) / 2)
+        : word.end;
+    while (index < chords.length && chords[index].start < cutoff) {
       active = chords[index++];
       prefix += `[${active.label}]`;
       changes.push(active);

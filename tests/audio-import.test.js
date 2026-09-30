@@ -26,11 +26,44 @@ test("short neural intervals remain visible and time rounding carries minutes", 
   assert.equal(formatAudioTime(0.02), "0:00.02");
   assert.equal(formatAudioTime(59.999), "1:00.00");
 });
-test("merge retains instrumental changes and snaps intra-word changes to the word", () => {
+test("merge retains instrumental changes and assigns nearby sung onsets", () => {
   assert.equal(
     analysisToText(example()),
     "[C]\n[Am]Hoy [F]canto\n[G]\n[C]aquí",
   );
+});
+
+test("late changes attach to the next sung onset instead of stacking on the previous word", () => {
+  const data = {
+    version: 1,
+    duration: 5,
+    words: [
+      { start: 0.2, end: 1.5, text: "Luz", line: 0 },
+      { start: 1.5, end: 3, text: "azul", line: 0 },
+    ],
+    chords: [
+      { start: 0, end: 1.35, label: "C" },
+      { start: 1.35, end: 5, label: "G" },
+    ],
+  };
+  assert.equal(analysisToText(data), "[C]Luz [G]azul");
+});
+
+test("repeated contiguous labels collapse while silence retains a new onset", () => {
+  const data = {
+    version: 1,
+    duration: 5,
+    words: [],
+    chords: [
+      { start: 0, end: 1, label: "Em7" },
+      { start: 1, end: 2, label: "Em7" },
+      { start: 2, end: 3, label: "N" },
+      { start: 3, end: 5, label: "Em7" },
+    ],
+  };
+  const original = structuredClone(data);
+  assert.equal(analysisToText(data), "[Em7] [Em7]");
+  assert.deepEqual(data, original);
 });
 test("instrumental audio remains importable without invented lyrics", () => {
   const data = example();

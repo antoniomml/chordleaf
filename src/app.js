@@ -39,6 +39,7 @@ import {
 import { registerServiceWorker } from "./pwa.js";
 import { setupLocalWebImport } from "./ui/local-web-import.js";
 import { setupAudioImport } from "./ui/audio-import.js";
+import { resolveFeatureFlags } from "./feature-flags.js";
 import { setupClipboardImport } from "./ui/clipboard-import.js";
 import { setupMenu } from "./ui/menu.js";
 import { blankLineCount, compressBlankLines } from "./text-tools.js";
@@ -1029,10 +1030,15 @@ document.querySelectorAll("[data-harmony-view]").forEach((button) => {
 });
 let importGeneration = 0,
   importController;
-const audioImport = setupAudioImport({
-  accept: (data, options) => acceptImport(data, { ...options, edit: true }),
-  reportError: importError,
-});
+const features = resolveFeatureFlags(import.meta.env);
+$("#audio").hidden = !features.audioImport;
+$("#web").hidden = !features.webImport;
+const audioImport = features.audioImport
+  ? setupAudioImport({
+      accept: (data, options) => acceptImport(data, { ...options, edit: true }),
+      reportError: importError,
+    })
+  : { reset() {}, open() {} };
 const clipboardImport = setupClipboardImport({
   active: () => $("#new-dialog").open && !$("#new-menu").hidden,
   accept: (text) => acceptImport(importText(text, "")),
@@ -1040,6 +1046,11 @@ const clipboardImport = setupClipboardImport({
 });
 $("#audio").onclick = () => importScreen("audio");
 function importScreen(screen) {
+  if (
+    (screen === "audio" && !features.audioImport) ||
+    (screen === "web" && !features.webImport)
+  )
+    return;
   $("#new-dialog").dataset.screen = screen;
   audioImport.reset();
   importController?.abort();
@@ -1086,7 +1097,7 @@ function importScreen(screen) {
     $("#audio-drop").focus();
   } else if (screen === "text") $("#choose-file").focus();
   else {
-    $("#web").focus();
+    $("#new-menu .choice:not([hidden])").focus();
     if ($("#new-dialog").open) clipboardImport.refresh();
   }
 }
@@ -1095,7 +1106,7 @@ function openNewSong() {
   $("#file").value = "";
   importScreen("menu");
   $("#new-dialog").showModal();
-  $("#web").focus();
+  $("#new-menu .choice:not([hidden])").focus();
   clipboardImport.refresh();
 }
 $("#new").onclick = openNewSong;
@@ -1209,6 +1220,7 @@ const localWebImport = setupLocalWebImport({
 });
 $("#web-import").onsubmit = async (e) => {
   e.preventDefault();
+  if (!features.webImport) return;
   importController?.abort();
   importController = new AbortController();
   const generation = ++importGeneration;

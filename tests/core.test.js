@@ -96,8 +96,8 @@ test("nearby chords never overlap", () => {
   for (const row of l.pages[0].columns[0])
     for (let i = 1; i < row.marks.length; i++)
       assert.ok(
-        row.marks[i].lane !== row.marks[i - 1].lane ||
-          row.marks[i].at > row.marks[i - 1].at + row.marks[i - 1].chord.length,
+        row.marks[i].lane === 0 &&
+          row.marks[i].x > row.marks[i - 1].x + row.marks[i - 1].chord.length,
       );
 });
 test("text metadata and aligned chords import", () => {
@@ -211,10 +211,13 @@ test("labels always start at the syllable, including legacy centered documents",
     text: "Una ca[Emaj7]sa [Abm7b5]azul",
   });
   const row = l.pages[0].columns[0][0];
-  assert.equal(row.lyric, "Una casa azul");
+  assert.equal(row.lyric, "Una casa    azul");
   assert.equal(row.marks[0].at, 6);
   assert.equal(row.marks[0].x, 6);
-  assert.notEqual(row.marks[0].lane, row.marks[1].lane);
+  assert.equal(row.marks[0].lane, 0);
+  assert.equal(row.marks[1].lane, 0);
+  assert.equal(row.marks[1].at, 9);
+  assert.equal(row.marks[1].x, row.lyric.indexOf("azul"));
   const edge = layout({ ...base, chordAlign: "center", text: "[Emaj7]Casa" })
     .pages[0].columns[0][0];
   assert.equal(edge.marks[0].x, 0);

@@ -57,7 +57,8 @@ try {
   else await page.locator("#new").click();
   await page.locator("#audio").click();
   await page.locator("#audio-model-dialog").waitFor({ state: "visible" });
-  await page.locator("#audio-model-later").click();
+  await page.locator('[name="audio-model"][value="none"]').check();
+  await page.locator("#audio-model-continue").click();
   const buffer = Buffer.alloc(44 + 16000 * 2 * 6);
   buffer.write("RIFF", 0);
   buffer.writeUInt32LE(buffer.length - 8, 4);
@@ -87,12 +88,30 @@ try {
   });
   await page.locator("#audio-analyze").click();
   console.log("analysis clicked");
-  await page
-    .locator("#audio-result")
-    .waitFor({ state: "visible", timeout: 90000 });
-  await page.locator("#audio-draft").fill("[C]Desktop persistence [G]verified");
-  await page.locator("#audio-create").click();
-  await page.waitForFunction(() => !document.querySelector("#new-dialog").open);
+  // Silence has no sung words; the UI reports an empty result if the detector
+  // correctly outputs N, or opens its detected instrumental chords directly.
+  await page.waitForFunction(
+    () =>
+      !document.querySelector("#new-dialog").open ||
+      !document.querySelector("#import-error").hidden,
+    null,
+    { timeout: 90000 },
+  );
+  if (await page.locator("#new-dialog").isVisible()) {
+    assert.match(
+      await page.locator("#import-error").textContent(),
+      /No se han detectado/,
+    );
+    await page.locator("#import-back").click();
+    await page.locator("#blank").click();
+    await page.locator('.rail [data-desktop-view="edit"]').click();
+  }
+  await page.locator("#source").fill("[C]Desktop persistence [G]verified");
+  await page.waitForFunction(() =>
+    JSON.parse(localStorage.getItem("chordleaf-v1")).songs.some((s) =>
+      s.text.includes("Desktop persistence"),
+    ),
+  );
   await page.screenshot({ path: "artifacts/desktop/editor.png" });
   console.log("closing first window");
   await app.evaluate(({ dialog }) => {

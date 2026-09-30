@@ -56,6 +56,14 @@ La letra cantada requiere revisión. El modelo puede inventar palabras durante i
 
 Falta una evaluación de precisión sobre anotaciones temporales revisadas, comparaciones de letra con referencias completas, equipos con poca memoria y una matriz amplia de navegadores. Estas pruebas no convierten el resultado en una transcripción definitiva ni garantizan prestaciones idénticas en todos los equipos.
 
+## Colocación de acordes
+
+La hoja reserva espacio horizontal para que los acordes cercanos compartan una sola fila, ampliando preferentemente espacios entre palabras. Dos acordes con el mismo anclaje se muestran en su orden musical, con la letra bajo el último del grupo. Se conservan todos los acordes y sus anclajes en el texto editable; el espaciado adicional sólo afecta a la hoja, PDF y Word. Si la fila no cabe, se envuelve dentro de la columna. La edición directa abre el texto original, sin ese espaciado visual.
+
+La importación asigna cambios tardíos al inicio cantado más próximo cuando dispone de intervalos de palabra cortos; no aplica ese ajuste a grupos con tiempos aproximados. Se unen etiquetas idénticas contiguas, sin borrar reapariciones separadas por silencio ni modificar el análisis original. Se comprobaron dos importaciones completas de _Te vas_ con Qwen y su PDF como referencia de estructura: desaparecen las dobles filas en el documento ya importado, pero persisten errores de letra y algunos anclajes aproximados. No se ha medido una tasa de error temporal ni inferido automáticamente la cejilla.
+
+Las comprobaciones de regresión revisan coordenadas en la vista previa y PDF, conservación de letras y acordes, columnas estrechas y edición directa. Los audios, PDF de referencia y las capturas de la canción real permanecen en carpetas privadas ignoradas.
+
 ## YouTube sin servidor
 
 Sólo se necesita audio para el análisis. Sin embargo, pegar un enlace no da acceso al audio bruto desde otra web: [CORS depende de los permisos de YouTube](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS). Una prueba real desde el navegador obtuvo `Failed to fetch` al intentar leer directamente una página de YouTube. El [ejemplo de navegador de YouTube.js](https://github.com/LuanRT/YouTube.js/blob/main/examples/browser/README.md), aunque está señalado como antiguo, requiere un proxy. La [API oficial del reproductor](https://developers.google.com/youtube/iframe_api_reference) no ofrece una descarga del audio para procesarlo.
@@ -75,6 +83,6 @@ pnpm build
 pnpm start
 ```
 
-En producción basta publicar la web estática con las cabeceras de `vercel.json`. Los pesos de voz se descargan directamente de Hugging Face; la web distribuye sus recursos y los pesos pequeños de acordes. **No se necesita servidor de inferencia, GPU alojada ni API de pago por canción**. El alojamiento y la transferencia de archivos siguen sujetos a los límites del proveedor; no se promete un coste cero para tráfico ilimitado. No se ha desplegado todavía esta revisión en el dominio público.
+En producción basta publicar la web estática con las cabeceras de `vercel.json`. Los pesos de voz se descargan directamente de Hugging Face; la web distribuye sus recursos y los pesos pequeños de acordes. **No se necesita servidor de inferencia, GPU alojada ni API de pago por canción**. El alojamiento y la transferencia de archivos siguen sujetos a los límites del proveedor; no se promete un coste cero para tráfico ilimitado. La función conserva la etiqueta experimental y puede desactivarse con los [flags de Vercel](feature-flags.es.md).
 
 Licencias y atribuciones: [`public/licenses/browser-audio.txt`](../public/licenses/browser-audio.txt). Scripts de conversión y comparación: `experiments/audio/`; sus salidas y los audios privados quedan en `artifacts/browser-audio`, ignorado por Git.

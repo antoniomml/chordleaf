@@ -1,5 +1,6 @@
 import { parseSong, chordLabel, chordRE, unresolvedChordRE } from "./music.js";
 import { stickerGeometry } from "./dictionary.js";
+import { spaceChordAnchors } from "./chord-spacing.js";
 export const PAGE = { width: 595.28, height: 841.89 };
 function wrapText(text, capacity) {
   const lines = [];
@@ -135,11 +136,10 @@ export function layout(song, parsed = parseSong(song.text)) {
       flush();
       continue;
     }
-    const length = Math.max(
-      lyric.length,
-      ...marks.map((m) => m.at + m.chord.length),
-      0,
-    );
+    const spaced = spaceChordAnchors(lyric, marks);
+    lyric = spaced.lyric;
+    marks = spaced.marks;
+    const length = lyric.length;
     if (!length) {
       rows.push({
         ...line,
@@ -159,27 +159,22 @@ export function layout(song, parsed = parseSong(song.text)) {
         const space = lyric.lastIndexOf(" ", end - 1);
         if (space > offset + capacity * 0.45) end = space + 1;
         const cross = marks.find(
-          (m) => m.at < end && m.at + m.chord.length > end,
+          (m) => m.visualAt < end && m.visualAt + m.chord.length > end,
         );
-        if (cross && cross.at > offset) end = cross.at;
+        if (cross && cross.visualAt > offset) end = cross.visualAt;
       }
       const ms = marks
-        .filter((m) => m.at >= offset && m.at < end)
-        .map((m) => ({ ...m, at: m.at - offset }));
-      const laneEnds = [];
-      for (const m of ms) {
-        // Keep the musical anchor (at) separate from the visual left edge (x).
-        m.x = m.at;
-        let lane = laneEnds.findIndex((end) => m.x >= end + 0.5);
-        if (lane < 0) lane = laneEnds.length;
-        m.lane = lane;
-        laneEnds[lane] = m.x + m.chord.length;
-      }
-      const chordHeight =
-        ms.length && !instrumental ? laneEnds.length * size * 1.44 : 0;
+        .filter((m) => m.visualAt >= offset && m.visualAt < end)
+        .map((m) => ({
+          ...m,
+          at: m.at - (spaced.positions[offset] ?? 0),
+          x: m.visualAt - offset,
+          lane: 0,
+        }));
+      const chordHeight = ms.length ? size * 1.44 : 0;
       rows.push({
         ...line,
-        lyric: lyric.slice(offset, end),
+        lyric: lyric.slice(offset, end).trimEnd(),
         marks: ms,
         height: chordHeight + size * 1.44,
         lyricOffset: chordHeight,

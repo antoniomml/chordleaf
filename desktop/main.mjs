@@ -105,7 +105,11 @@ else {
           "snapshots",
           whisperRevision,
         ),
-        CHORDLEAF_DIST: join(root, "dist"),
+        CHORDLEAF_DIST:
+          process.env.CHORDLEAF_DESKTOP_TEST_DATA &&
+          process.env.CHORDLEAF_DESKTOP_TEST_DIST
+            ? resolve(process.env.CHORDLEAF_DESKTOP_TEST_DIST)
+            : join(root, "dist"),
         CHORDLEAF_AUDIO_OFFLINE: "1",
         CHORDLEAF_DESKTOP_TOKEN: randomBytes(32).toString("hex"),
       });

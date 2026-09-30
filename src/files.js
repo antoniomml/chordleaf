@@ -402,7 +402,7 @@ export async function exportSong(song, type) {
           ) {
             const marks = row.marks.filter((m) => (m.lane || 0) === lane);
             let line = "";
-            for (const m of marks) line = line.padEnd(m.at, " ") + m.chord;
+            for (const m of marks) line = line.padEnd(m.x, " ") + m.chord;
             paras.push(para(line, l.size, true, "111111", l.size * 1.44));
           }
           paras.push(

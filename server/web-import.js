@@ -177,7 +177,16 @@ export async function webImportMiddleware(req, res, next) {
   const enabled =
     process.env.CHORDLEAF_WEB_IMPORT_ENABLED ??
     process.env.CHORDI_WEB_IMPORT_ENABLED;
-  if (enabled === "false" || (process.env.VERCEL && enabled !== "true")) {
+  const feature = process.env.VITE_FEATURE_WEB_IMPORT;
+  const featureEnabled =
+    feature === undefined ||
+    feature === "" ||
+    feature.trim().toLowerCase() === "true";
+  if (
+    !featureEnabled ||
+    enabled === "false" ||
+    (process.env.VERCEL && enabled !== "true")
+  ) {
     res.statusCode = 503;
     res.end(
       JSON.stringify({
