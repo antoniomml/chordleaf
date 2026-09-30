@@ -70,6 +70,13 @@ export async function recognizeBrowserChords(
   gpu = true,
 ) {
   const manifest = await read("chords", "manifest.json", "json");
+  const duration = audio.length / manifest.sampleRate;
+  // The lowest CQT octaves need two seconds for reflection padding. Keep
+  // the synthetic tail out of the recurrent networks and exported timeline.
+  const minimumSamples = 2 * manifest.sampleRate;
+  const frontendAudio =
+    audio.length < minimumSamples ? new Float32Array(minimumSamples) : audio;
+  if (frontendAudio !== audio) frontendAudio.set(audio);
   const providers = gpu ? ["webgpu", "wasm"] : ["wasm"];
   progress("Preparando los acordes…");
   const bank = new Float32Array(await read("chords", "tuning-kernels.f32"));
@@ -86,7 +93,7 @@ export async function recognizeBrowserChords(
     { executionProviders: providers },
   );
   const outputs = await frontend.run({
-    audio: new ort.Tensor("float32", audio, [1, audio.length]),
+    audio: new ort.Tensor("float32", frontendAudio, [1, frontendAudio.length]),
     real: new ort.Tensor(
       "float32",
       kernel.subarray(0, size),
@@ -99,7 +106,19 @@ export async function recognizeBrowserChords(
     ),
     lengths: new ort.Tensor("float32", kernel.subarray(2 * size), [288]),
   });
-  const features = outputs.cqt;
+  let features = outputs.cqt;
+  if (frontendAudio !== audio) {
+    const frames = Math.floor(audio.length / manifest.hop) + 1;
+    const bins = features.dims[2];
+    const values = await features.getData();
+    const cropped = new ort.Tensor("float32", values.slice(0, frames * bins), [
+      1,
+      frames,
+      bins,
+    ]);
+    features.dispose();
+    features = cropped;
+  }
   await frontend.release();
   const probabilities = [];
   for (let model = 0; model < 5; model++) {
@@ -120,9 +139,5 @@ export async function recognizeBrowserChords(
     await session.release();
   }
   features.dispose();
-  return decodeChordProbabilities(
-    probabilities,
-    manifest,
-    audio.length / 22050,
-  );
+  return decodeChordProbabilities(probabilities, manifest, duration);
 }

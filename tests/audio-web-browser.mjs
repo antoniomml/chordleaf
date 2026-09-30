@@ -22,6 +22,27 @@ try {
   await page.addInitScript(() =>
     Object.defineProperty(navigator, "gpu", { value: undefined }),
   );
+  await page.addInitScript(() => {
+    const OriginalWorker = window.Worker;
+    window.staleAudioMessages = 0;
+    window.Worker = class extends OriginalWorker {
+      constructor(url, options) {
+        super(url, options);
+        this.audioAnalysis = /analyze\.worker/.test(String(url));
+      }
+      terminate() {
+        const callback = this.onmessage;
+        super.terminate();
+        if (this.audioAnalysis)
+          setTimeout(() => {
+            window.staleAudioMessages++;
+            callback?.call(this, {
+              data: { status: "stale-worker-message" },
+            });
+          }, 0);
+      }
+    };
+  });
   await page.goto(url);
   await page.locator("#empty-new").click();
   await page.locator("#audio").click();
@@ -41,7 +62,7 @@ try {
   );
   await page.locator("#browser-model-chords").click();
   assert.equal(await page.locator("#audio-lyrics").isChecked(), false);
-  const buffer = Buffer.alloc(44 + 22050 * 2 * 4);
+  const buffer = Buffer.alloc(44 + 22050 * 2);
   buffer.write("RIFF");
   buffer.writeUInt32LE(buffer.length - 8, 4);
   buffer.write("WAVEfmt ", 8);
@@ -54,7 +75,7 @@ try {
   buffer.writeUInt16LE(16, 34);
   buffer.write("data", 36);
   buffer.writeUInt32LE(buffer.length - 44, 40);
-  for (let i = 0; i < 22050 * 4; i++) {
+  for (let i = 0; i < 22050; i++) {
     const value =
       [261.6256, 329.6276, 391.9954].reduce(
         (s, f) => s + Math.sin((2 * Math.PI * f * i) / 22050),
@@ -77,7 +98,7 @@ try {
   );
   assert.match(result.engines.chords, /lv-chordia-web/);
   assert.ok(result.chords.length > 0);
-  assert.equal(result.duration, 4);
+  assert.equal(result.duration, 1);
   assert.deepEqual(result.words, []);
   assert.deepEqual(uploads, []);
   await page.locator("#audio-another").click();
@@ -94,6 +115,9 @@ try {
   await page.waitForFunction(() =>
     document.querySelector("#audio-status").textContent.includes("cancelado"),
   );
+  await page.waitForTimeout(50);
+  assert.ok(await page.evaluate(() => window.staleAudioMessages >= 2));
+  assert.match(await page.locator("#audio-status").textContent(), /cancelado/);
   assert.equal(await page.locator("#audio-result").isVisible(), false);
   // Production build: speech weights remain absent; the real chord network runs
   // after disabling all network, with runtime and models in the browser cache.

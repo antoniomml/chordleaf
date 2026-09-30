@@ -30,7 +30,7 @@ Pruebas privadas en el navegador integrado de Codex, Chromium con WebGPU, Apple 
 - _Por qué te vas_ completa, 205,39 segundos: 50,01 segundos de análisis y 77 intervalos de acordes, con tiempos aproximados.
 - Con el servidor de archivos apagado, se recargó la PWA y se completó letra, alineado y acordes de un fragmento de 25 segundos en 11,75 segundos, usando la caché local.
 - Una prueba de carga de diez minutos, construida repitiendo un fragmento privado, completó los acordes en 39,68 segundos, con 313 intervalos. Es una prueba del límite de duración en este M4, no una evaluación musical ni una garantía para móviles.
-- Una prueba automatizada ejecutó los modelos reales de acordes en WASM, repitió el cálculo sin conexión y obtuvo los mismos intervalos. No hubo POST ni solicitudes a `/api/audio-import`.
+- Una prueba automatizada ejecutó los modelos reales de acordes en WASM sobre un audio de un segundo, repitió el cálculo sin conexión y obtuvo los mismos intervalos, conservando su duración original. No hubo POST ni solicitudes a `/api/audio-import`. También verificó que los mensajes atrasados de un Worker terminado no alteran el estado después de cancelar.
 
 La letra cantada requiere revisión. El modelo puede inventar palabras durante instrumentales, perder finales de frases o repetir sílabas. Se limita la generación y se avisa cuando queda parcial. El alineador también puede dar tiempos invertidos, repetidos o fuera del fragmento: se conservan sus salidas originales en el JSON y se agrupan los tramos inconsistentes como aproximados, conservando el orden de la letra. No se presentan esos grupos como tiempos exactos por palabra.
 

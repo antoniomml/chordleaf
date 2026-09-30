@@ -45,7 +45,10 @@ export async function analyzeBrowserAudio(
   signal.throwIfAborted();
   return new Promise((resolve, reject) => {
     const worker = new AnalysisWorker();
+    let completed = false;
     const finish = (value, error) => {
+      if (completed) return;
+      completed = true;
       signal.removeEventListener("abort", abort);
       worker.terminate();
       error ? reject(error) : resolve(value);
@@ -61,6 +64,7 @@ export async function analyzeBrowserAudio(
         ),
       );
     worker.onmessage = ({ data }) => {
+      if (completed) return;
       if (data.status) progress(data.status);
       if (data.error) finish(null, new Error(data.error));
       if (data.result) finish(data.result);
