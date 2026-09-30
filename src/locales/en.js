@@ -762,4 +762,74 @@ export default {
   "Copia de seguridad · JSON": "Backup · JSON",
   "Todas las canciones abiertas": "Every open song",
   "Para otras apps de acordes": "For other chord apps",
+  "Prepara la importación de audio": "Prepare audio import",
+  "Los modelos se guardan en este navegador. Tu audio y la letra permanecen en tu equipo.":
+    "Models are stored in this browser. Your audio and lyrics stay on your device.",
+  "Letra y acordes · Qwen 0,6B": "Lyrics and chords · Qwen 0.6B",
+  "Qwen, alineador y acordes complejos. Necesita WebGPU; recomendamos 8 GB de memoria o más.":
+    "Qwen, alignment and complex chords. Requires WebGPU; we recommend at least 8 GB of memory.",
+  "Sólo acordes · LV-Chordia": "Chords only · LV-Chordia",
+  "También funciona sin WebGPU. Puedes añadir la letra después.":
+    "Works without WebGPU too. Add lyrics afterwards.",
+  "Además se descarga el motor de ejecución, unos 25 MB. La primera descarga requiere conexión; después podrás analizar sin conexión. El navegador puede borrar modelos si necesita espacio.":
+    "The runtime adds about 25 MB. Connect for the first download; afterwards you can analyze offline. The browser may remove models if it needs space.",
+  "WebGPU disponible. Qwen recomendado para este navegador.":
+    "WebGPU available. Qwen is recommended for this browser.",
+  "La letra necesita un navegador con WebGPU compatible. Prueba Chrome o Edge actualizado; mientras puedes importar sólo acordes.":
+    "Lyrics require a browser with compatible WebGPU. Try an up-to-date Chrome or Edge; you can import chords meanwhile.",
+  "Listo · Usar letra y acordes": "Ready · Use lyrics and chords",
+  "Listo · Usar sólo acordes": "Ready · Use chords only",
+  "Descargar letra y acordes · ": "Download lyrics and chords · ",
+  "Descargar acordes · 13 MB": "Download chords · 13 MB",
+  "Descargando modelos públicos…": "Downloading public models…",
+  "Descargando · ": "Downloading · ",
+  "Modelos listos en este navegador.": "Models ready in this browser.",
+  "Descarga pausada. Los archivos completos se conservan para reintentar.":
+    "Download paused. Completed files are kept for retry.",
+  "Descarga los modelos en Modelos y ajustes.":
+    "Download the models in Models and settings.",
+  "Pausar descarga": "Pause download",
+  "Usar audio de YouTube": "Use audio from YouTube",
+  "Abre el vídeo y captura el audio mientras se reproduce. Elige su pestaña y activa «Compartir audio». Sólo guardamos el audio en este navegador.":
+    "Open the video and capture audio while it plays. Choose its tab and enable “Share audio”. We only keep audio in this browser.",
+  "Enlace de YouTube": "YouTube link",
+  "Abrir vídeo": "Open video",
+  "Capturar audio de una pestaña": "Capture audio from a tab",
+  "Terminar y usar audio": "Finish and use audio",
+  "Cancelar captura": "Cancel capture",
+  "Disponible en navegadores que permiten compartir el audio de una pestaña, como Chrome y Edge. Máximo 10 minutos.":
+    "Available in browsers with tab audio sharing, such as Chrome and Edge. Maximum 10 minutes.",
+  "Capturando sólo audio · ": "Capturing audio only · ",
+  " s. Reproduce el vídeo desde el principio.":
+    " s. Play the video from the beginning.",
+  "Audio listo para analizar en tu equipo.":
+    "Audio ready to analyze on your device.",
+  "Captura cancelada. Puedes seleccionar un archivo de audio.":
+    "Capture cancelled. You can select an audio file.",
+  "Captura cancelada.": "Capture cancelled.",
+  "Leyendo el audio en tu navegador…": "Reading audio in your browser…",
+  "Cargando Qwen en la GPU…": "Loading Qwen on the GPU…",
+  "Cargando los tiempos de la letra…": "Loading lyric timing…",
+  "Obteniendo letra · ": "Getting lyrics · ",
+  "Situando la letra · ": "Aligning lyrics · ",
+  "Preparando los acordes…": "Preparing chords…",
+  "Analizando acordes · ": "Analyzing chords · ",
+  "No se pudieron obtener los acordes en este navegador. Prueba un fragmento más corto o Chrome/Edge actualizado.":
+    "Could not analyze chords in this browser. Try a shorter clip or an up-to-date Chrome/Edge.",
+  "No hay suficiente espacio en el navegador. Libera unos 3 GB y reintenta.":
+    "Not enough browser storage. Free about 3 GB and retry.",
+  "No se pudo descargar el modelo. Comprueba la conexión.":
+    "Could not download the model. Check your connection.",
+  "Descarga incompleta": "Incomplete download",
+  "Tamaño de modelo incorrecto": "Incorrect model size",
+  "El modelo descargado no coincide con la versión verificada.":
+    "The downloaded model does not match the verified version.",
+  "Introduce un enlace de YouTube válido.": "Enter a valid YouTube link.",
+  "Introduce un enlace HTTPS de YouTube.": "Enter an HTTPS YouTube link.",
+  "Introduce el enlace de un vídeo de YouTube.": "Enter a YouTube video link.",
+  "No se ha compartido audio. Usa Chrome o Edge, elige una pestaña y activa Compartir audio.":
+    "No audio was shared. Use Chrome or Edge, choose a tab and enable Share audio.",
+  "Este navegador no permite grabar el audio de una pestaña.":
+    "This browser cannot record tab audio.",
+  "No se pudo grabar el audio de la pestaña.": "Could not record tab audio.",
 };

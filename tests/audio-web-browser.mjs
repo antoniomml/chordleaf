@@ -118,6 +118,30 @@ try {
     await context.setOffline(false);
   }
   assert.deepEqual(errors, []);
+  const english = await browser.newPage({ locale: "en-US" });
+  await english.addInitScript(() =>
+    Object.defineProperty(navigator, "gpu", { value: undefined }),
+  );
+  await english.goto(url);
+  await english.locator("#empty-new").click();
+  await english.locator("#audio").click();
+  await english
+    .locator("#audio-browser-model-dialog")
+    .waitFor({ state: "visible" });
+  assert.match(
+    await english.locator("#audio-browser-model-dialog h2").textContent(),
+    /Prepare audio import/,
+  );
+  assert.match(
+    await english.locator("#browser-model-chords").textContent(),
+    /Download chords/,
+  );
+  await english.locator("#browser-model-close").click();
+  assert.equal(
+    await english.getByText("Use audio from YouTube", { exact: true }).count(),
+    1,
+  );
+  await english.close();
   console.log(
     "Browser audio: explicit download, real WASM chord inference, no uploads and offline inference passed.",
   );

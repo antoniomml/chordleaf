@@ -1,3 +1,4 @@
+import { t } from "../i18n.js";
 import {
   browserHardware,
   browserReadiness,
@@ -10,7 +11,7 @@ export function setupBrowserModels(refresh, busyChanged) {
   const dialog = document.createElement("dialog");
   dialog.id = "audio-browser-model-dialog";
   dialog.className = "audio-browser-model-dialog";
-  dialog.innerHTML = `<h2>Prepara la importación de audio</h2>
+  dialog.innerHTML = t`<h2>Prepara la importación de audio</h2>
     <p>Los modelos se guardan en este navegador. Tu audio y la letra permanecen en tu equipo.</p>
     <div class="audio-model-card"><strong>Letra y acordes · Qwen 0,6B</strong><p>Qwen, alineador y acordes complejos. Necesita WebGPU; recomendamos 8 GB de memoria o más.</p><button type="button" id="browser-model-qwen" class="primary">Descargar · ${(bundleBytes("qwen") / 1e9).toFixed(2)} GB</button></div>
     <div class="audio-model-card"><strong>Sólo acordes · LV-Chordia</strong><p>También funciona sin WebGPU. Puedes añadir la letra después.</p><button type="button" id="browser-model-chords">Descargar · 13 MB</button></div>
@@ -47,6 +48,9 @@ export function setupBrowserModels(refresh, busyChanged) {
     $("browser-model-chords").textContent = ready.neural
       ? "Listo · Usar sólo acordes"
       : "Descargar acordes · 13 MB";
+    const walker = document.createTreeWalker(dialog, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode())
+      walker.currentNode.data = t(walker.currentNode.data);
     busyChanged(Boolean(controller));
   }
   async function download(bundle) {
@@ -63,20 +67,22 @@ export function setupBrowserModels(refresh, busyChanged) {
     }
     controller = new AbortController();
     render();
-    $("browser-model-status").textContent = "Descargando modelos públicos…";
+    $("browser-model-status").textContent = t("Descargando modelos públicos…");
     try {
       await downloadBrowserModels(bundle, controller.signal, (value) => {
         $("browser-model-progress").value = value;
         $("browser-model-status").textContent =
-          `Descargando · ${Math.floor(value * 100)} %`;
+          t`Descargando · ${Math.floor(value * 100)} %`;
       });
-      $("browser-model-status").textContent =
-        "Modelos listos en este navegador.";
+      $("browser-model-status").textContent = t(
+        "Modelos listos en este navegador.",
+      );
     } catch (error) {
-      $("browser-model-status").textContent =
+      $("browser-model-status").textContent = t(
         error.name === "AbortError"
           ? "Descarga pausada. Los archivos completos se conservan para reintentar."
-          : error.message;
+          : error.message,
+      );
     } finally {
       controller = null;
       ready = await browserReadiness();

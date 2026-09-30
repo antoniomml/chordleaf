@@ -1,9 +1,10 @@
+import { t } from "../i18n.js";
 import { recordTabAudio, youtubeURL } from "../browser-audio/capture.js";
 
 export function setupAudioCapture(selectFile, reportError) {
   const host = document.createElement("details");
   host.className = "audio-capture";
-  host.innerHTML = `<summary>Usar audio de YouTube</summary><p>Abre el vídeo y captura el audio mientras se reproduce. Elige su pestaña y activa «Compartir audio». Sólo guardamos el audio en este navegador.</p><label>Enlace de YouTube<input type="url" id="audio-youtube-url" placeholder="https://www.youtube.com/watch?v=…" /></label><div class="dialog-actions"><button type="button" id="audio-youtube-open">Abrir vídeo</button><button type="button" id="audio-capture-start">Capturar audio de una pestaña</button><button type="button" id="audio-capture-finish" hidden>Terminar y usar audio</button><button type="button" id="audio-capture-cancel" hidden>Cancelar captura</button></div><p id="audio-capture-status" role="status" aria-live="polite">Disponible en navegadores que permiten compartir el audio de una pestaña, como Chrome y Edge. Máximo 10 minutos.</p>`;
+  host.innerHTML = t`<summary>Usar audio de YouTube</summary><p>Abre el vídeo y captura el audio mientras se reproduce. Elige su pestaña y activa «Compartir audio». Sólo guardamos el audio en este navegador.</p><label>Enlace de YouTube<input type="url" id="audio-youtube-url" placeholder="https://www.youtube.com/watch?v=…" /></label><div class="dialog-actions"><button type="button" id="audio-youtube-open">Abrir vídeo</button><button type="button" id="audio-capture-start">Capturar audio de una pestaña</button><button type="button" id="audio-capture-finish" hidden>Terminar y usar audio</button><button type="button" id="audio-capture-cancel" hidden>Cancelar captura</button></div><p id="audio-capture-status" role="status" aria-live="polite">Disponible en navegadores que permiten compartir el audio de una pestaña, como Chrome y Edge. Máximo 10 minutos.</p>`;
   document.getElementById("audio-upload-controls").append(host);
   const $ = (id) => host.querySelector("#" + id);
   let capture,
@@ -64,7 +65,7 @@ export function setupAudioCapture(selectFile, reportError) {
       const start = Date.now();
       const update = () => {
         $("audio-capture-status").textContent =
-          `Capturando sólo audio · ${Math.floor((Date.now() - start) / 1000)} s. Reproduce el vídeo desde el principio.`;
+          t`Capturando sólo audio · ${Math.floor((Date.now() - start) / 1000)} s. Reproduce el vídeo desde el principio.`;
       };
       update();
       timer = setInterval(update, 1000);
@@ -77,15 +78,17 @@ export function setupAudioCapture(selectFile, reportError) {
             type: blob.type,
           }),
         );
-        $("audio-capture-status").textContent =
-          "Audio listo para analizar en tu equipo.";
+        $("audio-capture-status").textContent = t(
+          "Audio listo para analizar en tu equipo.",
+        );
       }
     } catch (error) {
       if (current === generation)
-        $("audio-capture-status").textContent =
+        $("audio-capture-status").textContent = t(
           error.name === "NotAllowedError"
             ? "Captura cancelada. Puedes seleccionar un archivo de audio."
-            : error.message;
+            : error.message,
+        );
     } finally {
       if (current === generation) {
         clearInterval(timer);
@@ -98,7 +101,7 @@ export function setupAudioCapture(selectFile, reportError) {
   $("audio-capture-finish").onclick = () => capture?.finish();
   $("audio-capture-cancel").onclick = () => {
     close();
-    $("audio-capture-status").textContent = "Captura cancelada.";
+    $("audio-capture-status").textContent = t("Captura cancelada.");
   };
   render();
   return {
