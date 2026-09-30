@@ -27,10 +27,14 @@ export function setupBrowserModels(refresh, busyChanged) {
   dialog.setAttribute("aria-labelledby", "browser-model-heading");
   dialog.innerHTML = t`<button type="button" id="browser-model-close" class="dialog-close" aria-label="Cerrar">×</button>
     <h2 id="browser-model-heading">Modelos de audio</h2>
-    <div class="browser-chord-required"><div><strong>Acordes · LV-Chordia</strong><small>Necesario · 13 MB</small></div>
-      <div class="browser-model-storage"><span id="browser-chords-state"></span><button type="button" id="browser-chords-download" class="audio-text-button">Descargar</button><button type="button" id="browser-chords-remove" class="audio-text-button" hidden>Borrar</button></div>
-    </div>
-    <fieldset class="browser-model-choices"><legend>Letra · Opcional</legend>
+    <fieldset class="browser-model-choices browser-chord-models"><legend>Acordes <span class="audio-section-badge">Obligatorio</span></legend>
+      <div class="browser-model-card is-selected browser-chord-required">
+        <label for="browser-required-chords"><input type="checkbox" id="browser-required-chords" checked disabled aria-describedby="browser-chords-state" />
+          <span><strong>LV-Chordia</strong><small>Detector de acordes · 13 MB</small></span></label>
+        <div class="browser-model-storage"><span id="browser-chords-state"></span><button type="button" id="browser-chords-download" class="primary browser-model-download">Descargar</button><button type="button" id="browser-chords-remove" class="audio-text-button" hidden>Borrar</button></div>
+      </div>
+    </fieldset>
+    <fieldset class="browser-model-choices"><legend>Letra <span class="audio-section-badge">Opcional</span></legend>
       <div class="browser-model-card" data-bundle="chords">
         <label for="browser-model-chords"><input type="radio" name="browser-audio-model" id="browser-model-chords" value="chords" />
           <span><strong>Ninguna</strong><small>Sólo acordes · Puedes añadir la letra después</small></span></label>
