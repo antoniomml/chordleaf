@@ -3503,3 +3503,36 @@ select:focus-visible {
     align-items: baseline;
   }
 }
+
+.audio-preview-heading {
+  display: block;
+  margin: 16px 0 8px;
+}
+#audio-sheet-preview {
+  max-height: 260px;
+  overflow: auto;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font:
+    13px/1.44 "Courier New",
+    monospace;
+  background: #171d17;
+}
+.audio-sheet-line {
+  position: relative;
+  min-height: 18.72px;
+}
+.audio-sheet-chord,
+.audio-sheet-lyric {
+  position: absolute;
+  white-space: pre;
+}
+.audio-sheet-chord {
+  color: var(--green);
+  font-weight: bold;
+}
+#audio-result #audio-timeline {
+  max-height: 110px;
+}

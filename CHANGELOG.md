@@ -3,6 +3,7 @@
 ## 1.2.0-beta.2 · September 30, 2026 · Candidate
 
 - Simplify audio import with a one-time model setup dialog, explicit downloads, memory-based recommendations and saved model preferences. Use neural chord detection only, add drag-and-drop and a focused review screen, and offer ten shared lyric languages.
+- Improve lyric phrasing and chord placement, preserve transcription punctuation and add a live chord-over-lyric preview. Bound Qwen decoding per fragment and retry pathological repetition loops without losing the rest of the song; mark incomplete lyrics and approximate alignment repairs for review.
 
 ## 1.2.0-beta.1 · September 30, 2026 · Candidate
 

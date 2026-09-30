@@ -11,6 +11,8 @@ import unicodedata
 import os
 from pathlib import Path
 import sys
+import statistics
+import re
 from languages import LANGUAGES
 from offline import require_offline
 
@@ -68,6 +70,83 @@ def aligned_groups(items, start, end, line):
     return words,approximate
 
 
+def restore_transcript_text(words, text):
+    """Restore ASR punctuation/case stripped by the aligner, without new times."""
+    canonical = lambda value: ''.join(c for c in unicodedata.normalize('NFKC', value).casefold() if c.isalnum())
+    if canonical(' '.join(w['text'] for w in words)) != canonical(text):
+        return False
+    positions=[]
+    for index, character in enumerate(text):
+        positions.extend([index] * len(canonical(character)))
+    if len(positions) != len(canonical(text)):
+        return False
+    cursor=0;left=0
+    for word in words:
+        cursor+=len(canonical(word['text']))
+        right=positions[cursor] if cursor<len(positions) else len(text)
+        word['text']=text[left:right].strip()
+        left=right
+    return True
+
+
+def trim_alignment_lead(words):
+    """Bound an implausibly long first token over an instrumental introduction.
+
+    This is an approximate onset, not a measured vocal boundary. Keep raw
+    alignment separately and mark the adjusted event for review.
+    """
+    if not words or len(words[0]['text'].split()) != 1:
+        return 0
+    first=words[0]
+    durations=[w['end']-w['start'] for w in words[1:]
+               if len(w['text'].split())==1 and 0<w['end']-w['start']<2]
+    if first['end']-first['start']<=4 or not durations:
+        return 0
+    cap=min(1.5,max(0.25,2*statistics.median(durations)))
+    first['start']=first['end']-cap
+    first['timing']='grouped'
+    return 1
+
+
+def repetition_start(text):
+    """Detect pathological decoding loops, not normal repeated choruses."""
+    tokens=list(re.finditer(r'\S+',text))
+    values=[m.group().casefold().strip('.,!?;:') for m in tokens]
+    for width,repeats in [(1,40),(2,24),(3,24),(4,24),(5,24),(6,24)]:
+        run=0
+        for i in range(width,len(values)):
+            run=run+1 if values[i] and values[i]==values[i-width] else 0
+            if run >= width*(repeats-1):
+                return tokens[i-run-width+1].start()
+    return None
+
+
+def generate_segments(model, audio, language):
+    """A loop in one chunk must not consume the budget for the entire song."""
+    from mlx_audio.stt.models.qwen3_asr.qwen3_asr import split_audio_into_chunks
+    from analyze import RATE
+    segments=[];partial=False
+    for chunk,start in split_audio_into_chunks(audio,sr=RATE,chunk_duration=30):
+        generated=model.generate(chunk,max_tokens=1024,temperature=0,
+                                 language=language,chunk_duration=45)
+        text=generated.text.strip()
+        if repetition_start(text) is not None:
+            generated=model.generate(chunk,max_tokens=1024,temperature=0,
+                                     language=language,chunk_duration=45,
+                                     repetition_penalty=1.15,repetition_context_size=64)
+            text=generated.text.strip()
+        repeated=repetition_start(text)
+        if repeated is not None:
+            text=text[:repeated].strip()
+            partial=True
+        if generated.generation_tokens>=1024:
+            partial=True
+        detected=(generated.segments or [{}])[0].get('language')
+        segments.append({'start':start,'end':start+len(chunk)/RATE,
+                         'text':text,'language':detected or language})
+    return segments,partial
+
+
 def transcribe(path, language=None):
     from analyze import decode,RATE
     from mlx_audio.stt.utils import load
@@ -75,8 +154,8 @@ def transcribe(path, language=None):
     audio=decode(path);duration=len(audio)/RATE
     asr_path,align_path=paths()
     model=load(asr_path,strict=True)
-    result=model.generate(audio,max_tokens=8192,temperature=0,language=LANGUAGES.get(language, {}).get('qwen'),chunk_duration=30)
-    transcript=result.text;segments=result.segments
+    segments,partial=generate_segments(model,audio,LANGUAGES.get(language, {}).get('qwen'))
+    transcript=' '.join(segment['text'] for segment in segments)
     del model;gc.collect();mx.clear_cache()
     aligner=load(align_path,strict=True)
     words=[];approximate=0;raw=[]
@@ -90,14 +169,15 @@ def transcribe(path, language=None):
         grouped,adjustments=aligned_groups(aligned.items,start,end,line)
         # Some aligners omit tokens altogether. Keep the original transcript
         # as a coarse segment when token preservation cannot be established.
-        canonical = lambda value: ''.join(c for c in unicodedata.normalize('NFKC', value).casefold() if c.isalnum())
-        if canonical(' '.join(w['text'] for w in grouped)) != canonical(text):
+        if not restore_transcript_text(grouped, text):
             grouped = [{'start':start,'end':end,'text':text,'line':line,'timing':'segment'}]
             adjustments += 1
+        adjustments += trim_alignment_lead(grouped)
         words.extend(grouped);approximate+=adjustments
 
     return {'words':words,'transcript':transcript,'engine':'qwen3-asr-1.7b-8bit+forced-aligner-0.6b-8bit',
-            'warnings':['alignment-approximate'] if approximate else [],'approximateAlignments':approximate,'rawAlignment':raw}
+            'warnings':(['alignment-approximate'] if approximate else [])+(['lyrics-partial'] if partial else []),
+            'approximateAlignments':approximate,'rawAlignment':raw}
 
 
 if __name__=='__main__':

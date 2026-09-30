@@ -393,6 +393,9 @@ export default {
   Vista: "View",
   "Herramientas musicales": "Music tools",
   "Vista previa": "Preview",
+  "Vista previa de letra y acordes": "Lyrics and chords preview",
+  "Hay tramos de letra incompletos. Revísalos al escuchar la canción.":
+    "Some lyric passages are incomplete. Review them while listening to the song.",
   "Consultar tonalidad": "View key",
   Tonalidad: "Key",
   "Explorar y crear acordes": "Explore and create chords",

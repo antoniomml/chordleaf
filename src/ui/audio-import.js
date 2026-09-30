@@ -3,6 +3,7 @@ import { setupDesktopModels } from "./audio-desktop.js";
 import languages from "../audio-languages.json" with { type: "json" };
 import { installedLyricModel, readAudioSettings } from "../audio-models.js";
 import { t } from "../i18n.js";
+import { setupAudioPreview } from "./audio-preview.js";
 import {
   analysisToText,
   validateAnalysis,
@@ -11,6 +12,10 @@ import {
 
 export function setupAudioImport({ accept, reportError }) {
   const $ = (id) => document.getElementById(id);
+  const renderDraft = setupAudioPreview(
+    $("audio-draft"),
+    $("audio-sheet-preview"),
+  );
   // Bind specifically to an audio element; a generic .src sink could target
   // an executable element if the shell were accidentally changed.
   const player = document.querySelector("audio#audio-player");
@@ -99,6 +104,7 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-file").disabled = false;
     $("audio-create").disabled = false;
     $("audio-timeline").replaceChildren();
+    $("audio-sheet-preview").replaceChildren();
     $("audio-language").disabled = false;
     $("audio-lyrics").disabled = false;
     status("");
@@ -263,6 +269,8 @@ export function setupAudioImport({ accept, reportError }) {
       if (current !== generation) return;
       result = data;
       $("audio-warning").hidden = !data.warnings?.includes("lyrics-failed");
+      $("audio-partial-warning").hidden =
+        !data.warnings?.includes("lyrics-partial");
       $("audio-timing-warning").hidden = !data.warnings?.includes(
         "alignment-approximate",
       );
@@ -286,6 +294,7 @@ export function setupAudioImport({ accept, reportError }) {
         $("audio-timeline").append(button);
       }
       $("audio-result").hidden = false;
+      renderDraft();
       $("audio-upload-controls").hidden = true;
       $("audio-analysis-actions").hidden = true;
       status(

@@ -788,9 +788,19 @@
       <p id="audio-warning" class="audio-notice" role="status" hidden>
         No se pudo obtener la letra. Puedes añadirla al borrador.
       </p>
+      <p id="audio-partial-warning" class="audio-notice" role="status" hidden>
+        Hay tramos de letra incompletos. Revísalos al escuchar la canción.
+      </p>
       <p id="audio-timing-warning" class="audio-notice" role="status" hidden>
         Algunos tiempos son aproximados. Revisa esos tramos al escuchar.
       </p>
+      <strong class="audio-preview-heading">Vista previa</strong>
+      <div
+        id="audio-sheet-preview"
+        role="region"
+        aria-label="Vista previa de letra y acordes"
+        tabindex="0"
+      ></div>
       <div class="audio-timeline-heading">
         <strong>Acordes</strong
         ><label class="audio-option"
@@ -801,7 +811,7 @@
       <label class="field"
         >LETRA Y ACORDES<textarea
           id="audio-draft"
-          rows="8"
+          rows="5"
           maxlength="50000"
         ></textarea>
       </label>

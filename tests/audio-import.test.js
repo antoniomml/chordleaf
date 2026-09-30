@@ -35,7 +35,7 @@ test("merge retains instrumental changes and snaps intra-word changes to the wor
 test("instrumental audio remains importable without invented lyrics", () => {
   const data = example();
   data.words = [];
-  assert.equal(analysisToText(data), "[C]\n[Am]\n[F]\n[G]\n[C]");
+  assert.equal(analysisToText(data), "[C] [Am] [F] [G] [C]");
 });
 test("reject malformed, overlapping, unbounded and nonfinite timelines", () => {
   for (const edit of [
@@ -65,10 +65,7 @@ test("neural extensions and slash bass survive validation and sheet conversion",
   data.chords.forEach((c, i) => {
     c.label = labels[i];
   });
-  assert.equal(
-    analysisToText(data),
-    "[Cmaj7]\n[Dm7b5]\n[G7sus4]\n[Am9]\n[D/F#]",
-  );
+  assert.equal(analysisToText(data), "[Cmaj7] [Dm7b5] [G7sus4] [Am9] [D/F#]");
 });
 
 test("approximate lyric groups preserve text longer than a single word", () => {
@@ -78,5 +75,63 @@ test("approximate lyric groups preserve text longer than a single word", () => {
   assert.throws(() => validateAnalysis(data));
   data.words[0].timing = "grouped";
   assert.equal(validateAnalysis(data).words[0].text, text);
-  assert.ok(analysisToText(data).includes(text));
+  assert.ok(
+    analysisToText(data)
+      .replace(/\[[^\]]+\]/g, "")
+      .replace(/\s+/g, " ")
+      .includes(text),
+  );
+});
+
+test("breaths keep chord changes attached to the next sung word", () => {
+  const data = example();
+  data.words = [
+    { start: 2, end: 3, text: "Hoy", line: 0 },
+    { start: 4.2, end: 5, text: "canto", line: 0 },
+  ];
+  data.chords = [
+    { start: 0, end: 3.5, label: "C" },
+    { start: 3.5, end: 12, label: "F" },
+  ];
+  const sheet = analysisToText(data);
+  assert.match(sheet, /\[F\]canto/);
+  assert.ok(!sheet.split("\n").includes("[F]"));
+});
+
+test("coarse multi-word timing distributes chord anchors and keeps raw data intact", () => {
+  const data = example();
+  data.words = [
+    { start: 2, end: 10, text: "Hoy canto aquí", line: 0, timing: "segment" },
+  ];
+  data.chords = [
+    { start: 0, end: 8, label: "C" },
+    { start: 8, end: 12, label: "F" },
+  ];
+  const original = structuredClone(data);
+  assert.match(analysisToText(data), /Hoy canto \[F\]aquí/);
+  assert.deepEqual(data, original);
+});
+
+test("lines follow lyric punctuation and keep sounding chords above later verses", () => {
+  const data = example();
+  data.words = [
+    { start: 2, end: 3, text: "Hoy.", line: 0 },
+    { start: 3, end: 4, text: "Canto", line: 0 },
+  ];
+  data.chords = [{ start: 0, end: 12, label: "C" }];
+  assert.equal(analysisToText(data), "[C]\n[C]Hoy.\n[C]Canto");
+  data.chords[0].end = 2;
+  assert.equal(analysisToText(data), "[C]\nHoy.\nCanto");
+});
+
+test("an implausibly long vowel cannot stack a whole solo above one word", () => {
+  const data = example();
+  data.words = [{ start: 1, end: 12, text: "Oh", line: 0 }];
+  data.chords = [
+    { start: 0, end: 3, label: "C" },
+    { start: 3, end: 6, label: "Am" },
+    { start: 6, end: 9, label: "F" },
+    { start: 9, end: 12, label: "G" },
+  ];
+  assert.equal(analysisToText(data), "[C]\n[C]Oh\n[Am] [F] [G]");
 });

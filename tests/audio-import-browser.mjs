@@ -112,7 +112,7 @@ try {
   await page.locator("#audio-timing-warning").waitFor({ state: "visible" });
   assert.equal(
     await page.locator("#audio-draft").inputValue(),
-    "[Cmaj7]\nHola [G7/B]mundo",
+    "[Cmaj7]\n[Cmaj7]Hola [G7/B]mundo",
   );
   assert.equal(await page.locator("#audio-timeline button").count(), 2);
   await page.waitForFunction(
@@ -144,6 +144,26 @@ try {
     () => document.querySelector("#audio-player").paused,
   );
   await page.locator("#audio-draft").fill("[Cmaj7]Revisión conservada");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("#audio-sheet-preview")
+      .textContent.includes("Revisión conservada"),
+  );
+  const previewAnchors = await page
+    .locator("#audio-sheet-preview")
+    .evaluate((preview) => {
+      const chord = preview
+        .querySelector(".audio-sheet-chord")
+        .getBoundingClientRect();
+      const lyric = preview
+        .querySelector(".audio-sheet-lyric")
+        .getBoundingClientRect();
+      return {
+        sameColumn: Math.abs(chord.left - lyric.left) < 1,
+        above: chord.bottom <= lyric.top + 1,
+      };
+    });
+  assert.deepEqual(previewAnchors, { sameColumn: true, above: true });
   const download = page.waitForEvent("download");
   await page.locator("#audio-download").click();
   const exported = await download;

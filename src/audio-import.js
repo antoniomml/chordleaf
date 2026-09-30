@@ -45,44 +45,100 @@ export function validateAnalysis(data) {
   return data;
 }
 
-// Keep the original timing in JSON. A text sheet can only anchor to words;
-// changes inside a sustained word snap to its beginning, never fake syllables.
+// Layout does not change source intervals. Multi-word approximate groups use
+// proportional text anchors for the sheet only; these are not word timestamps.
+function sheetWords(words) {
+  return words.flatMap((word) => {
+    const parts = word.text
+      .replace(/[\[\]{}\r\n]/g, "")
+      .trim()
+      .split(/\s+/u);
+    const size = parts.reduce((n, text) => n + text.length, 0);
+    let offset = 0;
+    return parts.filter(Boolean).map((text) => {
+      const start = word.start + (word.end - word.start) * (offset / size);
+      offset += text.length;
+      return {
+        ...word,
+        text,
+        start,
+        end: word.start + (word.end - word.start) * (offset / size),
+      };
+    });
+  });
+}
+
 export function analysisToText(input) {
   const data = validateAnalysis(input);
   const chords = data.chords.filter((c) => c.label !== "N");
   const lines = [];
   let line = "",
     previous,
+    active,
+    characters = 0,
+    count = 0,
     index = 0;
   const flush = () => {
     if (line.trim()) lines.push(line.trim());
     line = "";
+    characters = count = 0;
   };
-  for (const word of data.words) {
+  const instrumental = (events) => {
+    flush();
+    for (let i = 0; i < events.length; i += 8)
+      lines.push(
+        events
+          .slice(i, i + 8)
+          .map((c) => `[${c.label}]`)
+          .join(" "),
+      );
+  };
+  for (const word of sheetWords(data.words)) {
+    const gap = previous ? word.start - previous.end : Infinity;
     if (
       previous &&
-      (word.line !== previous.line || word.start - previous.end > 1.5)
+      (gap > 1.2 ||
+        (gap > 0.55 && count >= 3) ||
+        /[.!?。！？]$/u.test(previous.text) ||
+        characters + word.text.length > 64 ||
+        (word.line !== previous.line && count >= 6 && gap > 0.2))
     )
       flush();
-    // Preserve chords in introductions, pauses and instrumental breaks.
-    while (
-      index < chords.length &&
-      chords[index].start < word.start &&
-      (!previous || chords[index].start >= previous.end) &&
-      word.start - chords[index].start > 0.5
-    ) {
-      flush();
-      lines.push(`[${chords[index++].label}]`);
+    // Breaths are part of the lyric phrase, not instrumental interludes.
+    if (gap > 3) {
+      const events = [];
+      while (index < chords.length && chords[index].start < word.start - 0.75) {
+        const chord = chords[index++];
+        active = chord;
+        events.push(chord);
+      }
+      if (events.length) instrumental(events);
     }
     let prefix = "";
-    while (index < chords.length && chords[index].start < word.end)
-      prefix += `[${chords[index++].label}]`;
-    const text = word.text.replace(/[\[\]{}\r\n]/g, "").trim();
-    line += (line ? " " : "") + prefix + text;
+    const sounding = active?.end > word.start ? active : null;
+    const changes = [];
+    while (index < chords.length && chords[index].start < word.end) {
+      active = chords[index++];
+      prefix += `[${active.label}]`;
+      changes.push(active);
+    }
+    // A long, weakly aligned token cannot supply anchors for an entire solo.
+    // Preserve those intervals as a progression instead of stacking many
+    // labels over a single syllable and suggesting impossible precision.
+    const overflow = changes.length > 2 && word.end - word.start > 2;
+    if (overflow) prefix = `[${(sounding || changes[0]).label}]`;
+    // Repeat the sounding harmony at a new lyric line, even without a change.
+    // A preceding N interval or expired chord must never carry into the verse.
+    if (!line && !prefix && active && active.end > word.start)
+      prefix = `[${active.label}]`;
+    line += (line ? " " : "") + prefix + word.text;
+    characters += word.text.length + 1;
+    count++;
     previous = word;
+    if (overflow) instrumental(sounding ? changes : changes.slice(1));
   }
   flush();
-  for (; index < chords.length; index++) lines.push(`[${chords[index].label}]`);
+  if (index < chords.length) instrumental(chords.slice(index));
   return lines.join("\n");
 }
 
