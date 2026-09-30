@@ -21,3 +21,6 @@ test-results/
 # Local audio research runtime and model outputs
 experiments/audio/.venv/
 __pycache__/
+
+# Packaged desktop apps and portable runtime
+release-desktop/

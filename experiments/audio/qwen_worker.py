@@ -15,7 +15,7 @@ from offline import require_offline
 
 ASR_ID='mlx-community/Qwen3-ASR-1.7B-8bit'
 ALIGN_ID='mlx-community/Qwen3-ForcedAligner-0.6B-8bit'
-REVISIONS={ASR_ID:'a8379a2e2f9e313c9292cdf1af4055ab56d50d55',ALIGN_ID:'0e1a68e91d815300c7c9754b2a7639378b23db15'}
+REVISIONS=json.loads(Path(__file__).with_name('model-catalog.json').read_text())['qwen']['models']
 
 
 def model_path(variable, default):
@@ -32,7 +32,8 @@ def paths():
 def ready():
     try:
         import mlx.core
-        from mlx_audio.stt.utils import load
+        from importlib.util import find_spec
+        if not find_spec('mlx_audio'): return False
         asr,aligner=paths()
         return all((p/'config.json').is_file() and any(p.glob('*.safetensors')) for p in [asr,aligner])
     except Exception:return False

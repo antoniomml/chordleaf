@@ -1,5 +1,32 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "La importación de audio necesita Chordleaf para escritorio. Los modelos se ejecutan en tu ordenador; esta web no recibe el audio.":
+    "Audio import requires Chordleaf for desktop. Models run on your computer; this website does not receive the audio.",
+  "Descargar para Mac con Apple Silicon": "Download for Apple Silicon Mac",
+  "La primera versión está en preparación para Mac con Apple Silicon.":
+    "The first release is being prepared for Apple Silicon Mac.",
+  "Modelos de letra en este equipo": "Lyric models on this computer",
+  "Qwen ofrece la mejor letra en nuestras pruebas. Recomendamos 16 GB de memoria. La descarga inicial necesita Internet; después puedes analizar sin conexión.":
+    "Qwen produces the best lyrics in our tests. We recommend 16 GB of memory. The initial download needs Internet; afterwards you can analyze offline.",
+  "Instalar Qwen · 3,8 GB": "Install Qwen · 3.8 GB",
+  "Instalar Whisper · 0,5 GB": "Install Whisper · 0.5 GB",
+  "Cancelar descarga": "Cancel download",
+  "Eliminar modelos de letra": "Remove lyric models",
+  "Los acordes funcionan sin descargar estos modelos. Puedes importar y exportar tus canciones mediante una copia JSON; la web y la aplicación guardan bibliotecas separadas.":
+    "Chords work without downloading these models. You can import and export your songs using a JSON backup; the website and desktop app keep separate libraries.",
+  "Los modelos se guardan en este equipo. Tus canciones no se suben.":
+    "Models are stored on this computer. Your songs are not uploaded.",
+  "Descargando modelos… Puedes cancelar y continuar más tarde.":
+    "Downloading models… You can cancel and resume later.",
+  "Modelos instalados. Ya puedes transcribir la letra.":
+    "Models installed. You can now transcribe lyrics.",
+  "Descarga cancelada. Puedes continuar más tarde.":
+    "Download cancelled. You can resume later.",
+  "Necesitas al menos 6 GB libres para instalar los modelos.":
+    "You need at least 6 GB of free space to install the models.",
+  "No se pudo completar la descarga. Comprueba la conexión y vuelve a intentarlo.":
+    "The download could not be completed. Check your connection and try again.",
+
   "TRANSCRIPTOR DE LETRA": "LYRIC TRANSCRIBER",
   "Whisper · CPU": "Whisper · CPU",
   "Qwen3 · Apple Silicon": "Qwen3 · Apple Silicon",

@@ -1,5 +1,14 @@
 # chordleaf changelog
 
+## 1.1.0-beta.1 · September 29, 2026 · Candidate
+
+- Add local audio import with timed chord and lyric review, editable drafts, interval playback and JSON timing export.
+- Use LV-Chordia for extended chords and offer Qwen3-ASR with forced alignment or Whisper for lyrics. Preserve chord results if transcription fails and mark approximate word groups.
+- Package an Apple Silicon desktop candidate with its own Python runtime and in-app model installation, cancellation and removal. Audio inference remains on each user’s device.
+- Keep desktop storage on a stable private origin, isolate the renderer, authenticate the internal service and preserve libraries across restarts.
+- Add pinned runtime/model manifests, desktop CI and a signing/notarization release gate. Public installer availability remains disabled until that gate is completed.
+- Document actual model comparisons and the experimental GuitarSet training result; the trained research model is not deployed.
+
 ## 1.0.3 · September 26, 2026
 
 - Replace Cifra Club in the import screen with providers that still answer server downloads: LaCuerda, AcordesWeb, TusAcordes, Chordie and Ultimate Guitar. Saved Cifra Club HTML keeps parsing offline.

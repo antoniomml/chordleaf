@@ -655,9 +655,53 @@
       armonías o inventar palabras.
     </p>
     <p id="audio-setup" class="web-help" hidden>
-      Esta prueba requiere iniciar el analizador en una copia local de
-      Chordleaf. Consulta experiments/audio/README.md en el proyecto.
+      La importación de audio necesita Chordleaf para escritorio. Los modelos se
+      ejecutan en tu ordenador; esta web no recibe el audio.
+      <a
+        id="audio-desktop-download"
+        hidden
+        target="_blank"
+        rel="noopener noreferrer"
+        >Descargar para Mac con Apple Silicon</a
+      >
+      <span id="audio-desktop-pending"
+        >La primera versión está en preparación para Mac con Apple
+        Silicon.</span
+      >
     </p>
+    <details id="audio-desktop-setup" class="audio-models" hidden>
+      <summary>Modelos de letra en este equipo</summary>
+      <p class="web-help">
+        Qwen ofrece la mejor letra en nuestras pruebas. Recomendamos 16 GB de
+        memoria. La descarga inicial necesita Internet; después puedes analizar
+        sin conexión.
+      </p>
+      <div class="dialog-actions">
+        <button id="audio-install-qwen" type="button">
+          Instalar Qwen · 3,8 GB
+        </button>
+        <button id="audio-install-whisper" type="button">
+          Instalar Whisper · 0,5 GB
+        </button>
+        <button id="audio-cancel-models" type="button" hidden>
+          Cancelar descarga
+        </button>
+        <button id="audio-remove-models" type="button">
+          Eliminar modelos de letra
+        </button>
+      </div>
+      <p
+        id="audio-model-status"
+        class="web-help"
+        role="status"
+        aria-live="polite"
+      ></p>
+      <p class="web-help">
+        Los acordes funcionan sin descargar estos modelos. Puedes importar y
+        exportar tus canciones mediante una copia JSON; la web y la aplicación
+        guardan bibliotecas separadas.
+      </p>
+    </details>
     <p id="audio-capabilities" class="web-help" role="status"></p>
     <label class="field"
       >ARCHIVO DE AUDIO<input

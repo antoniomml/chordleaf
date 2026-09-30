@@ -1,3 +1,5 @@
+import { desktopDownloadURL } from "../desktop-release.js";
+import { setupDesktopModels } from "./audio-desktop.js";
 import { t } from "../i18n.js";
 import {
   analysisToText,
@@ -7,12 +9,22 @@ import {
 
 export function setupAudioImport({ accept, reportError }) {
   const $ = (id) => document.getElementById(id);
+  const desktopURL = desktopDownloadURL(
+    import.meta.env.VITE_DESKTOP_DOWNLOAD_URL,
+  );
+  if (desktopURL) {
+    $("audio-desktop-download").href = desktopURL;
+    $("audio-desktop-download").hidden = false;
+    $("audio-desktop-pending").hidden = true;
+  }
   let controller,
     generation = 0,
     objectURL,
     result,
     readiness,
-    playbackRange;
+    playbackRange,
+    modelsBusy = false,
+    analysisRunning = false;
   const status = (message) => {
     $("audio-status").textContent = t(message);
   };
@@ -22,16 +34,31 @@ export function setupAudioImport({ accept, reportError }) {
       ($("audio-engine").value !== "neural" || readiness.neural !== false);
     const file = $("audio-file").files[0];
     $("audio-analyze").disabled =
-      !ready || !file || file.size > 30 * 1024 * 1024;
+      !ready ||
+      modelsBusy ||
+      analysisRunning ||
+      !file ||
+      file.size > 30 * 1024 * 1024;
     $("audio-file").disabled = !readiness?.available;
   }
   $("audio-engine").onchange = updateAvailability;
   const lyricsUnavailable = () =>
     readiness?.lyrics === false && !readiness?.qwen;
+  const desktopModels = setupDesktopModels(
+    () => open(true),
+    (busy) => {
+      modelsBusy = busy;
+      updateAvailability();
+    },
+  );
   function reset() {
+    analysisRunning = false;
+    desktopModels.close();
+    desktopModels.setAnalyzing(false);
     generation++;
     playbackRange = null;
     controller?.abort();
+    window.chordleafDesktop?.cancelAnalysis().catch(() => {});
     $("audio-player").pause();
     $("audio-player").removeAttribute("src");
     if (objectURL) URL.revokeObjectURL(objectURL);
@@ -54,7 +81,8 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-lyrics").disabled = false;
     status("");
   }
-  async function open() {
+  async function open(refreshOnly = false) {
+    if (!refreshOnly) desktopModels.open();
     const current = generation;
     controller = new AbortController();
     status("Comprobando el analizador local…");
@@ -64,11 +92,15 @@ export function setupAudioImport({ accept, reportError }) {
       });
       const data = response.ok && (await response.json());
       if (current !== generation) return;
+      const hadNoLyrics = readiness?.lyrics === false && !readiness?.qwen;
       readiness = data;
+      if (window.chordleafDesktop && data?.lyrics === false && !data?.qwen)
+        $("audio-desktop-setup").open = true;
       $("audio-setup").hidden = Boolean(
-        data?.available &&
-        data.neural !== false &&
-        (data.lyrics !== false || data.qwen),
+        window.chordleafDesktop ||
+        (data?.available &&
+          data.neural !== false &&
+          (data.lyrics !== false || data.qwen)),
       );
       const messages = [];
       if (data?.neural === false)
@@ -88,6 +120,7 @@ export function setupAudioImport({ accept, reportError }) {
         data?.lyrics === false;
       $("audio-lyrics-engine").value = data?.qwen ? "qwen" : "whisper";
       $("audio-lyrics").disabled = lyricsUnavailable();
+      if (hadNoLyrics && !lyricsUnavailable()) $("audio-lyrics").checked = true;
       if (lyricsUnavailable()) $("audio-lyrics").checked = false;
       status(
         data?.available
@@ -97,7 +130,7 @@ export function setupAudioImport({ accept, reportError }) {
       updateAvailability();
     } catch (error) {
       if (current !== generation || error.name === "AbortError") return;
-      $("audio-setup").hidden = false;
+      $("audio-setup").hidden = Boolean(window.chordleafDesktop);
       $("audio-file").disabled = true;
       status("El analizador local no está activado.");
     }
@@ -123,8 +156,10 @@ export function setupAudioImport({ accept, reportError }) {
     status("Listo para analizar. Máximo 10 minutos.");
   };
   $("audio-cancel").onclick = () => {
+    analysisRunning = false;
     generation++;
     controller?.abort();
+    window.chordleafDesktop?.cancelAnalysis().catch(() => {});
     $("audio-file").disabled = false;
     updateAvailability();
     $("audio-cancel").hidden = true;
@@ -132,14 +167,18 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-language").disabled = false;
     $("audio-lyrics-engine").disabled = false;
     $("audio-lyrics").disabled = lyricsUnavailable();
+    desktopModels.setAnalyzing(false);
     status("Análisis cancelado.");
   };
   $("audio-analyze").onclick = async () => {
     const file = $("audio-file").files[0];
     if (!file) return;
     controller?.abort();
+    await window.chordleafDesktop?.cancelAnalysis().catch(() => {});
     controller = new AbortController();
     const current = ++generation;
+    analysisRunning = true;
+    desktopModels.setAnalyzing(true);
     result = null;
     playbackRange = null;
     $("audio-result").hidden = true;
@@ -228,6 +267,8 @@ export function setupAudioImport({ accept, reportError }) {
       }
     } finally {
       if (current === generation) {
+        analysisRunning = false;
+        desktopModels.setAnalyzing(false);
         updateAvailability();
         $("audio-cancel").hidden = true;
         $("audio-engine").disabled = false;

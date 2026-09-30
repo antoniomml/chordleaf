@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from contextlib import redirect_stdout
 import sys
+from importlib.util import find_spec
 from offline import require_offline
 
 
@@ -17,10 +18,12 @@ def check():
         except Exception:
             return {**result, 'reason': 'dependencies'}
         try:
-            import torch, librosa
-            from lv_chordia.chord_recognition import MODEL_NAMES
-            from lv_chordia.mir.common import CACHE_DATA_PATH
-            result['neural'] = all((Path(CACHE_DATA_PATH) / (n + '.sdict')).is_file() for n in MODEL_NAMES)
+            spec = find_spec('lv_chordia')
+            cache = Path(sys.prefix) / 'share/lv-chordia/cache_data'
+            if not cache.is_dir() and spec:
+                cache = Path(spec.origin).parent / 'cache_data'
+            names = [f'joint_chord_net_ismir_naive_v1.0_reweight(0.0,10.0)_s{i}.best.sdict' for i in range(5)]
+            result['neural'] = bool(spec and find_spec('torch') and find_spec('librosa') and all((cache / name).is_file() for name in names))
         except Exception:
             pass
         try:

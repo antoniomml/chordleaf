@@ -19,6 +19,7 @@ try {
     [40, 40],
     [40, 40],
     [40, 40],
+    [40, 40],
   ]);
   await page.locator("#blank").click();
   await page.locator('.rail [data-desktop-view="edit"]').click();

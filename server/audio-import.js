@@ -7,10 +7,19 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const MAX_BYTES = 30 * 1024 * 1024;
-const script = fileURLToPath(
-  new URL("../experiments/audio/analyze.py", import.meta.url),
-);
+const script = process.env.CHORDLEAF_AUDIO_SCRIPTS
+  ? join(process.env.CHORDLEAF_AUDIO_SCRIPTS, "analyze.py")
+  : fileURLToPath(new URL("../experiments/audio/analyze.py", import.meta.url));
+const workers = new Set();
+export function cancelAudioJobs() {
+  for (const child of workers) child.kill("SIGKILL");
+}
 let busy = false;
+let cleanup = Promise.resolve();
+export async function shutdownAudioJobs() {
+  cancelAudioJobs();
+  await cleanup;
+}
 
 export async function audioImportMiddleware(req, res, next) {
   const url = new URL(req.url, "http://localhost");
@@ -57,6 +66,10 @@ export async function audioImportMiddleware(req, res, next) {
   if (Number(req.headers["content-length"]) > MAX_BYTES)
     return reply(413, { error: "size" });
   busy = true;
+  let cleaned;
+  cleanup = new Promise((resolve) => {
+    cleaned = resolve;
+  });
   let directory, child, timer, uploadTimer, response;
   const abort = () => child?.kill("SIGKILL");
   res.on("close", abort);
@@ -99,6 +112,8 @@ export async function audioImportMiddleware(req, res, next) {
           HF_HUB_OFFLINE: "1",
         },
       });
+      workers.add(child);
+      child.once("close", () => workers.delete(child));
       let stdout = "";
       child.stdout.on("data", (data) => {
         stdout += data;
@@ -143,6 +158,7 @@ export async function audioImportMiddleware(req, res, next) {
       if (directory) await rm(directory, { recursive: true, force: true });
     } finally {
       busy = false;
+      cleaned();
       if (response) reply(...response);
     }
   }

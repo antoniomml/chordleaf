@@ -15,7 +15,10 @@ if (
 const audioMiddleware = localAudio
   ? (await import("./audio-import.js")).audioImportMiddleware
   : (_req, _res, next) => next();
-const root = await realpath(fileURLToPath(new URL("../dist", import.meta.url)));
+const root = await realpath(
+  process.env.CHORDLEAF_DIST ||
+    fileURLToPath(new URL("../dist", import.meta.url)),
+);
 const types = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript",
@@ -30,7 +33,15 @@ const types = {
   ".webmanifest": "application/manifest+json",
   ".xml": "application/xml",
 };
-const server = createServer((req, res) => {
+export const server = createServer((req, res) => {
+  if (
+    process.env.CHORDLEAF_DESKTOP_TOKEN &&
+    req.headers.authorization !==
+      `Bearer ${process.env.CHORDLEAF_DESKTOP_TOKEN}`
+  ) {
+    res.writeHead(403).end();
+    return;
+  }
   securityHeaders(res);
   audioMiddleware(req, res, () =>
     webImportMiddleware(req, res, async () => {
@@ -71,12 +82,17 @@ const server = createServer((req, res) => {
     }),
   );
 });
-server.listen(
-  Number(process.env.PORT) || 3000,
-  process.env.HOST || "127.0.0.1",
-  () => {
-    console.log(
-      `Chordleaf: http://${process.env.HOST || "127.0.0.1"}:${server.address().port}`,
-    );
-  },
-);
+export const ready = new Promise((resolve, reject) => {
+  server.once("error", reject);
+  server.listen(
+    process.env.PORT === undefined ? 3000 : Number(process.env.PORT),
+    process.env.HOST || "127.0.0.1",
+    () => {
+      resolve(server.address());
+      if (!process.env.CHORDLEAF_DESKTOP_TOKEN)
+        console.log(
+          `Chordleaf: http://${process.env.HOST || "127.0.0.1"}:${server.address().port}`,
+        );
+    },
+  );
+});

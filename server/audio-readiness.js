@@ -1,9 +1,17 @@
+import { join } from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
-const script = fileURLToPath(
-  new URL("../experiments/audio/check.py", import.meta.url),
-);
+const script = process.env.CHORDLEAF_AUDIO_SCRIPTS
+  ? join(process.env.CHORDLEAF_AUDIO_SCRIPTS, "check.py")
+  : fileURLToPath(new URL("../experiments/audio/check.py", import.meta.url));
 let cached;
+const workers = new Set();
+export function cancelReadinessJobs() {
+  for (const child of workers) child.kill("SIGKILL");
+}
+export function clearAudioReadiness() {
+  cached = undefined;
+}
 export function audioReadiness(python) {
   if (!python) return Promise.resolve({ available: false });
   const key = JSON.stringify([
@@ -18,6 +26,8 @@ export function audioReadiness(python) {
       stdio: ["ignore", "pipe", "ignore"],
       env: { ...process.env, HF_HUB_OFFLINE: "1" },
     });
+    workers.add(child);
+    child.once("close", () => workers.delete(child));
     let output = "",
       settled = false;
     const finish = (data) => {

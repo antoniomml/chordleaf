@@ -1,0 +1,15 @@
+{
+  "qwen": {
+    "downloadBytes": 3745000000,
+    "models": {
+      "mlx-community/Qwen3-ASR-1.7B-8bit": "a8379a2e2f9e313c9292cdf1af4055ab56d50d55",
+      "mlx-community/Qwen3-ForcedAligner-0.6B-8bit": "0e1a68e91d815300c7c9754b2a7639378b23db15"
+    }
+  },
+  "whisper": {
+    "downloadBytes": 488000000,
+    "models": {
+      "Systran/faster-whisper-small": "536b0662742c02347bc0e980a01041f333bce120"
+    }
+  }
+}

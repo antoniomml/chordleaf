@@ -35,3 +35,9 @@ Apple Silicon lyric inference optionally uses [MLX Audio](https://github.com/Bla
 The chord-training research uses [GuitarSet 1.1.0](https://zenodo.org/records/3371780), by Qingyang Xi, Rachel M. Bittner, Johan Pauwels, Xuzhou Ye and Juan Pablo Bello, under CC BY 4.0. Please cite _GuitarSet: A Dataset for Guitar Transcription_, ISMIR 2018. Downloads, features and trained checkpoints stay outside Git.
 
 The lyric benchmark uses [Jam-ALT](https://huggingface.co/datasets/jamendolyrics/jam-alt). Each recording keeps its own license, recorded by the download script; recordings and reference lyrics are not redistributed with this software or used here for training. This notice does not grant rights beyond those of the original datasets and models.
+
+## Desktop candidate
+
+The desktop distribution includes Electron (with its Chromium/Node third-party notices), a relocatable CPython distribution from [python-build-standalone](https://github.com/astral-sh/python-build-standalone), and the Python packages pinned in `experiments/audio/requirements-desktop.lock.txt`. Their installed license files and dist-info notices remain in the runtime. `artifacts/desktop/runtime/provenance.json` records the runtime archive URL and SHA-256 used for a build.
+
+Unlike the web bundle, the desktop runtime includes the five LV-Chordia research checkpoints distributed by its package, together with that package's MIT notice. Qwen and Whisper weights are downloaded separately on the user's explicit request. The desktop installer never contains the user's recordings, lyric references, GuitarSet data or trained research checkpoints.
