@@ -1,6 +1,6 @@
 // Independent implementation of the published Qwen ASR ONNX graph contract.
 // Model conversion: jiangzhuo9357/Qwen3-ASR-0.6B-ONNX (Apache-2.0).
-import { repetitionStart } from "./chunks.js";
+import { repetitionStart, asrTextTokens } from "./chunks.js";
 import * as ort from "onnxruntime-web/webgpu";
 import {
   PreTrainedTokenizer,
@@ -163,13 +163,11 @@ export async function loadQwen(read, progress) {
       }
       outputs.present_keys.dispose();
       outputs.present_values.dispose();
-      const prefix = tokens.indexOf(config.prompt.asr_text_id);
+      const textTokens = asrTextTokens(tokens, config.prompt.asr_text_id);
       return {
-        text: tokenizer
-          .decode(prefix < 0 ? tokens : tokens.slice(prefix + 1), {
-            skip_special_tokens: true,
-          })
-          .trim(),
+        text: textTokens.length
+          ? tokenizer.decode(textTokens, { skip_special_tokens: true }).trim()
+          : "",
         partial: capped,
       };
     },

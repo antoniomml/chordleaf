@@ -44,3 +44,9 @@ export function audioChunks(audio, rate = 16000) {
   }
   return chunks;
 }
+// Automatic language detection can return EOS immediately on instrumentals,
+// or only a language prefix. Both represent a valid empty transcript.
+export function asrTextTokens(tokens, textMarker) {
+  const marker = tokens.indexOf(textMarker);
+  return marker < 0 ? tokens : tokens.slice(marker + 1);
+}

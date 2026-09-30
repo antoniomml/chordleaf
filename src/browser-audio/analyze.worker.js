@@ -71,7 +71,13 @@ self.onmessage = async ({ data }) => {
         } finally {
           await aligner?.dispose();
         }
-      } catch {
+      } catch (error) {
+        // Keep the chord import usable, but retain a local diagnostic so a
+        // failed voice engine can be investigated without transmitting audio.
+        console.warn("Local lyric analysis failed", error);
+        self.postMessage({
+          diagnostic: String(error.message || error).slice(0, 500),
+        });
         result.warnings.push("lyrics-failed");
         if (result.words.length) result.warnings.push("lyrics-partial");
       }

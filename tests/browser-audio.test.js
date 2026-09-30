@@ -7,7 +7,18 @@ import { youtubeURL, recordTabAudio } from "../src/browser-audio/capture.js";
 import { validateAnalysis } from "../src/audio-import.js";
 import { estimateTuning } from "../src/browser-audio/tuning.js";
 import catalog from "../src/browser-audio/catalog.json" with { type: "json" };
-import { audioChunks, repetitionStart } from "../src/browser-audio/chunks.js";
+import {
+  audioChunks,
+  repetitionStart,
+  asrTextTokens,
+} from "../src/browser-audio/chunks.js";
+
+test("instrumental ASR outputs remain empty without losing subsequent sung tokens", () => {
+  assert.deepEqual(asrTextTokens([], 42), []);
+  assert.deepEqual(asrTextTokens([7, 42], 42), []);
+  assert.deepEqual(asrTextTokens([7, 42, 11, 12], 42), [11, 12]);
+  assert.deepEqual(asrTextTokens([11, 12], 42), [11, 12]);
+});
 
 test("ASR chunks cover the file without overlaps and prefer a quiet boundary", () => {
   const audio = new Float32Array(60 * 16000).fill(0.2);

@@ -40,15 +40,18 @@ try {
   });
   await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
   await page.locator("#empty-new").click();
-  await page.locator("#clipboard-enable").waitFor({ state: "visible" });
-  assert.equal(await page.locator("#clipboard-import").isDisabled(), true);
+  await page.waitForFunction(
+    () => !document.getElementById("clipboard-import").disabled,
+  );
+  assert.equal(await page.locator("#clipboard-enable").count(), 0);
+  assert.equal(await page.locator("#clipboard-import").isDisabled(), false);
   assert.equal(await page.evaluate(() => window.clipboardFixture.reads), 0);
-  await page.locator("#clipboard-enable").click();
+  await page.locator("#clipboard-import").click();
   await page.waitForFunction(() =>
     document.getElementById("clipboard-hint").textContent.includes("vacío"),
   );
   assert.equal(await page.locator("#clipboard-import").isDisabled(), true);
-  assert.equal(await page.locator("#clipboard-access").isVisible(), false);
+  assert.equal(await page.locator("#clipboard-access").count(), 0);
   await page.evaluate(() => {
     window.clipboardFixture.text =
       "{title: Del portapapeles}\n[C]Luz [G]del día";
@@ -122,7 +125,7 @@ try {
     document.getElementById("clipboard-hint").textContent.includes("bloqueado"),
   );
   assert.equal(await page.locator("#clipboard-import").isDisabled(), true);
-  assert.equal(await page.locator("#clipboard-access").isVisible(), false);
+  assert.equal(await page.locator("#clipboard-access").count(), 0);
   await page.evaluate(() => {
     Object.defineProperty(navigator, "clipboard", { value: undefined });
     window.dispatchEvent(new Event("focus"));

@@ -65,20 +65,24 @@ export async function downloadBrowserModels(bundle, signal, progress) {
   for (const file of files)
     if (!(await cache.match(absolute(file.url)))) missing.push(file);
   const required = missing.reduce((s, f) => s + (f.bytes || 25000000), 0);
-  const storage = await navigator.storage?.estimate();
-  if (storage?.quota && storage.quota - storage.usage < required * 1.2)
-    throw new Error(
-      "No hay suficiente espacio en el navegador. Libera unos 3 GB y reintenta.",
-    );
+  // Quota estimates can be conservative and do not measure free disk space.
+  // Attempt the write; reject only an actual storage failure, keeping the
+  // files already verified so retries download just the missing resources.
   let completed = 0;
   for (const file of missing) {
     signal.throwIfAborted();
     // Public weights only. Audio and transcripts never enter this function.
-    const response = await fetch(absolute(file.url), {
-      signal,
-      credentials: "omit",
-      referrerPolicy: "no-referrer",
-    });
+    let response;
+    try {
+      response = await fetch(absolute(file.url), {
+        signal,
+        credentials: "omit",
+        referrerPolicy: "no-referrer",
+      });
+    } catch (error) {
+      if (error.name === "AbortError") throw error;
+      throw new Error("No se pudo descargar el modelo. Comprueba la conexión.");
+    }
     if (!response.ok)
       throw new Error("No se pudo descargar el modelo. Comprueba la conexión.");
     const reader = response.body.getReader(),
@@ -112,18 +116,25 @@ export async function downloadBrowserModels(bundle, signal, progress) {
         );
     }
     signal.throwIfAborted();
-    await cache.put(
-      absolute(file.url),
-      new Response(blob, {
-        headers: {
-          "Content-Type": file.url.endsWith(".wasm")
-            ? "application/wasm"
-            : file.url.endsWith(".mjs")
-              ? "text/javascript"
-              : "application/octet-stream",
-        },
-      }),
-    );
+    try {
+      await cache.put(
+        absolute(file.url),
+        new Response(blob, {
+          headers: {
+            "Content-Type": file.url.endsWith(".wasm")
+              ? "application/wasm"
+              : file.url.endsWith(".mjs")
+                ? "text/javascript"
+                : "application/octet-stream",
+          },
+        }),
+      );
+    } catch (error) {
+      if (error.name !== "QuotaExceededError") throw error;
+      throw new Error(
+        "Este navegador ha alcanzado su límite de almacenamiento para Chordleaf. Los modelos ya guardados se conservan. Puedes reintentar, liberar datos de sitios en sus ajustes o usar otro navegador.",
+      );
+    }
     completed += bytes;
   }
   progress(1);

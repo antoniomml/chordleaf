@@ -1,5 +1,17 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Este navegador ha alcanzado su límite de almacenamiento para Chordleaf. Los modelos ya guardados se conservan. Puedes reintentar, liberar datos de sitios en sus ajustes o usar otro navegador.":
+    "This browser has reached its storage limit for Chordleaf. Models already saved are kept. You can retry, free up site data in its settings, or use another browser.",
+  "No se han detectado letra ni acordes. Prueba otra grabación.":
+    "No lyrics or chords were detected. Try another recording.",
+  "No se pudo obtener la letra. Puedes añadirla en el editor.":
+    "Lyrics could not be obtained. You can add them in the editor.",
+  "Hay tramos de letra incompletos. Puedes corregirlos en el editor.":
+    "Some lyrics are incomplete. You can correct them in the editor.",
+  "Algunos tiempos son aproximados. Revisa la posición de los acordes.":
+    "Some timings are approximate. Review the placement of the chords.",
+  "Abriendo la canción…": "Opening the song…",
+
   "Abrir documento": "Open document",
   "Elegir documento": "Choose document",
   "PDF, Word, TXT o ChordPro": "PDF, Word, TXT or ChordPro",

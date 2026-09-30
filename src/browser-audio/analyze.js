@@ -65,6 +65,8 @@ export async function analyzeBrowserAudio(
       );
     worker.onmessage = ({ data }) => {
       if (completed) return;
+      if (data.diagnostic)
+        console.warn("Local lyric analysis failed:", data.diagnostic);
       if (data.status) progress(data.status);
       if (data.error) finish(null, new Error(data.error));
       if (data.result) finish(data.result);

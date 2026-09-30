@@ -1030,7 +1030,7 @@ document.querySelectorAll("[data-harmony-view]").forEach((button) => {
 let importGeneration = 0,
   importController;
 const audioImport = setupAudioImport({
-  accept: acceptImport,
+  accept: (data, options) => acceptImport(data, { ...options, edit: true }),
   reportError: importError,
 });
 const clipboardImport = setupClipboardImport({
@@ -1126,8 +1126,11 @@ $("#blank").onclick = () => {
   persist();
   $("#title")?.focus();
 };
-async function acceptImport(data) {
+async function acceptImport(data, { edit = false, signal } = {}) {
   const generation = importGeneration;
+  const importSignal = signal
+    ? AbortSignal.any([signal, importController.signal])
+    : importController.signal;
   if (data.text.length > MAX_TEXT_LENGTH)
     throw new Error(
       t(
@@ -1135,14 +1138,15 @@ async function acceptImport(data) {
       ),
     );
   const s = create({ ...data, dirty: true });
-  Object.assign(s, await fitSong(s, { signal: importController.signal }));
+  Object.assign(s, await fitSong(s, { signal: importSignal }));
+  importSignal.throwIfAborted();
   if (generation !== importGeneration || !$("#new-dialog").open) return;
   songs.push(s);
   active = s.id;
-  desktopView = "document";
+  desktopView = edit ? "edit" : "document";
   songDesktopViews.set(active, desktopView);
   resetView();
-  mobileView = "preview";
+  mobileView = edit ? "edit" : "preview";
   songViews.set(active, mobileView);
   songMusicSections.set(active, musicSection);
   $("#new-dialog").close();

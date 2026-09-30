@@ -5,19 +5,10 @@ import { browserReadiness, browserHardware } from "../browser-audio/models.js";
 import languages from "../audio-languages.json" with { type: "json" };
 import { installedLyricModel, readAudioSettings } from "../audio-models.js";
 import { t } from "../i18n.js";
-import { setupAudioPreview } from "./audio-preview.js";
-import {
-  analysisToText,
-  validateAnalysis,
-  formatAudioTime,
-} from "../audio-import.js";
+import { analysisToText, validateAnalysis } from "../audio-import.js";
 
 export function setupAudioImport({ accept, reportError }) {
   const $ = (id) => document.getElementById(id);
-  const renderDraft = setupAudioPreview(
-    $("audio-draft"),
-    $("audio-sheet-preview"),
-  );
   // Bind specifically to an audio element; a generic .src sink could target
   // an executable element if the shell were accidentally changed.
   const player = document.querySelector("audio#audio-player");
@@ -41,9 +32,7 @@ export function setupAudioImport({ accept, reportError }) {
   let controller,
     generation = 0,
     objectURL,
-    result,
     readiness,
-    playbackRange,
     modelsBusy = false,
     analysisRunning = false;
   const status = (message) => {
@@ -97,30 +86,23 @@ export function setupAudioImport({ accept, reportError }) {
     desktopModels.close();
     desktopModels.setAnalyzing(false);
     generation++;
-    playbackRange = null;
     controller?.abort();
     window.chordleafDesktop?.cancelAnalysis().catch(() => {});
     player.pause();
     player.removeAttribute("src");
     if (objectURL) URL.revokeObjectURL(objectURL);
     objectURL = null;
-    result = null;
     readiness = null;
     $("audio-capabilities").textContent = "";
     $("audio-capabilities").hidden = true;
     $("audio-upload-controls").hidden = false;
     $("audio-analysis-actions").hidden = false;
     $("audio-file-name").textContent = t("Elige una grabación");
-    $("audio-warning").hidden = true;
     $("audio-file").value = "";
-    $("audio-result").hidden = true;
     player.hidden = true;
     $("audio-analyze").disabled = true;
     $("audio-cancel").hidden = true;
     $("audio-file").disabled = false;
-    $("audio-create").disabled = false;
-    $("audio-timeline").replaceChildren();
-    $("audio-sheet-preview").replaceChildren();
     $("audio-language").disabled = false;
     $("audio-lyrics").disabled = false;
     status("");
@@ -176,9 +158,6 @@ export function setupAudioImport({ accept, reportError }) {
     }
   }
   $("audio-file").onchange = () => {
-    result = null;
-    playbackRange = null;
-    $("audio-result").hidden = true;
     $("import-error").hidden = true;
     player.pause();
     player.removeAttribute("src");
@@ -223,27 +202,17 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-file").files = transfer.files;
     $("audio-file").dispatchEvent(new Event("change"));
   };
-  $("audio-another").onclick = () => {
-    $("audio-result").hidden = true;
-    $("audio-upload-controls").hidden = false;
-    $("audio-analysis-actions").hidden = false;
-    $("audio-file").value = "";
-    $("audio-file").onchange();
-    $("audio-file-name").textContent = t("Elige una grabación");
-    status("Elige otra grabación.");
-    $("audio-file").click();
-  };
   $("audio-cancel").onclick = () => {
     analysisRunning = false;
     generation++;
     controller?.abort();
     window.chordleafDesktop?.cancelAnalysis().catch(() => {});
     $("audio-file").disabled = false;
-    updateAvailability();
     $("audio-cancel").hidden = true;
     $("audio-language").disabled = false;
     $("audio-lyrics").disabled = lyricsUnavailable();
     desktopModels.setAnalyzing(false);
+    updateAvailability();
     status("Análisis cancelado.");
   };
   $("audio-analyze").onclick = async () => {
@@ -255,9 +224,6 @@ export function setupAudioImport({ accept, reportError }) {
     const current = ++generation;
     analysisRunning = true;
     desktopModels.setAnalyzing(true);
-    result = null;
-    playbackRange = null;
-    $("audio-result").hidden = true;
     $("import-error").hidden = true;
     $("audio-analyze").disabled = true;
     $("audio-file").disabled = true;
@@ -313,40 +279,30 @@ export function setupAudioImport({ accept, reportError }) {
       }
       const data = validateAnalysis(analysis);
       if (current !== generation) return;
-      result = data;
-      $("audio-warning").hidden = !data.warnings?.includes("lyrics-failed");
-      $("audio-partial-warning").hidden =
-        !data.warnings?.includes("lyrics-partial");
-      $("audio-timing-warning").hidden = !data.warnings?.includes(
-        "alignment-approximate",
-      );
-      $("audio-engine-used").textContent = [
-        data.engines?.chords,
-        data.engines?.lyrics,
-      ]
-        .filter(Boolean)
-        .join(" · ");
-      $("audio-draft").value = analysisToText(data);
-      $("audio-timeline").replaceChildren();
-      for (const chord of data.chords) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = `${formatAudioTime(chord.start)}–${formatAudioTime(chord.end)} · ${chord.label === "N" ? t("Sin acorde") : chord.label}`;
-        button.onclick = () => {
-          playbackRange = chord;
-          player.currentTime = chord.start;
-          player.play().catch(() => {});
-        };
-        $("audio-timeline").append(button);
-      }
-      $("audio-result").hidden = false;
-      renderDraft();
-      $("audio-upload-controls").hidden = true;
-      $("audio-analysis-actions").hidden = true;
-      status(
-        data.words.length
-          ? "Borrador listo."
-          : "Acordes listos. Puedes añadir la letra al borrador.",
+      const text = analysisToText(data);
+      if (!text.trim())
+        throw new Error(
+          "No se han detectado letra ni acordes. Prueba otra grabación.",
+        );
+      const notices = {
+        "lyrics-failed":
+          "No se pudo obtener la letra. Puedes añadirla en el editor.",
+        "lyrics-partial":
+          "Hay tramos de letra incompletos. Puedes corregirlos en el editor.",
+        "alignment-approximate":
+          "Algunos tiempos son aproximados. Revisa la posición de los acordes.",
+      };
+      status("Abriendo la canción…");
+      await accept(
+        {
+          title: file.name.replace(/\.[^.]+$/, ""),
+          text,
+          notice: (data.warnings || [])
+            .map((warning) => t(notices[warning] || ""))
+            .filter(Boolean)
+            .join(" "),
+        },
+        { signal: controller.signal },
       );
     } catch (error) {
       if (current === generation && error.name !== "AbortError") {
@@ -357,68 +313,12 @@ export function setupAudioImport({ accept, reportError }) {
       if (current === generation) {
         analysisRunning = false;
         desktopModels.setAnalyzing(false);
-        updateAvailability();
         $("audio-cancel").hidden = true;
         $("audio-language").disabled = false;
         $("audio-lyrics").disabled = lyricsUnavailable();
+        updateAvailability();
       }
     }
-  };
-  player.ontimeupdate = () => {
-    if (playbackRange && player.currentTime >= playbackRange.end) {
-      if ($("audio-loop").checked) player.currentTime = playbackRange.start;
-      else {
-        player.pause();
-        playbackRange = null;
-      }
-    }
-    if (playbackRange && player.currentTime < playbackRange.start - 0.1)
-      playbackRange = null;
-    if (!result) return;
-    [...$("audio-timeline").children].forEach((button, index) => {
-      const chord = result.chords[index];
-      if (player.currentTime >= chord.start && player.currentTime < chord.end)
-        button.setAttribute("aria-current", "true");
-      else button.removeAttribute("aria-current");
-    });
-  };
-  $("audio-create").onclick = async () => {
-    const text = $("audio-draft").value.trim();
-    if (!result || !text)
-      return reportError(
-        new Error("Añade letra o acordes antes de crear la canción."),
-      );
-    $("audio-create").disabled = true;
-    try {
-      await accept({
-        title: $("audio-file").files[0].name.replace(/\.[^.]+$/, ""),
-        text,
-      });
-    } catch (error) {
-      reportError(error);
-    } finally {
-      $("audio-create").disabled = false;
-    }
-  };
-  $("audio-download").onclick = () => {
-    if (!result) return;
-    const url = URL.createObjectURL(
-      new Blob(
-        [
-          JSON.stringify(
-            { ...result, draftText: $("audio-draft").value },
-            null,
-            2,
-          ),
-        ],
-        { type: "application/json" },
-      ),
-    );
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "audio-analysis.json";
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   return { reset, open };
 }

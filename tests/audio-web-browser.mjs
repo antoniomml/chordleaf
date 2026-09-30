@@ -34,10 +34,29 @@ try {
   await page.addInitScript(() => {
     const OriginalWorker = window.Worker;
     window.staleAudioMessages = 0;
+    window.audioResults = [];
+    // The reported quota is deliberately smaller than the chord bundle. It
+    // is an estimate; successful real Cache writes must remain allowed.
+    navigator.storage.estimate = async () => ({ quota: 1e6, usage: 0 });
+    const put = Cache.prototype.put;
+    window.failModelWrite = true;
+    window.completedModelWrites = [];
+    Cache.prototype.put = async function (request, response) {
+      const url = String(request);
+      if (window.failModelWrite && url.includes("net-1.onnx"))
+        throw new DOMException("Origin quota reached", "QuotaExceededError");
+      const result = await put.call(this, request, response);
+      if (url.includes("/models/")) window.completedModelWrites.push(url);
+      return result;
+    };
     window.Worker = class extends OriginalWorker {
       constructor(url, options) {
         super(url, options);
         this.audioAnalysis = /analyze\.worker/.test(String(url));
+        if (this.audioAnalysis)
+          this.addEventListener("message", (event) => {
+            if (event.data.result) window.audioResults.push(event.data.result);
+          });
       }
       terminate() {
         const callback = this.onmessage;
@@ -89,9 +108,48 @@ try {
   await page.locator("#browser-model-chords").click();
   assert.deepEqual(downloads, []);
   await page.locator("#browser-model-next").click();
+  await page.waitForFunction(
+    () =>
+      document
+        .querySelector("#browser-model-status")
+        .textContent.includes("límite de almacenamiento"),
+    { timeout: 120000 },
+  );
+  await page.waitForFunction(
+    () => !document.querySelector("#browser-model-next").disabled,
+  );
+  const storageError = await page
+    .locator("#browser-model-status")
+    .textContent();
+  await page.waitForTimeout(300);
+  assert.equal(await page.locator("#browser-model-status").isVisible(), true);
+  assert.equal(
+    await page.locator("#browser-model-status").textContent(),
+    storageError,
+  );
+  assert.equal(
+    await page.locator("#audio-browser-model-dialog").isVisible(),
+    true,
+  );
+  const completedWrites = await page.evaluate(
+    () => window.completedModelWrites,
+  );
+  assert.ok(completedWrites.length > 0);
+  const completedRequests = new Map(
+    completedWrites.map((url) => [
+      url,
+      downloads.filter((request) => request === url).length,
+    ]),
+  );
+  await page.evaluate(() => {
+    window.failModelWrite = false;
+  });
+  await page.locator("#browser-model-next").click();
   await page
     .locator("#audio-browser-model-dialog")
     .waitFor({ state: "hidden", timeout: 120000 });
+  for (const [url, count] of completedRequests)
+    assert.equal(downloads.filter((request) => request === url).length, count);
   assert.equal(await page.locator("#audio-lyrics").isChecked(), false);
   assert.equal(await page.locator("#audio-lyrics").isDisabled(), true);
   assert.ok(
@@ -122,6 +180,66 @@ try {
     .locator("#audio-browser-model-dialog")
     .waitFor({ state: "hidden" });
   assert.equal(downloads.length, downloaded);
+  // A second setup session can upgrade the cached chords to lyrics. The
+  // hardware fixture is only for the menu: no speech graph or fake weights run.
+  const upgrade = await context.newPage(),
+    upgradeRequests = [];
+  upgrade.on("pageerror", (error) => errors.push(error.message));
+  upgrade.on("request", (request) => upgradeRequests.push(request.url()));
+  await upgrade.addInitScript(() =>
+    Object.defineProperty(navigator, "gpu", {
+      value: {
+        requestAdapter: async () => ({ features: new Set(["shader-f16"]) }),
+      },
+    }),
+  );
+  await upgrade.route("https://huggingface.co/**", (route) => route.abort());
+  await upgrade.goto(url);
+  await upgrade.getByRole("button", { name: "Usar aquí", exact: true }).click();
+  await upgrade.locator("#new").click();
+  await upgrade.locator("#audio").click();
+  await upgrade.waitForFunction(
+    () => !document.querySelector("#audio-file").disabled,
+  );
+  await upgrade.locator("#audio-model-settings").click();
+  await upgrade.locator("#browser-model-qwen").check();
+  await upgrade.locator("#browser-model-next").click();
+  await upgrade.waitForFunction(() =>
+    document
+      .querySelector("#browser-model-status")
+      .textContent.includes("conexión"),
+  );
+  await upgrade.waitForFunction(
+    () => !document.querySelector("#browser-model-next").disabled,
+  );
+  await upgrade.waitForTimeout(300);
+  assert.equal(
+    await upgrade.locator("#browser-model-status").isVisible(),
+    true,
+  );
+  assert.equal(await upgrade.locator("#browser-model-qwen").isChecked(), true);
+  assert.match(
+    await upgrade.locator("#browser-chords-state").textContent(),
+    /Ya en tu dispositivo/,
+  );
+  assert.ok(upgradeRequests.some((url) => url.includes("huggingface.co")));
+  assert.equal(
+    upgradeRequests.some((url) => url.includes("/api/audio-import")),
+    false,
+  );
+  await upgrade.locator("#browser-model-chords").check();
+  await upgrade.locator("#browser-model-next").click();
+  await upgrade
+    .locator("#audio-browser-model-dialog")
+    .waitFor({ state: "hidden" });
+  await upgrade.close();
+  await page.getByRole("button", { name: "Usar aquí", exact: true }).click();
+  await page.locator("#empty-new").click();
+  await page.locator("#audio").click();
+  await page.waitForFunction(
+    () => !document.querySelector("#audio-file").disabled,
+  );
+  const reusedResources = downloads.length;
   const runtimeDownloaded = runtimeResponses.length;
   // An interrupted voice download can be removed without discarding the
   // usable chord engine. This fixture registers only a small config file.
@@ -158,7 +276,7 @@ try {
   await page
     .locator("#audio-browser-model-dialog")
     .waitFor({ state: "hidden" });
-  const buffer = Buffer.alloc(44 + 22050 * 2);
+  const buffer = Buffer.alloc(44 + 22050 * 2 * 4);
   buffer.write("RIFF");
   buffer.writeUInt32LE(buffer.length - 8, 4);
   buffer.write("WAVEfmt ", 8);
@@ -171,12 +289,22 @@ try {
   buffer.writeUInt16LE(16, 34);
   buffer.write("data", 36);
   buffer.writeUInt32LE(buffer.length - 44, 40);
-  for (let i = 0; i < 22050; i++) {
+  for (let i = 0; i < 22050 * 4; i++) {
+    const time = i / 22050,
+      onset = time % 0.5;
     const value =
-      [261.6256, 329.6276, 391.9954].reduce(
-        (s, f) => s + Math.sin((2 * Math.PI * f * i) / 22050),
+      [130.8128, 164.8138, 195.9977, 261.6256, 329.6276].reduce(
+        (sum, frequency) => {
+          for (let harmonic = 1; harmonic <= 8; harmonic++) {
+            sum +=
+              (Math.sin(2 * Math.PI * frequency * harmonic * time) *
+                Math.exp(-onset * (2 + harmonic * 0.3))) /
+              harmonic;
+          }
+          return sum;
+        },
         0,
-      ) / 6;
+      ) / 18;
     buffer.writeInt16LE(Math.round(value * 32767), 44 + 2 * i);
   }
   const picker = page.waitForEvent("filechooser");
@@ -185,21 +313,31 @@ try {
     await picker
   ).setFiles({ name: "Acorde local.wav", mimeType: "audio/wav", buffer });
   await page.locator("#audio-analyze").click();
-  await page
-    .locator("#audio-result")
-    .waitFor({ state: "visible", timeout: 120000 });
-  assert.ok((await page.locator("#audio-timeline button").count()) > 0);
-  const exported = page.waitForEvent("download");
-  await page.locator("#audio-download").click();
-  const result = JSON.parse(
-    await readFile(await (await exported).path(), "utf8"),
+  await page.waitForFunction(
+    () =>
+      window.audioResults.length > 0 ||
+      !document.querySelector("#import-error").hidden,
+    null,
+    { timeout: 120000 },
   );
+  await page
+    .locator("#new-dialog")
+    .waitFor({ state: "hidden", timeout: 120000 });
+  assert.equal(await page.locator("#source").isVisible(), true);
+  assert.equal(await page.locator("#audio-result").count(), 0);
+  const result = await page.evaluate(() => window.audioResults.at(-1));
   assert.match(result.engines.chords, /lv-chordia-web/);
-  assert.ok(result.chords.length > 0);
-  assert.equal(result.duration, 1);
+  assert.ok(result.chords.some((chord) => chord.label !== "N"));
+  assert.equal(result.duration, 4);
   assert.deepEqual(result.words, []);
   assert.deepEqual(uploads, []);
-  await page.locator("#audio-another").click();
+  const importedText = await page.locator("#source").inputValue();
+  assert.match(importedText, /\[[^\]]+\]/);
+  await page.locator("#new").click();
+  await page.locator("#audio").click();
+  await page.waitForFunction(
+    () => !document.querySelector("#audio-file").disabled,
+  );
   await page
     .locator("#audio-file")
     .setInputFiles({ name: "Cancelar.wav", mimeType: "audio/wav", buffer });
@@ -216,7 +354,8 @@ try {
   await page.waitForTimeout(50);
   assert.ok(await page.evaluate(() => window.staleAudioMessages >= 2));
   assert.match(await page.locator("#audio-status").textContent(), /cancelado/);
-  assert.equal(await page.locator("#audio-result").isVisible(), false);
+  assert.equal(await page.locator("#audio-result").count(), 0);
+  assert.equal(await page.locator(".tab").count(), 1);
   // Production build: speech weights remain absent; the real chord network runs
   // after disabling all network, with runtime and models in the browser cache.
   if (await page.evaluate(() => Boolean(navigator.serviceWorker?.controller))) {
@@ -229,24 +368,29 @@ try {
     });
     await page.locator("#audio-analyze").click();
     await page
-      .locator("#audio-result")
-      .waitFor({ state: "visible", timeout: 120000 });
-    const offlineExport = page.waitForEvent("download");
-    await page.locator("#audio-download").click();
-    const offlineResult = JSON.parse(
-      await readFile(await (await offlineExport).path(), "utf8"),
-    );
+      .locator("#new-dialog")
+      .waitFor({ state: "hidden", timeout: 120000 });
+    const offlineResult = await page.evaluate(() => window.audioResults.at(-1));
     assert.deepEqual(offlineResult.chords, result.chords);
+    assert.equal(await page.locator("#source").inputValue(), importedText);
+    assert.equal(await page.locator(".tab").count(), 2);
     await context.setOffline(false);
   }
   assert.deepEqual(errors, []);
   assert.deepEqual(
-    downloads.slice(downloaded).filter((url) => !/ort-wasm/.test(url)),
+    downloads.slice(reusedResources).filter((url) => !/ort-wasm/.test(url)),
     [],
   );
   if (await page.evaluate(() => Boolean(navigator.serviceWorker?.controller))) {
     assert.ok(runtimeResponses.slice(runtimeDownloaded).length > 0);
     assert.ok(runtimeResponses.slice(runtimeDownloaded).every(Boolean));
+  }
+  if (!(await page.locator("#new-dialog").isVisible())) {
+    await page.locator("#new").click();
+    await page.locator("#audio").click();
+    await page.waitForFunction(
+      () => !document.querySelector("#audio-file").disabled,
+    );
   }
   await page.locator("#audio-model-settings").click();
   await page.locator("#browser-chords-remove").click();
@@ -285,7 +429,7 @@ try {
   );
   await english.close();
   console.log(
-    "Browser audio: explicit download, real WASM chord inference, no uploads and offline inference passed.",
+    "Browser audio: quota recovery, chord-to-voice upgrade failure, real WASM chord inference, direct editor opening, no uploads and offline inference passed.",
   );
 } finally {
   await browser.close();

@@ -1319,10 +1319,6 @@ dialog .choice {
   font-weight: 500;
   vertical-align: middle;
 }
-#clipboard-access {
-  text-align: right;
-  margin-top: 4px;
-}
 #new-dialog[data-screen="menu"] {
   padding: 24px;
 }
@@ -3114,7 +3110,6 @@ select:focus-visible {
 }
 
 #audio-import[hidden],
-#audio-result[hidden],
 #audio-player[hidden],
 #audio-cancel[hidden] {
   display: none;
@@ -3145,41 +3140,6 @@ select:focus-visible {
   background: #1c241e;
   color: #e2ead9;
 }
-#audio-timeline {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  max-height: 180px;
-  overflow-y: auto;
-  margin-bottom: 16px;
-}
-#audio-timeline button {
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 12px;
-}
-#audio-draft {
-  width: 100%;
-  resize: vertical;
-  min-height: 140px;
-  padding: 12px;
-  border: 1px solid #68765f;
-  border-radius: 6px;
-  background: #1c241e;
-  color: #e2ead9;
-  font:
-    13px/1.6 "Google Sans Code",
-    monospace;
-  letter-spacing: normal;
-  text-transform: none;
-}
-
-#audio-timeline button[aria-current="true"] {
-  outline: 2px solid var(--accent, #a4ba83);
-  outline-offset: -2px;
-}
-
 #new-dialog[data-screen="audio"] > .dialog-logo,
 #new-dialog[data-screen="audio"] > .eyebrow {
   display: none;
@@ -3187,9 +3147,7 @@ select:focus-visible {
 #new-dialog[data-screen="audio"] {
   max-width: 650px;
 }
-.audio-toolbar,
-.audio-result-heading,
-.audio-timeline-heading {
+.audio-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3319,31 +3277,11 @@ select:focus-visible {
   margin-top: 8px;
   color: var(--green);
 }
-.audio-result-heading h3 {
-  margin: 10px 0;
-  font-size: 20px;
-}
-.audio-timeline-heading {
-  margin-top: 20px;
-  font-size: 13px;
-}
-.audio-timeline-heading .audio-option {
-  margin: 8px 0;
-}
-.audio-notice {
-  font-size: 12px;
-  line-height: 1.5;
-  padding: 10px 12px;
-  border-left: 3px solid var(--green);
-  background: #2a3324;
-}
-.audio-result-details,
 .audio-storage-options {
   margin-top: 20px;
   color: #aeb5b0;
   font-size: 12px;
 }
-.audio-result-details summary,
 .audio-storage-options summary {
   min-height: 34px;
   cursor: pointer;
@@ -3519,39 +3457,6 @@ select:focus-visible {
   .audio-toolbar {
     align-items: baseline;
   }
-}
-
-.audio-preview-heading {
-  display: block;
-  margin: 16px 0 8px;
-}
-#audio-sheet-preview {
-  max-height: 260px;
-  overflow: auto;
-  padding: 12px;
-  margin-bottom: 16px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  font:
-    13px/1.44 "Courier New",
-    monospace;
-  background: #171d17;
-}
-.audio-sheet-line {
-  position: relative;
-  min-height: 18.72px;
-}
-.audio-sheet-chord,
-.audio-sheet-lyric {
-  position: absolute;
-  white-space: pre;
-}
-.audio-sheet-chord {
-  color: var(--green);
-  font-weight: bold;
-}
-#audio-result #audio-timeline {
-  max-height: 110px;
 }
 
 .audio-browser-model-dialog {

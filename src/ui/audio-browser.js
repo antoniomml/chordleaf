@@ -129,10 +129,14 @@ export function setupBrowserModels(refresh, busyChanged) {
     return true;
   }
   async function show() {
+    if (dialog.open || controller || checking) return;
     const current = generation;
     if (!(await check(current))) return;
     if (
       current !== generation ||
+      dialog.open ||
+      controller ||
+      checking ||
       !document.getElementById("new-dialog").open ||
       document.getElementById("audio-import").hidden
     )
@@ -178,12 +182,14 @@ export function setupBrowserModels(refresh, busyChanged) {
         });
         success = true;
       } catch (error) {
-        if (current === generation)
+        if (current === generation) {
+          $("browser-model-status").hidden = false;
           $("browser-model-status").textContent = t(
             error.name === "AbortError"
               ? "Descarga pausada. Puedes continuar más tarde."
               : error.message,
           );
+        }
       } finally {
         controller = null;
       }

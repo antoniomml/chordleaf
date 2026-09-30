@@ -1,6 +1,5 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 const browser = await chromium.launch({ headless: true });
 const url = process.env.CHORDLEAF_URL || "http://localhost:5173";
 const fixture = {
@@ -22,6 +21,25 @@ try {
     viewport: { width: 1280, height: 1000 },
   });
   await page.addInitScript(() => {
+    const OriginalWorker = window.Worker;
+    window.holdFit = false;
+    window.Worker = class extends OriginalWorker {
+      constructor(url, options) {
+        super(url, options);
+        if (/fit-worker/.test(String(url)))
+          this.addEventListener("message", (event) => {
+            if (!window.holdFit) return;
+            event.stopImmediatePropagation();
+            window.fitWaiting = true;
+            window.releaseFit = () => {
+              window.holdFit = false;
+              this.dispatchEvent(
+                new MessageEvent("message", { data: event.data }),
+              );
+            };
+          });
+      }
+    };
     window.chordleafDesktop = {
       system: async () => ({ platform: "darwin", arch: "arm64", memoryGB: 16 }),
       models: async () => ({ stage: "idle", active: false }),
@@ -52,11 +70,17 @@ try {
     return route
       .fulfill({
         json:
-          mode === "partial"
-            ? { ...fixture, words: [], warnings: ["lyrics-failed"] }
-            : qwen
-              ? { ...fixture, warnings: ["alignment-approximate"] }
-              : fixture,
+          mode === "empty"
+            ? {
+                ...fixture,
+                words: [],
+                chords: [{ start: 0, end: 6, label: "N" }],
+              }
+            : mode === "partial"
+              ? { ...fixture, words: [], warnings: ["lyrics-failed"] }
+              : qwen
+                ? { ...fixture, warnings: ["alignment-approximate"] }
+                : fixture,
       })
       .catch(() => {});
   });
@@ -97,21 +121,51 @@ try {
   mode = "error";
   await page.locator("#audio-analyze").click();
   await page.locator("#import-error").waitFor({ state: "visible" });
-  assert.equal(await page.locator("#audio-result").isVisible(), false);
+  assert.equal(await page.locator("#audio-result").count(), 0);
+  assert.equal(await page.locator(".tab").count(), 0);
   mode = "slow";
   await page.locator("#audio-analyze").click();
   await page.locator("#audio-cancel").click();
   await page.waitForTimeout(650);
-  assert.equal(await page.locator("#audio-result").isVisible(), false);
+  assert.equal(await page.locator("#audio-result").count(), 0);
+  assert.equal(await page.locator(".tab").count(), 0);
   assert.match(await page.locator("#audio-status").textContent(), /cancelado/);
+  mode = "ok";
+  await page.evaluate(() => {
+    window.holdFit = true;
+  });
+  await page.locator("#audio-analyze").click();
+  await page.waitForFunction(() => window.fitWaiting);
+  assert.match(await page.locator("#audio-status").textContent(), /Abriendo/);
+  await page.locator("#audio-cancel").click();
+  await page.evaluate(() => window.releaseFit());
+  await page.waitForTimeout(50);
+  assert.equal(await page.locator(".tab").count(), 0);
+  assert.match(await page.locator("#audio-status").textContent(), /cancelado/);
+  mode = "empty";
+  await page.locator("#audio-analyze").click();
+  await page.waitForFunction(() =>
+    document
+      .querySelector("#import-error")
+      .textContent.includes("No se han detectado"),
+  );
+  assert.equal(await page.locator(".tab").count(), 0);
   mode = "partial";
   await page.locator("#audio-analyze").click();
-  await page.locator("#audio-warning").waitFor({ state: "visible" });
-  assert.equal(await page.locator("#audio-timeline button").count(), 2);
-  assert.match(await page.locator("#audio-draft").inputValue(), /Cmaj7/);
+  await page.locator("#new-dialog").waitFor({ state: "hidden" });
+  assert.equal(await page.locator(".tab").count(), 1);
+  assert.match(await page.locator("#source").inputValue(), /Cmaj7.*G7\/B/);
+  assert.match(
+    await page.locator("#toast").textContent(),
+    /añadirla en el editor/,
+  );
+  assert.equal(await page.locator("#source").isVisible(), true);
+  assert.equal(await page.locator("#audio-player").getAttribute("src"), null);
+
   mode = "ok";
-  await page.locator("#import-back").click();
   qwen = true;
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator("#mobile-tab-plus").click();
   await page.locator("#audio").click();
   await page.waitForFunction(
     () => document.querySelector("#audio-model-name").dataset.model === "qwen",
@@ -119,88 +173,34 @@ try {
   assert.equal(await page.locator("#audio-lyrics").isDisabled(), false);
   await upload();
   await page.locator("#audio-analyze").click();
-  await page.locator("#audio-result").waitFor({ state: "visible" });
-  await page.locator("#audio-timing-warning").waitFor({ state: "visible" });
+  await page.locator("#new-dialog").waitFor({ state: "hidden" });
+  assert.equal(await page.locator(".tab").count(), 2);
+  assert.equal(await page.locator("#source").isVisible(), true);
   assert.equal(
-    await page.locator("#audio-draft").inputValue(),
+    await page.locator("#source").inputValue(),
     "[Cmaj7]\n[Cmaj7]Hola [G7/B]mundo",
   );
-  assert.equal(await page.locator("#audio-timeline button").count(), 2);
-  await page.waitForFunction(
-    () => document.querySelector("#audio-player").readyState >= 1,
-  );
-  await page.locator("#audio-loop").check();
-  await page.locator("#audio-timeline button").first().click();
-  await page.waitForFunction(
-    () => !document.querySelector("#audio-player").paused,
-  );
-  await page.locator("#audio-player").evaluate((el) => {
-    el.currentTime = 2.1;
-  });
-  await page.waitForFunction(
-    () => document.querySelector("#audio-player").currentTime < 2,
-  );
-  assert.equal(
-    await page
-      .locator("#audio-timeline button")
-      .first()
-      .getAttribute("aria-current"),
-    "true",
-  );
-  await page.locator("#audio-loop").uncheck();
-  await page.locator("#audio-player").evaluate((el) => {
-    el.currentTime = 2.1;
-  });
-  await page.waitForFunction(
-    () => document.querySelector("#audio-player").paused,
-  );
-  await page.locator("#audio-draft").fill("[Cmaj7]Revisión conservada");
-  await page.waitForFunction(() =>
-    document
-      .querySelector("#audio-sheet-preview")
-      .textContent.includes("Revisión conservada"),
-  );
-  const previewAnchors = await page
-    .locator("#audio-sheet-preview")
-    .evaluate((preview) => {
-      const chord = preview
-        .querySelector(".audio-sheet-chord")
-        .getBoundingClientRect();
-      const lyric = preview
-        .querySelector(".audio-sheet-lyric")
-        .getBoundingClientRect();
-      return {
-        sameColumn: Math.abs(chord.left - lyric.left) < 1,
-        above: chord.bottom <= lyric.top + 1,
-      };
-    });
-  assert.deepEqual(previewAnchors, { sameColumn: true, above: true });
-  const download = page.waitForEvent("download");
-  await page.locator("#audio-download").click();
-  const exported = await download;
-  assert.equal(exported.suggestedFilename(), "audio-analysis.json");
-  const saved = JSON.parse(await readFile(await exported.path(), "utf8"));
-  assert.equal(saved.draftText, "[Cmaj7]Revisión conservada");
-  assert.deepEqual(saved.chords, fixture.chords);
-  await page.screenshot({ path: "artifacts/audio-import-desktop.png" });
-  await page.setViewportSize({ width: 390, height: 844 });
+  assert.match(await page.locator("#toast").textContent(), /aproximados/);
+  assert.equal(await page.locator("#audio-create").count(), 0);
+  assert.equal(await page.locator("#audio-player").getAttribute("src"), null);
   assert.equal(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
     true,
   );
-  await page.screenshot({ path: "artifacts/audio-import-mobile.png" });
-  await page.locator("#audio-draft").fill("[C]Letra corregida [G]a mano");
-  await page.locator("#audio-create").click();
-  await page.waitForFunction(() => !document.querySelector("#new-dialog").open);
-  assert.match(
-    await page.locator(".page").first().textContent(),
-    /Letra corregida/,
+  await page.locator("#source").fill("[C]Letra corregida [G]a mano");
+  await page.waitForFunction(() =>
+    JSON.parse(localStorage.getItem("chordleaf-v1")).songs.some((song) =>
+      song.text.includes("Letra corregida"),
+    ),
   );
+  await page.screenshot({ path: "artifacts/audio-import-mobile.png" });
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.screenshot({ path: "artifacts/audio-import-desktop.png" });
   assert.equal(errors.length, 0, errors.join("\n"));
   console.log(
-    "Audio UI: unavailable, error, cancellation, preview, JSON, mobile and import passed.",
+    "Audio UI: unavailable, errors, cancellation, empty results, direct editor import, partial lyrics and mobile editing passed.",
   );
 } finally {
   await browser.close();

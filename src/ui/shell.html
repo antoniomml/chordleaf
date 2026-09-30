@@ -630,21 +630,15 @@
     <button
       id="clipboard-import"
       class="choice"
-      disabled
       aria-describedby="clipboard-hint"
     >
       <span class="choice-icon" aria-hidden="true">▤</span>
       <div>
         <strong>Pegar del portapapeles</strong
-        ><small id="clipboard-hint">Comprobando el portapapeles…</small>
+        ><small id="clipboard-hint">Crear canción con el texto copiado</small>
       </div>
       <b>→</b>
     </button>
-    <div id="clipboard-access" hidden>
-      <button id="clipboard-enable" type="button" class="audio-text-button">
-        Permitir portapapeles
-      </button>
-    </div>
     <button id="audio" class="choice">
       <span class="choice-icon" aria-hidden="true">♫</span>
       <div>
@@ -787,59 +781,6 @@
       ><button id="audio-cancel" hidden>Cancelar análisis</button>
     </div>
     <p id="audio-status" class="web-help" role="status" aria-live="polite"></p>
-    <div id="audio-result" hidden>
-      <div class="audio-result-heading">
-        <h3>Revisa la canción</h3>
-        <button id="audio-another" class="audio-text-button" type="button">
-          Cambiar audio
-        </button>
-      </div>
-      <p class="web-help">
-        Escucha los acordes y corrige el borrador antes de guardarlo.
-      </p>
-      <p id="audio-warning" class="audio-notice" role="status" hidden>
-        No se pudo obtener la letra. Puedes añadirla al borrador.
-      </p>
-      <p id="audio-partial-warning" class="audio-notice" role="status" hidden>
-        Hay tramos de letra incompletos. Revísalos al escuchar la canción.
-      </p>
-      <p id="audio-timing-warning" class="audio-notice" role="status" hidden>
-        Algunos tiempos son aproximados. Revisa esos tramos al escuchar.
-      </p>
-      <strong class="audio-preview-heading">Vista previa</strong>
-      <div
-        id="audio-sheet-preview"
-        role="region"
-        aria-label="Vista previa de letra y acordes"
-        tabindex="0"
-      ></div>
-      <div class="audio-timeline-heading">
-        <strong>Acordes</strong
-        ><label class="audio-option"
-          ><input id="audio-loop" type="checkbox" /> Repetir tramo</label
-        >
-      </div>
-      <div id="audio-timeline" aria-label="Acordes en el tiempo"></div>
-      <label class="field"
-        >LETRA Y ACORDES<textarea
-          id="audio-draft"
-          rows="5"
-          maxlength="50000"
-        ></textarea>
-      </label>
-      <div class="dialog-actions">
-        <button id="audio-create" class="primary">Crear canción</button
-        ><button id="audio-download">Guardar tiempos · JSON</button>
-      </div>
-      <details class="audio-result-details">
-        <summary>Sobre los tiempos y el análisis</summary>
-        <p class="web-help">
-          La canción guarda el borrador editado. El JSON conserva también los
-          tiempos originales; editar el texto no los cambia.
-        </p>
-        <p id="audio-engine-used" class="web-help"></p>
-      </details>
-    </div>
   </section>
   <p id="import-error" role="alert" hidden></p>
   <details id="web-local-options" hidden>

@@ -143,10 +143,10 @@ try {
     buffer: Buffer.from("mock audio"),
   });
   await page.locator("#audio-analyze").click();
-  await page.locator("#audio-result").waitFor({ state: "visible" });
-  assert.match(await page.locator("#audio-draft").inputValue(), /Bonjour/);
+  await page.locator("#new-dialog").waitFor({ state: "hidden" });
+  assert.match(await page.locator("#source").inputValue(), /Bonjour/);
   await page.reload();
-  await page.locator("#empty-new").click();
+  await page.locator("#mobile-tab-plus").click();
   await page.locator("#audio").click();
   await page.waitForFunction(
     () => !document.querySelector("#audio-file").disabled,
