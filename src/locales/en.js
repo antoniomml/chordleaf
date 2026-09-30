@@ -1,5 +1,7 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  Obligatorio: "Required",
+  "Detector de acordes · 13 MB": "Chord detector · 13 MB",
   Experimental: "Experimental",
   "Puede haber errores en la letra, los acordes y su posición.":
     "Lyrics, chords and their placement may contain errors.",

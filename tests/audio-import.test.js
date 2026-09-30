@@ -5,6 +5,8 @@ import {
   validateAnalysis,
   formatAudioTime,
 } from "../src/audio-import.js";
+import { parseSong } from "../src/music.js";
+import { layout } from "../src/layout.js";
 const example = () => ({
   version: 1,
   duration: 12,
@@ -29,7 +31,7 @@ test("short neural intervals remain visible and time rounding carries minutes", 
 test("merge retains instrumental changes and assigns nearby sung onsets", () => {
   assert.equal(
     analysisToText(example()),
-    "[C]\n[Am]Hoy [F]canto\n[G]\n[C]aquí",
+    "[Intro] [C]\n[Am]Hoy [F]canto\n[Instrumental] [G]\n[C]aquí",
   );
 });
 
@@ -152,9 +154,9 @@ test("short ASR punctuation does not orphan a word or invent a verse", () => {
     { start: 3, end: 4, text: "Canto", line: 0 },
   ];
   data.chords = [{ start: 0, end: 12, label: "C" }];
-  assert.equal(analysisToText(data), "[C]\n[C]Hoy. Canto");
+  assert.equal(analysisToText(data), "[Intro] [C]\nHoy. Canto");
   data.chords[0].end = 2;
-  assert.equal(analysisToText(data), "[C]\nHoy. Canto");
+  assert.equal(analysisToText(data), "[Intro] [C]\nHoy. Canto");
 });
 
 test("an implausibly long vowel cannot stack a whole solo above one word", () => {
@@ -166,5 +168,122 @@ test("an implausibly long vowel cannot stack a whole solo above one word", () =>
     { start: 6, end: 9, label: "F" },
     { start: 9, end: 12, label: "G" },
   ];
-  assert.equal(analysisToText(data), "[C]\n[C]Oh\n[Am] [F] [G]");
+  assert.equal(
+    analysisToText(data),
+    "[Intro] [C]\nOh\n[Instrumental] [Am] [F] [G]",
+  );
+});
+
+test("held harmony is emitted once across lyric line breaks, with the next change retained", () => {
+  const data = {
+    version: 1,
+    duration: 25,
+    words: [
+      { start: 0, end: 1, text: "Te", line: 0 },
+      { start: 1, end: 2, text: "vas.", line: 0 },
+      { start: 4.5, end: 5, text: "Y", line: 1 },
+      { start: 5, end: 6, text: "me", line: 1 },
+      { start: 6, end: 7, text: "quedo.", line: 1 },
+      { start: 9.5, end: 10.5, text: "Aquí.", line: 2 },
+      { start: 13, end: 14, text: "Cantando.", line: 3 },
+    ],
+    chords: [
+      { start: 0, end: 9.5, label: "G" },
+      { start: 9.5, end: 25, label: "D/F#" },
+    ],
+  };
+  assert.equal(
+    analysisToText(data),
+    "[G]Te vas.\nY me quedo.\n[D/F#]Aquí.\nCantando.",
+  );
+});
+
+test("a single introductory chord remains separate from an unmarked first lyric in the sheet", () => {
+  const data = {
+    version: 1,
+    duration: 10,
+    words: [{ start: 2, end: 3, text: "Te vas", line: 0 }],
+    chords: [{ start: 0, end: 10, label: "G" }],
+  };
+  const text = analysisToText(data),
+    parsed = parseSong(text);
+  assert.equal(text, "[Intro] [G]\nTe vas");
+  assert.equal(parsed.length, 2);
+  assert.deepEqual(parsed[1].marks, []);
+  const rows = layout({
+    text,
+    title: "",
+    fontSize: 12,
+    margin: 18,
+    columns: 1,
+  }).pages.flatMap((page) => page.columns.flat());
+  assert.equal(rows[0].instrumental, true);
+  assert.equal(rows[1].lyric, "Te vas");
+  assert.deepEqual(rows[1].marks, []);
+});
+
+test("introductory changes near the voice stay in the intro while a sung onset stays on its word", () => {
+  const data = {
+    version: 1,
+    duration: 8,
+    words: [
+      { start: 2, end: 2.4, text: "Te", line: 0 },
+      { start: 2.4, end: 3, text: "vas", line: 0 },
+    ],
+    chords: [
+      { start: 0, end: 1.85, label: "G" },
+      { start: 1.85, end: 2, label: "D/F#" },
+      { start: 2, end: 8, label: "Em7" },
+    ],
+  };
+  assert.equal(analysisToText(data), "[Intro] [G] [D/F#]\n[Em7]Te vas");
+});
+
+test("a long first token keeps two changes visible without piling both above the syllable", () => {
+  const data = {
+    version: 1,
+    duration: 10,
+    words: [{ start: 0, end: 8, text: "Oh", line: 0 }],
+    chords: [
+      { start: 0, end: 4, label: "G" },
+      { start: 4, end: 10, label: "D/F#" },
+    ],
+  };
+  assert.equal(analysisToText(data), "[G]Oh\n[Instrumental] [D/F#]");
+});
+
+test("a repaired opening phrase keeps its progression separate without fragmenting the lyric", () => {
+  const data = {
+    version: 1,
+    duration: 16,
+    words: [
+      { start: 0, end: 12, text: "Luz de mar", line: 0, timing: "grouped" },
+      { start: 12, end: 12.5, text: "para", line: 0 },
+      { start: 12.5, end: 13, text: "ti.", line: 0 },
+    ],
+    chords: [
+      { start: 0, end: 2, label: "G" },
+      { start: 2, end: 4, label: "D/F#" },
+      { start: 4, end: 8, label: "Em7" },
+      { start: 8, end: 12, label: "C" },
+      { start: 12, end: 16, label: "D" },
+    ],
+  };
+  const original = structuredClone(data);
+  const text = analysisToText(data);
+  assert.equal(text, "[Inicio] [G] [D/F#] [Em7] [C]\nLuz de mar [D]para ti.");
+  assert.deepEqual(data, original);
+  const rows = layout({
+    text,
+    title: "",
+    fontSize: 12,
+    margin: 18,
+    columns: 1,
+  }).pages.flatMap((page) => page.columns.flat());
+  assert.equal(rows[0].instrumental, true);
+  assert.equal(rows[1].lyric, "Luz de mar para ti.");
+  assert.deepEqual(
+    rows[1].marks.map((mark) => mark.chord),
+    ["D"],
+  );
 });

@@ -847,18 +847,23 @@
   <p id="audio-model-intro">
     Elige un modelo para la letra. Se descarga una vez y funciona sin conexión.
   </p>
-  <div class="audio-chord-model">
-    <span aria-hidden="true">✓</span>
-    <div>
-      <strong>Acordes · LV-Chordia</strong
-      ><small id="audio-chord-model-state"
-        >Incluido en la aplicación. Sin descarga adicional.</small
-      >
-    </div>
-  </div>
+  <fieldset class="audio-model-choices audio-required-model">
+    <legend>
+      Acordes <span class="audio-section-badge">Obligatorio</span>
+    </legend>
+    <label class="audio-model-card audio-required-card">
+      <input type="checkbox" checked disabled />
+      <span
+        ><strong>LV-Chordia</strong
+        ><small id="audio-chord-model-state"
+          >Incluido en la aplicación. Sin descarga adicional.</small
+        >
+      </span>
+    </label>
+  </fieldset>
   <p id="audio-recommendation" class="web-help"></p>
   <fieldset id="audio-model-choices" class="audio-model-choices">
-    <legend>Letra · Opcional</legend>
+    <legend>Letra <span class="audio-section-badge">Opcional</span></legend>
     <label class="audio-model-card"
       ><input type="radio" name="audio-model" value="none" /><span
         ><strong>Ninguna</strong

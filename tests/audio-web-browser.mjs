@@ -90,6 +90,40 @@ try {
       state,
     );
   }
+  const mandatory = page.locator("#browser-required-chords");
+  assert.equal(await mandatory.isChecked(), true);
+  assert.equal(await mandatory.isDisabled(), true);
+  assert.ok(
+    await page
+      .locator(".browser-chord-required")
+      .evaluate((el) => el.classList.contains("is-selected")),
+  );
+  assert.match(
+    await page.locator(".browser-chord-models legend").textContent(),
+    /Acordes.*Obligatorio/,
+  );
+  assert.match(
+    await page
+      .locator(".browser-model-choices:not(.browser-chord-models) legend")
+      .textContent(),
+    /Letra.*Opcional/,
+  );
+  assert.ok(
+    await page
+      .locator("#browser-chords-download")
+      .evaluate((el) => el.classList.contains("primary")),
+  );
+  const voiceBefore = await page
+    .locator('input[name="browser-audio-model"]:checked')
+    .getAttribute("id");
+  await page.locator(".browser-chord-required").click();
+  assert.equal(
+    await page
+      .locator('input[name="browser-audio-model"]:checked')
+      .getAttribute("id"),
+    voiceBefore,
+  );
+  assert.deepEqual(downloads, []);
   await checkAccessibility("browser model selection");
   await page.setViewportSize({ width: 390, height: 844 });
   assert.ok(
