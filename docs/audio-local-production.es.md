@@ -2,13 +2,13 @@
 
 Requisito: ningún servidor central procesa canciones. El audio, la letra y los acordes se calculan en el dispositivo de cada usuario.
 
-La distribución de escritorio ya tiene un candidato empaquetado para Apple Silicon. Consultar [instalación, pruebas y requisitos de publicación](desktop-release.es.md). Las limitaciones descritas más abajo corresponden al punto de partida de la investigación.
+La distribución de escritorio ya tiene un candidato empaquetado para Apple Silicon. Consultar [instalación, pruebas y requisitos de publicación](desktop-release.es.md). La [revisión de navegador y YouTube](audio-browser-youtube.es.md) distingue el navegador local que funciona hoy de la futura ejecución íntegra en una web pública.
 
 ## Lo que funciona ahora
 
-La rama experimental ejecuta el detector neuronal y Whisper en Python, en el mismo ordenador que abre Chordleaf. El navegador entrega el archivo a `127.0.0.1`; ese tráfico no sale del equipo. Los archivos temporales se eliminan al terminar o cancelar. No se necesita una cuenta ni una API de pago.
+La rama experimental ejecuta el detector neuronal y Qwen o Whisper en Python, en el mismo ordenador que abre Chordleaf. El navegador entrega el archivo a `127.0.0.1`; ese tráfico no sale del equipo. Los archivos temporales se eliminan al terminar o cancelar. No se necesita una cuenta ni una API de pago.
 
-`pnpm start:local-audio` permite usar la aplicación compilada con este motor. Fuerza la escucha en `127.0.0.1`, utiliza los modelos ya descargados y activa una protección de Python contra conexiones de red durante la inferencia. Si falta Whisper, falla sin descargarlo. El servicio público y `pnpm start` siguen sin activar el análisis de audio por defecto. La protección de Python no equivale a una sandbox del sistema operativo para bibliotecas nativas.
+`pnpm start:local-audio` permite usar la aplicación compilada con este motor. Fuerza la escucha en `127.0.0.1`, utiliza los modelos ya descargados y activa una protección de Python contra conexiones de red durante la inferencia. Si falta el transcriptor elegido, no lo descarga durante el análisis. Qwen permite incluir letra aunque Whisper no esté instalado. El servicio público y `pnpm start` siguen sin activar el análisis de audio por defecto. La protección de Python no equivale a una sandbox del sistema operativo para bibliotecas nativas.
 
 La instalación inicial de dependencias y modelos sí necesita Internet. Descargar un modelo no implica subir una canción. La prueba de navegador con _Imagine_ completa pasó por este modo: análisis real, reproducción de intervalos, exportación de tiempos y creación de una canción editable.
 
@@ -16,11 +16,11 @@ Instrucciones reproducibles: [README del experimento](../experiments/audio/READM
 
 ## Cómo distribuirlo
 
-| Opción                                                | Dónde se procesa          | Situación                                                                                    |
-| ----------------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------- |
-| Copia local actual, Node + Python                     | Ordenador de cada usuario | Funciona; instalación técnica, sin instalador                                                |
-| Aplicación de escritorio con motor incluido           | Ordenador de cada usuario | Recomendación para conservar el motor probado; falta empaquetar y probar Windows/macOS/Linux |
-| Web con modelos descargables y ejecución en navegador | Navegador de cada usuario | Arquitectura válida; falta portar y verificar el detector de acordes                         |
+| Opción                                                | Dónde se procesa          | Situación                                                                                   |
+| ----------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------- |
+| Copia local actual, Node + Python                     | Ordenador de cada usuario | Funciona desde el navegador con el motor local instalado                                    |
+| Aplicación de escritorio con motor incluido           | Ordenador de cada usuario | Candidato Apple Silicon probado; firma y notarización pendientes; otros sistemas pendientes |
+| Web con modelos descargables y ejecución en navegador | Navegador de cada usuario | Arquitectura válida; falta portar y verificar el detector de acordes                        |
 
 Para una primera distribución, una aplicación de escritorio evita pedir al usuario que instale Python. El instalador incluiría el motor y descargaría los pesos elegidos una vez. La interfaz puede seguir siendo la de Chordleaf. No hace falta alojar una GPU ni pagar por cada canción; el coste de cálculo y memoria recae en el equipo del usuario. El candidato de escritorio posterior ya incluye este motor; falta completar su firma y validación para publicación.
 
