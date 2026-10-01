@@ -28,7 +28,7 @@ Sections hide the entire inactive sidebar content without destroying the text ed
 
 ## Musical positions
 
-`parseSong` produces lyrics and `{ at, chord }` marks. `at` is the index into lyrics without chord tokens. `layout` adds `x` (the chord label's left edge in monospaced characters) and `lane` (vertical collision avoidance). The current layout aligns chord labels with their anchors, including imported legacy centered documents. Exports share this model.
+`parseSong` produces lyrics and `{ at, chord }` marks. `at` is the index into lyrics without chord tokens. `layout` adds `x` (the chord label's left edge in monospaced characters) and `lane` (vertical collision avoidance). Labels use `floor((length - 1) / 2)` as their reference-character offset: the middle character for odd lengths, the left middle for even lengths. `spaceChordAnchors` pads only the display to keep centred labels inside margins and avoid collisions. Rows also retain a display-to-source `positions` map for direct sheet dragging, including wrapping and collision padding. PDF and Word share the same label geometry. The sheet controller updates only the selected original bracket token and invalidates undo when another edit changes the source.
 
 Editor positions use UTF-16 indices, matching textarea APIs. Western lyrics and chord symbols are the primary target; emoji and combining characters do not have guaranteed monospaced alignment. Scanned PDFs need external OCR.
 

@@ -204,7 +204,7 @@ test("catalog covers all chromatic roots and common extended families", () => {
   }
 });
 
-test("labels always start at the syllable, including legacy centered documents", () => {
+test("labels centre their reference character on the syllable, including legacy documents", () => {
   const l = layout({
     ...base,
     chordAlign: "center",
@@ -213,11 +213,14 @@ test("labels always start at the syllable, including legacy centered documents",
   const row = l.pages[0].columns[0][0];
   assert.equal(row.lyric, "Una casa    azul");
   assert.equal(row.marks[0].at, 6);
-  assert.equal(row.marks[0].x, 6);
+  assert.equal(row.marks[0].x + row.marks[0].anchorOffset, 6);
   assert.equal(row.marks[0].lane, 0);
   assert.equal(row.marks[1].lane, 0);
   assert.equal(row.marks[1].at, 9);
-  assert.equal(row.marks[1].x, row.lyric.indexOf("azul"));
+  assert.equal(
+    row.marks[1].x + row.marks[1].anchorOffset,
+    row.lyric.indexOf("azul"),
+  );
   const edge = layout({ ...base, chordAlign: "center", text: "[Emaj7]Casa" })
     .pages[0].columns[0][0];
   assert.equal(edge.marks[0].x, 0);

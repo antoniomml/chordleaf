@@ -1,6 +1,15 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
   "Alinear acordes": "Align chords",
+  "Arrastra un acorde, o selecciónalo y toca su letra de destino.":
+    "Drag a chord, or select it and tap its destination letter.",
+  "Selecciona un acorde": "Select a chord",
+  "Arrastra los acordes para alinearlos; pulsa un verso para editar.":
+    "Drag chords to align them; select a verse to edit.",
+  "Editar letra del verso": "Edit verse lyrics",
+  Espacio: "Space",
+  "Acorde movido. Cambios guardados en la canción.":
+    "Chord moved. Changes saved in the song.",
   Alinear: "Align",
   Listo: "Done",
   Deshacer: "Undo",

@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Add a mobile-friendly chord alignment view with drag, tap-to-place, character step controls, keyboard navigation and undo. Moves update the original bracket tokens while preserving lyrics, repeated chords and line breaks.
+- Align chords directly on the document with drag, tap-to-place, character step controls, keyboard navigation and undo. Phones use readable sheet zoom and large controls; completed moves update the original bracket tokens.
+- Place the middle character of odd-length chord labels and the left middle character of even-length labels over their lyric anchor: E, Em and Em7 use E, E and m respectively. Preview, PDF and Word preserve the same placement.
 
 ## 1.2.1 · October 1, 2026
 

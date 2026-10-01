@@ -1,5 +1,10 @@
-// Keep source anchors intact. Only the printed layout gains space when two
-// labels would collide; the editor and saved ChordPro remain unchanged.
+// ChordPro tokens anchor a lyric character. Odd labels put their middle letter
+// there; even labels put the left middle letter there (E / Em / Em7 -> E / E / m).
+export function chordAnchorOffset(label) {
+  return Math.floor(Math.max(0, label.length - 1) / 2);
+}
+
+// Keep source anchors intact. Printed padding prevents centred labels colliding.
 export function spaceChordAnchors(lyric, marks) {
   let text = "";
   const positions = [],
@@ -9,13 +14,16 @@ export function spaceChordAnchors(lyric, marks) {
     previousAnchor = -1;
   const length = Math.max(lyric.length, ...marks.map((m) => m.at + 1), 0);
   for (let at = 0; at < length; at++) {
-    const group = [];
-    while (index < marks.length && marks[index].at === at)
-      group.push(marks[index++]);
-    if (group.length) {
-      const padding = Math.max(0, previousEnd + 1 - text.length);
+    while (index < marks.length && marks[index].at === at) {
+      const mark = marks[index++],
+        anchorOffset = chordAnchorOffset(mark.chord);
+      const padding = Math.max(
+        0,
+        previousEnd + 1 - (text.length - anchorOffset),
+      );
       if (padding) {
-        // Prefer widening an existing word boundary over splitting a word.
+        // Prefer widening a word boundary over splitting a word. The first
+        // label may need leading space so its centre stays inside the margin.
         const space = text.lastIndexOf(" ");
         const insert = space > previousAnchor ? space + 1 : text.length;
         text = text.slice(0, insert) + " ".repeat(padding) + text.slice(insert);
@@ -25,15 +33,10 @@ export function spaceChordAnchors(lyric, marks) {
           ...Array(padding).fill(positions[insert] ?? at),
         );
       }
-      for (const mark of group) {
-        const x = Math.max(text.length, previousEnd + 1);
-        const gap = x - text.length;
-        text += " ".repeat(gap);
-        positions.push(...Array(gap).fill(at));
-        spaced.push({ ...mark, visualAt: x });
-        previousAnchor = x;
-        previousEnd = x + mark.chord.length;
-      }
+      const x = text.length - anchorOffset;
+      spaced.push({ ...mark, visualAt: x, anchorOffset });
+      previousAnchor = text.length;
+      previousEnd = x + mark.chord.length;
     }
     text += lyric[at] ?? " ";
     positions.push(at);

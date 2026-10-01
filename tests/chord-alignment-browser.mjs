@@ -1,10 +1,21 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import axe from "axe-core";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
+import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import mammoth from "mammoth";
 
 await mkdir("artifacts", { recursive: true });
 const browser = await chromium.launch();
+async function letterBox(row, offset) {
+  return row.locator(".lyric").evaluate((lyric, offset) => {
+    const range = document.createRange();
+    range.setStart(lyric.firstChild, offset);
+    range.setEnd(lyric.firstChild, offset + 1);
+    const r = range.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  }, offset);
+}
 try {
   for (const mobile of [false, true]) {
     const page = await browser.newPage({
@@ -26,65 +37,184 @@ try {
       .click();
     const source = page.locator("#source");
     const original =
-      "[G]Una ca[G]sa [D/F#]azul\n[C]La luz de la mañana\n[C]\nUna canción";
+      "[E]antes [Em]antes [Em7]antes\n[G]Una ca[G]sa [D/F#]azul\n[C]\nUna canción";
     await source.fill(original);
     await page.locator("#align-chords").click();
-    await page.locator('#alignment-chords [data-start="9"]').click();
-    await page.locator('#alignment-letters [data-at="9"]').click();
+    assert.equal(await page.locator("dialog[open]").count(), 0);
     assert.equal(
-      await source.inputValue(),
-      "[G]Una casa [D/F#][G]azul\n[C]La luz de la mañana\n[C]\nUna canción",
+      await page.locator("#sheet-alignment-tools").isVisible(),
+      true,
     );
-    await page.locator("#alignment-undo").click();
-    assert.equal(await source.inputValue(), original);
-    await page.locator("#alignment-handle").press("ArrowRight");
-    assert.ok((await source.inputValue()).startsWith("[G]Una cas[G]a"));
-    await page.locator("#alignment-undo").click();
-
-    // Pointer capture keeps the dragged label attached, and updates source only on release.
-    const handle = await page.locator("#alignment-handle").boundingBox();
-    const target = await page
-      .locator('#alignment-letters [data-at="4"]')
-      .boundingBox();
-    const x = handle.x + 8,
-      y = handle.y + handle.height / 2;
+    const row = page.locator('.song-line[data-line="0"]');
+    const lyric = await row.locator(".lyric").innerText();
+    for (const [chord, nth, offset] of [
+      ["E", 0, 0],
+      ["Em", 1, 0],
+      ["Em7", 2, 1],
+    ]) {
+      const aIndex = [...lyric.matchAll(/antes/g)][nth].index;
+      const a = await letterBox(row, aIndex);
+      const label = await row.locator(`[data-chord="${chord}"]`).boundingBox();
+      const cw = label.width / chord.length;
+      assert.ok(
+        Math.abs(label.x + (offset + 0.5) * cw - (a.x + a.width / 2)) < 1.2,
+        `${chord} anchors its reference letter on A`,
+      );
+    }
+    if (!mobile) {
+      await page.locator("#export").click();
+      let downloaded = page.waitForEvent("download");
+      await page.locator('[data-export="pdf"]').click();
+      const pdfPath = "artifacts/inline-centred.pdf";
+      await (await downloaded).saveAs(pdfPath);
+      const loading = getDocument({
+        data: new Uint8Array(await readFile(pdfPath)),
+        useSystemFonts: true,
+      });
+      const doc = await loading.promise;
+      const items = (await (await doc.getPage(1)).getTextContent()).items;
+      const lyricItem = items.find((item) => item.str === "antes antes antes");
+      assert.ok(lyricItem);
+      const lyricCell = lyricItem.width / lyricItem.str.length;
+      const tokens = items
+        .filter(
+          (item) =>
+            item.transform[5] > lyricItem.transform[5] &&
+            item.str
+              .trim()
+              .split(/\s+/)
+              .every((token) => ["E", "Em", "Em7"].includes(token)),
+        )
+        .flatMap((item) =>
+          [...item.str.matchAll(/\S+/g)].map((match) => ({
+            label: match[0],
+            x: item.transform[4] + (match.index * item.width) / item.str.length,
+            cw: item.width / item.str.length,
+          })),
+        );
+      assert.equal(tokens.length, 3);
+      for (const [i, token] of tokens.entries()) {
+        const reference =
+          token.x + (Math.floor((token.label.length - 1) / 2) + 0.5) * token.cw;
+        const a = lyricItem.transform[4] + (i * 6 + 0.5) * lyricCell;
+        assert.ok(
+          Math.abs(reference - a) < 0.2,
+          "PDF uses the same reference letter as the sheet",
+        );
+      }
+      await loading.destroy();
+      await page.locator("#export").click();
+      downloaded = page.waitForEvent("download");
+      await page.locator('[data-export="docx"]').click();
+      const wordPath = "artifacts/inline-centred.docx";
+      await (await downloaded).saveAs(wordPath);
+      const word = (
+        await mammoth.extractRawText({ path: wordPath })
+      ).value.split("\n");
+      const chords = word.find((line) => /^E +Em +Em7$/.test(line));
+      assert.ok(chords);
+      assert.equal(chords.indexOf("E"), 0);
+      assert.equal(chords.indexOf("Em"), 6);
+      assert.equal(chords.indexOf("Em7") + 1, 12);
+    }
+    const label = row.locator('[data-chord="Em7"]');
+    const bounds = await label.boundingBox();
+    const nIndex = lyric.lastIndexOf("antes") + 1;
+    const n = await letterBox(row, nIndex);
+    const start = {
+      x: bounds.x + bounds.width / 2,
+      y: bounds.y + bounds.height / 2,
+    };
+    const end = { x: n.x + n.width / 2, y: n.y + n.height / 2 };
+    const cdp = mobile ? await page.context().newCDPSession(page) : null;
     if (mobile) {
-      const cdp = await page.context().newCDPSession(page);
       await cdp.send("Input.dispatchTouchEvent", {
         type: "touchStart",
-        touchPoints: [{ x, y }],
+        touchPoints: [start],
       });
       await cdp.send("Input.dispatchTouchEvent", {
         type: "touchMove",
-        touchPoints: [{ x: target.x + 8, y }],
+        touchPoints: [end],
       });
-      assert.equal(await source.inputValue(), original);
+    } else {
+      await page.mouse.move(start.x, start.y);
+      await page.mouse.down();
+      await page.mouse.move(end.x, end.y, { steps: 5 });
+    }
+    assert.equal(await source.inputValue(), original);
+    await page.locator(".sheet-alignment-target").waitFor();
+    assert.equal(
+      await page.locator("#sheet-alignment-selection").innerText(),
+      "Em7 → n",
+    );
+    if (mobile)
       await cdp.send("Input.dispatchTouchEvent", {
         type: "touchEnd",
         touchPoints: [],
       });
-      await cdp.detach();
-    } else {
-      await page.mouse.move(x, y);
-      await page.mouse.down();
-      await page.mouse.move(target.x + 8, y, { steps: 5 });
+    else await page.mouse.up();
+    assert.ok(
+      (await source.inputValue()).startsWith("[E]antes [Em]antes a[Em7]ntes"),
+    );
+    await page.locator("#sheet-alignment-undo").click();
+    assert.equal(await source.inputValue(), original);
+
+    await label.click();
+    const t = await letterBox(row, nIndex + 1);
+    if (mobile)
+      await page.touchscreen.tap(t.x + t.width / 2, t.y + t.height / 2);
+    else await page.mouse.click(t.x + t.width / 2, t.y + t.height / 2);
+    assert.ok(
+      (await source.inputValue()).startsWith("[E]antes [Em]antes an[Em7]tes"),
+    );
+    await page.locator("#sheet-alignment-undo").click();
+    await label.press("ArrowRight");
+    assert.ok(
+      (await source.inputValue()).startsWith("[E]antes [Em]antes a[Em7]ntes"),
+    );
+    await page.locator("#sheet-alignment-undo").click();
+    assert.equal(await source.inputValue(), original);
+
+    // A cancelled touch drag preserves source; a second occurrence stays distinct.
+    if (mobile) {
+      const b = await label.boundingBox();
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [{ x: b.x + b.width / 2, y: b.y + b.height / 2 }],
+      });
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [end],
+      });
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchCancel",
+        touchPoints: [],
+      });
       assert.equal(await source.inputValue(), original);
-      await page.mouse.up();
+      await cdp.detach();
     }
-    assert.ok((await source.inputValue()).startsWith("[G]Una [G]casa"));
-    await page.locator("#alignment-undo").click();
+    await page
+      .locator('.song-line[data-line="1"] [data-chord="G"]')
+      .nth(1)
+      .click();
+    await page.locator("#sheet-alignment-right").click();
+    assert.ok((await source.inputValue()).includes("[G]Una cas[G]a"));
+    await page.locator("#sheet-alignment-undo").click();
     assert.equal(await source.inputValue(), original);
-    await page.locator("#alignment-verse").selectOption("2");
-    await page.locator('#alignment-letters [data-at="5"]').click();
-    assert.ok((await source.inputValue()).endsWith("\n\nUna [C]canción"));
-    await page.locator("#alignment-undo").click();
+    await page.locator('.song-line[data-line="2"] [data-chord="C"]').click();
+    await page.locator("#sheet-alignment-right").click();
+    assert.ok((await source.inputValue()).endsWith("\n\n[C]Una canción"));
+    assert.equal(
+      await page.locator("#sheet-alignment-selection").innerText(),
+      "C → U",
+    );
+    await page.locator("#sheet-alignment-undo").click();
     assert.equal(await source.inputValue(), original);
-    await page.locator("#alignment-verse").selectOption("1");
-    await page.locator("#alignment-handle").press("ArrowRight");
-    await page.locator("#alignment-handle").press("ArrowRight");
+
+    await label.click();
     await page.addScriptTag({ content: axe.source });
     const violations = await page.evaluate(() =>
-      axe.run(document.querySelector("#alignment-dialog")),
+      axe.run(document.querySelector("#preview-panel")),
     );
     assert.deepEqual(
       violations.violations.map((v) => ({
@@ -96,84 +226,109 @@ try {
     await page.screenshot({
       path: `artifacts/chord-alignment-${mobile ? "mobile" : "desktop"}.png`,
     });
-    await page.locator("#alignment-close").click();
-    assert.equal(await page.locator("#alignment-dialog").isVisible(), false);
-    if (!mobile) {
-      await page.locator("#pencil").click();
-      await page.locator('.sheet-chord[data-chord="D/F#"]').click();
-      assert.equal(await page.locator("#alignment-handle").innerText(), "D/F#");
-      await page.locator("#alignment-handle").press("Home");
-      await page.locator("#alignment-close").click();
-      await page
-        .locator(".song-line")
-        .first()
-        .click({ position: { x: 100, y: 30 } });
-      assert.ok(await page.locator(".inline-editor").isVisible());
-      await page.locator(".inline-editor").press("Escape");
-    }
-    const savedSource = await source.inputValue();
-    await page.reload();
-    assert.equal(await source.inputValue(), savedSource);
+    await page.locator("#sheet-alignment-edit").click();
+    assert.equal(
+      await page.locator(".inline-editor").inputValue(),
+      original.split("\n")[0],
+    );
+    await page.locator(".inline-editor").press("Escape");
+    await page.locator("#sheet-alignment-done").click();
+    assert.equal(
+      await page.locator("#sheet-alignment-tools").isVisible(),
+      false,
+    );
     await page
       .locator(`.rail [data-${mobile ? "mobile" : "desktop"}-view="edit"]`)
       .click();
-    const long = "[C]" + "Una canción muy larga con café 👩‍🎤 y luz. ".repeat(8);
+    const plain = Array.from(
+      { length: 35 },
+      (_, i) => `palabra${String(i).padStart(2, "0")}`,
+    ).join(" ");
+    const long = "[Em7]" + plain;
     await source.fill(long);
-    // The alignment dialog can also open over the expanded text editor.
-    await page.locator("#expand-editor").evaluate((button) => button.click());
+    const beforeZoom = (await page.locator(".page-shell").first().boundingBox())
+      ?.width;
     await page.locator("#align-chords").click();
-    const longHandle = await page.locator("#alignment-handle").boundingBox();
-    const bounds = await page.locator("#alignment-scroll").boundingBox();
+    const wraps = page.locator('.song-line[data-line="0"]');
+    assert.ok((await wraps.count()) > 1);
+    const nextRow = wraps.nth(1);
+    const nextLyric = await nextRow.locator(".lyric").innerText();
+    const word = nextLyric.trim().split(/\s+/)[0];
+    const destination = await letterBox(nextRow, nextLyric.indexOf(word));
+    const first = await wraps
+      .first()
+      .locator('[data-chord="Em7"]')
+      .boundingBox();
+    const from = {
+      x: first.x + first.width / 2,
+      y: first.y + first.height / 2,
+    };
+    const to = {
+      x: destination.x + destination.width / 2,
+      y: destination.y + destination.height / 2,
+    };
     if (mobile) {
-      const cdp = await page.context().newCDPSession(page);
-      const point = { x: longHandle.x + 8, y: longHandle.y + 22 };
-      await cdp.send("Input.dispatchTouchEvent", {
-        type: "touchStart",
-        touchPoints: [point],
-      });
-      await cdp.send("Input.dispatchTouchEvent", {
-        type: "touchMove",
-        touchPoints: [{ x: bounds.x + bounds.width - 12, y: point.y }],
-      });
-      await page.waitForFunction(
-        () => document.querySelector("#alignment-scroll").scrollLeft > 100,
+      assert.ok(
+        destination.width >= 8,
+        "phone alignment zoom keeps characters readable",
       );
-      await cdp.send("Input.dispatchTouchEvent", {
-        type: "touchCancel",
+      const touch = await page.context().newCDPSession(page);
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [from],
+      });
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [to],
+      });
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
         touchPoints: [],
       });
-      assert.equal(await source.inputValue(), long);
-      await cdp.detach();
+      await touch.detach();
+    } else {
+      await page.mouse.move(from.x, from.y);
+      await page.mouse.down();
+      await page.mouse.move(to.x, to.y, { steps: 5 });
+      await page.mouse.up();
     }
-    await page.locator("#alignment-handle").press("End");
-    assert.equal(await source.inputValue(), long.slice(3) + "[C]");
-    await page.locator("#alignment-undo").click();
+    const at = plain.indexOf(word);
+    assert.equal(
+      await source.inputValue(),
+      plain.slice(0, at) + "[Em7]" + plain.slice(at),
+    );
+    await page.locator("#sheet-alignment-undo").click();
     assert.equal(await source.inputValue(), long);
-    await page.locator("#alignment-close").click();
-    assert.equal(await page.locator("#editor-dialog").isVisible(), true);
-    await page.locator("#collapse-editor").click();
+    await page.locator("#sheet-alignment-done").click();
+    if (mobile && beforeZoom)
+      assert.ok(
+        Math.abs(
+          (await page.locator(".page-shell").first().boundingBox()).width -
+            beforeZoom,
+        ) < 1,
+      );
+    const saved = await source.inputValue();
+    await page.reload();
+    assert.equal(await source.inputValue(), saved);
     assert.deepEqual(errors, []);
     await page.close();
   }
   const english = await browser.newPage({ locale: "en-US" });
   await english.goto(process.env.CHORDLEAF_URL || "http://localhost:5173/en/");
   await english.locator("#example-song").click();
-  await english.locator('.rail [data-desktop-view="edit"]').click();
-  await english.locator("#align-chords").click();
-  assert.equal(
-    await english.locator("#alignment-title").innerText(),
-    "Align chords",
-  );
-  assert.equal(await english.locator("#alignment-close").innerText(), "Done");
-  assert.equal(await english.locator("#alignment-undo").innerText(), "Undo");
+  await english.locator("#pencil").click();
   assert.ok(
-    (await english.locator("#alignment-status").innerText()).startsWith(
-      "Position ",
+    (await english.locator("#sheet-alignment-tools").innerText()).includes(
+      "Drag a chord",
     ),
+  );
+  assert.equal(
+    await english.locator("#sheet-alignment-done").innerText(),
+    "Done",
   );
   await english.close();
   console.log(
-    "Chord alignment: desktop and touch drag, tap, keyboard, undo, repeated chords, exact source, standalone chord rows, persistence, bilingual UI and accessibility passed.",
+    "Inline alignment: E/Em/Em7 reference letters, mouse/touch drag, tap, keyboard, cancel, undo, repeated chords, chord-only row migration, persistence and accessible bilingual sheet controls passed.",
   );
 } finally {
   await browser.close();

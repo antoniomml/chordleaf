@@ -176,6 +176,7 @@ export function layout(song, parsed = parseSong(song.text)) {
       rows.push({
         ...line,
         lyric: lyric.slice(offset, end).trimEnd(),
+        positions: spaced.positions.slice(offset, end),
         marks: ms,
         height: chordHeight + size * 1.44,
         lyricOffset: chordHeight,
