@@ -48,6 +48,12 @@ The expand icon beside **Lyrics and chords** opens a larger editor with the same
 
 The preview's pencil enables editing directly on the sheet. Select a verse; Enter commits, Escape cancels and Shift+Enter adds a line break.
 
+Use **Align chords** above the text editor to move chords without cutting and pasting brackets. Choose a verse and a chord, then drag its green handle over the lyric or tap the destination character. The left/right buttons move it one character at a time; the focused handle also accepts Left/Right, Home and End. Long verses scroll horizontally, including while dragging near an edge. On desktop, selecting a chord with the preview pencil enabled opens the same alignment view; select the lyric to edit the verse text.
+
+Each completed move updates the song's bracket token immediately. **Undo** restores alignment changes from this open session, including moves in another verse. **Done** or Escape closes the view and keeps completed moves. Touch cancellation discards the current drag. Literal bracketed headings, other chord occurrences, accents and lyric line breaks are preserved.
+
+![Moving a chord over readable lyrics on a phone](https://raw.githubusercontent.com/antoniomml/chordleaf/main/docs/images/chord-alignment-mobile.png)
+
 ## Browse, edit and print chord diagrams
 
 ![A grid of guitar chord diagrams in the Chords section](https://raw.githubusercontent.com/antoniomml/chordleaf/main/docs/images/chord-library.png)

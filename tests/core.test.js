@@ -24,8 +24,8 @@ test("inline chords preserve lyrics and anchors", () => {
   const [line] = parseSong("[G]Hola [D]mundo");
   assert.equal(line.lyric, "Hola mundo");
   assert.deepEqual(line.marks, [
-    { at: 0, chord: "G" },
-    { at: 5, chord: "D" },
+    { at: 0, chord: "G", rawIndex: 0 },
+    { at: 5, chord: "D", rawIndex: 8 },
   ]);
 });
 test("unresolved chord markers remain visible at their lyric position", () => {

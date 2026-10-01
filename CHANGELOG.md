@@ -1,5 +1,9 @@
 # chordleaf changelog
 
+## Unreleased
+
+- Add a mobile-friendly chord alignment view with drag, tap-to-place, character step controls, keyboard navigation and undo. Moves update the original bracket tokens while preserving lyrics, repeated chords and line breaks.
+
 ## 1.2.1 · October 1, 2026
 
 - Protect unsaved work when switching browser tabs: a failed save keeps the current editing session, and an unresponsive tab no longer has its lock stolen automatically. The requesting tab shows a translated warning and can retry.

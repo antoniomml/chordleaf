@@ -150,7 +150,8 @@ export function parseLine(raw, index = 0) {
     m;
   while ((m = re.exec(raw))) {
     lyric += raw.slice(end, m.index);
-    if (chordRE.test(m[1])) marks.push({ at: lyric.length, chord: m[1] });
+    if (chordRE.test(m[1]))
+      marks.push({ at: lyric.length, chord: m[1], rawIndex: m.index });
     else if (unresolvedChordRE.test(m[1]))
       marks.push({
         at: lyric.length,

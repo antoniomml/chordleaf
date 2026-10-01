@@ -3682,3 +3682,130 @@ select:focus-visible {
 .audio-model-card:has(input[value="none"]) {
   grid-column: 1 / -1;
 }
+
+/* Alignment uses source character boundaries at a readable, unscaled size. */
+.alignment-open {
+  margin-left: auto;
+  margin-right: 8px;
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 12px;
+  letter-spacing: normal;
+}
+#editor-dialog .source-heading {
+  display: flex;
+  border: 0;
+  padding: 0 0 8px;
+}
+#editor-dialog .source-heading > span,
+#editor-dialog #expand-editor {
+  display: none;
+}
+#alignment-dialog {
+  width: min(680px, calc(100vw - 24px));
+  max-height: calc(var(--visual-viewport-height, 100dvh) - 24px);
+  overflow-y: auto;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.alignment-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.alignment-heading h2 {
+  margin: 0;
+  font-size: 22px;
+}
+#alignment-dialog button {
+  min-height: 44px;
+  padding: 8px 14px;
+}
+#alignment-help {
+  line-height: 1.6;
+}
+.alignment-verse-label {
+  display: block;
+  margin-bottom: 6px;
+}
+#alignment-verse {
+  width: 100%;
+  min-height: 44px;
+}
+#alignment-chords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0;
+}
+#alignment-chords [aria-pressed="true"] {
+  background: #174d3b;
+  color: white;
+}
+#alignment-scroll {
+  overflow-x: auto;
+  border: 1px solid #b7c8bf;
+  border-radius: 10px;
+  padding: 16px;
+  background: #fff;
+  color: #172a22;
+}
+#alignment-track {
+  position: relative;
+  padding-top: 56px;
+}
+#alignment-handle {
+  position: absolute;
+  top: 0;
+  background: #174d3b;
+  color: #fff;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  font-family: "Google Sans Code", monospace;
+}
+#alignment-handle.dragging {
+  cursor: grabbing;
+  box-shadow: 0 4px 14px #0003;
+}
+#alignment-letters {
+  display: flex;
+  font:
+    20px/44px "Google Sans Code",
+    monospace;
+  white-space: pre;
+  cursor: pointer;
+}
+#alignment-letters span {
+  flex: 0 0 16px;
+  text-align: left;
+  border-top: 2px solid transparent;
+  min-height: 44px;
+}
+#alignment-letters .alignment-destination {
+  border-color: #174d3b;
+  background: #dbece2;
+}
+.alignment-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+#alignment-undo {
+  margin-left: auto;
+}
+#alignment-status {
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+@media (max-width: 760px) {
+  #alignment-dialog {
+    padding: 16px;
+  }
+  .alignment-heading h2 {
+    font-size: 20px;
+  }
+}

@@ -1,5 +1,19 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Alinear acordes": "Align chords",
+  Alinear: "Align",
+  Listo: "Done",
+  Deshacer: "Undo",
+  "Elige un acorde y arrástralo sobre la letra, o toca su destino. Las flechas lo mueven letra a letra.":
+    "Choose a chord and drag it over the lyrics, or tap its destination. The arrows move it one character at a time.",
+  Verso: "Verse",
+  "Acordes del verso": "Verse chords",
+  "Letra para alinear acordes": "Lyrics for chord alignment",
+  "Mover acorde: ": "Move chord: ",
+  "Mover una letra a la izquierda": "Move one character left",
+  "Mover una letra a la derecha": "Move one character right",
+  "Posición ": "Position ",
+  ". Cambios guardados en la canción.": ". Changes saved in the song.",
   Obligatorio: "Required",
   "Detector de acordes · 13 MB": "Chord detector · 13 MB",
   Experimental: "Experimental",
