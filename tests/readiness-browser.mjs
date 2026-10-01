@@ -15,7 +15,7 @@ try {
   );
   await page
     .getByRole("heading", {
-      name: "Your song, ready for rehearsal.",
+      name: "Chord editor. Your version, ready to print.",
       exact: true,
     })
     .waitFor();

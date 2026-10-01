@@ -35,13 +35,15 @@ Open the URL printed by Vite, normally `http://localhost:5173`.
 To check the interface and exports:
 
 ```sh
-pnpm exec playwright install chromium
-pnpm dev
+pnpm exec playwright install --with-deps chromium firefox webkit
+pnpm check
+PORT=5173 pnpm start
 # In another terminal:
 pnpm test:e2e
+pnpm test:compatibility
 ```
 
-Browser tests use Chromium and write ignored files under `artifacts/`. Override the server URL with `CHORDLEAF_URL`. Public screenshots under `docs/images/` use a clean browser context without personal data.
+Browser tests primarily use Chromium, with WebKit and all-engine suites for platform-specific behavior, and write ignored files under `artifacts/`. Override the server URL with `CHORDLEAF_URL`. Public screenshots under `docs/images/` use a clean browser context without personal data.
 
 To inspect a local reference PDF:
 
@@ -134,3 +136,19 @@ CHORDLEAF_URL=http://localhost:5173 node tests/pwa-browser.mjs
 The ordinary website cannot read another origin's page unless that origin grants CORS permission. `no-cors` returns an unreadable response, and forwarding a visitor IP header from Vercel does not change the outbound IP. Keep server-side downloads as an optional supported-provider flow; do not add public proxy services, identity spoofing or automatic retries after source blocks.
 
 The website import dialog initially offers only the URL download. A structured `SOURCE_FORBIDDEN` error identifies an upstream 403; only that error reveals a collapsed saved-HTML fallback and the upcoming-extension notice. Other failures do not reveal it. Editing the URL, retrying or reopening the dialog resets the fallback. Text pasting remains in the existing text/file import screen. `src/local-web-import.js` validates local file size and source metadata, and `src/ui/local-web-import.js` handles file selection. `src/web-markup.js` uses DOMPurify with an explicit tag/attribute allowlist to return an inert fragment, preserving provider metadata and preformatted text. Scripts, images and frames are removed, and the fragment is never inserted into the live document. Keep sanitization in this shared path for both server and local imports. Tests use invented songs; do not commit downloaded third-party pages.
+
+## Import, export and entry controllers
+
+`src/app.js` coordinates workspace state and navigation. `src/ui/song-import.js` owns import dialogs, cancellation, validation and prepared-song callbacks; `src/ui/song-export.js` snapshots songs for exports and manages editable-project downloads. `src/ui/entry.js` and `build/entry.js` share the startup sheet and initial HTML geometry to keep the layout stable while the editor loads.
+
+## Reproducible laboratory measurements
+
+```sh
+node scripts/audit-web.mjs https://chordleaf.com/es/
+# Or the running built server:
+node scripts/audit-web.mjs http://localhost:5173/es/
+```
+
+The script measures three fresh Chromium contexts per viewport with service workers blocked. Mobile uses 150 ms latency, 1.6 Mbps download, 750 Kbps upload and fourfold CPU throttling. Programmatic text updates dispatch the actual editor input handler, then wait for persisted content; these measurements do not represent typing speed or field INP. Download timings include generation, lazy-library loading and saving the invented output file. Run without competing browser suites for less CPU contention. Ignored outputs go to `artifacts/audit/`.
+
+The [2026-10-01 audit](audit-2026-10-01.es.md) distinguishes the live deployed version from local fixes and records unverified native Mac and Vercel-account checks. [Reviewed wiki source](wiki/README.md) is versioned here; the public GitHub wiki is a separate repository and requires a separate publication.

@@ -1,4 +1,5 @@
 import { introHtml } from "../src/ui/intro-copy.js";
+import { renderStartupEntry } from "./entry.js";
 
 const CHANGELOG_URL =
   "https://github.com/antoniomml/chordleaf/blob/main/CHANGELOG.md";
@@ -1975,6 +1976,10 @@ export function metadataPlugin(site) {
             .replace(/<p>\s*Write lyrics.*?<\/p>/s, `<p>${c.intro}</p>`)
             .replace(/<p>\s*Import TXT.*?<\/p>/s, `<p>${c.privacy}</p>`)
             .replace('<div id="fallback-features"></div>', introHtml(locale));
+          html = html.replace(
+            /<div id="app">[\s\S]*<\/div>\s*<\/body>/,
+            `<div id="app">${renderStartupEntry(locale)}</div>\n</body>`,
+          );
           if (site) {
             const origin = site.origin;
             const pageUrl = locale === "en" ? `${origin}/` : `${origin}/es/`;
