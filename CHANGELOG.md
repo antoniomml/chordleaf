@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Align chords directly on the document with drag, tap-to-place, character step controls, keyboard navigation and undo. Phones use readable sheet zoom and large controls; completed moves update the original bracket tokens.
+- Align chords directly on the document with drag, tap-to-place, character step controls, keyboard navigation and undo. Compact floating controls appear on selection, with no instruction banner. Phones use readable sheet zoom and large touch targets; completed moves update the original bracket tokens.
+- Use discreet underlines and soft selection backgrounds while editing the sheet instead of large green frames. Title, artist and source editor fields also use a thinner, muted focus border. Keyboard focus remains visible on lyrics, headers and chords.
 - Place the middle character of odd-length chord labels and the left middle character of even-length labels over their lyric anchor: E, Em and Em7 use E, E and m respectively. Preview, PDF and Word preserve the same placement.
 
 ## 1.2.1 · October 1, 2026

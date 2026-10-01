@@ -16,7 +16,7 @@ export function setupChordAlignment({
   const tools = document.createElement("div");
   tools.id = "sheet-alignment-tools";
   tools.hidden = true;
-  tools.innerHTML = t`<p>Arrastra un acorde, o selecciónalo y toca su letra de destino.</p><div class="sheet-alignment-controls"><span id="sheet-alignment-selection">Selecciona un acorde</span><button id="sheet-alignment-left" aria-label="Mover una letra a la izquierda">←</button><button id="sheet-alignment-right" aria-label="Mover una letra a la derecha">→</button><button id="sheet-alignment-edit" aria-label="Editar letra del verso">Letra</button><button id="sheet-alignment-undo">Deshacer</button><button id="sheet-alignment-done">Listo</button></div><span id="sheet-alignment-status" class="visually-hidden" role="status" aria-live="polite"></span>`;
+  tools.innerHTML = t`<div class="sheet-alignment-controls" role="toolbar" aria-label="Controles del acorde"><span id="sheet-alignment-selection"></span><button id="sheet-alignment-left" aria-label="Mover una letra a la izquierda" title="Mover una letra a la izquierda">←</button><button id="sheet-alignment-right" aria-label="Mover una letra a la derecha" title="Mover una letra a la derecha">→</button><button id="sheet-alignment-edit" aria-label="Editar letra del verso" title="Editar letra del verso">Letra</button><button id="sheet-alignment-undo" aria-label="Deshacer último cambio" title="Deshacer último cambio">↶</button><button id="sheet-alignment-done" aria-label="Listo" title="Listo">✓</button></div><span id="sheet-alignment-status" class="visually-hidden" role="status" aria-live="polite"></span>`;
   scroll.before(tools);
   const $ = (s) => tools.querySelector(s);
   let owner,
@@ -106,13 +106,16 @@ export function setupChordAlignment({
       $("#sheet-alignment-right").disabled = active.at === line.lyric.length;
     } else {
       selected = undefined;
-      $("#sheet-alignment-selection").textContent = t("Selecciona un acorde");
+      $("#sheet-alignment-selection").textContent = "";
       $("#sheet-alignment-edit").disabled = true;
       $("#sheet-alignment-left").disabled = $(
         "#sheet-alignment-right",
       ).disabled = true;
     }
+    for (const id of ["selection", "left", "right", "edit"])
+      $(`#sheet-alignment-${id}`).hidden = !chord;
     $("#sheet-alignment-undo").disabled = !history.length;
+    tools.hidden = !enabled() || (!chord && !history.length);
   }
   function select(el) {
     const row = rows.find((r) => r.el === el.closest(".song-line"));
@@ -431,7 +434,6 @@ export function setupChordAlignment({
         }),
       );
     pages.classList.toggle("aligning-chords", enabled());
-    tools.hidden = !enabled();
     paintSelection();
   }
   function handles(event) {

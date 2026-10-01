@@ -43,7 +43,7 @@ try {
     assert.equal(await page.locator("dialog[open]").count(), 0);
     assert.equal(
       await page.locator("#sheet-alignment-tools").isVisible(),
-      true,
+      false,
     );
     const row = page.locator('.song-line[data-line="0"]');
     const lyric = await row.locator(".lyric").innerText();
@@ -118,6 +118,18 @@ try {
       assert.equal(chords.indexOf("Em7") + 1, 12);
     }
     const label = row.locator('[data-chord="Em7"]');
+    const beforeSelection = await row.boundingBox();
+    await label.click();
+    assert.equal(await page.locator("#sheet-alignment-tools p").count(), 0);
+    const controls = await page.locator("#sheet-alignment-tools").boundingBox();
+    assert.ok(controls.height <= 56, "context controls fit on one row");
+    assert.ok(controls.width <= (mobile ? 390 : 1440) - 24);
+    assert.deepEqual(await row.boundingBox(), beforeSelection);
+    assert.equal(
+      await label.evaluate((el) => getComputedStyle(el).outlineStyle),
+      "none",
+      "pointer selection does not frame the chord",
+    );
     const bounds = await label.boundingBox();
     const nIndex = lyric.lastIndexOf("antes") + 1;
     const n = await letterBox(row, nIndex);
@@ -172,6 +184,12 @@ try {
     assert.ok(
       (await source.inputValue()).startsWith("[E]antes [Em]antes a[Em7]ntes"),
     );
+    await label.press("Escape");
+    assert.equal(
+      await page.locator("#sheet-alignment-left").isVisible(),
+      false,
+    );
+    assert.equal(await page.locator("#sheet-alignment-undo").isVisible(), true);
     await page.locator("#sheet-alignment-undo").click();
     assert.equal(await source.inputValue(), original);
 
@@ -231,8 +249,19 @@ try {
       await page.locator(".inline-editor").inputValue(),
       original.split("\n")[0],
     );
+    assert.equal(
+      await page
+        .locator(".inline-editor")
+        .evaluate((el) => getComputedStyle(el).outlineStyle),
+      "none",
+      "editing a verse does not add a green focus frame",
+    );
     await page.locator(".inline-editor").press("Escape");
-    await page.locator("#sheet-alignment-done").click();
+    assert.equal(
+      await page.locator("#sheet-alignment-tools").isVisible(),
+      false,
+    );
+    await page.locator("#pencil").click();
     assert.equal(
       await page.locator("#sheet-alignment-tools").isVisible(),
       false,
@@ -317,14 +346,51 @@ try {
   await english.goto(process.env.CHORDLEAF_URL || "http://localhost:5173/en/");
   await english.locator("#example-song").click();
   await english.locator("#pencil").click();
-  assert.ok(
-    (await english.locator("#sheet-alignment-tools").innerText()).includes(
-      "Drag a chord",
-    ),
+  const title = english.locator('[data-header="title"]');
+  const artist = english.locator('[data-header="artist"]');
+  for (const field of [title, artist]) {
+    await field.click();
+    assert.equal(
+      await field.evaluate((el) => getComputedStyle(el).outlineStyle),
+      "none",
+      "sheet header focus uses an underline instead of a frame",
+    );
+  }
+  await title.fill("Edited on the sheet");
+  await artist.click();
+  assert.equal(
+    await english.locator("#title").inputValue(),
+    "Edited on the sheet",
+  );
+  const keyboardLyric = english.locator(".lyric[tabindex]").first();
+  await keyboardLyric.focus();
+  await english.keyboard.press("Shift+Tab");
+  await english.keyboard.press("Tab");
+  assert.equal(
+    await keyboardLyric.evaluate((el) => el === document.activeElement),
+    true,
+  );
+  assert.notEqual(
+    await keyboardLyric.evaluate((el) => getComputedStyle(el).boxShadow),
+    "none",
+    "keyboard focus remains visible on lyrics",
+  );
+  await keyboardLyric.press("Enter");
+  await english.locator(".inline-editor").press("Escape");
+  assert.equal(
+    await english.locator("#sheet-alignment-tools").isVisible(),
+    false,
+  );
+  await english.locator(".alignable-chord").first().click();
+  assert.equal(
+    await english.locator("#sheet-alignment-done").getAttribute("aria-label"),
+    "Done",
   );
   assert.equal(
-    await english.locator("#sheet-alignment-done").innerText(),
-    "Done",
+    await english
+      .locator(".sheet-alignment-controls")
+      .getAttribute("aria-label"),
+    "Chord controls",
   );
   await english.close();
   console.log(

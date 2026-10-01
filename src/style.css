@@ -80,6 +80,12 @@ input:focus,
 textarea:focus {
   border-color: #98b874 !important;
 }
+#title:focus,
+#artist:focus {
+  outline: none;
+  border-color: #96a58a !important;
+  box-shadow: 0 0 0 1px #96a58a;
+}
 input {
   min-width: 0;
   width: 100%;
@@ -808,7 +814,7 @@ main {
   transition: box-shadow 0.15s;
 }
 .source-container:focus-within {
-  box-shadow: inset 0 0 0 2px var(--green);
+  box-shadow: inset 0 0 0 1px #96a58a;
 }
 #source:focus-visible {
   outline: none;
@@ -1127,9 +1133,19 @@ main {
   cursor: text;
   border-radius: 2px;
 }
-.editable:hover {
-  background: #dce6c959;
-  outline: 1px dashed #a6b68d;
+.sheet-header [contenteditable]:focus {
+  outline: none;
+  box-shadow: inset 0 -1px #9aa58f;
+}
+.editable .lyric:focus-visible,
+.sheet-header [contenteditable]:focus-visible {
+  outline: none;
+  box-shadow: inset 0 -2px #536448;
+}
+@media (hover: hover) {
+  .editable .lyric:hover {
+    background: #eef1e880;
+  }
 }
 .inline-editor {
   position: absolute;
@@ -1139,16 +1155,24 @@ main {
   width: 100%;
   height: 60px;
   min-height: 100%;
-  background: #f8fcec;
-  color: #283d20;
-  border: 1px solid #8fa971;
-  box-shadow: 0 3px 14px #0002;
+  background: #fff;
+  color: #111;
+  border: 1px solid #c9cec2;
+  border-radius: 3px;
+  box-shadow: 0 2px 8px #0001;
   padding: 5px;
   font:
     12px/1.6 "Courier New",
     monospace;
   white-space: pre-wrap;
   resize: vertical;
+}
+.page .inline-editor:focus {
+  outline: none;
+  border-color: #a7b09d !important;
+  box-shadow:
+    0 2px 8px #0001,
+    inset 0 -1px #7e8b72;
 }
 .preview-footer {
   height: 38px;
@@ -3701,56 +3725,59 @@ select:focus-visible {
 #editor-dialog #expand-editor {
   display: none;
 }
-/* Sheet controls stay outside the scaled A4 page so phones retain touch targets. */
+/* Contextual controls float outside the scaled page; touch targets stay 44px. */
 #sheet-alignment-tools {
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
-  background: #222b24;
-  flex-shrink: 0;
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: 54px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 24px);
+  padding: 4px 6px;
+  border: 1px solid var(--field-border);
+  border-radius: 12px;
+  background: #242a24f5;
+  box-shadow: 0 3px 14px #0003;
 }
-#sheet-alignment-tools[hidden] {
+#sheet-alignment-tools[hidden],
+.sheet-alignment-controls [hidden] {
   display: none;
-}
-#sheet-alignment-tools p {
-  margin: 0 0 8px;
-  font-size: 12px;
-  color: #d2dfcb;
-  line-height: 1.4;
 }
 .sheet-alignment-controls {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
 }
 #sheet-alignment-selection {
-  flex: 1;
+  width: 72px;
   min-width: 0;
+  padding-inline: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 14px;
-  color: #eef5e8;
+  font-size: 12px;
+  color: #e5e7df;
 }
 #sheet-alignment-tools button {
+  flex-shrink: 0;
   min-width: 44px;
   min-height: 44px;
-  padding: 6px 10px;
-  border: 1px solid #697b64;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #f2f6ee;
-  background: #313e32;
+  padding: 6px;
+  border-radius: 7px;
+  font-size: 18px;
+  color: #e5e7df;
+}
+#sheet-alignment-tools #sheet-alignment-edit {
+  font-size: 12px;
 }
 #sheet-alignment-tools button:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
 }
 .aligning-chords .sheet-chord.alignable-chord {
   cursor: grab;
   touch-action: none;
   user-select: none;
-  outline: 1px dashed #89a77d;
   border-radius: 2px;
-  background: #edf4e6;
 }
 .aligning-chords .sheet-chord.alignable-chord::before {
   content: "";
@@ -3758,8 +3785,12 @@ select:focus-visible {
   inset: -7px -3px;
 }
 .aligning-chords .sheet-chord.alignment-selected {
-  background: #d3e5bc;
-  outline: 2px solid #42682e;
+  background: #e7eedf;
+  box-shadow: inset 0 -1px #7e8b72;
+}
+.aligning-chords .sheet-chord.alignable-chord:focus-visible {
+  outline: 1px solid #536448;
+  outline-offset: 2px;
 }
 .aligning-chords .sheet-chord.alignment-dragging {
   opacity: 0.25;
@@ -3776,8 +3807,9 @@ select:focus-visible {
   z-index: 30;
   pointer-events: none;
   color: #21471a;
-  background: #d3e5bc;
-  outline: 2px solid #42682e;
+  background: #e7eedf;
+  box-shadow: 0 2px 6px #0002;
+  border-radius: 2px;
   font-family: "Google Sans Code", monospace;
   font-weight: bold;
   line-height: 1.2;
@@ -3785,24 +3817,7 @@ select:focus-visible {
 }
 @media (max-width: 760px) {
   #sheet-alignment-tools {
-    padding: 8px 12px;
-  }
-  .sheet-alignment-controls {
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-  #sheet-alignment-selection {
-    flex-basis: 100%;
-    font-size: 16px;
-  }
-  #sheet-alignment-tools button {
-    flex: 1;
-    padding: 6px;
-  }
-}
-@media (max-height: 500px) {
-  #sheet-alignment-tools p {
-    display: none;
+    bottom: 70px;
   }
 }
 @media print {
@@ -3814,6 +3829,12 @@ select:focus-visible {
   .aligning-chords .sheet-chord.alignable-chord {
     background: none !important;
     outline: none !important;
+    box-shadow: none !important;
     opacity: 1 !important;
+  }
+  .page [contenteditable],
+  .editable .lyric {
+    box-shadow: none !important;
+    background: none !important;
   }
 }

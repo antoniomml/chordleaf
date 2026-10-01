@@ -607,9 +607,7 @@ function renderPages() {
     : `${t("Acordes por revisar")}: ${issues}`;
   $("#pencil").classList.toggle("selected", editing);
   $("#pencil").setAttribute("aria-pressed", String(editing));
-  $("#editing-hint").textContent = editing
-    ? t("Arrastra los acordes para alinearlos; pulsa un verso para editar.")
-    : "";
+  $("#editing-hint").textContent = editing ? t("Edición del documento") : "";
   observer?.disconnect();
   observer = new IntersectionObserver(
     (entries) => {

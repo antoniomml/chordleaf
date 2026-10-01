@@ -64,7 +64,7 @@ try {
   await page.locator('.rail [data-mobile-view="preview"]').click();
   await page.locator("#pencil").click();
   assert.equal(await page.locator("#editor-dialog").isVisible(), false);
-  assert.equal(await page.locator("#sheet-alignment-tools").isVisible(), true);
+  assert.equal(await page.locator("#sheet-alignment-tools").isVisible(), false);
   await page.locator(".song-line .lyric").first().click();
   assert.equal(await page.locator(".inline-editor").count(), 1);
   await checkTextControls();
