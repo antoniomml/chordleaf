@@ -1,7 +1,7 @@
 {
   "name": "chordleaf-desktop",
-  "version": "1.2.0",
-  "description": "Private, local lyrics and chord transcription",
+  "version": "1.2.1",
+  "description": "Local-first chord sheet editor with PDF and print export",
   "author": "Chordleaf",
   "license": "MIT",
   "type": "module",

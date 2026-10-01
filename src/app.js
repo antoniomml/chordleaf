@@ -1,10 +1,12 @@
+import { setupSongExport } from "./ui/song-export.js";
+import { setupSongImport } from "./ui/song-import.js";
 import { escapeHtml as esc } from "./ui/html.js";
 import { setupLanguagePicker } from "./ui/language.js";
 import { renderDocumentSettings, renderKeySettings } from "./ui/settings.js";
 import { renderPageMarkup } from "./ui/pages.js";
 import { introHtml } from "./ui/intro-copy.js";
+import { entrySheetMarkup } from "./ui/entry.js";
 import { fitSong } from "./fit-song.js";
-import { serializeWorkspace, restoreWorkspace } from "./workspace-backup.js";
 import { openWorkspaceSession } from "./workspace-session.js";
 import shell from "./ui/shell.html?raw";
 import { t, getLocale } from "./i18n.js";
@@ -23,24 +25,10 @@ import {
   chordRE,
 } from "./music.js";
 import { layout, PAGE } from "./layout.js";
-import { importWebSong } from "./web-import.js";
-import {
-  exportSong,
-  importFile,
-  importText,
-  download,
-  downloadName,
-} from "./files.js";
-import {
-  projectSignature,
-  serializeProject,
-  restoreProject,
-} from "./project.js";
+import { download } from "./files.js";
+import { projectSignature } from "./project.js";
 import { registerServiceWorker } from "./pwa.js";
-import { setupLocalWebImport } from "./ui/local-web-import.js";
-import { setupAudioImport } from "./ui/audio-import.js";
 import { resolveFeatureFlags } from "./feature-flags.js";
-import { setupClipboardImport } from "./ui/clipboard-import.js";
 import { setupMenu } from "./ui/menu.js";
 import { blankLineCount, compressBlankLines } from "./text-tools.js";
 import {
@@ -50,7 +38,7 @@ import {
   forget,
   worthKeeping,
 } from "./recent-projects.js";
-import { exampleSong, chordRows } from "./example-song.js";
+import { exampleSong } from "./example-song.js";
 const $ = (s) => document.querySelector(s);
 document.documentElement.lang = getLocale();
 const workspaceSession = await openWorkspaceSession($("#app"));
@@ -330,14 +318,7 @@ function recentClick(event) {
   if (open) reopenRecent(open.dataset.recent);
 }
 function renderEntrySheet() {
-  const example = exampleSong(getLocale());
-  $("#entry-sheet").innerHTML =
-    `<div class="entry-page"><strong>${esc(example.title.toLocaleUpperCase())}</strong><small>${esc(example.artist)}</small><pre>${chordRows(
-      example.text,
-      6,
-    )
-      .map((row) => `<b>${esc(row.chords)}</b>\n${esc(row.lyric)}`)
-      .join("\n")}</pre></div>`;
+  $("#entry-sheet").innerHTML = entrySheetMarkup(getLocale());
 }
 async function openExample() {
   const example = exampleSong(getLocale());
@@ -1028,353 +1009,47 @@ document.querySelectorAll("[data-harmony-view]").forEach((button) => {
     tabs[next].focus();
   };
 });
-let importGeneration = 0,
-  importController;
-const features = resolveFeatureFlags(import.meta.env);
-$("#audio").hidden = !features.audioImport;
-$("#web").hidden = !features.webImport;
-const audioImport = features.audioImport
-  ? setupAudioImport({
-      accept: (data, options) => acceptImport(data, { ...options, edit: true }),
-      reportError: importError,
-    })
-  : { reset() {}, open() {} };
-const clipboardImport = setupClipboardImport({
-  active: () => $("#new-dialog").open && !$("#new-menu").hidden,
-  accept: (text) => acceptImport(importText(text, "")),
-  reportError: importError,
+const imports = setupSongImport({
+  features: resolveFeatureFlags(import.meta.env),
+  toast,
+  onBlank() {
+    const s = create();
+    acceptSongs([s], s.id);
+    $("#title")?.focus();
+  },
+  onSongs: acceptSongs,
 });
-$("#audio").onclick = () => importScreen("audio");
-function importScreen(screen) {
-  if (
-    (screen === "audio" && !features.audioImport) ||
-    (screen === "web" && !features.webImport)
-  )
-    return;
-  $("#new-dialog").dataset.screen = screen;
-  audioImport.reset();
-  importController?.abort();
-  importController = new AbortController();
-  importGeneration++;
-  clipboardImport.reset();
-  localWebImport.reset();
-  $("#new-menu").hidden = screen !== "menu";
-  $("#text-import").hidden = screen !== "text";
-  $("#web-import").hidden = screen !== "web";
-  $("#audio-import").hidden = screen !== "audio";
-  $("#import-back").hidden = screen === "menu";
-  $("#new-heading").textContent = {
-    menu: t("Una nueva canción."),
-    text: t("Abrir documento"),
-    web: t("Importar desde una web."),
-    audio: t("Importar audio"),
-  }[screen];
-  $("#new-description").textContent = {
-    menu: t("De una idea a tu próxima hoja de acordes."),
-    text: t(
-      "PDF, Word, TXT o ChordPro. Se convierten en letra y acordes editables.",
-    ),
-    web: t("Pega el enlace de la canción que quieres tocar."),
-    audio: t("Puede haber errores en la letra, los acordes y su posición."),
-  }[screen];
-  $("#import-privacy").textContent =
-    screen === "audio"
-      ? t("Tu audio permanece en este equipo.")
-      : screen === "web"
-        ? t("El servidor descarga únicamente la página del enlace.")
-        : t("Los archivos se procesan aquí, en tu navegador.");
-  $("#import-error").hidden = true;
-  $("#import-error").textContent = "";
-  $("#web-submit").disabled = false;
-  $("#web-submit").textContent = t("Importar canción");
-  $("#choose-file").disabled = false;
-  $("#choose-file").textContent = t("Elegir documento");
-  $("#file").accept = ".txt,.pdf,.docx,.cho,.chordpro";
-  $("#new-dialog").scrollTop = 0;
-  if (screen === "web") $("#web-url").focus();
-  else if (screen === "audio") {
-    audioImport.open();
-    $("#audio-drop").focus();
-  } else if (screen === "text") $("#choose-file").focus();
-  else {
-    $("#new-menu .choice:not([hidden])").focus();
-    if ($("#new-dialog").open) clipboardImport.refresh();
-  }
-}
 function openNewSong() {
-  $("#web-url").value = "";
-  $("#file").value = "";
-  importScreen("menu");
-  $("#new-dialog").showModal();
-  $("#new-menu .choice:not([hidden])").focus();
-  clipboardImport.refresh();
+  imports.open();
 }
-$("#new").onclick = openNewSong;
-$("#mobile-tab-plus").onclick = openNewSong;
-$("#empty-new").onclick = openNewSong;
-$("#import-back").onclick = () => importScreen("menu");
-$("#new-dialog").addEventListener("close", () => {
-  audioImport.reset();
-  importController?.abort();
-  importGeneration++;
-  clipboardImport.reset();
-});
-$("#new-dialog .dialog-close").onclick = () => $("#new-dialog").close();
-$("#blank").onclick = () => {
-  const s = create();
-  songs.push(s);
-  active = s.id;
-  section = "document";
-  mobileView = "document";
-  desktopView = "document";
-  songDesktopViews.set(active, desktopView);
-  musicSection = "key";
-  songViews.set(active, mobileView);
-  songMusicSections.set(active, musicSection);
-  resetView();
-  $("#new-dialog").close();
-  render();
-  persist();
-  $("#title")?.focus();
-};
-async function acceptImport(data, { edit = false, signal } = {}) {
-  const generation = importGeneration;
-  const importSignal = signal
-    ? AbortSignal.any([signal, importController.signal])
-    : importController.signal;
-  if (data.text.length > MAX_TEXT_LENGTH)
-    throw new Error(
-      t(
-        "El texto es demasiado largo. Importa hasta 50.000 caracteres por canción.",
-      ),
-    );
-  const s = create({ ...data, dirty: true });
-  Object.assign(s, await fitSong(s, { signal: importSignal }));
-  importSignal.throwIfAborted();
-  if (generation !== importGeneration || !$("#new-dialog").open) return;
-  songs.push(s);
-  active = s.id;
+/** Commit prepared songs in one place, including their initial navigation. */
+function acceptSongs(
+  opened,
+  selected,
+  { edit = false, imported = false } = {},
+) {
+  songs.push(...opened);
+  active = selected;
   desktopView = edit ? "edit" : "document";
+  mobileView = edit ? "edit" : imported ? "preview" : "document";
+  musicSection = "key";
+  section = "document";
   songDesktopViews.set(active, desktopView);
-  resetView();
-  mobileView = edit ? "edit" : "preview";
   songViews.set(active, mobileView);
   songMusicSections.set(active, musicSection);
+  resetView();
   $("#new-dialog").close();
   render();
   persist();
-  const fit =
-    layout(s).pages.length === 1
-      ? t("Ajustada a una página. Puedes cambiar los ajustes.")
-      : t(
-          "Es demasiado larga para una página con letra legible. Se han optimizado los ajustes.",
-        );
-  toast([data.notice, fit].filter(Boolean).join(" "));
 }
-function importError(error) {
-  $("#import-error").hidden = false;
-  $("#import-error").textContent = t(error.message);
-}
-$("#import").onclick = () => {
-  importScreen("text");
-  $("#file").click();
-};
-$("#open-project").onclick = () => {
-  importScreen("text");
-  $("#new-heading").textContent = t("Abrir proyecto editable.");
-  $("#new-description").textContent = t(
-    "Selecciona el archivo .chordleaf.json de una canción guardada.",
-  );
-  $("#choose-file").textContent = t("Seleccionar proyecto");
-  $("#file").accept = ".chordleaf.json,.json";
-  $("#choose-file").focus();
-};
-$("#choose-file").onclick = () => $("#file").click();
-$("#web").onclick = () => importScreen("web");
-const localWebImport = setupLocalWebImport({
-  onChange() {
-    importController?.abort();
-    importGeneration++;
-    $("#import-error").hidden = true;
-    $("#web-submit").disabled = false;
-    $("#web-submit").textContent = t("Importar canción");
-  },
-  async onImport(read) {
-    importController?.abort();
-    importController = new AbortController();
-    const signal = importController.signal;
-    const generation = ++importGeneration;
-    $("#import-error").hidden = true;
-    $("#web-submit").disabled = false;
-    $("#web-submit").textContent = t("Importar canción");
-    try {
-      const data = await read(signal);
-      signal.throwIfAborted();
-      if (generation !== importGeneration || !$("#new-dialog").open) return;
-      await acceptImport(data);
-    } catch (error) {
-      if (generation === importGeneration && $("#new-dialog").open)
-        importError(error);
-    }
-  },
+const { saveProject } = setupSongExport({
+  song,
+  workspace: () => ({ songs, active }),
+  exportMenu,
+  renderTabs,
+  persist,
+  toast,
 });
-$("#web-import").onsubmit = async (e) => {
-  e.preventDefault();
-  if (!features.webImport) return;
-  importController?.abort();
-  importController = new AbortController();
-  const generation = ++importGeneration;
-  localWebImport.reset();
-  $("#import-error").hidden = true;
-  $("#web-submit").disabled = true;
-  $("#web-submit").textContent = t("Importando…");
-  try {
-    const data = await importWebSong($("#web-url").value.trim(), {
-      signal: importController.signal,
-    });
-    if (generation !== importGeneration || !$("#new-dialog").open) return;
-    await acceptImport(data);
-    $("#web-url").value = "";
-  } catch (error) {
-    if (generation === importGeneration && $("#new-dialog").open) {
-      if (error.code === "SOURCE_FORBIDDEN") {
-        importError(
-          new Error(
-            t(
-              "La web bloquea la descarga (403). Próximamente podrás importarla con la extensión de navegador de Chordleaf.",
-            ),
-          ),
-        );
-        localWebImport.show();
-      } else importError(error);
-    }
-  } finally {
-    if (generation === importGeneration) {
-      $("#web-submit").disabled = false;
-      $("#web-submit").textContent = t("Importar canción");
-    }
-  }
-};
-$("#file").onchange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  importController?.abort();
-  importController = new AbortController();
-  const signal = importController.signal;
-  const generation = importGeneration;
-  $("#choose-file").disabled = true;
-  $("#choose-file").textContent = t("Importando…");
-  try {
-    if (file.name.toLowerCase().endsWith(".json")) {
-      if (file.size > 10 * 1024 * 1024)
-        throw new Error(t("La copia supera el límite de 10 MiB."));
-      const content = await file.text();
-      let format;
-      try {
-        format = JSON.parse(content)?.format;
-      } catch {
-        throw new Error(t("El archivo JSON está dañado o no es compatible."));
-      }
-      if (generation !== importGeneration || !$("#new-dialog").open) return;
-      if (format === "chordleaf-song") {
-        const opened = restoreProject(content);
-        songs.push(opened);
-        active = opened.id;
-        desktopView = "document";
-        songDesktopViews.set(active, desktopView);
-        resetView();
-        $("#new-dialog").close();
-        render();
-        persist();
-        toast(t("Proyecto editable abierto."));
-        return;
-      }
-      const restored = restoreWorkspace(content);
-      songs.push(...restored.songs);
-      active = restored.active;
-      desktopView = "document";
-      resetView();
-      $("#new-dialog").close();
-      render();
-      persist();
-      toast(t("Copia restaurada como nuevas pestañas."));
-      return;
-    }
-    const data = await importFile(file, { signal });
-    if (generation !== importGeneration || !$("#new-dialog").open) return;
-    await acceptImport(data);
-  } catch (error) {
-    if (generation === importGeneration && $("#new-dialog").open)
-      importError(error);
-  } finally {
-    if (generation === importGeneration) {
-      $("#choose-file").disabled = false;
-      $("#choose-file").textContent = t("Elegir documento");
-      e.target.value = "";
-    }
-  }
-};
-$("#workspace-backup").onclick = () => {
-  download(
-    new Blob([serializeWorkspace(songs, active)], { type: "application/json" }),
-    "chordleaf-workspace.json",
-  );
-  exportMenu.close({ focus: true });
-};
-$("#print-document").onclick = () => {
-  exportMenu.close({ focus: true });
-  // The print stylesheet paints only the A4 pages, whatever view is open.
-  window.print();
-};
-function saveProject(target = song()) {
-  if (!target) return false;
-  try {
-    const signature = projectSignature(target);
-    const name = downloadName(target.title, t("Canción"));
-    download(
-      new Blob([serializeProject(target)], { type: "application/json" }),
-      `${name}.chordleaf.json`,
-    );
-    target.projectSignature = signature;
-    target.dirty = false;
-    renderTabs();
-    persist();
-    toast(
-      t("Proyecto editable descargado. Conserva el archivo para reabrirlo."),
-    );
-    return true;
-  } catch (error) {
-    toast(
-      t(
-        "No se pudo guardar el proyecto. Copia la letra del editor o descarga TXT. ",
-      ) + error.message,
-      "error",
-    );
-    return false;
-  }
-}
-$("#save-project").onclick = () => {
-  exportMenu.close({ focus: true });
-  saveProject();
-};
-document.querySelectorAll("[data-export]").forEach(
-  (b) =>
-    (b.onclick = async () => {
-      exportMenu.close({ focus: true });
-      const s = song();
-      try {
-        toast(t("Preparando tu documento…"));
-        await exportSong(structuredClone(s), b.dataset.export);
-        toast(t("Documento descargado."));
-      } catch (e) {
-        toast(
-          t("No se pudo exportar. Copia la letra del editor o descarga TXT. ") +
-            e.message,
-          "error",
-        );
-      }
-    }),
-);
 document.addEventListener("click", (e) => {
   const chord = e.target.closest("button[data-chord]");
   if (chord) {

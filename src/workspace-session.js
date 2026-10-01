@@ -8,7 +8,7 @@ const HANDOFF_TIMEOUT = 2500;
 export async function openWorkspaceSession(root) {
   const channel =
     "BroadcastChannel" in globalThis ? new BroadcastChannel(LOCK) : null;
-  const lease = { held: false, release() {}, beforeHandOff() {} };
+  const lease = { held: false, release() {}, beforeHandOff: () => true };
   function acquire(options) {
     return new Promise((resolve) => {
       navigator.locks
@@ -35,7 +35,14 @@ export async function openWorkspaceSession(root) {
   }
   channel?.addEventListener("message", (event) => {
     if (event.data?.type !== "take-over" || !lease.held) return;
-    lease.beforeHandOff();
+    // Failed persistence must retain the only live copy and its editing lease.
+    if (lease.beforeHandOff() === false) {
+      channel?.postMessage({
+        type: "handoff-failed",
+        requestId: event.data.requestId,
+      });
+      return;
+    }
     lease.release();
     location.reload();
   });
@@ -65,17 +72,36 @@ export async function openWorkspaceSession(root) {
   use.textContent = t("Usar aquí");
   panel.append(use);
   use.focus();
-  await new Promise((resolve) =>
-    use.addEventListener("click", resolve, { once: true }),
-  );
-  use.disabled = true;
-  use.textContent = t("Abriendo tus canciones…");
-  // Queue first, then ask: the owner's release goes straight to this request.
-  const queued = acquire({});
-  channel?.postMessage({ type: "take-over" });
-  const timeout = new Promise((resolve) =>
-    setTimeout(() => resolve(false), HANDOFF_TIMEOUT),
-  );
-  if (!(await Promise.race([queued, timeout]))) await acquire({ steal: true });
+  await new Promise((resolve) => {
+    use.addEventListener("click", async () => {
+      if (use.disabled) return;
+      use.disabled = true;
+      use.textContent = t("Abriendo tus canciones…");
+      const controller = new AbortController();
+      const requestId = crypto.randomUUID();
+      const failed = (event) => {
+        if (
+          event.data?.type === "handoff-failed" &&
+          event.data.requestId === requestId
+        )
+          controller.abort();
+      };
+      channel?.addEventListener("message", failed);
+      // Queue first, then ask. Never steal from an owner with unsaved changes.
+      const timer = setTimeout(() => controller.abort(), HANDOFF_TIMEOUT);
+      const queued = acquire({ signal: controller.signal });
+      channel?.postMessage({ type: "take-over", requestId });
+      const acquired = await queued;
+      clearTimeout(timer);
+      channel?.removeEventListener("message", failed);
+      if (acquired) return resolve();
+      description.textContent = t(
+        "No se pudo cambiar de pestaña. Guarda o exporta tus cambios en la otra pestaña y vuelve a intentarlo.",
+      );
+      description.setAttribute("role", "alert");
+      use.disabled = false;
+      use.textContent = t("Usar aquí");
+    });
+  });
   return lease;
 }

@@ -27,7 +27,7 @@ const expected = {
     title: "Chordleaf — Lyrics &amp; Guitar Chords Editor | Free PDF Sheets",
     description:
       "Write lyrics and chords, explore guitar shapes, transpose songs and export rehearsal sheets as PDF, Word or text. Free browser workspace in English and Spanish.",
-    heading: "Chordleaf — Lyrics &amp; Guitar Chords Editor",
+    heading: "Chord editor. Your version, ready to print.",
     imageAlt:
       "Chordleaf social card: a song sheet with lyrics, guitar chord positions and the Chordleaf logo.",
     locale: "en_US",
@@ -37,7 +37,7 @@ const expected = {
     title: "Chordleaf — Editor de letras y acordes | Hojas PDF gratis",
     description:
       "Escribe letras y acordes, explora posiciones de guitarra, transporta canciones y exporta hojas de ensayo en PDF, Word o texto. Gratis, en español e inglés.",
-    heading: "Chordleaf — Editor de letras y acordes",
+    heading: "Editor de acordes. Tu versión, lista para imprimir.",
     imageAlt:
       "Tarjeta social de Chordleaf: una hoja con letra, acordes de guitarra y el logotipo de Chordleaf.",
     locale: "es_ES",

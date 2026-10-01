@@ -4,22 +4,25 @@ chordleaf is a browser application built with ES modules and Vite. Editing and f
 
 ## Modules
 
-| File                   | Responsibility                                                                     |
-| ---------------------- | ---------------------------------------------------------------------------------- |
-| `src/app.js`           | Song state, document/key sections and control wiring.                              |
-| `src/ui/pages.js`      | Escaped HTML for the document preview.                                             |
-| `src/ui/intro-copy.js` | Shared English/Spanish introduction for the app and static entry pages.            |
-| `src/chords-panel.js`  | Chord sidebar, catalog search, interactive fretboard and replacement workflow.     |
-| `src/harmony.js`       | Guitar pitches, formula matching, theoretical note spelling and token replacement. |
-| `src/dictionary-ui.js` | Song chord cards, custom shape editor and draggable sheet diagrams.                |
-| `src/dictionary.js`    | Shared diagram geometry and rendering for preview and exports.                     |
-| `src/editor-tools.js`  | Expanded editor and accessible workspace divider.                                  |
-| `src/music.js`         | Symbols, transposition, line parsing, estimated keys and diagrams.                 |
-| `src/data/guitar.json` | Local catalog of guitar positions using absolute frets.                            |
-| `src/layout.js`        | Shared model for lines, collisions, columns and pages.                             |
-| `src/files.js`         | Import/export with on-demand dependencies.                                         |
-| `src/pdf-import.js`    | Geometric interpretation of extracted PDF text.                                    |
-| `src/fonts.js`         | Document font loading and embedding.                                               |
+| File                                 | Responsibility                                                                     |
+| ------------------------------------ | ---------------------------------------------------------------------------------- |
+| `src/app.js`                         | Song state, document/key sections and control wiring.                              |
+| `src/ui/pages.js`                    | Escaped HTML for the document preview.                                             |
+| `src/ui/intro-copy.js`               | Shared English/Spanish introduction for the app and static entry pages.            |
+| `src/chords-panel.js`                | Chord sidebar, catalog search, interactive fretboard and replacement workflow.     |
+| `src/harmony.js`                     | Guitar pitches, formula matching, theoretical note spelling and token replacement. |
+| `src/dictionary-ui.js`               | Song chord cards, custom shape editor and draggable sheet diagrams.                |
+| `src/dictionary.js`                  | Shared diagram geometry and rendering for preview and exports.                     |
+| `src/editor-tools.js`                | Expanded editor and accessible workspace divider.                                  |
+| `src/music.js`                       | Symbols, transposition, line parsing, estimated keys and diagrams.                 |
+| `src/data/guitar.json`               | Local catalog of guitar positions using absolute frets.                            |
+| `src/layout.js`                      | Shared model for lines, collisions, columns and pages.                             |
+| `src/files.js`                       | Import/export with on-demand dependencies.                                         |
+| `src/ui/song-import.js`              | Import dialogs, cancellation, validation and prepared-song callbacks.              |
+| `src/ui/song-export.js`              | Snapshot exports, print controls and editable-project downloads.                   |
+| `src/ui/entry.js` / `build/entry.js` | Shared sheet and static entry layout before editor initialization.                 |
+| `src/pdf-import.js`                  | Geometric interpretation of extracted PDF text.                                    |
+| `src/fonts.js`                       | Document font loading and embedding.                                               |
 
 Sections hide the entire inactive sidebar content without destroying the text editor. The expanded editor moves the existing textarea, retaining selection and undo history. The native dialog manages focus, an inert background and Escape.
 
@@ -45,7 +48,7 @@ The identifier is independent of the fingering catalog. It calculates MIDI pitch
 
 Unit tests cover import, anchors, harmony, specific voicings and pagination. Browser tests exercise editing, section isolation, dialogs, chord replacement, responsive layouts, the A4 print stylesheet and the TXT, ChordPro, PDF and Word exports. `artifacts/` and `output/` are ignored local outputs.
 
-Keep model transformations separate from UI controls. Audio transcription remains future work and requires decisions about models, privacy, cost and manual review before introducing services or credentials.
+Keep model transformations separate from UI controls. Audio transcription is an optional experiment with separate browser/native runtimes, explicit model downloads and manual review. It must not become a prerequisite for editing or printing chord sheets.
 
 ## Language and untrusted data
 
@@ -62,7 +65,7 @@ Web extraction is provider-specific, not song-specific. `src/web-import.js` read
 - `src/ui/shell.html`: static, bilingual application shell; user values never enter this template.
 - `src/ui/language.js`: accessible language menu, persistence and route switching.
 - `src/i18n.js` and `src/locales/en.js`: source-literal translations; interpolated song text is not translated. `/en/` and `/es/` select the interface language.
-- `src/workspace-session.js`: exclusive Web Lock acquired before loading storage. The owner saves and releases on page exit; restored back/forward pages reload before editing.
+- `src/workspace-session.js`: exclusive Web Lock acquired before loading storage. Handoffs release only after successful persistence; a failed save or unresponsive messaging channel retains the current owner and lets the requester retry. The owner saves and releases on page exit; restored back/forward pages reload before editing.
 - `src/workspace-backup.js`: versioned JSON backup and additive restore, with fresh song identifiers and known-field sanitization.
 - `src/fit-song.js` and `src/fit-worker.js`: bounded auto-fit in a dedicated worker. It prefers a one-page layout that keeps every source line intact (one column on ties); when one page is impossible it picks the two-column layout with the fewest pages, then the fewest broken lines. Each search parses the song once; editing during a pending fit prevents stale results from being applied.
 - `src/docx-limits.js`: ZIP central-directory preflight limits declared expanded content to 32 MiB and 2,000 entries. It rejects encrypted and unsupported archives; it is not a complete malicious-parser sandbox.
