@@ -14,6 +14,7 @@ import { createSong as create, MAX_TEXT_LENGTH } from "./song-state.js";
 import { setupChordsPanel } from "./chords-panel.js";
 import { setupDictionary } from "./dictionary-ui.js";
 import { setupEditorTools } from "./editor-tools.js";
+import { setupChordAlignment } from "./ui/chord-alignment.js";
 import "./style.css";
 import {
   keyInfo,
@@ -579,6 +580,8 @@ function renderSource() {
   sourceMeta();
 }
 function sourceMeta({ harmonyChanged = true } = {}) {
+  $("#align-chords").disabled =
+    !chords(song().text).length && !/\[\?[^\[\]\n]{1,40}\]/.test(song().text);
   const lines = song().text.split("\n").length;
   if ($("#line-numbers").childElementCount !== lines)
     $("#line-numbers").innerHTML = Array.from(
@@ -650,9 +653,26 @@ function renderPages() {
     );
     document.querySelectorAll(".song-line").forEach((el) => {
       el.onclick = (event) => {
+        const chord = event.target.closest(".sheet-chord[data-chord]");
+        if (chord) {
+          alignment.open(
+            Number(el.dataset.line),
+            Number(chord.dataset.alignStart),
+          );
+          return;
+        }
         if (!event.target.closest(".unresolved-chord")) editLine(el);
       };
       el.onkeydown = (e) => {
+        const chord = e.target.closest(".sheet-chord[data-chord]");
+        if (chord && ["Enter", " "].includes(e.key)) {
+          e.preventDefault();
+          alignment.open(
+            Number(el.dataset.line),
+            Number(chord.dataset.alignStart),
+          );
+          return;
+        }
         if (e.key === "Enter" && !e.target.closest(".unresolved-chord")) {
           e.preventDefault();
           editLine(el);
@@ -1214,6 +1234,15 @@ document.addEventListener("keydown", (e) => {
     );
 });
 setupEditorTools({ resizePages });
+const alignment = setupChordAlignment({
+  song,
+  update(text) {
+    song().text = text;
+    changed();
+    renderSource();
+    renderPages();
+  },
+});
 const chordPanel = setupChordsPanel({
   song,
   changed,

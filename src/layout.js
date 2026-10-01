@@ -122,6 +122,7 @@ export function layout(song, parsed = parseSong(song.text)) {
           flush();
         } else text += separator;
         sequenceMarks.push({
+          rawIndex: m.index,
           at: text.length,
           x: text.length,
           chord,
