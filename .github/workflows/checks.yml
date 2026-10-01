@@ -11,8 +11,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   app:
-    # Fresh runners can spend more than 15 minutes downloading WebKit's system
-    # dependencies; keep the complete browser matrix within the job budget.
+    # Keep dependency setup and the complete browser matrix within the job budget.
     timeout-minutes: 30
     runs-on: ubuntu-24.04
     steps:
@@ -32,7 +31,12 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
-      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - name: Use the official Ubuntu package mirror
+        # The runner's Azure mirror can stall on WebKit system dependencies.
+        run: sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+      - name: Install browser dependencies
+        timeout-minutes: 10
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
       - name: Browser tests
         run: |
           mkdir -p artifacts

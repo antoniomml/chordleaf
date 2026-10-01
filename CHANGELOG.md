@@ -8,6 +8,7 @@
 - Center the homepage, README and desktop description on correcting chord sheets, preparing a personal version and printing/exporting it. Clarify that browser installation support varies.
 - Add reproducible desktop/mobile laboratory measurements, startup/no-JavaScript and failed-save/timeout regression tests, and a full Spanish audit with prioritized product, security and distribution findings.
 - Update architecture/development documentation and prepare reviewed GitHub wiki source in the main repository; wiki publication remains separate.
+- Use the official Ubuntu package mirror for browser CI dependencies and bound installation time, avoiding stalled runner downloads without reducing browser coverage.
 - Security follow-up: the experimental model-conversion requirements still pin ONNX 1.19.1. Existing PR #45 proposes 1.22.0; this release does not include that independent update.
 - macOS distribution remains a candidate: no signed/notarized installer is published with this release.
 
