@@ -2,7 +2,7 @@
   <img src="public/logo.svg" width="76" height="76" alt="chordleaf logo">
   <h1>chordleaf</h1>
   <p><strong>Your song. Your chords. Everything in place.</strong></p>
-  <p>A workspace for writing lyrics and chords, exploring guitar voicings,<br>and making a song sheet for your next rehearsal.</p>
+  <p>A local-first chord sheet editor: correct imported chords, make your own version,<br>and export a clean PDF or print it.</p>
   <p>
     <a href="https://github.com/antoniomml/chordleaf/releases/latest"><img src="https://img.shields.io/github/v/release/antoniomml/chordleaf?style=flat-square&color=c9e79c&labelColor=263426&label=version" alt="Latest release"></a>
     <a href="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml"><img src="https://github.com/antoniomml/chordleaf/actions/workflows/checks.yml/badge.svg" alt="Automated checks"></a>
@@ -14,9 +14,9 @@
 
 ## A small studio for your songs
 
-Preparing a song should leave time to play it. chordleaf brings lyrics, chords and the finished document together: write a verse, place each chord on the right syllable, and check the printed layout as you go.
+Chord sites are a starting point: the chords, alignment or arrangement may need corrections. Chordleaf helps you make your own version: import a supported page or document, edit the lyrics and chord changes, transpose when needed, then review the printed layout and export PDF or print directly.
 
-It is for singers, guitarists and anyone preparing a rehearsal or organizing songs. The interface is available in **English and Spanish**. Use **EN / ES** in the top bar; your songs keep their original language. Project documentation is in English.
+It is for singers, guitarists, teachers and anyone preparing their own printable chord sheets. The interface is available in **English and Spanish**. Use **EN / ES** in the top bar; your songs keep their original language. Project documentation is in English.
 
 | When you want to…             | chordleaf helps you…                                                   |
 | ----------------------------- | ---------------------------------------------------------------------- |
@@ -69,7 +69,7 @@ Both interface and document fonts are served by the app itself. There are no thi
 
 ## Install it, print it
 
-Chordleaf is an installable app. Open it in Chromium, Firefox or Safari and choose **Install**, or add it to your home screen on a phone. After the first successful service-worker installation, the editor, fonts, file importers and PDF/Word exporters are available offline. Updates take over when existing Chordleaf tabs close; link downloads still need a connection. **Export → Print** paints just the A4 sheet, without the workspace chrome.
+Chordleaf works in Chromium, Firefox and Safari. In browsers that support installing websites, use the browser's install option, or add it to your home screen on a phone. After the first successful service-worker installation, the editor, fonts, file importers and PDF/Word exporters are available offline. Updates take over when existing Chordleaf tabs close; link downloads still need a connection. **Export → Print** paints just the A4 sheet, without the workspace chrome.
 
 **Export → ChordPro (.cho)** writes a portable plain-text chord sheet with `{title}`, `{artist}` and `{capo}` directives, understood by apps such as SongBook, OnSong and the ChordPro toolchain, and it can be imported back here.
 
@@ -88,7 +88,7 @@ The [user wiki](https://github.com/antoniomml/chordleaf/wiki) is the home for th
 ---
 
 <div align="center">
-  <p><strong>Made to play.</strong></p>
+  <p><strong>Make the sheet your own.</strong></p>
   <p><a href="https://github.com/antoniomml/chordleaf/wiki/User-guide">User guide</a> · <a href="docs/deployment.md">Deploy</a> · <a href="docs/architecture.md">Architecture</a> · <a href="THIRD_PARTY_NOTICES.md">Credits</a></p>
   <sub>Original application code is MIT licensed. See <a href="LICENSE">LICENSE</a>. Third-party data and fonts retain their respective licenses.</sub>
 </div>

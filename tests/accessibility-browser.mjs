@@ -36,7 +36,7 @@ try {
     await page
       .getByRole("heading", {
         level: 1,
-        name: "Tu canción, lista para el ensayo.",
+        name: "Editor de acordes. Tu versión, lista para imprimir.",
       })
       .count(),
     1,

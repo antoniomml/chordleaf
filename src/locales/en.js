@@ -811,6 +811,8 @@ export default {
   "Puedes seguir aquí. La otra pestaña guardará tus canciones y se pausará.":
     "You can continue here. The other tab will save your songs and pause.",
   "Usar aquí": "Use here",
+  "No se pudo cambiar de pestaña. Guarda o exporta tus cambios en la otra pestaña y vuelve a intentarlo.":
+    "Could not switch tabs. Save or export your changes in the other tab and try again.",
   "Abriendo tus canciones…": "Opening your songs…",
   "No se pudo guardar la lista de recientes.":
     "Recent songs could not be saved.",
@@ -824,7 +826,8 @@ export default {
     "Saved in this browser. To take it elsewhere: Export → Download editable project.",
   "Documento descargado.": "Document downloaded.",
   "EDITOR DE LETRAS Y ACORDES": "LYRICS AND CHORDS EDITOR",
-  "Tu canción, lista para el ensayo.": "Your song, ready for rehearsal.",
+  "Editor de acordes. Tu versión, lista para imprimir.":
+    "Chord editor. Your version, ready to print.",
   "Escribe o importa la letra, coloca cada acorde en su sílaba y descarga una hoja clara en PDF o Word.":
     "Write or import the lyrics, place each chord on its syllable and download a clear sheet as PDF or Word.",
   "Ver un ejemplo": "See an example",
