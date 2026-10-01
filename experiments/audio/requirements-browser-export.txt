@@ -1,5 +1,5 @@
 # Optional conversion tools; use in an isolated research environment alongside
 # requirements-neural.txt. They are not needed by visitors or desktop inference.
-onnx==1.19.1
+onnx==1.22.0
 nnAudio==0.3.4
 ml_dtypes==0.5.3
