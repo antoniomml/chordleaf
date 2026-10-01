@@ -32,10 +32,16 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
       - name: Use the official Ubuntu package mirror
-        # The runner's Azure mirror can stall on WebKit system dependencies.
-        run: sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+        # Ubuntu runners use mirror+file, so replacing only the Azure URL in
+        # ubuntu.sources leaves APT downloading from the same slow mirror.
+        run: |
+          sudo sed -i \
+            -e 's|mirror+file:/etc/apt/apt-mirrors.txt|https://archive.ubuntu.com/ubuntu/|g' \
+            -e 's|mirror+file:/etc/apt/apt-security-mirrors.txt|https://security.ubuntu.com/ubuntu/|g' \
+            -e 's|http://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' \
+            /etc/apt/sources.list.d/ubuntu.sources
       - name: Install browser dependencies
-        timeout-minutes: 10
+        timeout-minutes: 15
         run: pnpm exec playwright install --with-deps chromium firefox webkit
       - name: Browser tests
         run: |
