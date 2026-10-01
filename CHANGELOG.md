@@ -1,5 +1,16 @@
 # chordleaf changelog
 
+## 1.2.1 · October 1, 2026
+
+- Protect unsaved work when switching browser tabs: a failed save keeps the current editing session, and an unresponsive tab no longer has its lock stolen automatically. The requesting tab shows a translated warning and can retry.
+- Render the same entry layout before and after JavaScript loads, reducing mobile startup layout shifts while keeping the no-JavaScript page and guides readable.
+- Separate import and export controllers from workspace coordination, preserving cancellation, format validation and snapshot-based document exports.
+- Center the homepage, README and desktop description on correcting chord sheets, preparing a personal version and printing/exporting it. Clarify that browser installation support varies.
+- Add reproducible desktop/mobile laboratory measurements, startup/no-JavaScript and failed-save/timeout regression tests, and a full Spanish audit with prioritized product, security and distribution findings.
+- Update architecture/development documentation and prepare reviewed GitHub wiki source in the main repository; wiki publication remains separate.
+- Security follow-up: the experimental model-conversion requirements still pin ONNX 1.19.1. Existing PR #45 proposes 1.22.0; this release does not include that independent update.
+- macOS distribution remains a candidate: no signed/notarized installer is published with this release.
+
 ## 1.2.0 · September 30, 2026
 
 - Import audio locally in the browser with LV-Chordia for chords and optional Whisper or Qwen3-ASR for lyrics. Download models explicitly, reuse them on the device and open the resulting song directly in the editor. The audio importer remains experimental.
