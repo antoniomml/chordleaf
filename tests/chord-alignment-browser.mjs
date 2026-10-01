@@ -157,7 +157,7 @@ try {
     await page.locator(".sheet-alignment-target").waitFor();
     assert.equal(
       await page.locator("#sheet-alignment-selection").innerText(),
-      "Em7 → n",
+      "Em7",
     );
     if (mobile)
       await cdp.send("Input.dispatchTouchEvent", {
@@ -224,7 +224,7 @@ try {
     assert.ok((await source.inputValue()).endsWith("\n\n[C]Una canción"));
     assert.equal(
       await page.locator("#sheet-alignment-selection").innerText(),
-      "C → U",
+      "C",
     );
     await page.locator("#sheet-alignment-undo").click();
     assert.equal(await source.inputValue(), original);

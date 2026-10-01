@@ -29,7 +29,7 @@ export function setupBrowserModels(refresh, busyChanged) {
     <h2 id="browser-model-heading">Modelos de audio</h2>
     <fieldset class="browser-model-choices browser-chord-models"><legend>Acordes <span class="audio-section-badge">Obligatorio</span></legend>
       <div class="browser-model-card is-selected browser-chord-required">
-        <label for="browser-required-chords"><input type="checkbox" id="browser-required-chords" checked disabled aria-describedby="browser-chords-state" />
+        <label for="browser-required-chords"><input type="radio" name="browser-chord-model" value="lv-chordia" id="browser-required-chords" checked disabled aria-describedby="browser-chords-state" />
           <span><strong>LV-Chordia</strong><small>Detector de acordes · 13 MB</small></span></label>
         <div class="browser-model-storage"><span id="browser-chords-state"></span><button type="button" id="browser-chords-download" class="primary browser-model-download">Descargar</button><button type="button" id="browser-chords-remove" class="audio-text-button" hidden>Borrar</button></div>
       </div>

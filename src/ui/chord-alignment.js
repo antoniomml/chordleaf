@@ -1,6 +1,7 @@
 import { alignmentLine, moveAlignedChord } from "../chord-alignment.js";
 import { t } from "../i18n.js";
 import { parseSong } from "../music.js";
+import { icon } from "./icons.js";
 
 /** Edit the actual sheet. Source offsets come from the shared export layout,
  * never from padded display text or from the length of a chord's label. */
@@ -16,9 +17,11 @@ export function setupChordAlignment({
   const tools = document.createElement("div");
   tools.id = "sheet-alignment-tools";
   tools.hidden = true;
-  tools.innerHTML = t`<div class="sheet-alignment-controls" role="toolbar" aria-label="Controles del acorde"><span id="sheet-alignment-selection"></span><button id="sheet-alignment-left" aria-label="Mover una letra a la izquierda" title="Mover una letra a la izquierda">←</button><button id="sheet-alignment-right" aria-label="Mover una letra a la derecha" title="Mover una letra a la derecha">→</button><button id="sheet-alignment-edit" aria-label="Editar letra del verso" title="Editar letra del verso">Letra</button><button id="sheet-alignment-undo" aria-label="Deshacer último cambio" title="Deshacer último cambio">↶</button><button id="sheet-alignment-done" aria-label="Listo" title="Listo">✓</button></div><span id="sheet-alignment-status" class="visually-hidden" role="status" aria-live="polite"></span>`;
+  tools.innerHTML = t`<div class="sheet-alignment-controls" role="toolbar" aria-label="Controles del acorde"><span id="sheet-alignment-selection"></span><button id="sheet-alignment-left" aria-label="Mover una letra a la izquierda" title="Mover una letra a la izquierda"></button><button id="sheet-alignment-right" aria-label="Mover una letra a la derecha" title="Mover una letra a la derecha"></button><button id="sheet-alignment-edit" aria-label="Editar letra del verso" title="Editar letra del verso"></button><button id="sheet-alignment-undo" aria-label="Deshacer último cambio" title="Deshacer último cambio"></button><button id="sheet-alignment-done" aria-label="Listo" title="Listo"></button></div><span id="sheet-alignment-status" class="visually-hidden" role="status" aria-live="polite"></span>`;
   scroll.before(tools);
   const $ = (s) => tools.querySelector(s);
+  for (const action of ["left", "right", "edit", "undo", "done"])
+    $(`#sheet-alignment-${action}`).innerHTML = icon(action);
   let owner,
     expected,
     layout,
@@ -96,11 +99,7 @@ export function setupChordAlignment({
       highlight(chord.row, chord.m.x + (chord.m.anchorOffset || 0));
       const active = mark(),
         line = model();
-      const segment = line.segments.find(
-        (s) => s.index <= active.at && s.index + s.segment.length > active.at,
-      )?.segment;
-      $("#sheet-alignment-selection").textContent =
-        `${chord.m.chord} → ${segment?.trim() || t("Espacio")}`;
+      $("#sheet-alignment-selection").textContent = chord.m.chord;
       $("#sheet-alignment-edit").disabled = false;
       $("#sheet-alignment-left").disabled = active.at === 0;
       $("#sheet-alignment-right").disabled = active.at === line.lyric.length;
@@ -220,11 +219,6 @@ export function setupChordAlignment({
     if (drag.destination) {
       const { row, column } = drag.destination;
       highlight(row, column);
-      const letter = model().segments.find(
-        (s) => s.index === drag.destination.at,
-      )?.segment;
-      $("#sheet-alignment-selection").textContent =
-        `${drag.ghost.textContent} → ${letter?.trim() || t("Espacio")}`;
       // Keep the label's chosen central character over the destination cell.
       const rect = row.el.getBoundingClientRect(),
         cw = (layout.cw * rect.width) / row.width;

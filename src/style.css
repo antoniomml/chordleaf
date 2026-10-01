@@ -1027,6 +1027,9 @@ main {
   white-space: nowrap;
 }
 .preview-actions #pencil {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 22px;
   width: 33px;
   height: 32px;
@@ -3541,6 +3544,37 @@ select:focus-visible {
   flex-shrink: 0;
   accent-color: var(--green);
 }
+/* Required and optional audio models use the same circle and selected dot. */
+#audio-model-dialog .audio-model-card input[type="radio"],
+.browser-model-card input[type="radio"] {
+  appearance: none;
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  padding: 0;
+  border: 1.5px solid #91a082;
+  border-radius: 50%;
+  background: #202321;
+}
+#audio-model-dialog .audio-model-card input[type="radio"]::before,
+.browser-model-card input[type="radio"]::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  transform: scale(0);
+}
+#audio-model-dialog .audio-model-card input[type="radio"]:checked,
+.browser-model-card input[type="radio"]:checked {
+  border-color: var(--green) !important;
+}
+#audio-model-dialog .audio-model-card input[type="radio"]:checked::before,
+.browser-model-card input[type="radio"]:checked::before {
+  transform: scale(1);
+}
 .browser-model-card label > span:first-of-type {
   flex: 1;
 }
@@ -3672,7 +3706,7 @@ select:focus-visible {
 .audio-required-card input:disabled {
   opacity: 1;
 }
-.audio-model-card.audio-required-card {
+#audio-model-dialog .audio-required-card {
   opacity: 1;
 }
 .audio-model-choices.audio-required-model {
@@ -3759,6 +3793,9 @@ select:focus-visible {
   color: #e5e7df;
 }
 #sheet-alignment-tools button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   min-width: 44px;
   min-height: 44px;
@@ -3767,8 +3804,9 @@ select:focus-visible {
   font-size: 18px;
   color: #e5e7df;
 }
-#sheet-alignment-tools #sheet-alignment-edit {
-  font-size: 12px;
+.ui-icon {
+  flex-shrink: 0;
+  vertical-align: middle;
 }
 #sheet-alignment-tools button:disabled {
   opacity: 0.4;

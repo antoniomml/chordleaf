@@ -15,6 +15,7 @@ import { setupChordsPanel } from "./chords-panel.js";
 import { setupDictionary } from "./dictionary-ui.js";
 import { setupEditorTools } from "./editor-tools.js";
 import { setupChordAlignment } from "./ui/chord-alignment.js";
+import { icon } from "./ui/icons.js";
 import "./style.css";
 import {
   keyInfo,
@@ -1256,6 +1257,13 @@ const alignment = setupChordAlignment({
     renderPages();
   },
 });
+for (const [id, name] of [
+  ["pencil", "edit"],
+  ["zoom-out", "minus"],
+  ["zoom-in", "plus"],
+  ["zoom-reset", "fit"],
+])
+  $("#" + id).innerHTML = icon(name);
 const chordPanel = setupChordsPanel({
   song,
   changed,
