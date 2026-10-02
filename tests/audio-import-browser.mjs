@@ -1,4 +1,4 @@
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 const browser = await chromium.launch({ headless: true });
 const url = process.env.CHORDLEAF_URL || "http://localhost:5173";
@@ -163,7 +163,11 @@ try {
     /añadirla en el editor/,
   );
   assert.equal(await page.locator("#source").isVisible(), true);
-  assert.equal(await page.locator("#audio-player").getAttribute("src"), null);
+  // dialog.close hides the dialog immediately but queues its close event,
+  // which resets playback. Assert completion of that cleanup, not its timing.
+  await expect
+    .poll(() => page.locator("#audio-player").getAttribute("src"))
+    .toBeNull();
 
   mode = "ok";
   qwen = true;
@@ -185,7 +189,9 @@ try {
   );
   assert.match(await page.locator("#toast").textContent(), /aproximados/);
   assert.equal(await page.locator("#audio-create").count(), 0);
-  assert.equal(await page.locator("#audio-player").getAttribute("src"), null);
+  await expect
+    .poll(() => page.locator("#audio-player").getAttribute("src"))
+    .toBeNull();
   assert.equal(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
