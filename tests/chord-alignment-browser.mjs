@@ -173,11 +173,38 @@ try {
 
     await label.click();
     const t = await letterBox(row, nIndex + 1);
+    await page.evaluate(() => {
+      document.addEventListener(
+        "click",
+        (event) => {
+          window.alignmentTap = {
+            target: event.target.outerHTML,
+            x: event.clientX,
+            y: event.clientY,
+          };
+        },
+        { once: true, capture: true },
+      );
+    });
     if (mobile)
       await page.touchscreen.tap(t.x + t.width / 2, t.y + t.height / 2);
     else await page.mouse.click(t.x + t.width / 2, t.y + t.height / 2);
-    assert.ok(
-      (await source.inputValue()).startsWith("[E]antes [Em]antes an[Em7]tes"),
+    const afterTap = await source.inputValue();
+    if (!afterTap.startsWith("[E]antes [Em]antes an[Em7]tes")) {
+      await page.screenshot({
+        path: `artifacts/alignment-tap-${mobile ? "mobile" : "desktop"}.png`,
+      });
+      console.log("Alignment tap diagnostic", {
+        mobile,
+        t,
+        afterTap,
+        event: await page.evaluate(() => window.alignmentTap),
+      });
+    }
+    assert.equal(
+      afterTap.split("\n")[0],
+      "[E]antes [Em]antes an[Em7]tes",
+      `tap placement (${mobile ? "mobile" : "desktop"})`,
     );
     await page.locator("#sheet-alignment-undo").click();
     await label.press("ArrowRight");
