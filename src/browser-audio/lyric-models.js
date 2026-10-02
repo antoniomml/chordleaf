@@ -25,12 +25,3 @@ export const whisperModels = {
   },
 };
 export const browserLyricModels = [...Object.keys(whisperModels), "qwen"];
-
-// Browser memory and CPU reports are approximate; this is a conservative
-// resource recommendation, never a benchmark or a promise of lyric accuracy.
-export function recommendedBrowserLyricModel(hardware) {
-  if (!(hardware?.memory > 0) || !(hardware?.cores > 0)) return null;
-  if (hardware.mobile || hardware.memory < 8) return "whisper";
-  if (hardware.gpu) return "qwen";
-  return hardware.cores >= 4 ? "whisper-small" : "whisper";
-}

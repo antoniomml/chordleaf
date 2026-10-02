@@ -77,7 +77,7 @@ try {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   assert.equal(
-    await page.locator('[name="audio-model"][value="qwen"]').isChecked(),
+    await page.locator('[name="audio-model"][value="whisper"]').isChecked(),
     true,
   );
   assert.match(
@@ -178,10 +178,13 @@ try {
     await lighter.locator('[name="audio-model"][value="whisper"]').isChecked(),
     true,
   );
-  assert.match(
-    await lighter.locator("#audio-recommendation").textContent(),
-    /Whisper/,
+  assert.equal(
+    await lighter
+      .locator('#audio-model-dialog [data-kind="recommended"]')
+      .count(),
+    0,
   );
+  assert.equal(await lighter.locator("#audio-recommendation").count(), 0);
   assert.equal(
     await lighter.locator("#audio-model-heading").textContent(),
     "Prepare your device",
@@ -194,7 +197,7 @@ try {
   );
   assert.equal(await lighter.locator("#audio-model-dialog").isVisible(), false);
   console.log(
-    "Audio preparation: explicit downloads, recommendation, cancellation, persistent preferences, languages, English and mobile passed.",
+    "Audio preparation: explicit downloads, no recommendations, cancellation, persistent preferences, languages, English and mobile passed.",
   );
 } finally {
   await browser.close();

@@ -3262,10 +3262,15 @@ select:focus-visible {
 }
 .audio-song-options {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-top: 12px;
+  gap: 12px 20px;
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #ffffff03;
 }
 .audio-song-options .audio-option {
   margin: 0;
@@ -3280,26 +3285,55 @@ select:focus-visible {
 }
 .audio-language-field {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  gap: 8px;
   color: #b3beb0;
   font-size: 12px;
   min-width: 0;
 }
 #audio-language {
   margin: 0;
-  padding: 9px;
+  padding: 7px 8px;
   font-size: 13px;
-  min-height: 40px;
+  min-height: 36px;
+  width: auto;
+  max-width: 180px;
+  border-color: transparent;
+  background: #ffffff05;
 }
-.audio-model-line {
+#audio-analysis-actions #audio-model-settings {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  color: #aeb5b0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  flex: 1 1 0;
+  padding: 10px 12px;
+  background: transparent;
+  color: #e2ead9;
+  border: 1px solid var(--border);
+  text-align: left;
+  text-decoration: none;
+}
+#audio-model-settings-label {
   font-size: 12px;
-  margin: 6px 0;
+  font-weight: 600;
+}
+#audio-model-name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 16px;
+  color: #aeb5b0;
+}
+#audio-analysis-actions #audio-model-settings:hover {
+  background: #ffffff07;
+  border-color: #718166;
 }
 .audio-unavailable {
   background: #1b231c;
@@ -3488,17 +3522,9 @@ select:focus-visible {
   .audio-model-card {
     padding: 14px;
   }
-  .audio-song-options {
-    align-items: flex-start;
-    flex-direction: column;
-  }
   .audio-language-field {
-    width: 100%;
-  }
-  .audio-model-line {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
+    flex: 1 1 auto;
+    justify-content: space-between;
   }
 }
 

@@ -1,5 +1,6 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  Automático: "Automatic",
   "Qwen 0,6B": "Qwen 0.6B",
   "No extraer letra": "Do not transcribe lyrics",
   "Necesita WebGPU compatible.": "Requires compatible WebGPU.",

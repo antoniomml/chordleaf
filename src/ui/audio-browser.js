@@ -10,7 +10,6 @@ import {
 import {
   whisperModels,
   browserLyricModels,
-  recommendedBrowserLyricModel,
 } from "../browser-audio/lyric-models.js";
 
 const modelChoices = [...browserLyricModels, "chords"];
@@ -49,13 +48,13 @@ export function setupBrowserModels(refresh, busyChanged) {
           id === "qwen"
             ? t`<div class="browser-model-card" data-bundle="qwen">
         <label for="browser-model-qwen"><input type="radio" name="browser-audio-model" id="browser-model-qwen" value="qwen" aria-describedby="browser-qwen-state browser-model-device" />
-          <span><span class="browser-model-title"><strong>Qwen 0,6B</strong><span class="audio-model-tag" data-kind="balanced">Equilibrado</span><span id="browser-qwen-recommended" class="audio-model-tag" data-kind="recommended" hidden>Recomendado</span></span><small>WebGPU</small></span></label>
+          <span><span class="browser-model-title"><strong>Qwen 0,6B</strong><span class="audio-model-tag" data-kind="balanced">Equilibrado</span></span><small>WebGPU</small></span></label>
         <div class="browser-model-storage"><span id="browser-qwen-state"></span><button type="button" id="browser-qwen-remove" class="audio-text-button" hidden>Borrar</button></div>
         <small id="browser-model-device" hidden></small>
       </div>`
             : t`<div class="browser-model-card" data-bundle="${id}">
         <label for="browser-model-${id}"><input type="radio" name="browser-audio-model" id="browser-model-${id}" value="${id}" aria-describedby="browser-${id}-state" />
-          <span><span class="browser-model-title"><strong>${model.name}</strong><span class="audio-model-tag" data-kind="${model.kind}">${t(model.label)}</span><span id="browser-${id}-recommended" class="audio-model-tag" data-kind="recommended" hidden>Recomendado</span></span><small>${t(model.description)}</small></span></label>
+          <span><span class="browser-model-title"><strong>${model.name}</strong><span class="audio-model-tag" data-kind="${model.kind}">${t(model.label)}</span></span><small>${t(model.description)}</small></span></label>
         <div class="browser-model-storage"><span id="browser-${id}-state"></span><button type="button" id="browser-${id}-remove" class="audio-text-button" hidden>Borrar</button></div>
       </div>`,
         )
@@ -86,13 +85,10 @@ export function setupBrowserModels(refresh, busyChanged) {
     bundle === "chords" ? ready.neural : ready.modelDownloads?.[bundle];
   function render() {
     const busy = Boolean(controller) || analyzing || checking;
-    const recommended = recommendedBrowserLyricModel(hardware);
     for (const bundle of modelChoices) {
       const radio = $("browser-model-" + bundle);
       radio.disabled = busy || (bundle === "qwen" && !hardware?.gpu);
       radio.checked = selected === bundle;
-      const recommendation = $("browser-" + bundle + "-recommended");
-      if (recommendation) recommendation.hidden = recommended !== bundle;
       const card = radio.closest(".browser-model-card");
       card.classList.toggle("is-selected", radio.checked);
       card.classList.toggle("is-disabled", bundle === "qwen" && !hardware?.gpu);
@@ -149,7 +145,7 @@ export function setupBrowserModels(refresh, busyChanged) {
     selected =
       modelChoices.includes(saved) && (saved !== "qwen" || hardware?.gpu)
         ? saved
-        : (recommendedBrowserLyricModel(hardware) ?? "whisper");
+        : "whisper";
     render();
     return true;
   }
