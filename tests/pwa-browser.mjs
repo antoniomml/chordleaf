@@ -4,6 +4,7 @@
 import { chromium, firefox, webkit } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
+import { waitForPwaActivation } from "./helpers/pwa-ready.mjs";
 
 const baseUrl = (process.env.CHORDLEAF_URL || "http://localhost:5173").replace(
   /\/+$/,
@@ -115,19 +116,7 @@ for (const name of names) {
     );
     // Firefox can report the active worker while it is still activating, so
     // wait for activation explicitly rather than treating page load as ready.
-    await page.waitForFunction(
-      async () =>
-        (await navigator.serviceWorker.ready).active?.state === "activated",
-    );
-    const registration = await page.evaluate(async () => {
-      const ready = await navigator.serviceWorker.ready;
-      const worker = ready.active;
-      return {
-        scope: new URL(ready.scope).pathname,
-        state: worker?.state,
-        script: worker && new URL(worker.scriptURL).pathname,
-      };
-    });
+    const registration = await page.evaluate(waitForPwaActivation);
     assert.equal(registration.scope, "/");
     assert.equal(registration.state, "activated");
     assert.equal(registration.script, "/sw.js");
