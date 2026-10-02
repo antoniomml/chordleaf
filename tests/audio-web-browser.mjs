@@ -106,9 +106,7 @@ try {
     /Acordes.*Obligatorio/,
   );
   assert.match(
-    await page
-      .locator(".browser-model-choices:not(.browser-chord-models) legend")
-      .textContent(),
+    await page.locator("#browser-voice-heading").textContent(),
     /Letra.*Opcional/,
   );
   assert.ok(

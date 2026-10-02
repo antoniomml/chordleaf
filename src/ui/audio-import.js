@@ -56,7 +56,6 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-progress-view").hidden = !value;
     $("audio-upload-controls").hidden = value;
     $("audio-analysis-actions").hidden = value;
-    $("audio-import").querySelector(".audio-toolbar").hidden = value;
     player.hidden = value || !objectURL;
     $("new-dialog").classList.toggle("is-analyzing-audio", value);
   }
@@ -74,7 +73,14 @@ export function setupAudioImport({ accept, reportError }) {
       "aria-disabled",
       String(!ready || analysisRunning),
     );
-    $("audio-language-field").hidden = !$("audio-lyrics").checked;
+    $("audio-language").disabled =
+      analysisRunning ||
+      !$("audio-lyrics").checked ||
+      $("audio-lyrics").disabled;
+    $("audio-language-field").classList.toggle(
+      "is-disabled",
+      !$("audio-lyrics").checked,
+    );
     $("audio-lyrics-option").classList.toggle(
       "is-disabled",
       $("audio-lyrics").disabled,
@@ -88,8 +94,8 @@ export function setupAudioImport({ accept, reportError }) {
       $("audio-lyrics").checked ? "Obtener letra y acordes" : "Obtener acordes",
     );
     const names = {
-      qwen: "Qwen",
-      whisper: "Whisper",
+      qwen: window.chordleafDesktop ? t("Qwen 1,7B") : t("Qwen 0,6B"),
+      whisper: window.chordleafDesktop ? "Whisper Small" : "Whisper Base",
       "whisper-small": "Whisper Small",
       "whisper-turbo": "Whisper Large v3 Turbo",
     };

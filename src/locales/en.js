@@ -1,27 +1,17 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Qwen 0,6B": "Qwen 0.6B",
+  "No extraer letra": "Do not transcribe lyrics",
+  "Necesita WebGPU compatible.": "Requires compatible WebGPU.",
+  "Se guardan aquí para próximas canciones.": "Saved here for future songs.",
+  "Se guardan aquí · Motor local: 25 MB adicionales.":
+    "Saved here · Local engine: 25 MB extra.",
   "En canciones, la letra probablemente tendrá errores. Úsala como borrador y revisa los acordes y su posición.":
     "In songs, lyrics will probably contain errors. Use them as a draft and review the chords and their placement.",
-  "Menos recursos · CPU · Tiempos por palabra":
-    "Fewer resources · CPU · Word timestamps",
-  "Más recursos que Base · CPU · Tiempos por palabra":
-    "More resources than Base · CPU · Word timestamps",
-  "Lento en CPU · Más memoria · Tiempos por palabra":
-    "Slow on CPU · More memory · Word timestamps",
-  "WebGPU · Tiempos por palabra": "WebGPU · Word timestamps",
   Ligero: "Lightweight",
   Intermedio: "Intermediate",
   Exigente: "Demanding",
   Equilibrado: "Balanced",
-  Móvil: "Mobile",
-  " GB de memoria estimada": " GB estimated memory",
-  " hilos de CPU": " CPU threads",
-  "Memoria no disponible": "Memory unavailable",
-  "WebGPU disponible": "WebGPU available",
-  "Sin WebGPU": "No WebGPU",
-  "Recomendación orientativa · ": "Approximate recommendation · ",
-  "Necesita WebGPU · 8 GB de memoria o más recomendados":
-    "Requires WebGPU · 8 GB memory or more recommended",
   "Alinear acordes": "Align chords",
   "Controles del acorde": "Chord controls",
   "Editar letra del verso": "Edit verse lyrics",

@@ -4,10 +4,14 @@ import { installedLyricModel } from "../src/audio-models.js";
 import { recommendedBrowserLyricModel } from "../src/browser-audio/lyric-models.js";
 
 test("browser guidance uses conservative hardware reports, not model accuracy claims", () => {
-  assert.equal(recommendedBrowserLyricModel(null), "whisper");
+  assert.equal(recommendedBrowserLyricModel(null), null);
   assert.equal(
     recommendedBrowserLyricModel({ gpu: true, memory: null, cores: 12 }),
-    "whisper",
+    null,
+  );
+  assert.equal(
+    recommendedBrowserLyricModel({ gpu: true, memory: 8, cores: null }),
+    null,
   );
   assert.equal(
     recommendedBrowserLyricModel({

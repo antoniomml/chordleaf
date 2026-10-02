@@ -52,10 +52,29 @@ try {
   await expect(
     page.locator("#browser-whisper-turbo-recommended"),
   ).not.toBeVisible();
+  assert.deepEqual(
+    await page
+      .locator(".browser-voice-scroll .browser-model-card")
+      .evaluateAll((cards) => cards.map((card) => card.dataset.bundle)),
+    ["whisper", "whisper-small", "qwen", "whisper-turbo", "chords"],
+  );
+  await expect(page.locator("#browser-model-hardware")).toHaveCount(0);
+  const fixedBefore = await page
+    .locator("#browser-voice-heading")
+    .boundingBox();
+  await page.locator(".browser-voice-scroll").evaluate((el) => {
+    el.scrollTop = el.scrollHeight;
+  });
+  assert.deepEqual(
+    await page.locator("#browser-voice-heading").boundingBox(),
+    fixedBefore,
+  );
+  await expect(page.locator("#browser-required-chords")).toBeVisible();
+  await expect(page.locator("#browser-model-chords")).toBeVisible();
   for (const model of ["whisper", "whisper-small", "whisper-turbo", "qwen"])
     await expect(
       page.locator(`[data-bundle="${model}"] small`).first(),
-    ).toContainText("Tiempos por palabra");
+    ).toHaveText(model === "qwen" ? "WebGPU" : "CPU");
   for (const model of ["whisper", "whisper-small", "whisper-turbo"])
     await expect(page.locator("#browser-model-" + model)).toBeEnabled();
   await expect(page.locator("#browser-model-qwen")).toBeDisabled();
@@ -88,6 +107,40 @@ try {
       model,
     );
     await expect(page.locator("#audio-lyrics")).toBeChecked();
+    await expect(page.locator("#audio-model-name")).toHaveText(
+      (model === "whisper-small" ? "Whisper Small" : "Whisper Large v3 Turbo") +
+        " · LV-Chordia",
+    );
+    await expect(page.locator("#audio-experimental")).toBeVisible();
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      const buttonBefore = await page.locator("#audio-analyze").boundingBox();
+      await page.locator("#audio-lyrics").uncheck();
+      await expect(page.locator("#audio-language")).toBeVisible();
+      await expect(page.locator("#audio-language")).toBeDisabled();
+      const buttonAfter = await page.locator("#audio-analyze").boundingBox();
+      assert.equal(
+        buttonAfter.y,
+        buttonBefore.y,
+        "the language field keeps the action row in place",
+      );
+      await page.locator("#audio-lyrics").check();
+      await expect(page.locator("#audio-language")).toBeEnabled();
+      const settings = await page
+        .locator("#audio-model-settings")
+        .boundingBox();
+      assert.equal(
+        settings.y + settings.height / 2,
+        buttonBefore.y + buttonBefore.height / 2,
+      );
+      assert.equal(
+        await page
+          .locator("#new-dialog")
+          .evaluate((el) => el.scrollWidth <= el.clientWidth),
+        true,
+      );
+    }
+    await page.screenshot({ path: "artifacts/audio-import-mobile.png" });
     assert.equal(
       await page.evaluate(() =>
         localStorage.getItem("chordleaf-browser-audio-mode"),
@@ -132,32 +185,46 @@ try {
   );
   await page.screenshot({ path: "artifacts/lyric-models-mobile.png" });
   assert.deepEqual(errors, []);
-  for (const gpu of [true, false]) {
+  for (const { gpu, memory, cores } of [
+    { gpu: true, memory: 8, cores: 8 },
+    { gpu: false, memory: 8, cores: 8 },
+    { gpu: true, memory: null, cores: 8 },
+    { gpu: true, memory: 8, cores: null },
+  ]) {
     const desktop = await browser.newPage();
-    await desktop.addInitScript((gpu) => {
-      Object.defineProperty(navigator, "deviceMemory", { value: 8 });
-      Object.defineProperty(navigator, "hardwareConcurrency", { value: 8 });
-      Object.defineProperty(navigator, "gpu", {
-        value: gpu
-          ? {
-              requestAdapter: async () => ({
-                features: new Set(["shader-f16"]),
-              }),
-            }
-          : undefined,
-      });
-    }, gpu);
+    await desktop.addInitScript(
+      ({ gpu, memory, cores }) => {
+        Object.defineProperty(navigator, "deviceMemory", { value: memory });
+        Object.defineProperty(navigator, "hardwareConcurrency", {
+          value: cores,
+        });
+        Object.defineProperty(navigator, "gpu", {
+          value: gpu
+            ? {
+                requestAdapter: async () => ({
+                  features: new Set(["shader-f16"]),
+                }),
+              }
+            : undefined,
+        });
+      },
+      { gpu, memory, cores },
+    );
     await desktop.goto(url + "/en/");
     await desktop.locator("#empty-new").click();
     await desktop.locator("#audio").click();
-    const model = gpu ? "qwen" : "whisper-small";
-    await expect(
-      desktop.locator("#browser-" + model + "-recommended"),
-    ).toBeVisible();
+    const model =
+      !memory || !cores ? "whisper" : gpu ? "qwen" : "whisper-small";
+    if (!memory || !cores)
+      await expect(
+        desktop.locator('[data-kind="recommended"]:visible'),
+      ).toHaveCount(0);
+    else
+      await expect(
+        desktop.locator("#browser-" + model + "-recommended"),
+      ).toBeVisible();
     await expect(desktop.locator("#browser-model-" + model)).toBeChecked();
-    await expect(desktop.locator("#browser-model-hardware")).toContainText(
-      "8 GB estimated memory",
-    );
+    await expect(desktop.locator("#browser-model-hardware")).toHaveCount(0);
     // A saved user choice wins over the hardware recommendation on reopen.
     await desktop.evaluate(() =>
       localStorage.setItem("chordleaf-browser-audio-mode", "whisper"),
