@@ -62,7 +62,9 @@ export function setupSongImport({ features, onBlank, onSongs, toast }) {
         "PDF, Word, TXT o ChordPro. Se convierten en letra y acordes editables.",
       ),
       web: t("Pega el enlace de la canción que quieres tocar."),
-      audio: t("Puede haber errores en la letra, los acordes y su posición."),
+      audio: t(
+        "En canciones, la letra probablemente tendrá errores. Úsala como borrador y revisa los acordes y su posición.",
+      ),
     }[screen];
     $("#import-privacy").textContent =
       screen === "audio"

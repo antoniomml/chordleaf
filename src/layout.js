@@ -262,7 +262,7 @@ export function layout(song, parsed = parseSong(song.text)) {
   };
 }
 
-// Maximize readable type first. A one-page layout that keeps every source line
+// Maximize readable type up to 12 pt. A one-page layout that keeps every source line
 // intact wins at the largest size, preferring one column on ties. Otherwise the
 // two-column layout with the fewest pages, then the fewest broken lines, then
 // the largest size; wrapping is accepted when no size can avoid it. Never
@@ -271,7 +271,7 @@ export function fitToPage(song) {
   const text = song.text;
   const parsed = parseSong(text);
   let bestTwoColumns;
-  for (let fontSize = 20; fontSize >= 8; fontSize -= 0.5) {
+  for (let fontSize = 12; fontSize >= 8; fontSize -= 0.5) {
     for (const columns of [1, 2]) {
       for (const margin of [10, 9, 8, 7, 6]) {
         const candidate = { ...song, text, fontSize, columns, margin };

@@ -10,6 +10,7 @@ import {
 import {
   whisperModels,
   browserLyricModels,
+  recommendedBrowserLyricModel,
 } from "../browser-audio/lyric-models.js";
 
 const modelChoices = [...browserLyricModels, "chords"];
@@ -41,6 +42,7 @@ export function setupBrowserModels(refresh, busyChanged) {
       </div>
     </fieldset>
     <div class="browser-voice-scroll"><fieldset class="browser-model-choices"><legend>Letra <span class="audio-section-badge">Opcional</span></legend>
+      <p id="browser-model-hardware" class="browser-model-hardware"></p>
       <div class="browser-model-card" data-bundle="chords">
         <label for="browser-model-chords"><input type="radio" name="browser-audio-model" id="browser-model-chords" value="chords" />
           <span><strong>Ninguna</strong><small>Sólo acordes · Puedes añadir la letra después</small></span></label>
@@ -52,14 +54,14 @@ export function setupBrowserModels(refresh, busyChanged) {
             model,
           ]) => t`<div class="browser-model-card" data-bundle="${id}">
         <label for="browser-model-${id}"><input type="radio" name="browser-audio-model" id="browser-model-${id}" value="${id}" aria-describedby="browser-${id}-state" />
-          <span><strong>${model.name}</strong><small>${t(model.description)}</small></span></label>
+          <span><span class="browser-model-title"><strong>${model.name}</strong><span class="audio-model-tag" data-kind="${model.kind}">${t(model.label)}</span><span id="browser-${id}-recommended" class="audio-model-tag" data-kind="recommended" hidden>Recomendado</span></span><small>${t(model.description)}</small></span></label>
         <div class="browser-model-storage"><span id="browser-${id}-state"></span><button type="button" id="browser-${id}-remove" class="audio-text-button" hidden>Borrar</button></div>
       </div>`,
         )
         .join("")}
       <div class="browser-model-card" data-bundle="qwen">
         <label for="browser-model-qwen"><input type="radio" name="browser-audio-model" id="browser-model-qwen" value="qwen" aria-describedby="browser-qwen-state browser-model-device" />
-          <span><strong>Qwen 0,6B</strong><small>WebGPU · Incluye alineador de letra</small></span></label>
+          <span><span class="browser-model-title"><strong>Qwen 0,6B</strong><span class="audio-model-tag" data-kind="balanced">Equilibrado</span><span id="browser-qwen-recommended" class="audio-model-tag" data-kind="recommended" hidden>Recomendado</span></span><small>WebGPU · Tiempos por palabra</small></span></label>
         <div class="browser-model-storage"><span id="browser-qwen-state"></span><button type="button" id="browser-qwen-remove" class="audio-text-button" hidden>Borrar</button></div>
         <small id="browser-model-device"></small>
       </div>
@@ -86,10 +88,23 @@ export function setupBrowserModels(refresh, busyChanged) {
     bundle === "chords" ? ready.neural : ready.modelDownloads?.[bundle];
   function render() {
     const busy = Boolean(controller) || analyzing || checking;
+    const recommended = recommendedBrowserLyricModel(hardware);
+    const device = [
+      hardware?.mobile ? t("Móvil") : null,
+      hardware?.memory
+        ? t`${hardware.memory} GB de memoria estimada`
+        : t("Memoria no disponible"),
+      hardware?.cores ? t`${hardware.cores} hilos de CPU` : null,
+      t(hardware?.gpu ? "WebGPU disponible" : "Sin WebGPU"),
+    ].filter(Boolean);
+    $("browser-model-hardware").textContent =
+      t`Recomendación orientativa · ${device.join(" · ")}`;
     for (const bundle of modelChoices) {
       const radio = $("browser-model-" + bundle);
       radio.disabled = busy || (bundle === "qwen" && !hardware?.gpu);
       radio.checked = selected === bundle;
+      const recommendation = $("browser-" + bundle + "-recommended");
+      if (recommendation) recommendation.hidden = recommended !== bundle;
       const card = radio.closest(".browser-model-card");
       card.classList.toggle("is-selected", radio.checked);
       card.classList.toggle("is-disabled", bundle === "qwen" && !hardware?.gpu);
@@ -108,7 +123,7 @@ export function setupBrowserModels(refresh, busyChanged) {
     }
     $("browser-model-device").textContent = t(
       hardware?.gpu
-        ? "Necesita WebGPU · Recomendado con 8 GB de memoria o más"
+        ? "Necesita WebGPU · 8 GB de memoria o más recomendados"
         : "Necesita WebGPU compatible. Puedes usar Whisper en este navegador.",
     );
     $("browser-model-note").textContent = t(
@@ -149,7 +164,7 @@ export function setupBrowserModels(refresh, busyChanged) {
     selected =
       modelChoices.includes(saved) && (saved !== "qwen" || hardware?.gpu)
         ? saved
-        : "whisper";
+        : recommendedBrowserLyricModel(hardware);
     render();
     return true;
   }

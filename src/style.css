@@ -3585,6 +3585,43 @@ select:focus-visible {
   line-height: 1.5;
   margin-top: 2px;
 }
+.browser-model-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.audio-model-tag,
+.audio-model-card .audio-model-tag {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.audio-model-tag[data-kind="light"] {
+  background: #243c38;
+  color: #b2e0d4;
+}
+.audio-model-tag[data-kind="medium"] {
+  background: #2b3547;
+  color: #c4d5f3;
+}
+.audio-model-tag[data-kind="balanced"],
+.audio-model-tag[data-kind="recommended"] {
+  background: #384b2b;
+  color: #d7edb2;
+}
+.audio-model-tag[data-kind="heavy"] {
+  background: #493b26;
+  color: #f1d4a2;
+}
+.audio-browser-model-dialog .browser-model-hardware {
+  margin: 0 0 2px;
+  font-size: 11px;
+  color: #aeb5b0;
+}
 .browser-model-storage {
   display: flex;
   align-items: center;

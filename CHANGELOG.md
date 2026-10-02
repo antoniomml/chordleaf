@@ -2,8 +2,12 @@
 
 ## Unreleased
 
+## 1.4.0 · October 2, 2026
+
+- Show consistent resource badges and conservative browser hardware recommendations for voice models, preserve user choices, and describe word timestamps for both Qwen and Whisper. Mark Turbo as slow on CPU and demanding in memory.
+- Explain that sung lyrics are likely to contain errors and provide an editable draft. Cap automatic song fitting at 12 pt while keeping readable multi-page layouts and existing margins.
 - Offer explicitly downloadable Whisper Small (252 MB) and Whisper Large v3 Turbo (1.09 GB) alongside Whisper Base and Qwen 0.6B in the browser. All Whisper choices run locally in CPU/WASM and return word timestamps. Preserve each choice and remove its weights independently while retaining chords and the shared runtime.
-- Start browser voice selection with lightweight Whisper Base instead of recommending Qwen solely from GPU availability. Identify the existing native Mac models as Whisper Small and Qwen 1.7B.
+- Identify the existing native Mac models as Whisper Small and Qwen 1.7B.
 
 ## 1.3.0 · October 2, 2026
 

@@ -888,7 +888,12 @@
       ><input type="radio" name="audio-model" value="qwen" /><span
         ><span class="audio-card-title"
           ><strong>Qwen 1,7B</strong
-          ><small id="audio-qwen-recommended" class="audio-recommended" hidden
+          ><span class="audio-model-tag" data-kind="balanced">Equilibrado</span
+          ><small
+            id="audio-qwen-recommended"
+            class="audio-recommended audio-model-tag"
+            data-kind="recommended"
+            hidden
             >Recomendado</small
           ></span
         ><span>Más precisión en nuestras pruebas.</span
@@ -902,9 +907,11 @@
       ><input type="radio" name="audio-model" value="whisper" /><span
         ><span class="audio-card-title"
           ><strong>Whisper Small</strong
+          ><span class="audio-model-tag" data-kind="light">Ligero</span
           ><small
             id="audio-whisper-recommended"
-            class="audio-recommended"
+            class="audio-recommended audio-model-tag"
+            data-kind="recommended"
             hidden
             >Recomendado</small
           ></span
