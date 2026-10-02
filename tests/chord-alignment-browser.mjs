@@ -173,41 +173,14 @@ try {
 
     await label.click();
     const t = await letterBox(row, nIndex + 1);
-    await page.evaluate(() => {
-      document.addEventListener(
-        "click",
-        (event) => {
-          window.alignmentTap = {
-            target: event.target.outerHTML,
-            x: event.clientX,
-            y: event.clientY,
-          };
-        },
-        { once: true, capture: true },
-      );
-    });
     if (mobile)
       await page.touchscreen.tap(t.x + t.width / 2, t.y + t.height / 2);
     else await page.mouse.click(t.x + t.width / 2, t.y + t.height / 2);
-    // Check the actual source edit, including touch browsers that omit click
-    // after a drag. The gesture itself is sent through the browser's input API.
-    try {
-      await expect(source).toHaveValue(
-        original.replace("[Em7]antes", "an[Em7]tes"),
-      );
-    } catch (error) {
-      await page.screenshot({
-        path: `artifacts/alignment-tap-${mobile ? "mobile" : "desktop"}.png`,
-      });
-      console.log("Alignment tap diagnostic", {
-        mobile,
-        t,
-        afterTap: await source.inputValue(),
-        event: await page.evaluate(() => window.alignmentTap),
-      });
-      throw error;
-    }
-    await page.locator("#sheet-alignment-undo").click();
+    await expect(page.locator(".inline-editor")).toHaveValue(
+      "antes antes antes",
+    );
+    assert.equal(await source.inputValue(), original);
+    await page.locator(".inline-editor").press("Escape");
     await label.press("ArrowRight");
     assert.ok(
       (await source.inputValue()).startsWith("[E]antes [Em]antes a[Em7]ntes"),
@@ -306,7 +279,7 @@ try {
     await page.locator("#sheet-alignment-edit").click();
     assert.equal(
       await page.locator(".inline-editor").inputValue(),
-      original.split("\n")[0],
+      "antes antes antes",
     );
     assert.equal(
       await page
@@ -453,7 +426,7 @@ try {
   );
   await english.close();
   console.log(
-    "Inline alignment: E/Em/Em7 reference letters, mouse/touch drag, tap, keyboard, cancel, undo, repeated chords, chord-only row migration, persistence and accessible bilingual sheet controls passed.",
+    "Inline alignment: E/Em/Em7 reference letters, mouse/touch drag, lyrics-only tap editing, keyboard, cancel, undo, repeated chords, chord-only row migration, persistence and accessible bilingual sheet controls passed.",
   );
 } finally {
   await browser.close();

@@ -5,6 +5,7 @@ import {
   transpose,
   keyInfo,
   fingering,
+  diagram,
   pc,
   chords,
   fingerings,
@@ -315,4 +316,69 @@ test("Latin notation renames roots and bass notes only", () => {
   assert.equal(chordLabel("Bbmaj7", "latin"), "Sibmaj7");
   assert.equal(chordLabel("Fadd9", "latin"), "Faadd9");
   assert.equal(chordLabel("Asus4", "english"), "Asus4");
+});
+
+test("familiar open chords and standard barres are the default while variants remain", () => {
+  const preferred = {
+    Cmaj7: [-1, 3, 2, 0, 0, 0],
+    "C#": [-1, 4, 6, 6, 6, 4],
+    "C#m": [-1, 4, 6, 6, 5, 4],
+    "C#7": [-1, 4, 6, 4, 6, 4],
+    "C#maj7": [-1, 4, 6, 5, 6, 4],
+    "C#m7": [-1, 4, 6, 4, 5, 4],
+    Ebmaj7: [-1, 6, 8, 7, 8, 6],
+    Ebm7: [-1, 6, 8, 6, 7, 6],
+    "F#m7": [2, 4, 2, 2, 2, 2],
+    Ab: [4, 6, 6, 5, 4, 4],
+    Ab7: [4, 6, 4, 5, 4, 4],
+    Abm7: [4, 6, 4, 4, 4, 4],
+    Bbm7: [-1, 1, 3, 1, 2, 1],
+    Em7: [0, 2, 2, 0, 3, 3],
+    Cm: [-1, 3, 5, 5, 4, 3],
+    Gm: [3, 5, 5, 3, 3, 3],
+    Cm7: [-1, 3, 5, 3, 4, 3],
+    Dm7: [-1, -1, 0, 2, 1, 1],
+    Bm7: [-1, 2, 4, 2, 3, 2],
+    Fm7: [1, 3, 1, 1, 1, 1],
+    Gm7: [3, 5, 3, 3, 3, 3],
+    B: [-1, 2, 4, 4, 4, 2],
+    Bm: [-1, 2, 4, 4, 3, 2],
+    Bmaj7: [-1, 2, 4, 3, 4, 2],
+  };
+  const tuning = [4, 9, 2, 7, 11, 4];
+  for (const [name, shape] of Object.entries(preferred)) {
+    assert.deepEqual(fingering(name), shape, name);
+    assert.ok(fingerings(name).length > 1, name + " retains alternatives");
+    const root = pc(name.match(/^[A-G][#b]?/)[0]);
+    const notes = shape.flatMap((fret, string) =>
+      fret < 0 ? [] : [(tuning[string] + fret - root + 12) % 12],
+    );
+    const intervals = name.endsWith("maj7")
+      ? [0, 4, 7, 11]
+      : name.endsWith("m7")
+        ? [0, 3, 7, 10]
+        : name.endsWith("m")
+          ? [0, 3, 7]
+          : name.endsWith("7")
+            ? [0, 4, 7, 10]
+            : [0, 4, 7];
+    assert.deepEqual(
+      [...new Set(notes)].sort((a, b) => a - b),
+      intervals,
+      name + " contains the expected chord tones",
+    );
+    assert.equal(notes[0], 0, name + " has its root in the bass");
+  }
+  assert.deepEqual(fingering("C7M"), preferred.Cmaj7);
+  assert.deepEqual(fingering("CΔ7"), preferred.Cmaj7);
+  assert.ok(
+    fingerings("Em7").some((shape) => shape.join() === "0,-1,0,0,0,-1"),
+  );
+  assert.equal(
+    diagram("Em7", 0, [0, -1, 0, 0, 0, -1]),
+    diagram(
+      "Em7",
+      fingerings("Em7").findIndex((shape) => shape.join() === "0,-1,0,0,0,-1"),
+    ),
+  );
 });

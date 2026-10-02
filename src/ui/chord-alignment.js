@@ -10,6 +10,7 @@ export function setupChordAlignment({
   enabled,
   update,
   editVerse,
+  editChord,
   finish,
 }) {
   const pages = document.querySelector("#pages");
@@ -17,7 +18,7 @@ export function setupChordAlignment({
   const tools = document.createElement("div");
   tools.id = "sheet-alignment-tools";
   tools.hidden = true;
-  tools.innerHTML = t`<div class="sheet-alignment-controls" role="toolbar" aria-label="Controles del acorde"><span id="sheet-alignment-selection"></span><button id="sheet-alignment-left" aria-label="Mover una letra a la izquierda" title="Mover una letra a la izquierda"></button><button id="sheet-alignment-right" aria-label="Mover una letra a la derecha" title="Mover una letra a la derecha"></button><button id="sheet-alignment-edit" aria-label="Editar letra del verso" title="Editar letra del verso"></button><button id="sheet-alignment-undo" aria-label="Deshacer último cambio" title="Deshacer último cambio"></button><button id="sheet-alignment-done" aria-label="Listo" title="Listo"></button></div><span id="sheet-alignment-status" class="visually-hidden" role="status" aria-live="polite"></span>`;
+  tools.innerHTML = t`<div class="sheet-alignment-controls" role="toolbar" aria-label="Controles del acorde"><button id="sheet-alignment-selection" aria-label="Editar acorde" title="Editar acorde"></button><button id="sheet-alignment-left" aria-label="Mover una letra a la izquierda" title="Mover una letra a la izquierda"></button><button id="sheet-alignment-right" aria-label="Mover una letra a la derecha" title="Mover una letra a la derecha"></button><button id="sheet-alignment-edit" aria-label="Editar letra del verso" title="Editar letra del verso"></button><button id="sheet-alignment-undo" aria-label="Deshacer último cambio" title="Deshacer último cambio"></button><button id="sheet-alignment-done" aria-label="Listo" title="Listo"></button></div><span id="sheet-alignment-status" class="visually-hidden" role="status" aria-live="polite"></span>`;
   scroll.before(tools);
   const $ = (s) => tools.querySelector(s);
   for (const action of ["left", "right", "edit", "undo", "done"])
@@ -272,6 +273,7 @@ export function setupChordAlignment({
     paintSelection();
   }
   pages.addEventListener("pointerdown", (event) => {
+    if (event.target.closest(".inline-chord-editor")) return;
     lyricTap = undefined;
     if (!event.isPrimary) {
       stopDrag(false);
@@ -282,12 +284,11 @@ export function setupChordAlignment({
     if (
       event.pointerType === "touch" &&
       current() &&
-      selected &&
       event.target.closest(".lyric")
     )
       lyricTap = {
         id: event.pointerId,
-        selected,
+        row: event.target.closest(".song-line"),
         x: event.clientX,
         y: event.clientY,
       };
@@ -350,15 +351,11 @@ export function setupChordAlignment({
     // to the scroll container. Ignore a later synthesized click if it arrives.
     if (
       tap?.id === event.pointerId &&
-      tap.selected === selected &&
       current() &&
       Math.hypot(event.clientX - tap.x, event.clientY - tap.y) <= 8
     ) {
-      const destination = atPoint(event.clientX, event.clientY, true);
-      if (destination) {
-        suppressClick = true;
-        move(destination.at);
-      }
+      suppressClick = true;
+      editVerse(tap.row);
     }
   });
   pages.addEventListener("pointercancel", () => {
@@ -367,6 +364,7 @@ export function setupChordAlignment({
   });
   pages.addEventListener("lostpointercapture", () => stopDrag(false));
   pages.addEventListener("click", (event) => {
+    if (event.target.closest(".inline-chord-editor")) return;
     if (!current()) return;
     if (suppressClick) {
       suppressClick = false;
@@ -374,17 +372,20 @@ export function setupChordAlignment({
     }
     const el = event.target.closest(".sheet-chord[data-chord]");
     if (el) {
+      if (
+        rows.find((row) => row.el === el.closest(".song-line"))?.instrumental
+      ) {
+        editChord(el);
+        return;
+      }
       select(el);
       return;
-    }
-    if (selected && event.target.closest(".lyric")) {
-      const destination = atPoint(event.clientX, event.clientY, true);
-      if (destination) move(destination.at);
     }
   });
   pages.addEventListener(
     "keydown",
     (event) => {
+      if (event.target.closest(".inline-chord-editor")) return;
       const el = event.target.closest(".sheet-chord[data-chord]");
       if (
         !el ||
@@ -405,7 +406,7 @@ export function setupChordAlignment({
         if (["Enter", " "].includes(event.key)) {
           event.preventDefault();
           event.stopImmediatePropagation();
-          editVerse(row.el);
+          editChord(el);
         }
         return;
       }
@@ -429,6 +430,15 @@ export function setupChordAlignment({
     stopDrag(false);
     finish();
   };
+  $("#sheet-alignment-selection").onclick = () => {
+    const chord = selectedChord();
+    if (current() && chord) editChord(chord.el);
+  };
+  pages.addEventListener("dblclick", (event) => {
+    const el = event.target.closest(".sheet-chord[data-chord]");
+    if (current() && el && !event.target.closest(".inline-chord-editor"))
+      editChord(el);
+  });
   $("#sheet-alignment-edit").onclick = () => {
     if (!current() || !selected) return;
     const row = selectedChord()?.row;
@@ -457,26 +467,25 @@ export function setupChordAlignment({
     rows = l.pages
       .flatMap((p) => p.columns.flat())
       .map((row, index) => ({ ...row, el: elements[index] }));
-    rows
-      .filter((row) => !row.instrumental)
-      .forEach((row) =>
-        row.el.querySelectorAll(".sheet-chord[data-chord]").forEach((el) => {
-          if (enabled()) {
-            el.classList.add("alignable-chord");
-            el.setAttribute("role", "button");
-            el.setAttribute("aria-label", t`Mover acorde: ${el.textContent}`);
-          }
-        }),
-      );
+    rows.forEach((row) =>
+      row.el.querySelectorAll(".sheet-chord[data-chord]").forEach((el) => {
+        if (enabled()) {
+          el.classList.toggle("alignable-chord", !row.instrumental);
+          el.setAttribute("role", "button");
+          el.setAttribute(
+            "aria-label",
+            row.instrumental
+              ? `${t("Editar acorde")}: ${el.textContent}`
+              : t`Mover acorde: ${el.textContent}`,
+          );
+        }
+      }),
+    );
     pages.classList.toggle("aligning-chords", enabled());
     paintSelection();
   }
   function handles(event) {
-    return (
-      enabled() &&
-      (event.target.closest(".sheet-chord[data-chord]") ||
-        (selected && event.target.closest(".lyric")))
-    );
+    return enabled() && event.target.closest(".sheet-chord[data-chord]");
   }
   return {
     refresh,
