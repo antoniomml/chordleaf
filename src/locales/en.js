@@ -884,6 +884,12 @@ export default {
     "To open it in another browser · JSON",
   "Copia de seguridad · JSON": "Backup · JSON",
   "Todas las canciones abiertas": "Every open song",
+  "Todas las canciones abiertas y cerradas": "Every open and closed song",
+  "Ver todas": "View all",
+  "Mostrar menos": "Show less",
+  "El título o artista es demasiado largo.": "The title or artist is too long.",
+  "La copia debe contener entre 1 y 500 canciones. Descarga proyectos individuales para conservar el resto.":
+    "The backup must contain between 1 and 500 songs. Download individual projects to preserve the rest.",
   "Para otras apps de acordes": "For other chord apps",
   "Prepara la importación de audio": "Prepare audio import",
   "Los modelos se guardan en este navegador. Tu audio y la letra permanecen en tu equipo.":

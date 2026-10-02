@@ -1,4 +1,5 @@
 import { t } from "./i18n.js";
+import { assertTextLength } from "./song-state.js";
 import guitar from "./data/guitar.json" with { type: "json" };
 import {
   chords,
@@ -269,6 +270,23 @@ export function setupChordsPanel({
     const occurrence = $("#replace-occurrence").value;
     const source = document.querySelector("#source");
     const nextCursor = source.selectionStart + selected.name.length + 2;
+    const nextText = replacing
+      ? replaceChord(
+          s.text,
+          from,
+          selected.name,
+          occurrence === "all",
+          Number(occurrence),
+        )
+      : s.text.slice(0, source.selectionStart) +
+        `[${selected.name}]` +
+        s.text.slice(source.selectionEnd);
+    try {
+      assertTextLength(nextText);
+    } catch (error) {
+      notify(error.message, "warning");
+      return;
+    }
     undo = {
       id: s.id,
       text: s.text,
@@ -276,13 +294,7 @@ export function setupChordsPanel({
       chordStickers: structuredClone(s.chordStickers),
     };
     if (replacing) {
-      s.text = replaceChord(
-        s.text,
-        from,
-        selected.name,
-        occurrence === "all",
-        Number(occurrence),
-      );
+      s.text = nextText;
       if (occurrence === "all")
         for (const sticker of s.chordStickers || [])
           if (Array.isArray(sticker.chords))
@@ -296,11 +308,7 @@ export function setupChordsPanel({
               ),
             ];
     } else {
-      const input = document.querySelector("#source");
-      s.text =
-        s.text.slice(0, input.selectionStart) +
-        `[${selected.name}]` +
-        s.text.slice(input.selectionEnd);
+      s.text = nextText;
     }
     s.chordShapes ||= {};
     s.chordShapes[selected.name] = {

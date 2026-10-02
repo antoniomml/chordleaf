@@ -166,7 +166,13 @@ export function setupChordAlignment({
       endIndex: parsed.endIndex,
       start: start - beginning,
     };
-    update(expected);
+    if (update(expected) === false) {
+      const previous = history.pop();
+      expected = previous.text;
+      selected = previous.selected;
+      paintSelection();
+      return;
+    }
     selectedChord()?.el.scrollIntoView({ block: "nearest", inline: "nearest" });
     $("#sheet-alignment-status").textContent = t(
       "Acorde movido. Cambios guardados en la canción.",
@@ -450,9 +456,14 @@ export function setupChordAlignment({
     if (!current() || !history.length) return;
     stopDrag(false);
     const old = history.pop();
+    const previous = { selected, expected };
     selected = old.selected;
     expected = old.text;
-    update(expected);
+    if (update(expected) === false) {
+      history.push(old);
+      ({ selected, expected } = previous);
+      paintSelection();
+    }
   };
   function refresh(l) {
     if (drag) stopDrag(false);

@@ -1,4 +1,4 @@
-import { createSong, MAX_FILE_BYTES, MAX_TEXT_LENGTH } from "./song-state.js";
+import { createSong, MAX_FILE_BYTES, assertTextLength } from "./song-state.js";
 import { t } from "./i18n.js";
 
 export function projectData(song) {
@@ -46,6 +46,7 @@ export function projectSignature(song) {
 }
 
 export function serializeProject(song) {
+  assertTextLength(song.text);
   return JSON.stringify(
     { format: "chordleaf-song", version: 1, song: projectData(song) },
     null,
@@ -61,10 +62,10 @@ export function restoreProject(text) {
     data?.format !== "chordleaf-song" ||
     data.version !== 1 ||
     !data.song ||
-    typeof data.song.text !== "string" ||
-    data.song.text.length > MAX_TEXT_LENGTH
+    typeof data.song.text !== "string"
   )
     throw new Error(t("El proyecto no es compatible o está dañado."));
+  assertTextLength(data.song.text);
   const song = createSong({ ...data.song, id: crypto.randomUUID() });
   song.projectSignature = projectSignature(song);
   song.dirty = false;

@@ -81,7 +81,7 @@
         </button>
         <button id="workspace-backup" role="menuitem">
           Copia de seguridad · JSON
-          <small>Todas las canciones abiertas</small>
+          <small>Todas las canciones abiertas y cerradas</small>
         </button>
       </div>
     </div>
@@ -122,6 +122,15 @@
   >
     <h2 id="recent-heading">Recientes</h2>
     <ul id="recent-list" class="recent-list"></ul>
+    <button
+      id="recent-all"
+      class="recent-all"
+      aria-controls="recent-list"
+      aria-expanded="false"
+      hidden
+    >
+      Ver todas
+    </button>
   </section>
   <div id="intro-content"></div>
 </section>
@@ -695,6 +704,15 @@
     >
       <h2 id="dialog-recent-heading">Recientes</h2>
       <ul id="dialog-recent-list" class="recent-list"></ul>
+      <button
+        id="dialog-recent-all"
+        class="recent-all"
+        aria-controls="dialog-recent-list"
+        aria-expanded="false"
+        hidden
+      >
+        Ver todas
+      </button>
     </section>
   </section>
   <section id="text-import" hidden>
