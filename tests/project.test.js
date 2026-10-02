@@ -9,6 +9,20 @@ import {
 } from "../src/project.js";
 import { layout } from "../src/layout.js";
 
+test("projects at the text limit round trip; oversized projects are rejected before download", () => {
+  const song = createSong({ text: "[C]" + "x".repeat(49997) });
+  assert.equal(restoreProject(serializeProject(song)).text, song.text);
+  song.text += "x";
+  assert.throws(() => serializeProject(song), /50.000/);
+  assert.throws(
+    () =>
+      restoreProject(
+        JSON.stringify({ format: "chordleaf-song", version: 1, song }),
+      ),
+    /50.000/,
+  );
+});
+
 test("individual project round trips every editable field", () => {
   const song = createSong({
     title: "Luz",

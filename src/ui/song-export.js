@@ -7,6 +7,7 @@ import { exportSong, download, downloadName } from "../files.js";
 export function setupSongExport({
   song,
   workspace,
+  prepare = () => true,
   exportMenu,
   renderTabs,
   persist,
@@ -14,20 +15,31 @@ export function setupSongExport({
 }) {
   const $ = (selector) => document.querySelector(selector);
   $("#workspace-backup").onclick = () => {
-    download(
-      new Blob([serializeWorkspace(workspace().songs, workspace().active)], {
-        type: "application/json",
-      }),
-      "chordleaf-workspace.json",
-    );
-    exportMenu.close({ focus: true });
+    if (!prepare()) return;
+    try {
+      const state = workspace();
+      download(
+        new Blob(
+          [serializeWorkspace(state.songs, state.active, state.recent)],
+          {
+            type: "application/json",
+          },
+        ),
+        "chordleaf-workspace.json",
+      );
+      exportMenu.close({ focus: true });
+    } catch (error) {
+      toast(error.message, "error");
+    }
   };
   $("#print-document").onclick = () => {
+    if (!prepare()) return;
     exportMenu.close({ focus: true });
     // The print stylesheet paints only the A4 pages, whatever view is open.
     window.print();
   };
   function saveProject(target = song()) {
+    if (!prepare()) return false;
     if (!target) return false;
     try {
       const signature = projectSignature(target);
@@ -61,6 +73,7 @@ export function setupSongExport({
   document.querySelectorAll("[data-export]").forEach(
     (b) =>
       (b.onclick = async () => {
+        if (!prepare()) return;
         exportMenu.close({ focus: true });
         const s = song();
         try {

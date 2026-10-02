@@ -249,7 +249,7 @@ export function setupSongImport({ features, onBlank, onSongs, toast }) {
         }
         const restored = restoreWorkspace(content);
         $("#new-dialog").close();
-        onSongs(restored.songs, restored.active);
+        onSongs(restored.songs, restored.active, { recent: restored.recent });
         toast(t("Copia restaurada como nuevas pestañas."));
         return;
       }

@@ -75,12 +75,13 @@ The same build writes the sitemap covering the home pair plus every content pair
 
 ## Releases
 
-The current release is **`v1.3.0`**. Before another release:
+The application version is declared in `package.json` and `desktop/package.json`; published releases are listed on [GitHub](https://github.com/antoniomml/chordleaf/releases). For each release:
 
 1. Update `version` in `package.json` and `desktop/package.json` and add its changes to `CHANGELOG.md`.
 2. Run frozen installation, formatting, tests, build and browser checks.
 3. Merge the checked pull request into `main`.
-4. Create an annotated `vX.Y.Z` tag on the merged `main` commit, push it, then publish release notes on GitHub.
+4. Create an annotated `vX.Y.Z` tag on the merged `main` commit, push it, then publish release notes on GitHub. Keep existing tags immutable.
+5. Verify that production `/release.json` reports that version and the exact tagged commit. A matching version string alone does not identify a deployment.
 
 `private: true` in `package.json` prevents accidental registry publication; it does not control GitHub repository visibility. The original application code is licensed under MIT; third-party notices must be retained.
 

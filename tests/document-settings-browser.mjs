@@ -47,7 +47,10 @@ try {
         .evaluate((el) => el.getBoundingClientRect().height);
       assert.ok(editorHeight >= (width >= 1200 ? 180 : 120));
       await page.locator('.rail [data-desktop-view="document"]').click();
-      await page.locator(".more-document-options summary").click();
+      assert.equal(
+        await page.locator(".more-document-options").evaluate((el) => el.open),
+        true,
+      );
     }
     await page.locator(".footer-option").click();
     assert.equal(await page.locator("#showBrand").isChecked(), false);

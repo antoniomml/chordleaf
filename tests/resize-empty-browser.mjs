@@ -29,6 +29,22 @@ try {
     await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
     await page.locator("#empty-new").waitFor();
 
+    for (const width of [320, 360, 390, 768, 1024, 1440, 2560]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+        await new Promise(requestAnimationFrame);
+      });
+      assert.equal(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth > innerWidth,
+        ),
+        false,
+        `${profile.name}: homepage must fit at ${width}px`,
+      );
+    }
+    await page.setViewportSize(profile.options.viewport);
+
     await page.evaluate(() => window.dispatchEvent(new Event("resize")));
     await page.waitForTimeout(150);
     assert.deepEqual(

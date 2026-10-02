@@ -1,8 +1,17 @@
 import { chordRE } from "./music.js";
+import { t } from "./i18n.js";
 
 export const MAX_TEXT_LENGTH = 50000;
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
 export const MAX_PDF_PAGES = 50;
+export function assertTextLength(text) {
+  if (text.length > MAX_TEXT_LENGTH)
+    throw new Error(
+      t(
+        "El texto es demasiado largo. Importa hasta 50.000 caracteres por canción.",
+      ),
+    );
+}
 /** Diagrams allowed inside a single chord sticker. */
 export const MAX_STICKER_CHORDS = 60;
 /** Diagrams allowed across every sticker of one song. */

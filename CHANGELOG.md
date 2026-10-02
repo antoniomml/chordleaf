@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 1.4.1 · October 2, 2026
+
+- Keep active lyric, chord, title and artist edits in browser saves, project downloads, reloads and workspace handoffs. Autosave preserves the focused field; Escape restores the previous value.
+- Preserve every closed song until explicit removal. Offer View all in both Recent lists, save open and closed songs atomically, and include closed songs in workspace backups even with no open tabs. Existing backups and legacy Recent storage remain readable.
+- Enforce the song text limit across direct edits, chord insertion/replacement and transposition. Reject oversized project and workspace downloads before reporting success, with a clear limit message.
+- Preserve keyboard focus and expanded document options after settings changes. Enlarge smaller document controls, fix the tablet entry overflow and shorten informational notices.
+- Correct public audio availability and model distribution notices, and update storage, backup and release documentation.
+- The preceding post-1.4.0 changes make direct lyric editing preserve chord anchors and support separate chord renaming in desktop and mobile sheet views.
+
 ## 1.4.0 · October 2, 2026
 
 - Show consistent resource badges and conservative browser hardware recommendations for voice models, preserve user choices, and describe word timestamps for both Qwen and Whisper. Mark Turbo as slow on CPU and demanding in memory.

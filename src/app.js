@@ -11,7 +11,8 @@ import { fitSong } from "./fit-song.js";
 import { openWorkspaceSession } from "./workspace-session.js";
 import shell from "./ui/shell.html?raw";
 import { t, getLocale } from "./i18n.js";
-import { createSong as create, MAX_TEXT_LENGTH } from "./song-state.js";
+import { createSong as create, assertTextLength } from "./song-state.js";
+import { createInlineEdits } from "./ui/inline-edits.js";
 import { setupChordsPanel } from "./chords-panel.js";
 import { setupDictionary } from "./dictionary-ui.js";
 import { setupEditorTools } from "./editor-tools.js";
@@ -47,8 +48,11 @@ document.documentElement.lang = getLocale();
 const workspaceSession = await openWorkspaceSession($("#app"));
 workspaceSession.beforeHandOff = () => persist();
 let recent = [];
+let legacyRecent = false;
 try {
-  recent = readRecent(localStorage.getItem(RECENT_KEY));
+  const raw = localStorage.getItem(RECENT_KEY);
+  recent = readRecent(raw);
+  legacyRecent = Array.isArray(JSON.parse(raw));
 } catch {
   /* Storage can be unavailable in private or restricted contexts. */
 }
@@ -57,6 +61,8 @@ try {
   storedRaw =
     localStorage.getItem("chordleaf-v1") ?? localStorage.getItem("chordi-v1");
   const stored = JSON.parse(storedRaw);
+  if (Array.isArray(stored?.recent))
+    recent = readRecent(JSON.stringify(stored.recent));
   if (
     storedRaw &&
     (!Array.isArray(stored?.songs) ||
@@ -110,6 +116,28 @@ const transposeHistory = new Map();
 let chordMode = "song";
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const song = () => songs.find((s) => s.id === active);
+const inlineEdits = createInlineEdits({
+  changed,
+  finished() {
+    renderSource();
+    renderSettings();
+    renderPages();
+  },
+  invalid(message) {
+    setSaveState(message, { error: true, announce: true });
+    toast(message, "warning");
+  },
+});
+function updateText(text) {
+  try {
+    assertTextLength(text);
+    song().text = text;
+    return true;
+  } catch (error) {
+    toast(error.message, "warning");
+    return false;
+  }
+}
 /** Keep the visible save label in sync without announcing every keystroke.
  * Screen readers only hear the hidden live region on real transitions. */
 function setSaveState(text, { error = false, announce = false } = {}) {
@@ -125,6 +153,7 @@ function setSaveState(text, { error = false, announce = false } = {}) {
 }
 function persist() {
   if (!workspaceSession.held) return false;
+  if (!inlineEdits.capture()) return false;
   if (recoveryRaw) {
     setSaveState(
       t(
@@ -135,7 +164,19 @@ function persist() {
     return false;
   }
   try {
-    localStorage.setItem("chordleaf-v1", JSON.stringify({ songs, active }));
+    localStorage.setItem(
+      "chordleaf-v1",
+      JSON.stringify({ songs, active, recent }),
+    );
+    if (legacyRecent) {
+      try {
+        // Remove the old copy only after the complete workspace is durable.
+        localStorage.removeItem(RECENT_KEY);
+        legacyRecent = false;
+      } catch {
+        /* The canonical copy succeeded; retry legacy cleanup on another save. */
+      }
+    }
     setSaveState(t("Guardado en este navegador"), { announce: true });
     saveFailureNotified = false;
     requestPersistentStorage();
@@ -154,18 +195,14 @@ function persist() {
 }
 /** Ask once, after real content exists, so browsers keep songs under pressure. */
 function requestPersistentStorage() {
-  if (persistenceRequested || !songs.some(worthKeeping)) return;
+  if (
+    persistenceRequested ||
+    (!songs.some(worthKeeping) &&
+      !recent.some((entry) => worthKeeping(entry.song)))
+  )
+    return;
   persistenceRequested = true;
   navigator.storage?.persist?.().catch(() => {});
-}
-function saveRecent() {
-  try {
-    localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
-    return true;
-  } catch {
-    toast(t("No se pudo guardar la lista de recientes."), "error");
-    return false;
-  }
 }
 function changed({ preserveTranspose = false } = {}) {
   if (!song()) return;
@@ -187,7 +224,7 @@ function toast(message, variant = "success") {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(
     () => element.classList.remove("visible"),
-    variant === "error" ? 9000 : 6500,
+    variant === "error" ? 9000 : variant === "warning" ? 6500 : 4000,
   );
 }
 function scrollToOption(element, options) {
@@ -221,6 +258,7 @@ function renderTabs() {
   document.querySelectorAll("[data-id]").forEach(
     (b) =>
       (b.onclick = () => {
+        if (!inlineEdits.finish()) return;
         active = b.dataset.id;
         mobileView = songViews.get(active) ?? "document";
         desktopView = songDesktopViews.get(active) ?? "document";
@@ -246,25 +284,34 @@ function renderTabs() {
 }
 /** Closing keeps the project in Recents; removing it from there is explicit. */
 function closeSong(id) {
+  if (!inlineEdits.finish()) return;
   const target = songs.find((s) => s.id === id);
   if (!target) return;
   const kept = worthKeeping(target);
+  const previousRecent = recent;
   if (kept) {
     recent = rememberClosed(recent, structuredClone(target));
-    if (!saveRecent()) return;
   }
-  removeSong(id);
+  if (!removeSong(id)) {
+    recent = previousRecent;
+    return;
+  }
   if (kept) toast(t("Canción cerrada. Puedes reabrirla desde Recientes."));
 }
 function reopenRecent(id) {
+  if (!inlineEdits.finish()) return;
   const entry = recent.find((item) => item.song.id === id);
   if (!entry) return;
   const opened = create(entry.song);
   if (songs.some((s) => s.id === opened.id)) opened.id = crypto.randomUUID();
-  songs.push(opened);
+  const previous = { songs, recent, active };
+  songs = [...songs, opened];
   recent = forget(recent, id);
-  saveRecent();
   active = opened.id;
+  if (!persist()) {
+    ({ songs, recent, active } = previous);
+    return;
+  }
   mobileView = "preview";
   desktopView = "document";
   songViews.set(active, mobileView);
@@ -278,14 +325,19 @@ function reopenRecent(id) {
 function removeRecent(id) {
   const index = recent.findIndex((item) => item.song.id === id);
   if (index < 0) return;
+  const previous = recent;
   recent = forget(recent, id);
-  saveRecent();
+  if (!persist()) {
+    recent = previous;
+    return;
+  }
   renderRecent();
   // Keep keyboard focus inside the list after a removal.
   const buttons = document.querySelectorAll(
     `${$("#new-dialog").open ? "#dialog-recent-list" : "#recent-list"} .recent-open`,
   );
-  (buttons[Math.min(index, buttons.length - 1)] ?? $("#empty-new"))?.focus();
+  const fallback = $("#new-dialog").open ? $("#blank") : $("#empty-new");
+  (buttons[Math.min(index, buttons.length - 1)] ?? fallback)?.focus();
 }
 const relativeTime = new Intl.RelativeTimeFormat(getLocale(), {
   numeric: "auto",
@@ -307,14 +359,27 @@ function recentMarkup(entries) {
     })
     .join("");
 }
+const expandedRecent = new Set();
 function renderRecent() {
-  for (const [section, list, limit] of [
-    ["#recent-projects", "#recent-list", 6],
-    ["#dialog-recent", "#dialog-recent-list", 4],
+  for (const [section, list, limit, button] of [
+    ["#recent-projects", "#recent-list", 6, "#recent-all"],
+    ["#dialog-recent", "#dialog-recent-list", 4, "#dialog-recent-all"],
   ]) {
     $(section).hidden = !recent.length;
-    $(list).innerHTML = recentMarkup(recent.slice(0, limit));
+    const expanded = expandedRecent.has(list);
+    $(list).innerHTML = recentMarkup(
+      expanded ? recent : recent.slice(0, limit),
+    );
+    $(button).hidden = recent.length <= limit;
+    $(button).textContent = expanded ? t("Mostrar menos") : t("Ver todas");
+    $(button).setAttribute("aria-expanded", String(expanded));
+    $(button).onclick = () => {
+      if (expanded) expandedRecent.delete(list);
+      else expandedRecent.add(list);
+      renderRecent();
+    };
   }
+  $("#export").disabled = !song() && !recent.length;
 }
 function recentClick(event) {
   const remove = event.target.closest("[data-recent-remove]");
@@ -351,18 +416,23 @@ async function openExample() {
   toast(t("Canción de ejemplo abierta. Cámbiala a tu gusto o crea una nueva."));
 }
 function removeSong(id) {
+  const previous = { songs, active };
   songs = songs.filter((s) => s.id !== id);
+  if (active === id) active = songs[0]?.id ?? null;
+  if (!persist()) {
+    ({ songs, active } = previous);
+    return false;
+  }
   songViews.delete(id);
   songDesktopViews.delete(id);
   songMusicSections.delete(id);
-  if (active === id) {
-    active = songs[0]?.id ?? null;
+  if (previous.active === id) {
     mobileView = songViews.get(active) ?? "document";
     desktopView = songDesktopViews.get(active) ?? "document";
     musicSection = songMusicSections.get(active) ?? "key";
   }
   render();
-  persist();
+  return true;
 }
 function sectionForDesktop(view) {
   if (view === "key") return "key";
@@ -405,6 +475,25 @@ function compressBlanks() {
   toast(t`Se comprimieron ${removed} ${noun}.`);
 }
 function renderSettings() {
+  const focused = $("#settings")?.contains(document.activeElement)
+    ? document.activeElement
+    : null;
+  const focusSelector = focused?.id
+    ? `#${focused.id}`
+    : focused?.dataset.columns
+      ? `[data-columns="${focused.dataset.columns}"]`
+      : focused?.dataset.notation
+        ? `[data-notation="${focused.dataset.notation}"]`
+        : focused?.matches("summary")
+          ? ".more-document-options summary"
+          : null;
+  const optionsOpen = $(".more-document-options")?.open;
+  renderSettingsContent();
+  if (optionsOpen && $(".more-document-options"))
+    $(".more-document-options").open = true;
+  if (focusSelector) $(focusSelector)?.focus({ preventScroll: true });
+}
+function renderSettingsContent() {
   syncSection();
   updateNavigation();
   // Resize events reach this from the empty workspace (and after closing the
@@ -517,7 +606,7 @@ function updateNavigation() {
 function transposeSong(n) {
   const s = song();
   const names = transposeSpelling(s.text, n);
-  s.text = transpose(s.text, n, names);
+  if (!updateText(transpose(s.text, n, names))) return false;
   s.chordShapes = Object.fromEntries(
     Object.entries(s.chordShapes || {}).map(([name, shape]) => {
       let offset = n;
@@ -533,6 +622,7 @@ function transposeSong(n) {
   for (const sticker of s.chordStickers || [])
     if (Array.isArray(sticker.chords))
       sticker.chords = sticker.chords.map((c) => transposeChord(c, n, names));
+  return true;
 }
 function shift(n) {
   const s = song();
@@ -552,7 +642,7 @@ function shift(n) {
     Object.assign(s, history.snapshot);
     transposeHistory.delete(s.id);
   } else {
-    transposeSong(n);
+    if (!transposeSong(n)) return;
     history.offset = next;
     transposeHistory.set(s.id, history);
   }
@@ -571,7 +661,7 @@ function undoTranspose() {
 function setCapo(value) {
   const s = song(),
     next = Math.min(12, Math.max(0, Number.isFinite(value) ? value : 0));
-  if (s.linked) transposeSong(s.capo - next);
+  if (s.linked && !transposeSong(s.capo - next)) return;
   s.capo = next;
   changed();
   render();
@@ -594,6 +684,7 @@ function sourceMeta({ harmonyChanged = true } = {}) {
   if (section === "chords") chordPanel.refresh();
 }
 function renderPages() {
+  if (!inlineEdits.finish({ render: false })) return;
   clearTimeout(previewTimer);
   previewTimer = undefined;
   const s = song(),
@@ -636,16 +727,25 @@ function renderPages() {
   if (editing) {
     document.querySelectorAll("[data-header]").forEach(
       (el) =>
-        (el.onblur = () => {
-          if (el.innerText === (s[el.dataset.header] || "").toLocaleUpperCase())
-            return;
-          s[el.dataset.header] = el.innerText
-            .replace(/\n/g, " ")
-            .trim()
-            .slice(0, el.dataset.header === "title" ? 90 : 100);
-          changed();
-          renderSettings();
-          renderPages();
+        (el.onfocus = () => {
+          const name = el.dataset.header;
+          const original = s[name],
+            display = el.innerText;
+          inlineEdits.start(el, {
+            get: () => s[name],
+            set: (value) => (s[name] = value),
+            readInput: () => el.innerText,
+            writeInput: (value) => (el.innerText = value),
+            read: () =>
+              el.innerText === display
+                ? original
+                : el.innerText.replace(/\n/g, " ").trim(),
+            validate(value) {
+              if (value.length > (name === "title" ? 90 : 100))
+                throw new Error(t("El título o artista es demasiado largo."));
+            },
+            rejectInvalid: true,
+          });
         }),
     );
     document.querySelectorAll(".song-line").forEach((el) => {
@@ -678,43 +778,35 @@ function editLine(el) {
   if (el.querySelector("textarea")) return;
   alignment.clear();
   const endIndex = Number(el.dataset.end),
-    lines = song().text.split("\n");
+    target = song(),
+    lines = target.text.split("\n");
   // A separate chord-only source row stays untouched above its lyric row.
   let edited = lines[endIndex];
   el.innerHTML = t`<textarea class="inline-editor" aria-label="Editar letra del verso">${esc(alignmentLine(edited).lyric)}</textarea>`;
   const input = el.firstChild;
   input.focus();
-  input.oninput = () => {
-    edited = replaceAlignedLyrics(edited, input.value);
-  };
-  let done = false;
-  function commit() {
-    if (done) return;
-    done = true;
-    lines.splice(endIndex, 1, ...edited.split("\n"));
-    song().text = lines.join("\n");
-    changed();
-    renderSource();
-    renderPages();
-  }
+  inlineEdits.start(input, {
+    get: () => target.text,
+    set: (value) => (target.text = value),
+    read() {
+      const next = replaceAlignedLyrics(edited, input.value);
+      const candidate = [...lines];
+      candidate.splice(endIndex, 1, ...next.split("\n"));
+      const text = candidate.join("\n");
+      assertTextLength(text);
+      edited = next;
+      return text;
+    },
+    rejectInvalid: true,
+  });
   input.onclick = (e) => e.stopPropagation();
-  input.onblur = commit;
-  input.onkeydown = (e) => {
-    if (e.key === "Escape") {
-      done = true;
-      renderPages();
-    }
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      commit();
-    }
-  };
 }
 function editChord(el) {
   if (el.querySelector("input")) return;
   alignment.clear();
   const index = Number(el.closest(".song-line").dataset.line),
-    lines = song().text.split("\n"),
+    target = song(),
+    lines = target.text.split("\n"),
     mark = alignmentLine(lines[index]).marks.find(
       (mark) => mark.start === Number(el.dataset.alignStart),
     );
@@ -725,47 +817,24 @@ function editChord(el) {
   input.size = Math.max(3, mark.chord.length + 1);
   input.focus();
   input.select();
-  let done = false;
-  function commit() {
-    if (done) return;
-    const value = input.value.trim();
-    if (!chordRE.test(value)) {
-      input.setCustomValidity(
-        t("Introduce un acorde válido, por ejemplo C o Em7."),
-      );
-      input.reportValidity();
-      return;
-    }
-    done = true;
-    lines[index] =
-      lines[index].slice(0, mark.start) +
-      `[${value}]` +
-      lines[index].slice(mark.end);
-    song().text = lines.join("\n");
-    changed();
-    renderSource();
-    renderPages();
-  }
-  input.oninput = () => input.setCustomValidity("");
-  input.onblur = () => {
-    if (done) return;
-    if (chordRE.test(input.value.trim())) commit();
-    else {
-      done = true;
-      renderPages();
-    }
-  };
+  inlineEdits.start(input, {
+    get: () => target.text,
+    set: (value) => (target.text = value),
+    read() {
+      const value = input.value.trim();
+      if (!chordRE.test(value))
+        throw new Error(t("Introduce un acorde válido, por ejemplo C o Em7."));
+      const candidate = [...lines];
+      candidate[index] =
+        lines[index].slice(0, mark.start) +
+        `[${value}]` +
+        lines[index].slice(mark.end);
+      const text = candidate.join("\n");
+      assertTextLength(text);
+      return text;
+    },
+  });
   input.onclick = (event) => event.stopPropagation();
-  input.onkeydown = (event) => {
-    if (event.key === "Escape") {
-      done = true;
-      renderPages();
-    }
-    if (event.key === "Enter") {
-      event.preventDefault();
-      commit();
-    }
-  };
 }
 function resizePages() {
   const width = $("#pages-scroll").clientWidth;
@@ -966,14 +1035,14 @@ $("#issue-editor").onsubmit = (event) => {
     lines = song().text.split("\n"),
     marker = lines[line]?.slice(offset).match(/^\[\?[^\[\]\n]{1,40}\]/)?.[0];
   if (!marker) return renderPages();
-  if ($("#issue-all").checked && !$("#issue-all-row").hidden)
-    song().text = song().text.split(marker).join(`[${value}]`);
-  else {
+  if ($("#issue-all").checked && !$("#issue-all-row").hidden) {
+    if (!updateText(song().text.split(marker).join(`[${value}]`))) return;
+  } else {
     lines[line] =
       lines[line].slice(0, offset) +
       `[${value}]` +
       lines[line].slice(offset + marker.length);
-    song().text = lines.join("\n");
+    if (!updateText(lines.join("\n"))) return;
   }
   changed();
   renderSource();
@@ -987,7 +1056,11 @@ function render() {
   $("#tabs-wrap").hidden = empty;
   $("#empty-state").hidden = !empty;
   $("main").hidden = empty;
-  $("#export").disabled = empty;
+  $("#export").disabled = empty && !recent.length;
+  for (const element of document.querySelectorAll(
+    "[data-export], #save-project, #print-document",
+  ))
+    element.disabled = empty;
   renderRecent();
   if (empty) {
     clearTimeout(previewTimer);
@@ -1000,20 +1073,14 @@ function render() {
   renderPages();
 }
 $("#source").oninput = (e) => {
-  if (e.target.value.length > MAX_TEXT_LENGTH) {
+  const previousText = song().text;
+  if (!updateText(e.target.value)) {
     e.target.value = song().text;
-    toast(
-      t(
-        "El texto es demasiado largo. Importa hasta 50.000 caracteres por canción.",
-      ),
-      "warning",
-    );
     return;
   }
   const harmonyChanged =
-    JSON.stringify(chords(song().text)) !==
+    JSON.stringify(chords(previousText)) !==
     JSON.stringify(chords(e.target.value));
-  song().text = e.target.value;
   changed();
   sourceMeta({ harmonyChanged });
   if (harmonyChanged) renderSettings();
@@ -1107,10 +1174,12 @@ function openNewSong() {
 function acceptSongs(
   opened,
   selected,
-  { edit = false, imported = false } = {},
+  { edit = false, imported = false, recent: restoredRecent = [] } = {},
 ) {
+  if (!inlineEdits.finish()) return;
   songs.push(...opened);
-  active = selected;
+  recent = [...restoredRecent, ...recent];
+  active = selected ?? active;
   desktopView = edit ? "edit" : "document";
   mobileView = edit ? "edit" : imported ? "preview" : "document";
   musicSection = "key";
@@ -1125,7 +1194,8 @@ function acceptSongs(
 }
 const { saveProject } = setupSongExport({
   song,
-  workspace: () => ({ songs, active }),
+  workspace: () => ({ songs, active, recent }),
+  prepare: () => inlineEdits.finish(),
   exportMenu,
   renderTabs,
   persist,
@@ -1138,7 +1208,10 @@ document.addEventListener("click", (e) => {
       start = input.selectionStart,
       end = input.selectionEnd,
       value = `[${chord.dataset.chord}]`;
-    song().text = song().text.slice(0, start) + value + song().text.slice(end);
+    if (
+      !updateText(song().text.slice(0, start) + value + song().text.slice(end))
+    )
+      return;
     changed();
     renderSource();
     renderPages();
@@ -1327,10 +1400,11 @@ const alignment = setupChordAlignment({
     setSheetEditing(false);
   },
   update(text) {
-    song().text = text;
+    if (!updateText(text)) return false;
     changed();
     renderSource();
     renderPages();
+    return true;
   },
 });
 for (const [id, name] of [

@@ -27,7 +27,7 @@ Chordleaf opens without a sample song. Choose the large **New song** action, the
 | PDF with selectable text | Lyrics, chords, headers and columns recovered from their positions. Review the result.                              |
 | Word (.docx)             | Text and identifiable column structure. Review titles and alignment.                                                |
 
-Imports accept up to **10 MiB per file**, **50 PDF pages** and **50,000 text characters per song**. Large or complex documents can still take longer to process. Scanned PDFs need external OCR. Convert legacy `.doc` files to `.docx` first. Each song opens in a tab. Closing a song with unexported changes requires confirmation.
+Imports accept up to **10 MiB per file**, **50 PDF pages** and **50,000 text characters per song**. Direct edits, chord insertion and transposition use the same song text limit. Large or complex documents can still take longer to process. Scanned PDFs need external OCR. Convert legacy `.doc` files to `.docx` first. Each song opens in a tab. Closing a song saves it in **Recent**, without a confirmation. Closed songs remain available until explicitly removed; **View all** shows the whole list. If browser storage is full or unavailable, the song stays open so you can export it.
 
 ## Place a chord precisely
 
@@ -118,7 +118,7 @@ Preview, PDF and Word share a layout model. Reimported PDF or Word reconstructs 
 
 For a web import, paste an HTTPS song URL from LaCuerda, AcordesWeb, TusAcordes, Chordie, Acordes.cc or Ultimate Guitar. Cifra Club often blocks server requests; its saved HTML can still be parsed locally when offered. Chordleaf converts the accessible chord version into editable lyrics and anchored chords. LaCuerda supports both its normal chord page and its `/TXT/` link; its six-string fingering legends are left out of the song text. Ultimate Guitar supports `tabs.ultimate-guitar.com` and Spanish `es.ultimate-guitar.com` chord pages. Integrations are maintained per provider rather than per song, so a provider markup change can require an adapter update. Search pages, protected content and tablature-only versions are not supported. The source URL is kept with the working song. A running Chordleaf server is needed for this option.
 
-Every import tries one and two columns, 6–10 mm margins and 8–20 pt type, choosing the largest font that fits on one A4 page. Imported column/page breaks are reflowed. At equal font sizes, one column and 10 mm margins take preference. Longer songs keep all their content on multiple pages rather than shrinking below 8 pt. **Fit to one page** repeats this search; all document controls remain editable afterwards.
+Every import tries one and two columns, 6–10 mm margins and 8–12 pt type, choosing the largest font that fits on one A4 page. Imported column/page breaks are reflowed. At equal font sizes, one column and 10 mm margins take preference. Longer songs keep all their content on multiple pages rather than shrinking below 8 pt. **Fit to one page** repeats this search; all document controls remain editable afterwards.
 
 The preview, PDF and Word documents include a small grey **Chordleaf** footer. Catalog diagrams use the original fingering's barre information, including full and partial barres; unknown custom shapes infer a conservative barre when possible.
 
@@ -136,7 +136,7 @@ Chordleaf allows one active editor per browser profile and origin. A second brow
 
 ## Full workspace backups
 
-Choose **Export → Workspace backup · JSON** to save all open songs, layouts and custom chord shapes. To restore, choose **New song → Open editable project** and select the JSON backup. Restored songs become new tabs; existing songs are preserved. The versioned format currently supports up to 500 songs, 50,000 characters per song and 10 MiB per import. Future unsupported versions are rejected rather than guessed.
+Choose **Export → Workspace backup · JSON** to save all open and closed songs, layouts and custom chord shapes. This option remains available with no open song. To restore, choose **New song → Open editable project** and select the JSON backup. Open songs become new tabs and closed songs return to **Recent**; existing songs are preserved. Older backups containing only open songs still work. The versioned format supports up to 500 songs in total, 50,000 characters per song and 10 MiB per file. A backup that exceeds these limits is rejected before download; export individual projects if your library is larger. Future unsupported versions are rejected rather than guessed.
 
 Export a workspace backup before moving between a preview address and your final domain: browser storage does not move between websites. Keep the backup somewhere safe; it contains your song content.
 

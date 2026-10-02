@@ -355,9 +355,12 @@ button.primary {
 .entry-sheet {
   margin: 0;
   justify-self: center;
+  width: 354px;
+  min-width: 0;
+  max-width: 100%;
 }
 .entry-page {
-  width: 330px;
+  width: min(330px, 100% - 24px);
   padding: 30px 28px 34px;
   border-radius: 4px;
   background: #fffdf6;
@@ -448,6 +451,14 @@ button.primary {
 .recent-projects.compact {
   margin-top: 20px;
 }
+.recent-all {
+  margin-top: 12px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--field-border);
+  border-radius: 7px;
+  color: var(--green);
+}
 .recent-projects.compact .recent-list {
   grid-template-columns: 1fr;
   gap: 6px;
@@ -483,7 +494,7 @@ button.primary {
     padding: 36px 20px 16px;
   }
   .entry-hero {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 40px;
   }
   .entry-lead {
@@ -675,6 +686,8 @@ main {
   color: #aab6a0;
   font-size: 11px;
   cursor: pointer;
+  min-height: 32px;
+  padding: 8px 0;
 }
 .more-document-options summary:hover,
 .more-document-options summary:focus-visible {
@@ -1025,6 +1038,8 @@ main {
   font-size: 10px;
   color: #a6b397;
   white-space: nowrap;
+  min-height: 32px;
+  padding: 8px;
 }
 .preview-actions #pencil {
   display: inline-flex;
@@ -2274,8 +2289,20 @@ button:disabled {
 }
 #settings .segmented,
 #settings .stepper {
-  height: 30px;
+  height: 40px;
   margin-top: 5px;
+}
+@media (pointer: coarse), (min-width: 761px) and (max-width: 1024px) {
+  #settings .segmented,
+  #settings .stepper {
+    min-height: 52px;
+  }
+  #settings .segmented button,
+  #settings .stepper button,
+  .more-document-options summary,
+  .preview-actions #fit {
+    min-height: 44px;
+  }
 }
 #settings .number-unit span {
   top: 9px;

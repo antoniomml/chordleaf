@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createSong } from "../src/song-state.js";
 import {
-  MAX_RECENT,
   forget,
   readRecent,
   rememberClosed,
@@ -28,16 +27,18 @@ test("closed songs move to the front of Recents without duplicates", () => {
   );
 });
 
-test("Recents keep a bounded list", () => {
+test("closing songs never evicts an earlier song's only copy", () => {
   let recent = [];
-  for (let i = 0; i < MAX_RECENT + 5; i++)
+  for (let i = 0; i < 25; i++)
     recent = rememberClosed(
       recent,
       createSong({ title: `S${i}`, text: "x" }),
       i,
     );
-  assert.equal(recent.length, MAX_RECENT);
-  assert.equal(recent[0].song.title, `S${MAX_RECENT + 4}`);
+  assert.equal(recent.length, 25);
+  assert.equal(recent[0].song.title, "S24");
+  assert.equal(recent.at(-1).song.title, "S0");
+  assert.equal(readRecent(JSON.stringify(recent)).length, 25);
 });
 
 test("stored Recents are rebuilt from known fields and bad data is ignored", () => {

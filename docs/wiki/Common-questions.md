@@ -4,7 +4,7 @@
 
 ## Where are my songs saved?
 
-Chordleaf saves your open songs in this browser, on this website. It has no account or cloud sync. Other devices, browsers and website addresses have separate storage. Export a **Workspace backup · JSON** to keep everything, or choose **Export → Download editable project** to preserve one song as `.chordleaf.json`. Open it through **New song → Open editable project**. TXT and ChordPro remain useful interchange formats. See [privacy and storage](https://github.com/antoniomml/chordleaf/wiki/Privacy-and-storage).
+Chordleaf saves your open and closed songs in this browser, on this website. Closing a song moves it to **Recent**; **View all** shows every stored closed song. Songs stay there until you explicitly remove them. It has no account or cloud sync. Other devices, browsers and website addresses have separate storage. Export a **Workspace backup · JSON** to keep everything, even when all songs are closed, or choose **Export → Download editable project** to preserve one song as `.chordleaf.json`. Open it through **New song → Open editable project**. TXT and ChordPro remain useful interchange formats. See [privacy and storage](https://github.com/antoniomml/chordleaf/wiki/Privacy-and-storage).
 
 ## How do I put a chord over a particular syllable?
 

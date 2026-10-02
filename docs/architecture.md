@@ -1,28 +1,29 @@
 # Architecture
 
-chordleaf is a browser application built with ES modules and Vite. Editing and file import/export work without a backend. Importing a public website uses a small Node.js endpoint, shared by the local server and the Vercel function. Songs live in memory and are saved to `localStorage` under `chordleaf-v1`; legacy `chordi-v1` data is migrated on the next save. Exports provide portable backups.
+chordleaf is a browser application built with ES modules and Vite. Editing and file import/export work without a backend. Importing a public website uses a small Node.js endpoint, shared by the local server and the Vercel function. Open and closed songs live in memory and are saved atomically to `localStorage` under `chordleaf-v1`; legacy `chordi-v1` and separate Recent data are migrated on the next save. Closed songs have no automatic eviction. Exports provide portable backups, including closed songs.
 
 ## Modules
 
-| File                                 | Responsibility                                                                     |
-| ------------------------------------ | ---------------------------------------------------------------------------------- |
-| `src/app.js`                         | Song state, document/key sections and control wiring.                              |
-| `src/ui/pages.js`                    | Escaped HTML for the document preview.                                             |
-| `src/ui/intro-copy.js`               | Shared English/Spanish introduction for the app and static entry pages.            |
-| `src/chords-panel.js`                | Chord sidebar, catalog search, interactive fretboard and replacement workflow.     |
-| `src/harmony.js`                     | Guitar pitches, formula matching, theoretical note spelling and token replacement. |
-| `src/dictionary-ui.js`               | Song chord cards, custom shape editor and draggable sheet diagrams.                |
-| `src/dictionary.js`                  | Shared diagram geometry and rendering for preview and exports.                     |
-| `src/editor-tools.js`                | Expanded editor and accessible workspace divider.                                  |
-| `src/music.js`                       | Symbols, transposition, line parsing, estimated keys and diagrams.                 |
-| `src/data/guitar.json`               | Local catalog of guitar positions using absolute frets.                            |
-| `src/layout.js`                      | Shared model for lines, collisions, columns and pages.                             |
-| `src/files.js`                       | Import/export with on-demand dependencies.                                         |
-| `src/ui/song-import.js`              | Import dialogs, cancellation, validation and prepared-song callbacks.              |
-| `src/ui/song-export.js`              | Snapshot exports, print controls and editable-project downloads.                   |
-| `src/ui/entry.js` / `build/entry.js` | Shared sheet and static entry layout before editor initialization.                 |
-| `src/pdf-import.js`                  | Geometric interpretation of extracted PDF text.                                    |
-| `src/fonts.js`                       | Document font loading and embedding.                                               |
+| File                                 | Responsibility                                                                                |
+| ------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `src/app.js`                         | Song state, document/key sections and control wiring.                                         |
+| `src/ui/pages.js`                    | Escaped HTML for the document preview.                                                        |
+| `src/ui/intro-copy.js`               | Shared English/Spanish introduction for the app and static entry pages.                       |
+| `src/chords-panel.js`                | Chord sidebar, catalog search, interactive fretboard and replacement workflow.                |
+| `src/harmony.js`                     | Guitar pitches, formula matching, theoretical note spelling and token replacement.            |
+| `src/dictionary-ui.js`               | Song chord cards, custom shape editor and draggable sheet diagrams.                           |
+| `src/dictionary.js`                  | Shared diagram geometry and rendering for preview and exports.                                |
+| `src/editor-tools.js`                | Expanded editor and accessible workspace divider.                                             |
+| `src/music.js`                       | Symbols, transposition, line parsing, estimated keys and diagrams.                            |
+| `src/data/guitar.json`               | Local catalog of guitar positions using absolute frets.                                       |
+| `src/layout.js`                      | Shared model for lines, collisions, columns and pages.                                        |
+| `src/files.js`                       | Import/export with on-demand dependencies.                                                    |
+| `src/ui/song-import.js`              | Import dialogs, cancellation, validation and prepared-song callbacks.                         |
+| `src/ui/song-export.js`              | Snapshot exports, print controls and editable-project downloads.                              |
+| `src/ui/inline-edits.js`             | Capture focused sheet drafts without replacing the input; commit or cancel them consistently. |
+| `src/ui/entry.js` / `build/entry.js` | Shared sheet and static entry layout before editor initialization.                            |
+| `src/pdf-import.js`                  | Geometric interpretation of extracted PDF text.                                               |
+| `src/fonts.js`                       | Document font loading and embedding.                                                          |
 
 Sections hide the entire inactive sidebar content without destroying the text editor. The expanded editor moves the existing textarea, retaining selection and undo history. The native dialog manages focus, an inert background and Escape.
 
@@ -54,7 +55,7 @@ Keep model transformations separate from UI controls. Audio transcription is an 
 
 `src/i18n.js` and `src/locales/en.js` translate UI literals into English; Spanish is the source locale. The browser language chooses the initial interface and the explicit EN / ES selection is saved separately under `chordleaf-language`; the previous `chordi-language` key remains readable for migration. Switching saves the workspace and reloads; if storage fails, it keeps the current language and document. In tagged templates, only literal segments are translated. Interpolated titles, lyrics and chord symbols are preserved and HTML callers still escape user content. Add new copy to the English catalog and use `t` for labels, status messages and templates.
 
-`src/song-state.js` rebuilds known data fields when restoring storage or reading TXT metadata. It validates fret shapes, numeric settings and safe IDs. New imports are bounded to 10 MiB per file, 50 PDF pages and 50,000 text characters; existing song text is not truncated on restore. Malformed workspace JSON is not overwritten and can be downloaded for recovery.
+`src/song-state.js` rebuilds known data fields when restoring storage or reading TXT metadata. It validates fret shapes, numeric settings and safe IDs. Its text budget is shared by direct edits, chord insertion/replacement, alignment and transposition. New imports are bounded to 10 MiB per file, 50 PDF pages and 50,000 text characters; existing song text is not truncated on browser restore. Project and workspace exports validate the same import budgets before download. Malformed workspace JSON is not overwritten and can be downloaded for recovery.
 
 `api/import-web.js` awaits `server/web-import.js`. The same handler supplies development, production preview and the standalone server. Vercel serves `dist/` through its CDN; it does not run `pnpm start`. `vercel.json` and `server/security.js` share security headers. The CSP allows inline styles for generated sheet geometry, but no inline scripts, remote scripts or remote connections from the browser.
 
