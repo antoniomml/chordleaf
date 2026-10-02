@@ -29,6 +29,14 @@ export default {
   "Necesario · 13 MB": "Required · 13 MB",
   "Acordes · LV-Chordia": "Chords · LV-Chordia",
   "Ligero · Funciona sin WebGPU": "Lightweight · Works without WebGPU",
+  "Intermedio · Más memoria que Base · Funciona sin WebGPU":
+    "Intermediate · More memory than Base · Works without WebGPU",
+  "Modelo grande · Recomendado para ordenador · Funciona sin WebGPU":
+    "Large model · Recommended for computers · Works without WebGPU",
+  "WebGPU · Incluye alineador de letra": "WebGPU · Includes lyric alignment",
+  "Qwen 1,7B": "Qwen 1.7B",
+  "No se pudo guardar el modelo en este navegador. Prueba fuera de la navegación privada o elige un modelo más ligero.":
+    "Could not save the model in this browser. Try outside private browsing or choose a lighter model.",
   "Mayor capacidad · Incluye alineador de letra":
     "Larger model · Includes lyric alignment",
   "Necesita WebGPU compatible. Puedes usar Whisper en este navegador.":

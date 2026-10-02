@@ -7,6 +7,7 @@ import { loadBrowserAligner } from "./aligner.js";
 import { recognizeBrowserChords } from "./chords.js";
 import { audioChunks } from "./chunks.js";
 import { normalizeWords } from "./timeline.js";
+import { whisperModels } from "./lyric-models.js";
 ort.env.wasm.numThreads = 1;
 ort.env.wasm.proxy = false;
 ort.env.wasm.wasmPaths = runtimeURLs;
@@ -35,9 +36,9 @@ self.onmessage = async ({ data }) => {
     };
     if (lyrics) {
       try {
-        if (lyricsEngine === "whisper") {
+        if (whisperModels[lyricsEngine]) {
           progress("Cargando Whisper…", 6);
-          const model = await loadBrowserWhisper();
+          const model = await loadBrowserWhisper(lyricsEngine);
           try {
             const chunks = audioChunks(audio);
             for (let i = 0; i < chunks.length; i++) {
@@ -85,11 +86,11 @@ self.onmessage = async ({ data }) => {
                 result.warnings.push("alignment-approximate");
               progress("Obteniendo letra…", 10 + (72 * end) / audio.length);
             }
-            result.engines.lyrics = "Whisper-Base/ONNX-q8";
+            result.engines.lyrics = whisperModels[lyricsEngine].engine;
           } finally {
             await model.dispose();
           }
-        } else {
+        } else if (lyricsEngine === "qwen") {
           const transcripts = [];
           let model;
           try {
@@ -143,7 +144,7 @@ self.onmessage = async ({ data }) => {
           } finally {
             await aligner?.dispose();
           }
-        }
+        } else throw new Error("Unknown lyric model");
       } catch (error) {
         // Keep the chord import usable, but retain a local diagnostic so a
         // failed voice engine can be investigated without transmitting audio.

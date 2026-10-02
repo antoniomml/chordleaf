@@ -87,8 +87,14 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-analyze").textContent = t(
       $("audio-lyrics").checked ? "Obtener letra y acordes" : "Obtener acordes",
     );
+    const names = {
+      qwen: "Qwen",
+      whisper: "Whisper",
+      "whisper-small": "Whisper Small",
+      "whisper-turbo": "Whisper Large v3 Turbo",
+    };
     $("audio-model-name").textContent = $("audio-lyrics").checked
-      ? `${lyricModel === "qwen" ? "Qwen" : "Whisper"} · LV-Chordia`
+      ? `${names[lyricModel]} · LV-Chordia`
       : "LV-Chordia";
   }
   $("audio-lyrics").onchange = updateAvailability;

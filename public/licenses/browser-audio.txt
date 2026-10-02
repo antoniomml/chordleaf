@@ -56,6 +56,11 @@ Aligner ONNX conversion: valoomba/Qwen3-ForcedAligner-0.6B-ONNX, Apache-2.0.
 These speech weights are not redistributed in this website: they are downloaded
 from their pinned Hugging Face revisions after explicit user action.
 
+Whisper Base, Small and Large v3 Turbo: MIT, OpenAI.
+https://github.com/openai/whisper
+Timestamped ONNX conversions: onnx-community on Hugging Face.
+Only the selected model's pinned weights are downloaded on explicit request.
+
 Transformers.js: Apache-2.0. ONNX Runtime: MIT. fft.js: MIT.
 No code from the AGPL Sokuji project is incorporated.
 

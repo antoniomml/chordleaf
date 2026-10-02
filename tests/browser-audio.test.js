@@ -193,11 +193,16 @@ test("distributed chord assets match their pinned integrity and keep extended vo
   assert.ok(manifest.dictionary.length > 300);
   assert.ok(manifest.dictionary.some((c) => c.label.includes("maj7")));
   assert.ok(manifest.dictionary.some((c) => c.label.includes("/")));
-  for (const file of [...catalog.qwen, ...catalog.aligner, ...catalog.whisper])
+  for (const file of Object.entries(catalog)
+    .filter(([key]) => key !== "chords")
+    .flatMap(([, files]) => files)) {
     assert.match(
       file.url,
       /^https:\/\/huggingface\.co\/[^/]+\/[^/]+\/resolve\/[0-9a-f]{40}\//,
     );
+    assert.match(file.sha256, /^[a-f0-9]{64}$/);
+    assert.ok(file.bytes > 0);
+  }
 });
 
 test("missing speech timestamps preserve valid anchors and mark repaired words approximate", () => {

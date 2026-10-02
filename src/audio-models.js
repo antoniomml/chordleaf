@@ -36,7 +36,19 @@ export function saveAudioSettings(settings) {
   }
 }
 export function installedLyricModel(readiness, preferred) {
+  if (
+    ["whisper-small", "whisper-turbo"].includes(preferred) &&
+    readiness?.[preferred]
+  )
+    return preferred;
   if (preferred === "qwen" && readiness?.qwen) return "qwen";
-  if (preferred === "whisper" && readiness?.lyrics) return "whisper";
-  return readiness?.qwen ? "qwen" : "whisper";
+  if (preferred === "whisper" && (readiness?.whisper ?? readiness?.lyrics))
+    return "whisper";
+  if (readiness?.qwen) return "qwen";
+  if (readiness?.whisper || (readiness?.lyrics && !readiness?.modelDownloads))
+    return "whisper";
+  return (
+    ["whisper-small", "whisper-turbo"].find((name) => readiness?.[name]) ||
+    "whisper"
+  );
 }
