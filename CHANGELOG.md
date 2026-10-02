@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Offer explicitly downloadable Whisper Small (252 MB) and Whisper Large v3 Turbo (1.09 GB) alongside Whisper Base and Qwen 0.6B in the browser. All Whisper choices run locally in CPU/WASM and return word timestamps. Preserve each choice and remove its weights independently while retaining chords and the shared runtime.
+- Start browser voice selection with lightweight Whisper Base instead of recommending Qwen solely from GPU availability. Identify the existing native Mac models as Whisper Small and Qwen 1.7B.
+
 ## 1.3.0 · October 2, 2026
 
 - Match the required LV-Chordia selector to the lyric models’ circular indicators in browser and desktop audio setup. Use consistent outline icons for preview and chord-editing actions; the floating controls show only the selected chord name.

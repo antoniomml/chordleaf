@@ -7,6 +7,12 @@ import {
   bundleBytes,
 } from "../browser-audio/models.js";
 
+import {
+  whisperModels,
+  browserLyricModels,
+} from "../browser-audio/lyric-models.js";
+
+const modelChoices = [...browserLyricModels, "chords"];
 const preferenceKey = "chordleaf-browser-audio-mode";
 export function browserAudioPreference() {
   try {
@@ -34,23 +40,30 @@ export function setupBrowserModels(refresh, busyChanged) {
         <div class="browser-model-storage"><span id="browser-chords-state"></span><button type="button" id="browser-chords-download" class="primary browser-model-download">Descargar</button><button type="button" id="browser-chords-remove" class="audio-text-button" hidden>Borrar</button></div>
       </div>
     </fieldset>
-    <fieldset class="browser-model-choices"><legend>Letra <span class="audio-section-badge">Opcional</span></legend>
+    <div class="browser-voice-scroll"><fieldset class="browser-model-choices"><legend>Letra <span class="audio-section-badge">Opcional</span></legend>
       <div class="browser-model-card" data-bundle="chords">
         <label for="browser-model-chords"><input type="radio" name="browser-audio-model" id="browser-model-chords" value="chords" />
           <span><strong>Ninguna</strong><small>Sólo acordes · Puedes añadir la letra después</small></span></label>
       </div>
-      <div class="browser-model-card" data-bundle="whisper">
-        <label for="browser-model-whisper"><input type="radio" name="browser-audio-model" id="browser-model-whisper" value="whisper" aria-describedby="browser-whisper-state" />
-          <span><strong>Whisper Base</strong><small>Ligero · Funciona sin WebGPU</small></span><span id="browser-whisper-recommended" class="choice-beta" hidden>Recomendado</span></label>
-        <div class="browser-model-storage"><span id="browser-whisper-state"></span><button type="button" id="browser-whisper-remove" class="audio-text-button" hidden>Borrar</button></div>
-      </div>
+      ${Object.entries(whisperModels)
+        .map(
+          ([
+            id,
+            model,
+          ]) => t`<div class="browser-model-card" data-bundle="${id}">
+        <label for="browser-model-${id}"><input type="radio" name="browser-audio-model" id="browser-model-${id}" value="${id}" aria-describedby="browser-${id}-state" />
+          <span><strong>${model.name}</strong><small>${t(model.description)}</small></span></label>
+        <div class="browser-model-storage"><span id="browser-${id}-state"></span><button type="button" id="browser-${id}-remove" class="audio-text-button" hidden>Borrar</button></div>
+      </div>`,
+        )
+        .join("")}
       <div class="browser-model-card" data-bundle="qwen">
         <label for="browser-model-qwen"><input type="radio" name="browser-audio-model" id="browser-model-qwen" value="qwen" aria-describedby="browser-qwen-state browser-model-device" />
-          <span><strong>Qwen 0,6B</strong><small>Mayor capacidad · Incluye alineador de letra</small></span><span id="browser-model-recommended" class="choice-beta" hidden>Recomendado</span></label>
+          <span><strong>Qwen 0,6B</strong><small>WebGPU · Incluye alineador de letra</small></span></label>
         <div class="browser-model-storage"><span id="browser-qwen-state"></span><button type="button" id="browser-qwen-remove" class="audio-text-button" hidden>Borrar</button></div>
         <small id="browser-model-device"></small>
       </div>
-    </fieldset>
+    </fieldset></div>
     <p id="browser-model-note" class="browser-model-note"></p>
     <progress id="browser-model-progress" max="1" hidden></progress><p id="browser-model-status" role="status" aria-live="polite" hidden></p>
     <div class="dialog-actions"><button type="button" id="browser-model-stop" hidden>Pausar descarga</button><button type="button" id="browser-model-next" class="primary">Siguiente</button></div>`;
@@ -70,14 +83,10 @@ export function setupBrowserModels(refresh, busyChanged) {
     return value;
   });
   const installed = (bundle) =>
-    bundle === "qwen"
-      ? ready.qwenDownloaded
-      : bundle === "whisper"
-        ? ready.whisperDownloaded
-        : ready.neural;
+    bundle === "chords" ? ready.neural : ready.modelDownloads?.[bundle];
   function render() {
     const busy = Boolean(controller) || analyzing || checking;
-    for (const bundle of ["qwen", "whisper", "chords"]) {
+    for (const bundle of modelChoices) {
       const radio = $("browser-model-" + bundle);
       radio.disabled = busy || (bundle === "qwen" && !hardware?.gpu);
       radio.checked = selected === bundle;
@@ -86,21 +95,15 @@ export function setupBrowserModels(refresh, busyChanged) {
       card.classList.toggle("is-disabled", bundle === "qwen" && !hardware?.gpu);
       const state = $("browser-" + bundle + "-state");
       const saved =
-        bundle === "qwen"
-          ? ready.qwenVoiceDownloaded
-          : bundle === "whisper"
-            ? ready.whisperVoiceDownloaded
-            : ready.neural;
+        bundle === "chords" ? ready.neural : ready.voiceDownloads?.[bundle];
       state.classList.toggle("is-installed", Boolean(saved));
       state.textContent = saved
         ? t("✓ Ya en tu dispositivo")
         : t`Descarga · ${sizeLabel(Math.max(0, (ready.missingBytes?.[bundle] ?? bundleBytes(bundle)) - (bundle === "chords" ? 0 : (ready.missingBytes?.chords ?? bundleBytes("chords")))))}`;
       const remove = $("browser-" + bundle + "-remove");
-      remove.hidden = !(bundle === "qwen"
-        ? ready.hasQwenFiles
-        : bundle === "whisper"
-          ? ready.hasWhisperFiles
-          : ready.hasChordFiles);
+      remove.hidden = !(bundle === "chords"
+        ? ready.hasChordFiles
+        : ready.modelFiles?.[bundle]);
       remove.disabled = busy;
     }
     $("browser-model-device").textContent = t(
@@ -108,9 +111,6 @@ export function setupBrowserModels(refresh, busyChanged) {
         ? "Necesita WebGPU · Recomendado con 8 GB de memoria o más"
         : "Necesita WebGPU compatible. Puedes usar Whisper en este navegador.",
     );
-    const recommendQwen = hardware?.gpu && hardware?.memory >= 8;
-    $("browser-model-recommended").hidden = !recommendQwen;
-    $("browser-whisper-recommended").hidden = Boolean(recommendQwen);
     $("browser-model-note").textContent = t(
       ready.runtimeDownloaded
         ? "Se guardan en este navegador y se reutilizan entre canciones."
@@ -132,9 +132,7 @@ export function setupBrowserModels(refresh, busyChanged) {
   function applySelection() {
     const checkbox = document.getElementById("audio-lyrics");
     checkbox.checked =
-      selected === "qwen"
-        ? Boolean(ready.qwen)
-        : selected === "whisper" && Boolean(ready.whisper);
+      browserLyricModels.includes(selected) && Boolean(ready[selected]);
     checkbox.dispatchEvent(new Event("change"));
     try {
       localStorage.setItem(preferenceKey, selected);
@@ -149,14 +147,9 @@ export function setupBrowserModels(refresh, busyChanged) {
     ready = data;
     const saved = browserAudioPreference();
     selected =
-      ["chords", "whisper", "qwen"].includes(saved) &&
-      (saved !== "qwen" || hardware?.gpu)
+      modelChoices.includes(saved) && (saved !== "qwen" || hardware?.gpu)
         ? saved
-        : ready.qwen
-          ? "qwen"
-          : hardware?.gpu && hardware?.memory >= 8
-            ? "qwen"
-            : "whisper";
+        : "whisper";
     render();
     return true;
   }
@@ -179,7 +172,7 @@ export function setupBrowserModels(refresh, busyChanged) {
       $("browser-model-" + selected).focus();
     }
   }
-  for (const bundle of ["qwen", "whisper", "chords"])
+  for (const bundle of modelChoices)
     $("browser-model-" + bundle).onchange = () => {
       selected = bundle;
       render();
@@ -255,7 +248,7 @@ export function setupBrowserModels(refresh, busyChanged) {
     if (analyzing) event.preventDefault();
     else close();
   });
-  for (const bundle of ["qwen", "whisper", "chords"])
+  for (const bundle of modelChoices)
     $("browser-" + bundle + "-remove").onclick = async () => {
       const current = generation;
       checking = true;

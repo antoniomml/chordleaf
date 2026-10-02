@@ -3727,6 +3727,19 @@ select:focus-visible {
   max-height: calc(100dvh - 32px);
   overflow-y: auto;
 }
+#audio-browser-model-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+#audio-browser-model-dialog > :not(.browser-voice-scroll) {
+  flex-shrink: 0;
+}
+#audio-browser-model-dialog .browser-voice-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 @media (prefers-reduced-motion: reduce) {
   #audio-analysis-progress::-webkit-progress-value {
     transition: none;

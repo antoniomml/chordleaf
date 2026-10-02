@@ -1,10 +1,13 @@
 import catalog from "./catalog.json" with { type: "json" };
 import { runtimeURLs } from "./runtime.js";
+import { whisperModels, browserLyricModels } from "./lyric-models.js";
 
 export const MODEL_CACHE = "chordleaf-audio-models-v1";
 export const bundles = {
   chords: ["chords"],
-  whisper: ["chords", "whisper"],
+  ...Object.fromEntries(
+    Object.keys(whisperModels).map((name) => [name, ["chords", name]]),
+  ),
   qwen: ["chords", "qwen", "aligner"],
 };
 export const bundleBytes = (bundle) =>
@@ -26,7 +29,12 @@ export async function browserReadiness() {
     return { available: false, neural: false, qwen: false };
   const cache = await caches.open(MODEL_CACHE);
   const cached = new Map();
-  for (const file of [...resources("qwen"), ...resources("whisper")])
+  const allFiles = new Map(
+    Object.keys(bundles)
+      .flatMap(resources)
+      .map((file) => [file.url, file]),
+  );
+  for (const file of allFiles.values())
     cached.set(file.url, Boolean(await cache.match(absolute(file.url))));
   const installed = (bundle) =>
     resources(bundle).every((file) => cached.get(file.url));
@@ -43,10 +51,27 @@ export async function browserReadiness() {
     names.every((name) => catalog[name].every((file) => cached.get(file.url)));
   const neural = installed("chords");
   const qwenDownloaded = installed("qwen");
+  const lyricModels = Object.fromEntries(
+    browserLyricModels.map((name) => [name, installed(name)]),
+  );
   return {
     available: neural,
     neural,
-    lyrics: installed("whisper"),
+    lyrics: Object.keys(whisperModels).some((name) => lyricModels[name]),
+    ...lyricModels,
+    modelDownloads: lyricModels,
+    voiceDownloads: Object.fromEntries(
+      browserLyricModels.map((name) => [
+        name,
+        voiceInstalled(name === "qwen" ? ["qwen", "aligner"] : [name]),
+      ]),
+    ),
+    modelFiles: Object.fromEntries(
+      browserLyricModels.map((name) => [
+        name,
+        hasFiles(name === "qwen" ? ["qwen", "aligner"] : [name]),
+      ]),
+    ),
     whisper: installed("whisper"),
     whisperDownloaded: installed("whisper"),
     hasWhisperFiles: hasFiles(["whisper"]),
@@ -59,11 +84,9 @@ export async function browserReadiness() {
     ),
     hasQwenFiles: hasFiles(["qwen", "aligner"]),
     hasChordFiles: hasFiles(["chords"]),
-    missingBytes: {
-      qwen: missingBytes("qwen"),
-      whisper: missingBytes("whisper"),
-      chords: missingBytes("chords"),
-    },
+    missingBytes: Object.fromEntries(
+      Object.keys(bundles).map((name) => [name, missingBytes(name)]),
+    ),
   };
 }
 export async function downloadBrowserModels(bundle, signal, progress) {
@@ -139,7 +162,10 @@ export async function downloadBrowserModels(bundle, signal, progress) {
         }),
       );
     } catch (error) {
-      if (error.name !== "QuotaExceededError") throw error;
+      if (error.name !== "QuotaExceededError")
+        throw new Error(
+          "No se pudo guardar el modelo en este navegador. Prueba fuera de la navegación privada o elige un modelo más ligero.",
+        );
       throw new Error(
         "Este navegador ha alcanzado su límite de almacenamiento para Chordleaf. Los modelos ya guardados se conservan. Puedes reintentar, liberar datos de sitios en sus ajustes o usar otro navegador.",
       );
@@ -165,8 +191,8 @@ export async function removeBrowserModels(bundle) {
   const names =
     bundle === "qwen"
       ? ["qwen", "aligner"]
-      : bundle === "whisper"
-        ? ["whisper"]
+      : whisperModels[bundle]
+        ? [bundle]
         : bundle === "chords"
           ? ["chords"]
           : null;

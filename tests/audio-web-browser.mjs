@@ -40,9 +40,12 @@ try {
     navigator.storage.estimate = async () => ({ quota: 1e6, usage: 0 });
     const put = Cache.prototype.put;
     window.failModelWrite = true;
+    window.failModelInternally = true;
     window.completedModelWrites = [];
     Cache.prototype.put = async function (request, response) {
       const url = String(request);
+      if (window.failModelInternally && url.includes("net-1.onnx"))
+        throw new DOMException("Unexpected internal error", "UnknownError");
       if (window.failModelWrite && url.includes("net-1.onnx"))
         throw new DOMException("Origin quota reached", "QuotaExceededError");
       const result = await put.call(this, request, response);
@@ -143,6 +146,22 @@ try {
   await page.screenshot({ path: "artifacts/audio-browser-models.png" });
   await page.locator("#browser-model-chords").click();
   assert.deepEqual(downloads, []);
+  await page.locator("#browser-model-next").click();
+  await page.waitForFunction(() =>
+    document
+      .querySelector("#browser-model-status")
+      .textContent.includes("navegación privada"),
+  );
+  await page.waitForFunction(
+    () => !document.querySelector("#browser-model-next").disabled,
+  );
+  assert.equal(
+    await page.locator("#audio-browser-model-dialog").isVisible(),
+    true,
+  );
+  await page.evaluate(() => {
+    window.failModelInternally = false;
+  });
   await page.locator("#browser-model-next").click();
   await page.waitForFunction(
     () =>

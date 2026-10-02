@@ -8,13 +8,16 @@ import { repetitionStart } from "./chunks.js";
 import catalog from "./catalog.json" with { type: "json" };
 import { MODEL_CACHE } from "./models.js";
 import { runtimeURLs } from "./runtime.js";
+import { whisperModels } from "./lyric-models.js";
 
-export async function loadBrowserWhisper() {
+export async function loadBrowserWhisper(model = "whisper") {
+  const definition = whisperModels[model];
+  if (!definition) throw new Error("Unknown Whisper model");
   const cache = await caches.open(MODEL_CACHE);
-  const root = catalog.whisper[0].url.split("/onnx/")[0];
+  const root = catalog[model][0].url.split("/onnx/")[0];
   const match = async (request) => {
     const path = typeof request === "string" ? request : request.url;
-    const file = catalog.whisper.find((file) => path.endsWith("/" + file.name));
+    const file = catalog[model].find((file) => path.endsWith("/" + file.name));
     return file ? cache.match(file.url) : undefined;
   };
   // Only the explicit model download screen can access the network. Missing
@@ -34,7 +37,7 @@ export async function loadBrowserWhisper() {
   const revision = root.split("/").at(-1);
   const transcriber = await pipeline(
     "automatic-speech-recognition",
-    "onnx-community/whisper-base_timestamped",
+    definition.repository,
     {
       revision,
       dtype: "q8",
