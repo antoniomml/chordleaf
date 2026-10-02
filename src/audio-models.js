@@ -1,12 +1,4 @@
 export const AUDIO_SETTINGS_KEY = "chordleaf-audio-settings-v1";
-export function recommendedLyricModel(system) {
-  return system?.platform === "darwin" &&
-    system?.arch === "arm64" &&
-    Number.isFinite(system?.memoryGB) &&
-    system.memoryGB >= 16
-    ? "qwen"
-    : "whisper";
-}
 export function readAudioSettings() {
   try {
     const settings = JSON.parse(localStorage.getItem(AUDIO_SETTINGS_KEY));

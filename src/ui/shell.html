@@ -765,13 +765,11 @@
           id="audio-language-field"
           class="audio-language-field"
           for="audio-language"
-          >Idioma<select id="audio-language">
-            <option value="auto">Detectar automáticamente</option>
+          ><span>Idioma</span
+          ><select id="audio-language">
+            <option value="auto">Automático</option>
           </select></label
         >
-      </div>
-      <div class="audio-model-line">
-        <span id="audio-model-name"></span>
       </div>
     </div>
     <audio id="audio-player" controls preload="metadata" hidden></audio>
@@ -779,10 +777,11 @@
       <button
         id="audio-model-settings"
         type="button"
-        class="audio-text-button"
+        class="audio-settings-button"
         hidden
       >
-        Modelos y ajustes
+        <span id="audio-model-settings-label">Modelos y ajustes</span>
+        <small id="audio-model-name"></small>
       </button>
       <button id="audio-analyze" class="primary" disabled>
         Obtener letra y acordes
@@ -875,7 +874,6 @@
       </span>
     </label>
   </fieldset>
-  <p id="audio-recommendation" class="web-help"></p>
   <fieldset id="audio-model-choices" class="audio-model-choices">
     <legend>Letra <span class="audio-section-badge">Opcional</span></legend>
     <label class="audio-model-card"
@@ -888,13 +886,8 @@
       ><input type="radio" name="audio-model" value="qwen" /><span
         ><span class="audio-card-title"
           ><strong>Qwen 1,7B</strong
-          ><span class="audio-model-tag" data-kind="balanced">Equilibrado</span
-          ><small
-            id="audio-qwen-recommended"
-            class="audio-recommended audio-model-tag"
-            data-kind="recommended"
-            hidden
-            >Recomendado</small
+          ><span class="audio-model-tag" data-kind="balanced"
+            >Equilibrado</span
           ></span
         ><span>Más precisión en nuestras pruebas.</span
         ><small>3,8 GB · Apple Silicon · 16 GB recomendados</small
@@ -907,14 +900,7 @@
       ><input type="radio" name="audio-model" value="whisper" /><span
         ><span class="audio-card-title"
           ><strong>Whisper Small</strong
-          ><span class="audio-model-tag" data-kind="light">Ligero</span
-          ><small
-            id="audio-whisper-recommended"
-            class="audio-recommended audio-model-tag"
-            data-kind="recommended"
-            hidden
-            >Recomendado</small
-          ></span
+          ><span class="audio-model-tag" data-kind="light">Ligero</span></span
         ><span>Menos memoria y una descarga más pequeña.</span
         ><small>0,5 GB · Funciona con CPU</small
         ><small id="audio-whisper-installed" class="audio-installed" hidden

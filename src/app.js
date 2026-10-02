@@ -709,7 +709,7 @@ function resizePages() {
   if (!width) return;
   const gutter = window.matchMedia("(max-width: 760px)").matches ? 24 : 64;
   const available = width - gutter,
-    scale = Math.max(0.2, Math.min(1.08, available / PAGE.width)) * zoom;
+    scale = Math.max(0.2, available / PAGE.width) * zoom;
   $("#zoom-out").disabled = zoom <= 0.5;
   $("#zoom-in").disabled = zoom >= 2.5;
   $("#pages").style.minWidth = PAGE.width * scale + gutter + "px";
@@ -720,6 +720,10 @@ function resizePages() {
   });
 }
 const previewScroll = $("#pages-scroll");
+// Follow the preview's actual width, including panel resizing and view changes.
+new ResizeObserver(() => requestAnimationFrame(resizePages)).observe(
+  previewScroll,
+);
 let pinch;
 function pinchDistance(touches) {
   return Math.hypot(

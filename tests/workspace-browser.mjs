@@ -70,6 +70,10 @@ try {
   await sticker.scrollIntoViewIfNeeded();
   await sticker.focus();
   const handle = await sticker.locator(".resize-corner").boundingBox();
+  const pageScale = await sticker.evaluate((el) => {
+    const page = el.closest(".page");
+    return page.getBoundingClientRect().width / page.offsetWidth;
+  });
   const origin = await sticker.evaluate((el) => [el.style.left, el.style.top]);
   await page.mouse.move(
     handle.x + handle.width / 2,
@@ -79,8 +83,8 @@ try {
   let previous = await frameSize();
   for (const delta of [25, 50, 80, 110, 150, 190, 240, 300]) {
     await page.mouse.move(
-      handle.x + handle.width / 2 - delta,
-      handle.y + handle.height / 2 - delta / 2,
+      handle.x + handle.width / 2 - delta * pageScale,
+      handle.y + handle.height / 2 - (delta * pageScale) / 2,
     );
     const next = await frameSize();
     assert.ok(next.width <= previous.width);

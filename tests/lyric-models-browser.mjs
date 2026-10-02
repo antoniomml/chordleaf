@@ -48,10 +48,9 @@ try {
   await page.locator("#audio").click();
   await expect(page.locator("#audio-model-settings")).toBeEnabled();
   await page.locator("#audio-model-settings").click();
-  await expect(page.locator("#browser-whisper-recommended")).toBeVisible();
   await expect(
-    page.locator("#browser-whisper-turbo-recommended"),
-  ).not.toBeVisible();
+    page.locator('#audio-browser-model-dialog [data-kind="recommended"]'),
+  ).toHaveCount(0);
   assert.deepEqual(
     await page
       .locator(".browser-voice-scroll .browser-model-card")
@@ -213,19 +212,12 @@ try {
     await desktop.goto(url + "/en/");
     await desktop.locator("#empty-new").click();
     await desktop.locator("#audio").click();
-    const model =
-      !memory || !cores ? "whisper" : gpu ? "qwen" : "whisper-small";
-    if (!memory || !cores)
-      await expect(
-        desktop.locator('[data-kind="recommended"]:visible'),
-      ).toHaveCount(0);
-    else
-      await expect(
-        desktop.locator("#browser-" + model + "-recommended"),
-      ).toBeVisible();
-    await expect(desktop.locator("#browser-model-" + model)).toBeChecked();
+    await expect(
+      desktop.locator('#audio-browser-model-dialog [data-kind="recommended"]'),
+    ).toHaveCount(0);
+    await expect(desktop.locator("#browser-model-whisper")).toBeChecked();
     await expect(desktop.locator("#browser-model-hardware")).toHaveCount(0);
-    // A saved user choice wins over the hardware recommendation on reopen.
+    // A saved user choice is retained on reopen.
     await desktop.evaluate(() =>
       localStorage.setItem("chordleaf-browser-audio-mode", "whisper"),
     );

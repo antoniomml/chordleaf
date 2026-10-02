@@ -102,6 +102,7 @@ export function setupAudioImport({ accept, reportError }) {
     $("audio-model-name").textContent = $("audio-lyrics").checked
       ? `${names[lyricModel]} · LV-Chordia`
       : "LV-Chordia";
+    $("audio-model-name").title = $("audio-model-name").textContent;
   }
   $("audio-lyrics").onchange = updateAvailability;
   const lyricsUnavailable = () =>

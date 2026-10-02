@@ -1,9 +1,5 @@
 import { t } from "../i18n.js";
-import {
-  recommendedLyricModel,
-  readAudioSettings,
-  saveAudioSettings,
-} from "../audio-models.js";
+import { readAudioSettings, saveAudioSettings } from "../audio-models.js";
 
 export function setupDesktopModels(refresh, busyChanged) {
   const bridge = window.chordleafDesktop;
@@ -33,7 +29,7 @@ export function setupDesktopModels(refresh, busyChanged) {
     lastState = state;
     const busy = Boolean(state.active || analyzing || checking);
     busyChanged(Boolean(state.active || checking));
-    $("audio-model-settings").textContent = t(
+    $("audio-model-settings-label").textContent = t(
       state.active ? "Descargando modelo…" : "Modelos y ajustes",
     );
     const messages = {
@@ -99,18 +95,8 @@ export function setupDesktopModels(refresh, busyChanged) {
       $("audio-import").hidden
     )
       return;
-    const recommended = recommendedLyricModel(system);
-    selected =
-      settings.model ||
-      (readiness.qwen ? "qwen" : readiness.lyrics ? "whisper" : recommended);
+    selected = settings.model || (readiness.qwen ? "qwen" : "whisper");
     for (const radio of radios) radio.checked = radio.value === selected;
-    $("audio-qwen-recommended").hidden = recommended !== "qwen";
-    $("audio-whisper-recommended").hidden = recommended !== "whisper";
-    $("audio-recommendation").textContent = system
-      ? `${system.memoryGB} GB RAM · ${t(recommended === "qwen" ? "Recomendamos Qwen para este equipo." : "Recomendamos Whisper para consumir menos memoria.")}`
-      : t(
-          "Whisper es la opción más ligera. Puedes elegir Qwen si tienes Apple Silicon.",
-        );
     settings.seen = true;
     saveAudioSettings(settings);
     render();
