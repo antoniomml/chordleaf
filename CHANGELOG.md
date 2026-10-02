@@ -2,11 +2,14 @@
 
 ## Unreleased
 
-- Match the required LV-Chordia selector to the lyric models’ circular indicators in browser and desktop audio setup. Use consistent outline icons for preview and chord-editing actions; the floating controls show only the selected chord name.
+## 1.3.0 · October 2, 2026
 
+- Match the required LV-Chordia selector to the lyric models’ circular indicators in browser and desktop audio setup. Use consistent outline icons for preview and chord-editing actions; the floating controls show only the selected chord name.
 - Align chords directly on the document with drag, tap-to-place, character step controls, keyboard navigation and undo. Compact floating controls appear on selection, with no instruction banner. Phones use readable sheet zoom and large touch targets; completed moves update the original bracket tokens.
 - Use discreet underlines and soft selection backgrounds while editing the sheet instead of large green frames. Title, artist and source editor fields also use a thinner, muted focus border. Keyboard focus remains visible on lyrics, headers and chords.
 - Place the middle character of odd-length chord labels and the left middle character of even-length labels over their lyric anchor: E, Em and Em7 use E, E and m respectively. Preview, PDF and Word preserve the same placement.
+- Upgrade ONNX to 1.22.0 in the experimental browser-model conversion requirements.
+- Fix both Ubuntu mirror URLs and mirror-file sources in browser CI dependency setup.
 
 ## 1.2.1 · October 1, 2026
 

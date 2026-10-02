@@ -35,7 +35,7 @@ pnpm test:desktop
 pnpm desktop:dist
 ```
 
-El resultado aparece en `release-desktop/Chordleaf-1.2.1-mac-arm64.dmg`. El build local sin credenciales es un **candidato sin firma de distribución**, no una publicación validada por Gatekeeper. No se deben dar instrucciones para desactivar las protecciones del sistema.
+El resultado aparece en `release-desktop/Chordleaf-1.3.0-mac-arm64.dmg`. El build local sin credenciales es un **candidato sin firma de distribución**, no una publicación validada por Gatekeeper. No se deben dar instrucciones para desactivar las protecciones del sistema.
 
 La prueba `test:desktop` usa un perfil independiente, comprueba el Python incluido, acordes neuronales, aislamiento del renderer y persistencia tras reiniciar. Para verificar modelos reales y audio propio:
 

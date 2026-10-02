@@ -1,4 +1,4 @@
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 import axe from "axe-core";
 import { mkdir, readFile } from "node:fs/promises";
@@ -189,23 +189,24 @@ try {
     if (mobile)
       await page.touchscreen.tap(t.x + t.width / 2, t.y + t.height / 2);
     else await page.mouse.click(t.x + t.width / 2, t.y + t.height / 2);
-    const afterTap = await source.inputValue();
-    if (!afterTap.startsWith("[E]antes [Em]antes an[Em7]tes")) {
+    // touchscreen.tap acknowledges touchEnd before Chromium dispatches the
+    // synthesized click on some platforms. Wait for the observable edit.
+    try {
+      await expect(source).toHaveValue(
+        original.replace("[Em7]antes", "an[Em7]tes"),
+      );
+    } catch (error) {
       await page.screenshot({
         path: `artifacts/alignment-tap-${mobile ? "mobile" : "desktop"}.png`,
       });
       console.log("Alignment tap diagnostic", {
         mobile,
         t,
-        afterTap,
+        afterTap: await source.inputValue(),
         event: await page.evaluate(() => window.alignmentTap),
       });
+      throw error;
     }
-    assert.equal(
-      afterTap.split("\n")[0],
-      "[E]antes [Em]antes an[Em7]tes",
-      `tap placement (${mobile ? "mobile" : "desktop"})`,
-    );
     await page.locator("#sheet-alignment-undo").click();
     await label.press("ArrowRight");
     assert.ok(
