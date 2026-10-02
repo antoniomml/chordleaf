@@ -47,7 +47,30 @@ try {
   await page.locator("#empty-new").click();
   await page.locator("#audio").click();
   await expect(page.locator("#audio-model-settings")).toBeEnabled();
+  // Hold the async cache lookup to reproduce the CI case where the dialog's
+  // markup exists but opening it has not finished yet.
+  await page.evaluate(() => {
+    const open = caches.open.bind(caches);
+    let release;
+    const gate = new Promise((resolve) => {
+      release = resolve;
+    });
+    window.resumeModelCache = () => {
+      caches.open = open;
+      release();
+    };
+    caches.open = async (name) => {
+      if (name === "chordleaf-audio-models-v1") await gate;
+      return open(name);
+    };
+  });
   await page.locator("#audio-model-settings").click();
+  await expect(page.locator("#audio-browser-model-dialog")).not.toBeVisible();
+  await page.evaluate(() => window.resumeModelCache());
+  // Model preparation opens this dialog asynchronously. Its hidden DOM exists
+  // earlier, so wait for visibility before taking the fixed-heading baseline.
+  await expect(page.locator("#audio-browser-model-dialog")).toBeVisible();
+  await expect(page.locator("#browser-voice-heading")).toBeVisible();
   await expect(
     page.locator('#audio-browser-model-dialog [data-kind="recommended"]'),
   ).toHaveCount(0);
@@ -58,9 +81,11 @@ try {
     ["whisper", "whisper-small", "qwen", "whisper-turbo", "chords"],
   );
   await expect(page.locator("#browser-model-hardware")).toHaveCount(0);
+  await page.evaluate(() => document.fonts.ready);
   const fixedBefore = await page
     .locator("#browser-voice-heading")
     .boundingBox();
+  assert.ok(fixedBefore, "the visible heading has a layout box");
   await page.locator(".browser-voice-scroll").evaluate((el) => {
     el.scrollTop = el.scrollHeight;
   });

@@ -91,12 +91,12 @@ try {
       items[i].transform[4] > items[i - 1].transform[4] + items[i - 1].width,
     );
   await loading.destroy();
-  // Direct editing still opens the original source, without layout padding.
+  // Direct editing opens lyrics without chord tokens or layout padding.
   await page.locator("#pencil").click();
   await page.locator(".song-line").first().click();
   assert.equal(
     await page.locator(".inline-editor").inputValue(),
-    source.split("\n")[0],
+    source.split("\n")[0].replace(/\[[^\]]+\]/g, ""),
   );
   console.log(
     "Crowded chords: single row, no visual overlaps, PDF geometry matches, source and direct editing unchanged.",

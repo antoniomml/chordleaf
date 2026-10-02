@@ -38,9 +38,13 @@ await page.locator("#capo-down").click();
 await page.locator('.rail [data-desktop-view="edit"]').click();
 await page.locator("#pencil").click();
 await page.locator(".song-line").first().click();
-await page.locator(".inline-editor").fill("[G]Un verso editado [D]en la hoja");
+await page.locator(".inline-editor").fill("Un verso editado en la hoja");
 await page.locator(".inline-editor").press("Enter");
-assert.ok((await source.inputValue()).startsWith("[G]Un verso editado"));
+assert.ok((await source.inputValue()).startsWith("[G]Un verso"));
+assert.deepEqual(
+  (await source.inputValue()).match(/\[[^\]]+\]/g),
+  original.match(/\[[^\]]+\]/g),
+);
 await source.fill(original);
 for (const type of ["pdf", "docx", "txt"]) {
   await page.locator("#export").click();

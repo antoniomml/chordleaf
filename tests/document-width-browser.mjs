@@ -29,6 +29,14 @@ try {
       )
       .toBeLessThan(2);
   }
+  await expect
+    .poll(
+      async () =>
+        (await page.locator(".page-shell").first().boundingBox()).width,
+    )
+    .toBeCloseTo((595.28 * 4) / 3, 0);
+  await page.screenshot({ path: "artifacts/document-default-width.png" });
+  await page.locator("#zoom-reset").click();
   await expectWidth();
   const original = await page.locator(".page-shell").first().boundingBox();
   await page.locator("#panel-splitter").focus();
@@ -53,6 +61,22 @@ try {
     .evaluate((el) => el.style.setProperty("--editor-width", "700px"));
   await expectWidth();
   await page.screenshot({ path: "artifacts/document-fill-width.png" });
+  // A fresh import resets explicit fill-width zoom to the readable A4 default.
+  await page.locator("#new").click();
+  await page.locator("#import").click();
+  await page.locator("#file").setInputFiles({
+    name: "Ancho.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("{title: Ancho}\n[C]Una canción"),
+  });
+  await expect(page.locator("#new-dialog")).not.toBeVisible();
+  await expect
+    .poll(
+      async () =>
+        (await page.locator(".page-shell").first().boundingBox()).width,
+    )
+    .toBeCloseTo((595.28 * 4) / 3, 0);
+
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('.rail [data-mobile-view="preview"]').click();
   await page.locator("#zoom-reset").click();

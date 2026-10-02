@@ -1,5 +1,8 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Editar acorde": "Edit chord",
+  "Introduce un acorde válido, por ejemplo C o Em7.":
+    "Enter a valid chord, for example C or Em7.",
   Automático: "Automatic",
   "Qwen 0,6B": "Qwen 0.6B",
   "No extraer letra": "Do not transcribe lyrics",

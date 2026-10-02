@@ -1,3 +1,4 @@
+import { alignmentLine, replaceAlignedLyrics } from "./chord-alignment.js";
 import { setupSongExport } from "./ui/song-export.js";
 import { setupSongImport } from "./ui/song-import.js";
 import { escapeHtml as esc } from "./ui/html.js";
@@ -86,7 +87,8 @@ try {
 }
 if (!songs) songs = [];
 if (!songs.some((s) => s.id === active)) active = songs[0]?.id ?? null;
-let zoom = 1;
+let zoom = 1,
+  fitWidth = false;
 let section = "document",
   mobileView = "document",
   desktopView = "document",
@@ -675,17 +677,21 @@ function schedulePreview() {
 function editLine(el) {
   if (el.querySelector("textarea")) return;
   alignment.clear();
-  const index = Number(el.dataset.line),
-    endIndex = Number(el.dataset.end),
+  const endIndex = Number(el.dataset.end),
     lines = song().text.split("\n");
-  el.innerHTML = t`<textarea class="inline-editor" aria-label="Editar verso con acordes">${esc(lines.slice(index, endIndex + 1).join("\n"))}</textarea>`;
+  // A separate chord-only source row stays untouched above its lyric row.
+  let edited = lines[endIndex];
+  el.innerHTML = t`<textarea class="inline-editor" aria-label="Editar letra del verso">${esc(alignmentLine(edited).lyric)}</textarea>`;
   const input = el.firstChild;
   input.focus();
+  input.oninput = () => {
+    edited = replaceAlignedLyrics(edited, input.value);
+  };
   let done = false;
   function commit() {
     if (done) return;
     done = true;
-    lines.splice(index, endIndex - index + 1, ...input.value.split("\n"));
+    lines.splice(endIndex, 1, ...edited.split("\n"));
     song().text = lines.join("\n");
     changed();
     renderSource();
@@ -704,12 +710,75 @@ function editLine(el) {
     }
   };
 }
+function editChord(el) {
+  if (el.querySelector("input")) return;
+  alignment.clear();
+  const index = Number(el.closest(".song-line").dataset.line),
+    lines = song().text.split("\n"),
+    mark = alignmentLine(lines[index]).marks.find(
+      (mark) => mark.start === Number(el.dataset.alignStart),
+    );
+  if (!mark) return;
+  el.removeAttribute("role");
+  el.innerHTML = t`<input class="inline-chord-editor" aria-label="Editar acorde" autocomplete="off" spellcheck="false" value="${esc(mark.chord)}" />`;
+  const input = el.firstChild;
+  input.size = Math.max(3, mark.chord.length + 1);
+  input.focus();
+  input.select();
+  let done = false;
+  function commit() {
+    if (done) return;
+    const value = input.value.trim();
+    if (!chordRE.test(value)) {
+      input.setCustomValidity(
+        t("Introduce un acorde válido, por ejemplo C o Em7."),
+      );
+      input.reportValidity();
+      return;
+    }
+    done = true;
+    lines[index] =
+      lines[index].slice(0, mark.start) +
+      `[${value}]` +
+      lines[index].slice(mark.end);
+    song().text = lines.join("\n");
+    changed();
+    renderSource();
+    renderPages();
+  }
+  input.oninput = () => input.setCustomValidity("");
+  input.onblur = () => {
+    if (done) return;
+    if (chordRE.test(input.value.trim())) commit();
+    else {
+      done = true;
+      renderPages();
+    }
+  };
+  input.onclick = (event) => event.stopPropagation();
+  input.onkeydown = (event) => {
+    if (event.key === "Escape") {
+      done = true;
+      renderPages();
+    }
+    if (event.key === "Enter") {
+      event.preventDefault();
+      commit();
+    }
+  };
+}
 function resizePages() {
   const width = $("#pages-scroll").clientWidth;
   if (!width) return;
   const gutter = window.matchMedia("(max-width: 760px)").matches ? 24 : 64;
   const available = width - gutter,
-    scale = Math.max(0.2, available / PAGE.width) * zoom;
+    scale =
+      Math.max(
+        0.2,
+        fitWidth
+          ? available / PAGE.width
+          : Math.min(4 / 3, available / PAGE.width),
+      ) * zoom;
   $("#zoom-out").disabled = zoom <= 0.5;
   $("#zoom-in").disabled = zoom >= 2.5;
   $("#pages").style.minWidth = PAGE.width * scale + gutter + "px";
@@ -789,7 +858,8 @@ previewScroll.addEventListener("touchcancel", () => {
   pinch = null;
 });
 function resetView() {
-  if (alignmentZoom !== undefined) zoom = alignmentZoom;
+  zoom = 1;
+  fitWidth = false;
   alignmentZoom = undefined;
   editing = false;
   currentPage = 1;
@@ -1182,6 +1252,7 @@ document.addEventListener("keydown", (event) => {
 });
 // Sheet chords form one Tab stop; arrows, Home and End move between them.
 $("#pages").addEventListener("keydown", (event) => {
+  if (event.target.closest(".inline-chord-editor")) return;
   const current = event.target.closest(".sheet-chord[data-chord]");
   const step = {
     ArrowRight: 1,
@@ -1248,6 +1319,7 @@ setupEditorTools({ resizePages });
 const alignment = setupChordAlignment({
   song,
   enabled: () => editing,
+  editChord,
   editVerse(el) {
     editLine(el);
   },
@@ -1292,6 +1364,7 @@ for (const [id, delta] of [
   ["zoom-reset", 0],
 ])
   $("#" + id).onclick = () => {
+    if (!delta) fitWidth = true;
     zoom = delta
       ? Math.max(0.5, Math.min(2.5, Math.round((zoom + delta) * 10) / 10))
       : 1;
