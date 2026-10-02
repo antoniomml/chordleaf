@@ -15,6 +15,7 @@ import { setupChordsPanel } from "./chords-panel.js";
 import { setupDictionary } from "./dictionary-ui.js";
 import { setupEditorTools } from "./editor-tools.js";
 import { setupChordAlignment } from "./ui/chord-alignment.js";
+import { icon } from "./ui/icons.js";
 import "./style.css";
 import {
   keyInfo,
@@ -91,6 +92,7 @@ let section = "document",
   desktopView = "document",
   musicSection = "key",
   editing = false,
+  alignmentZoom,
   currentPage = 1,
   observer,
   saveTimer,
@@ -505,13 +507,10 @@ function updateNavigation() {
     button.tabIndex = selected ? 0 : -1;
   });
   const pencil = $("#pencil");
-  const pencilLabel = t(
-    mobile ? "Editar letra y acordes" : "Editar directamente la hoja",
-  );
+  const pencilLabel = t("Editar directamente la hoja");
   pencil.title = pencilLabel;
   pencil.setAttribute("aria-label", pencilLabel);
-  if (mobile) pencil.removeAttribute("aria-pressed");
-  else pencil.setAttribute("aria-pressed", String(editing));
+  pencil.setAttribute("aria-pressed", String(editing));
 }
 function transposeSong(n) {
   const s = song();
@@ -608,12 +607,8 @@ function renderPages() {
     ? t("Sin acordes detectados")
     : `${t("Acordes por revisar")}: ${issues}`;
   $("#pencil").classList.toggle("selected", editing);
-  if (window.matchMedia("(max-width: 760px)").matches)
-    $("#pencil").removeAttribute("aria-pressed");
-  else $("#pencil").setAttribute("aria-pressed", editing);
-  $("#editing-hint").textContent = editing
-    ? t("Pulsa un verso para editar letra y acordes.")
-    : "";
+  $("#pencil").setAttribute("aria-pressed", String(editing));
+  $("#editing-hint").textContent = editing ? t("Edición del documento") : "";
   observer?.disconnect();
   observer = new IntersectionObserver(
     (entries) => {
@@ -653,27 +648,15 @@ function renderPages() {
     );
     document.querySelectorAll(".song-line").forEach((el) => {
       el.onclick = (event) => {
-        const chord = event.target.closest(".sheet-chord[data-chord]");
-        if (chord) {
-          alignment.open(
-            Number(el.dataset.line),
-            Number(chord.dataset.alignStart),
-          );
-          return;
-        }
+        if (alignment.handles(event)) return;
         if (!event.target.closest(".unresolved-chord")) editLine(el);
       };
       el.onkeydown = (e) => {
-        const chord = e.target.closest(".sheet-chord[data-chord]");
-        if (chord && ["Enter", " "].includes(e.key)) {
-          e.preventDefault();
-          alignment.open(
-            Number(el.dataset.line),
-            Number(chord.dataset.alignStart),
-          );
-          return;
-        }
-        if (e.key === "Enter" && !e.target.closest(".unresolved-chord")) {
+        if (e.target.closest(".sheet-chord, .inline-editor")) return;
+        if (
+          ["Enter", " "].includes(e.key) &&
+          !e.target.closest(".unresolved-chord")
+        ) {
           e.preventDefault();
           editLine(el);
         }
@@ -682,6 +665,7 @@ function renderPages() {
   }
   dictionary.render();
   resizePages();
+  alignment.refresh(l);
 }
 function schedulePreview() {
   if (song().text.length <= 10000) return renderPages();
@@ -690,6 +674,7 @@ function schedulePreview() {
 }
 function editLine(el) {
   if (el.querySelector("textarea")) return;
+  alignment.clear();
   const index = Number(el.dataset.line),
     endIndex = Number(el.dataset.end),
     lines = song().text.split("\n");
@@ -800,6 +785,8 @@ previewScroll.addEventListener("touchcancel", () => {
   pinch = null;
 });
 function resetView() {
+  if (alignmentZoom !== undefined) zoom = alignmentZoom;
+  alignmentZoom = undefined;
   editing = false;
   currentPage = 1;
   $("#pages-scroll").scrollTop = 0;
@@ -1091,17 +1078,39 @@ document.addEventListener("click", (e) => {
     input.setSelectionRange(start + value.length, start + value.length);
   }
 });
-$("#pencil").onclick = () => {
-  if (window.matchMedia("(max-width: 760px)").matches) {
-    if (editing) {
-      editing = false;
-      renderPages();
-    }
-    $("#expand-editor").click();
-    return;
+function setSheetEditing(next) {
+  const mobile = window.matchMedia("(max-width: 760px)").matches;
+  if (next && !editing && mobile) {
+    const scale = Math.max(
+      0.2,
+      Math.min(1.08, (previewScroll.clientWidth - 24) / PAGE.width),
+    );
+    alignmentZoom = zoom;
+    zoom = Math.min(2.5, Math.max(zoom, 16 / (song().fontSize * scale)));
+  } else if (!next && alignmentZoom !== undefined) {
+    zoom = alignmentZoom;
+    alignmentZoom = undefined;
   }
-  editing = !editing;
+  editing = next;
   renderPages();
+  if (next && mobile) {
+    const first = $("#pages .song-line");
+    if (first) {
+      const rect = first.getBoundingClientRect(),
+        viewport = previewScroll.getBoundingClientRect();
+      previewScroll.scrollTop += rect.top - viewport.top - 24;
+      previewScroll.scrollLeft += rect.left - viewport.left - 20;
+    }
+  }
+}
+$("#pencil").onclick = () => setSheetEditing(!editing);
+$("#align-chords").onclick = () => {
+  if ($("#editor-dialog").open) $("#editor-dialog").close();
+  mobileView = "preview";
+  songViews.set(active, mobileView);
+  renderSettings();
+  setSheetEditing(true);
+  $("#pages-scroll").focus();
 };
 $("#fit").onclick = async () => {
   const s = song(),
@@ -1150,14 +1159,16 @@ function hideChordTooltip() {
 // chord positions are reachable without a mouse.
 document.addEventListener("pointerover", (event) => {
   const target = event.target.closest("[data-chord]");
-  if (target) showChordTooltip(target);
+  if (target && !(editing && target.closest("#pages")))
+    showChordTooltip(target);
 });
 document.addEventListener("pointerout", (event) => {
   if (event.target.closest("[data-chord]")) hideChordTooltip();
 });
 document.addEventListener("focusin", (event) => {
   const target = event.target.closest("[data-chord]");
-  if (target) showChordTooltip(target);
+  if (target && !(editing && target.closest("#pages")))
+    showChordTooltip(target);
 });
 document.addEventListener("focusout", (event) => {
   if (event.target.closest("[data-chord]")) hideChordTooltip();
@@ -1206,10 +1217,6 @@ window.visualViewport?.addEventListener("resize", syncVisualViewport);
 window.visualViewport?.addEventListener("scroll", syncVisualViewport);
 syncVisualViewport();
 window.addEventListener("resize", () => {
-  if (editing && window.matchMedia("(max-width: 760px)").matches) {
-    editing = false;
-    renderPages();
-  }
   renderSettings();
   resizePages();
 });
@@ -1236,6 +1243,13 @@ document.addEventListener("keydown", (e) => {
 setupEditorTools({ resizePages });
 const alignment = setupChordAlignment({
   song,
+  enabled: () => editing,
+  editVerse(el) {
+    editLine(el);
+  },
+  finish() {
+    setSheetEditing(false);
+  },
   update(text) {
     song().text = text;
     changed();
@@ -1243,6 +1257,13 @@ const alignment = setupChordAlignment({
     renderPages();
   },
 });
+for (const [id, name] of [
+  ["pencil", "edit"],
+  ["zoom-out", "minus"],
+  ["zoom-in", "plus"],
+  ["zoom-reset", "fit"],
+])
+  $("#" + id).innerHTML = icon(name);
 const chordPanel = setupChordsPanel({
   song,
   changed,

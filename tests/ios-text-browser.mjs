@@ -63,11 +63,13 @@ try {
 
   await page.locator('.rail [data-mobile-view="preview"]').click();
   await page.locator("#pencil").click();
-  assert.equal(await page.locator("#editor-dialog").isVisible(), true);
-  assert.equal(await page.locator(".inline-editor").count(), 0);
+  assert.equal(await page.locator("#editor-dialog").isVisible(), false);
+  assert.equal(await page.locator("#sheet-alignment-tools").isVisible(), false);
+  await page.locator(".song-line .lyric").first().click();
+  assert.equal(await page.locator(".inline-editor").count(), 1);
   await checkTextControls();
   assert.equal(await page.evaluate(() => visualViewport.scale), scale);
-  await page.locator("#collapse-editor").click();
+  await page.locator(".inline-editor").press("Escape");
   assert.equal(await page.locator(".preview-panel").isVisible(), true);
 
   assert.deepEqual(errors, []);

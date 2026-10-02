@@ -166,7 +166,7 @@ assert.equal(
     .locator(".sheet-chord")
     .first()
     .evaluate((el) => parseFloat(el.style.left)),
-  36,
+  24,
 );
 for (const type of ["pdf", "docx", "txt"]) {
   await page.locator("#export").click();

@@ -70,7 +70,10 @@ try {
     (await page.locator(".page-shell").first().boundingBox()).width > 250,
   );
   assert.equal(await page.locator(".preview-footer").isVisible(), false);
-  assert.equal(await page.locator("#zoom-reset").innerText(), "↔");
+  assert.equal(
+    await page.locator("#zoom-reset").getAttribute("aria-label"),
+    "Ajustar al ancho",
+  );
   const initialWidth = (await page.locator(".page-shell").first().boundingBox())
     .width;
   await page.locator("#pages-scroll").evaluate((scroll) => {

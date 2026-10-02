@@ -1,6 +1,11 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
   "Alinear acordes": "Align chords",
+  "Controles del acorde": "Chord controls",
+  "Editar letra del verso": "Edit verse lyrics",
+  Espacio: "Space",
+  "Acorde movido. Cambios guardados en la canción.":
+    "Chord moved. Changes saved in the song.",
   Alinear: "Align",
   Listo: "Done",
   Deshacer: "Undo",

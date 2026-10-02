@@ -38,7 +38,7 @@ Write its symbol in brackets immediately before the letter where it should sound
 A mor[Emaj7]ning beside the [Abm7b5]sea.
 ```
 
-In `mor[Emaj7]ning`, the chord starts at **n**. Brackets take no space on the sheet. If long symbols collide, the printed layout adds horizontal spacing to keep them on one row. Source lyrics and saved chord anchors remain unchanged. Transposition, font size and columns preserve those anchors. A manual line break gives more control over long verses. Emoji and combining characters may not align like ordinary monospaced text.
+In `mor[Emaj7]ning`, **n** is the chord’s reference character. Labels use their middle character for odd lengths and the left middle character for even lengths: `E` places E over the letter, `Em` starts over that letter and spans the next one, and `Em7` places m over it. Preview, PDF and Word share this alignment. Brackets take no space on the sheet. If long symbols collide, the printed layout adds horizontal spacing to keep them on one row. Source lyrics and saved chord anchors remain unchanged. Transposition, font size and columns preserve those anchors. A manual line break gives more control over long verses. Emoji and combining characters may not align like ordinary monospaced text.
 
 ## Write comfortably
 
@@ -48,11 +48,11 @@ The expand icon beside **Lyrics and chords** opens a larger editor with the same
 
 The preview's pencil enables editing directly on the sheet. Select a verse; Enter commits, Escape cancels and Shift+Enter adds a line break.
 
-Use **Align chords** above the text editor to move chords without cutting and pasting brackets. Choose a verse and a chord, then drag its green handle over the lyric or tap the destination character. The left/right buttons move it one character at a time; the focused handle also accepts Left/Right, Home and End. Long verses scroll horizontally, including while dragging near an edge. On desktop, selecting a chord with the preview pencil enabled opens the same alignment view; select the lyric to edit the verse text.
+Use **Align** beside the text editor's expand control, or enable the preview pencil, to move chords directly on the sheet. Drag a chord over the lyric; the highlighted cell shows its target letter. Alternatively, select a chord and tap its destination. A compact floating set of controls appears when you select a chord, showing only its name. The left/right buttons move it one character at a time; a focused chord also accepts Left/Right, Home and End. On phones, alignment opens the sheet and increases the view zoom when needed so lyrics remain readable. Page edges scroll while you drag. The **Done** action or the preview pencil ends editing and restores the previous view zoom.
 
-Each completed move updates the song's bracket token immediately. **Undo** restores alignment changes from this open session, including moves in another verse. **Done** or Escape closes the view and keeps completed moves. Touch cancellation discards the current drag. Literal bracketed headings, other chord occurrences, accents and lyric line breaks are preserved.
+Each completed move updates the original bracket token immediately. **Undo** restores alignment changes until another source edit invalidates that history; it remains available after deselecting a chord. Use the pencil action (**Edit verse lyrics**) for the selected verse to edit its text, or deselect the chord with Escape and select the lyric. Touch cancellation discards the current drag. Literal bracketed headings, other chord occurrences and lyric line breaks are preserved. Instrumental chord sequences keep their normal flow. Editing the title or artist uses a discreet underline; keyboard navigation still highlights the focused text.
 
-![Moving a chord over readable lyrics on a phone](https://raw.githubusercontent.com/antoniomml/chordleaf/main/docs/images/chord-alignment-mobile.png)
+![Moving a chord directly on the sheet on a phone](https://raw.githubusercontent.com/antoniomml/chordleaf/main/docs/images/chord-alignment-mobile.png)
 
 ## Browse, edit and print chord diagrams
 
