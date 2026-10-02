@@ -29,6 +29,7 @@ export function setupChordAlignment({
     selected,
     history = [],
     drag,
+    lyricTap,
     suppressClick = false;
   const target = document.createElement("span");
   target.className = "sheet-alignment-target";
@@ -271,12 +272,25 @@ export function setupChordAlignment({
     paintSelection();
   }
   pages.addEventListener("pointerdown", (event) => {
+    lyricTap = undefined;
     if (!event.isPrimary) {
       stopDrag(false);
       return;
     }
     suppressClick = false;
     const el = event.target.closest(".sheet-chord[data-chord]");
+    if (
+      event.pointerType === "touch" &&
+      current() &&
+      selected &&
+      event.target.closest(".lyric")
+    )
+      lyricTap = {
+        id: event.pointerId,
+        selected,
+        x: event.clientX,
+        y: event.clientY,
+      };
     if (!el || event.button !== 0 || !select(el)) return;
     event.preventDefault();
     el.focus({ preventScroll: true });
@@ -308,6 +322,11 @@ export function setupChordAlignment({
     el.setPointerCapture(event.pointerId);
   });
   pages.addEventListener("pointermove", (event) => {
+    if (
+      lyricTap?.id === event.pointerId &&
+      Math.hypot(event.clientX - lyricTap.x, event.clientY - lyricTap.y) > 8
+    )
+      lyricTap = undefined;
     if (!drag || event.pointerId !== drag.id) return;
     drag.x = event.clientX;
     drag.y = event.clientY;
@@ -322,8 +341,30 @@ export function setupChordAlignment({
     previewDrag();
     if (!drag.frame) drag.frame = requestAnimationFrame(animateDrag);
   });
-  pages.addEventListener("pointerup", () => stopDrag(true));
-  pages.addEventListener("pointercancel", () => stopDrag(false));
+  pages.addEventListener("pointerup", (event) => {
+    const tap = lyricTap;
+    lyricTap = undefined;
+    stopDrag(true);
+    // Touch browsers can omit the compatibility click after a chord drag.
+    // Commit a stationary lyric tap on release, while leaving pans and pinches
+    // to the scroll container. Ignore a later synthesized click if it arrives.
+    if (
+      tap?.id === event.pointerId &&
+      tap.selected === selected &&
+      current() &&
+      Math.hypot(event.clientX - tap.x, event.clientY - tap.y) <= 8
+    ) {
+      const destination = atPoint(event.clientX, event.clientY, true);
+      if (destination) {
+        suppressClick = true;
+        move(destination.at);
+      }
+    }
+  });
+  pages.addEventListener("pointercancel", () => {
+    lyricTap = undefined;
+    stopDrag(false);
+  });
   pages.addEventListener("lostpointercapture", () => stopDrag(false));
   pages.addEventListener("click", (event) => {
     if (!current()) return;

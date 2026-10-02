@@ -189,8 +189,8 @@ try {
     if (mobile)
       await page.touchscreen.tap(t.x + t.width / 2, t.y + t.height / 2);
     else await page.mouse.click(t.x + t.width / 2, t.y + t.height / 2);
-    // touchscreen.tap acknowledges touchEnd before Chromium dispatches the
-    // synthesized click on some platforms. Wait for the observable edit.
+    // Check the actual source edit, including touch browsers that omit click
+    // after a drag. The gesture itself is sent through the browser's input API.
     try {
       await expect(source).toHaveValue(
         original.replace("[Em7]antes", "an[Em7]tes"),
@@ -223,6 +223,37 @@ try {
 
     // A cancelled touch drag preserves source; a second occurrence stays distinct.
     if (mobile) {
+      const point = await letterBox(row, nIndex + 1);
+      const touch = {
+        x: point.x + point.width / 2,
+        y: point.y + point.height / 2,
+      };
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [touch],
+      });
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchCancel",
+        touchPoints: [],
+      });
+      assert.equal(await source.inputValue(), original);
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [touch],
+      });
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ ...touch, x: touch.x + 25 }],
+      });
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
+        touchPoints: [],
+      });
+      assert.equal(
+        await source.inputValue(),
+        original,
+        "a pan does not place a chord",
+      );
       const b = await label.boundingBox();
       await cdp.send("Input.dispatchTouchEvent", {
         type: "touchStart",
