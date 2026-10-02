@@ -3175,14 +3175,28 @@ select:focus-visible {
 #new-dialog[data-screen="audio"] {
   max-width: 570px;
 }
-.audio-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+#audio-experimental {
+  display: none;
 }
-.audio-toolbar {
-  margin: 0 0 10px;
+#new-dialog[data-screen="audio"] .import-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+#new-dialog[data-screen="audio"] .import-heading h1 {
+  margin: 0;
+}
+#new-dialog[data-screen="audio"] #audio-experimental {
+  display: inline-block;
+}
+#audio-analysis-actions {
+  justify-content: space-between;
+  align-items: center;
+}
+#audio-analysis-actions #audio-analyze {
+  margin-left: auto;
 }
 .audio-local-badge {
   color: var(--green);
@@ -3486,9 +3500,6 @@ select:focus-visible {
     flex-direction: column;
     gap: 4px;
   }
-  .audio-toolbar {
-    align-items: baseline;
-  }
 }
 
 .audio-browser-model-dialog {
@@ -3617,11 +3628,6 @@ select:focus-visible {
   background: #493b26;
   color: #f1d4a2;
 }
-.audio-browser-model-dialog .browser-model-hardware {
-  margin: 0 0 2px;
-  font-size: 11px;
-  color: #aeb5b0;
-}
 .browser-model-storage {
   display: flex;
   align-items: center;
@@ -3634,7 +3640,9 @@ select:focus-visible {
   color: var(--green);
 }
 .audio-browser-model-dialog .browser-model-note {
-  font-size: 12px;
+  margin: 0;
+  flex: 1;
+  font-size: 11px;
   color: #aeb5b0;
 }
 .audio-browser-model-dialog progress {
@@ -3762,7 +3770,7 @@ select:focus-visible {
 }
 #audio-browser-model-dialog {
   max-height: calc(100dvh - 32px);
-  overflow-y: auto;
+  overflow: hidden;
 }
 #audio-browser-model-dialog[open] {
   display: flex;
@@ -3776,6 +3784,9 @@ select:focus-visible {
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  display: grid;
+  gap: 8px;
+  padding: 2px 2px 4px;
 }
 @media (prefers-reduced-motion: reduce) {
   #audio-analysis-progress::-webkit-progress-value {
@@ -3924,5 +3935,86 @@ select:focus-visible {
   .editable .lyric {
     box-shadow: none !important;
     background: none !important;
+  }
+}
+
+/* Audio choices share the app's green selection style without moving fields. */
+#new-dialog .audio-option input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1.5px solid #91a082;
+  border-radius: 5px;
+  background: #202321;
+  cursor: pointer;
+}
+#new-dialog .audio-option input:checked {
+  border-color: var(--green);
+  background: var(--green);
+}
+.audio-option input:checked::before {
+  content: "";
+  width: 8px;
+  height: 4px;
+  border-left: 2px solid #202321;
+  border-bottom: 2px solid #202321;
+  transform: rotate(-45deg) translateY(-1px);
+}
+.audio-option input:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+.audio-language-field.is-disabled {
+  opacity: 0.45;
+}
+.browser-voice-heading {
+  font-size: 16px;
+  font-weight: 650;
+  margin: 0 0 8px;
+}
+#audio-browser-model-dialog .browser-model-footer {
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+.browser-model-footer button,
+#audio-analysis-actions button {
+  flex: 0 0 auto;
+}
+@media (max-width: 420px) {
+  .audio-browser-model-dialog {
+    padding: 20px 16px;
+  }
+  #audio-analysis-actions {
+    gap: 12px;
+  }
+  #audio-analysis-actions .primary {
+    padding: 12px;
+    font-size: 12px;
+  }
+  .audio-browser-model-dialog .browser-model-note {
+    font-size: 10px;
+  }
+  .browser-model-footer .primary {
+    padding: 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  #audio-analysis-actions {
+    flex-wrap: nowrap;
+  }
+  #audio-analysis-actions button {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 52px;
+    padding: 8px;
+    font-size: 12px;
+    line-height: 1.3;
   }
 }
