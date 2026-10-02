@@ -21,9 +21,12 @@ try {
   page.on("request", (request) => {
     if (request.url().includes("huggingface.co")) downloads.push(request.url());
   });
-  await page.addInitScript(() =>
-    Object.defineProperty(navigator, "gpu", { value: undefined }),
-  );
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "gpu", { value: undefined });
+    Object.defineProperty(navigator, "userAgentData", {
+      value: { mobile: true },
+    });
+  });
   await page.goto(url);
   await page.evaluate(
     async ({ files, runtime }) => {
@@ -45,6 +48,14 @@ try {
   await page.locator("#audio").click();
   await expect(page.locator("#audio-model-settings")).toBeEnabled();
   await page.locator("#audio-model-settings").click();
+  await expect(page.locator("#browser-whisper-recommended")).toBeVisible();
+  await expect(
+    page.locator("#browser-whisper-turbo-recommended"),
+  ).not.toBeVisible();
+  for (const model of ["whisper", "whisper-small", "whisper-turbo", "qwen"])
+    await expect(
+      page.locator(`[data-bundle="${model}"] small`).first(),
+    ).toContainText("Tiempos por palabra");
   for (const model of ["whisper", "whisper-small", "whisper-turbo"])
     await expect(page.locator("#browser-model-" + model)).toBeEnabled();
   await expect(page.locator("#browser-model-qwen")).toBeDisabled();
@@ -71,6 +82,7 @@ try {
     await expect(page.locator("#browser-model-next")).toHaveText("Siguiente");
     await page.locator("#browser-model-next").click();
     await expect(page.locator("#audio-browser-model-dialog")).not.toBeVisible();
+    await expect(page.locator("#new-description")).toContainText("borrador");
     await expect(page.locator("#audio-model-name")).toHaveAttribute(
       "data-model",
       model,
@@ -120,6 +132,42 @@ try {
   );
   await page.screenshot({ path: "artifacts/lyric-models-mobile.png" });
   assert.deepEqual(errors, []);
+  for (const gpu of [true, false]) {
+    const desktop = await browser.newPage();
+    await desktop.addInitScript((gpu) => {
+      Object.defineProperty(navigator, "deviceMemory", { value: 8 });
+      Object.defineProperty(navigator, "hardwareConcurrency", { value: 8 });
+      Object.defineProperty(navigator, "gpu", {
+        value: gpu
+          ? {
+              requestAdapter: async () => ({
+                features: new Set(["shader-f16"]),
+              }),
+            }
+          : undefined,
+      });
+    }, gpu);
+    await desktop.goto(url + "/en/");
+    await desktop.locator("#empty-new").click();
+    await desktop.locator("#audio").click();
+    const model = gpu ? "qwen" : "whisper-small";
+    await expect(
+      desktop.locator("#browser-" + model + "-recommended"),
+    ).toBeVisible();
+    await expect(desktop.locator("#browser-model-" + model)).toBeChecked();
+    await expect(desktop.locator("#browser-model-hardware")).toContainText(
+      "8 GB estimated memory",
+    );
+    // A saved user choice wins over the hardware recommendation on reopen.
+    await desktop.evaluate(() =>
+      localStorage.setItem("chordleaf-browser-audio-mode", "whisper"),
+    );
+    await desktop.locator("#browser-model-close").click();
+    await expect(desktop.locator("#new-description")).toContainText("draft");
+    await desktop.locator("#audio-model-settings").click();
+    await expect(desktop.locator("#browser-model-whisper")).toBeChecked();
+    await desktop.close();
+  }
   console.log(
     "Whisper Small/Turbo: CPU choices, independent cache, selection, persistence, removal, retained runtime, failed download and mobile layout passed.",
   );

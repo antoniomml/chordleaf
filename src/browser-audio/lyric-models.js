@@ -2,21 +2,34 @@ export const whisperModels = {
   whisper: {
     name: "Whisper Base",
     repository: "onnx-community/whisper-base_timestamped",
-    description: "Ligero · Funciona sin WebGPU",
+    label: "Ligero",
+    kind: "light",
+    description: "Menos recursos · CPU · Tiempos por palabra",
     engine: "Whisper-Base/ONNX-q8",
   },
   "whisper-small": {
     name: "Whisper Small",
     repository: "onnx-community/whisper-small_timestamped",
-    description: "Intermedio · Más memoria que Base · Funciona sin WebGPU",
+    label: "Intermedio",
+    kind: "medium",
+    description: "Más recursos que Base · CPU · Tiempos por palabra",
     engine: "Whisper-Small/ONNX-q8",
   },
   "whisper-turbo": {
     name: "Whisper Large v3 Turbo",
     repository: "onnx-community/whisper-large-v3-turbo_timestamped",
-    description:
-      "Modelo grande · Recomendado para ordenador · Funciona sin WebGPU",
+    label: "Exigente",
+    kind: "heavy",
+    description: "Lento en CPU · Más memoria · Tiempos por palabra",
     engine: "Whisper-Large-v3-Turbo/ONNX-q8",
   },
 };
 export const browserLyricModels = [...Object.keys(whisperModels), "qwen"];
+
+// Browser memory and CPU reports are approximate; this is a conservative
+// resource recommendation, never a benchmark or a promise of lyric accuracy.
+export function recommendedBrowserLyricModel(hardware) {
+  if (hardware?.mobile || !(hardware?.memory >= 8)) return "whisper";
+  if (hardware.gpu) return "qwen";
+  return hardware.cores >= 4 ? "whisper-small" : "whisper";
+}

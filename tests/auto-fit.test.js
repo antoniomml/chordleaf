@@ -10,9 +10,9 @@ const base = {
   margin: 10,
   fontSize: 10,
 };
-test("automatic fit enlarges small songs and keeps modest margins", () => {
+test("automatic fit caps small songs at 12 pt and keeps modest margins", () => {
   const fit = fitToPage(base);
-  assert.equal(fit.fontSize, 20);
+  assert.equal(fit.fontSize, 12);
   assert.equal(fit.margin, 10);
   assert.equal(fit.columns, 1);
   assert.equal(base.fontSize, 10);
@@ -22,6 +22,7 @@ test("automatic fit selects the largest size across both column options", () => 
   const fit = fitToPage(song);
   assert.equal(fit.columns, 2);
   assert.equal(layout({ ...song, ...fit }).pages.length, 1);
+  if (fit.fontSize === 12) return;
   for (const columns of [1, 2])
     for (const margin of [6, 7, 8, 9, 10])
       assert.ok(
@@ -32,7 +33,7 @@ test("automatic fit selects the largest size across both column options", () => 
 test("automatic fit avoids wrapping source lines on one page", () => {
   const song = {
     ...base,
-    text: "[C]" + "Palabra ".repeat(8).trim() + "\n" + "[G]Corta\n".repeat(6),
+    text: "[C]" + "Palabra ".repeat(10).trim() + "\n" + "[G]Corta\n".repeat(6),
   };
   const fit = fitToPage(song);
   const result = layout({ ...song, ...fit });

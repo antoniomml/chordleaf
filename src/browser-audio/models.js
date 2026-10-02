@@ -22,6 +22,11 @@ export async function browserHardware() {
   return {
     gpu: Boolean(adapter?.features.has("shader-f16")),
     memory: navigator.deviceMemory || null,
+    cores: navigator.hardwareConcurrency || null,
+    mobile:
+      navigator.userAgentData?.mobile === true ||
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "") ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1),
   };
 }
 export async function browserReadiness() {
