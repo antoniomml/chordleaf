@@ -3,6 +3,7 @@
 // Firefox and WebKit; narrow engines with CHORDLEAF_BROWSERS=chromium,firefox.
 import { chromium, firefox, webkit } from "@playwright/test";
 import assert from "node:assert/strict";
+import { mkdir, writeFile } from "node:fs/promises";
 
 const baseUrl = (process.env.CHORDLEAF_URL || "http://localhost:5173").replace(
   /\/+$/,
@@ -41,10 +42,11 @@ for (const name of names) {
     }
     throw error;
   }
+  let page;
+  const errors = [];
   try {
     const context = await browser.newContext({ locale: "en-US" });
-    const page = await context.newPage();
-    const errors = [];
+    page = await context.newPage();
     const consoleErrors = [];
     let offline = false;
     page.on("pageerror", (error) => errors.push(error.message));
@@ -100,20 +102,26 @@ for (const name of names) {
     assert.match(worker.headers()["content-type"] || "", /javascript/);
     assert.equal(worker.headers()["cache-control"], "no-cache");
 
-    // Production builds register and activate the worker. Firefox can report
-    // the active worker while it is still activating, so wait for that object.
-    await page.goto(baseUrl, { waitUntil: "load" });
+    // Firefox can miss Playwright's load completion while the document is
+    // already usable. Commit the navigation, then check the real document and
+    // app state. This still requires load to finish (readyState === complete),
+    // without relying on the driver's load-event bookkeeping.
+    const firstVisit = await page.goto(baseUrl, { waitUntil: "commit" });
+    assert.ok(firstVisit?.ok(), "the first visit should answer successfully");
+    await page.waitForFunction(
+      () =>
+        document.readyState === "complete" &&
+        Boolean(document.querySelector("#empty-new")),
+    );
+    // Firefox can report the active worker while it is still activating, so
+    // wait for activation explicitly rather than treating page load as ready.
+    await page.waitForFunction(
+      async () =>
+        (await navigator.serviceWorker.ready).active?.state === "activated",
+    );
     const registration = await page.evaluate(async () => {
       const ready = await navigator.serviceWorker.ready;
       const worker = ready.active;
-      if (worker && worker.state !== "activated")
-        await new Promise((resolve) => {
-          const changed = () => {
-            if (worker.state === "activated") resolve();
-          };
-          worker.addEventListener("statechange", changed);
-          changed();
-        });
       return {
         scope: new URL(ready.scope).pathname,
         state: worker?.state,
@@ -191,10 +199,15 @@ for (const name of names) {
       // Offline, the reload is served from the cache and the editor still works.
       offline = true;
       await context.setOffline(true);
-      const reload = await page.reload({ waitUntil: "load" });
+      const reload = await page.reload({ waitUntil: "commit" });
       assert.ok(
         reload?.ok(),
         "the cached shell should answer the offline reload",
+      );
+      await page.waitForFunction(
+        () =>
+          document.readyState === "complete" &&
+          Boolean(document.querySelector("#empty-new")),
       );
       await page.locator("#empty-new").click();
       await page.locator("#blank").click();
@@ -240,6 +253,38 @@ for (const name of names) {
     console.log(
       `${name}: manifest, service worker, offline shell and API exclusion passed`,
     );
+  } catch (error) {
+    // Capture a stalled browser's actual state so CI can distinguish a driver
+    // navigation failure from missing shell assets or a failed worker install.
+    if (page) {
+      await mkdir("artifacts", { recursive: true });
+      const state = await page
+        .evaluate(async () => {
+          const registration = await navigator.serviceWorker.getRegistration();
+          return {
+            url: location.href,
+            readyState: document.readyState,
+            appReady: Boolean(document.querySelector("#empty-new, #source")),
+            worker: registration?.active?.state,
+            installing: registration?.installing?.state,
+            controlled: Boolean(navigator.serviceWorker.controller),
+            caches: await caches.keys(),
+            pendingResources: performance
+              .getEntriesByType("resource")
+              .filter((resource) => !resource.responseEnd)
+              .map((resource) => resource.name),
+          };
+        })
+        .catch(() => null);
+      await writeFile(
+        `artifacts/pwa-${name}-failure.json`,
+        JSON.stringify({ error: String(error), errors, state }, null, 2),
+      );
+      await page
+        .screenshot({ path: `artifacts/pwa-${name}-failure.png` })
+        .catch(() => {});
+    }
+    throw error;
   } finally {
     await browser.close();
   }
