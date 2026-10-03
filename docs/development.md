@@ -29,7 +29,7 @@ Open the URL printed by Vite, normally `http://localhost:5173`.
 | `pnpm test:e2e`         | Browser and automated accessibility checks; requires a server.     |
 | `pnpm format`           | Format code and documentation.                                     |
 | `pnpm format:check`     | Check formatting without modifying files.                          |
-| `pnpm docs:screenshots` | Refresh documentation screenshots using the demo song.             |
+| `pnpm docs:screenshots` | Refresh demo screenshots and verify the introductory user flow.    |
 | `pnpm pwa:icons`        | Regenerate the installable PNG icons from the logo.                |
 
 To check the interface and exports:

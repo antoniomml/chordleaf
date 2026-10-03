@@ -4,13 +4,14 @@
 
 Use **EN / ES** in the top bar to choose English or Spanish. The app starts in your browser language (English for languages other than Spanish). This guide uses the English control labels. Changing the interface does not translate songs.
 
-The desktop workspace has a navigation rail, an editing panel and a sheet preview. Choose Document settings, Lyrics, Song chords, Key, Search or Identify. On phones, the bottom navigation switches between Document, Edit, Harmony and Preview; Harmony contains key analysis, song chords, search and identification. Your text and cursor remain in place.
+The desktop workspace has a navigation rail, an editing panel and a sheet preview. Choose **Settings**, **Lyrics**, **Chords**, **Key**, **Search** or **Identify**. On phones, the bottom navigation switches between **Settings**, **Lyrics**, **Harmony** and **Preview**; Harmony contains key analysis, song chords, search and identification. Your text and cursor remain in place. For a shorter introduction in Spanish, see [your first song in five minutes](https://github.com/antoniomml/chordleaf/wiki/First-song.es).
 
 ![The Chordleaf workspace with a song editor and page preview](https://raw.githubusercontent.com/antoniomml/chordleaf/main/docs/images/workspace.png)
 
 ## On this page
 
 - [Start or import a song](#start-or-import-a-song)
+- [Import audio](https://github.com/antoniomml/chordleaf/wiki/Audio-import)
 - [Place a chord precisely](#place-a-chord-precisely)
 - [Browse and print chord diagrams](#browse-edit-and-print-chord-diagrams)
 - [Identify a chord](#identify-a-chord-on-the-fretboard)
@@ -19,7 +20,7 @@ The desktop workspace has a navigation rail, an editing panel and a sheet previe
 
 ## Start or import a song
 
-Chordleaf opens without a sample song. Choose the large **New song** action, then **Start from scratch**. The title starts empty; its placeholder is not printed. Add an artist if needed. **Import text or a file** supports:
+Choose the large **New song** action, then **Start from scratch**, or use **See an example** on the start page to try an original demo song. A blank song's title starts empty; its placeholder is not printed. Add an artist if needed. **New song → Open document → Choose document** supports:
 
 | File                     | What to expect                                                                                                      |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
@@ -28,6 +29,8 @@ Chordleaf opens without a sample song. Choose the large **New song** action, the
 | Word (.docx)             | Text and identifiable column structure. Review titles and alignment.                                                |
 
 Imports accept up to **10 MiB per file**, **50 PDF pages** and **50,000 text characters per song**. Direct edits, chord insertion and transposition use the same song text limit. Large or complex documents can still take longer to process. Scanned PDFs need external OCR. Convert legacy `.doc` files to `.docx` first. Each song opens in a tab. Closing a song saves it in **Recent**, without a confirmation. Closed songs remain available until explicitly removed; **View all** shows the whole list. If browser storage is full or unavailable, the song stays open so you can export it.
+
+For copied text, choose **New song → Paste from clipboard** and grant access if your browser asks. If clipboard access is unavailable, start a blank song, open **Lyrics** and paste into the text editor. **Import audio** creates an experimental draft from a recording; follow the [audio guide](https://github.com/antoniomml/chordleaf/wiki/Audio-import) to choose and manage its local models.
 
 ## Place a chord precisely
 
@@ -42,11 +45,11 @@ In `mor[Emaj7]ning`, **n** is the chord’s reference character. Labels use thei
 
 ## Write comfortably
 
-Drag the vertical divider to resize the editor. Focus it with Tab and use Left/Right; Home or double-click restores its starting width. On mobile, switch between Edit and Preview with the bottom navigation; pinch the sheet to zoom.
+Drag the vertical divider to resize the editor. Focus it with Tab and use Left/Right; Home or double-click restores its starting width. On mobile, switch between **Lyrics** and **Preview** with the bottom navigation; pinch the sheet to zoom.
 
 The expand icon beside **Lyrics and chords** opens a larger editor with the same text, cursor and undo history. **Done** or Escape returns to the document. Changes save while typing.
 
-The preview opens at a readable A4 width. **Fill width** expands it to the available space and follows changes to the editor width.
+The preview opens at a readable A4 width. **Fit to width** expands it to the available space and follows changes to the editor width.
 
 The preview's pencil enables editing directly on the sheet. Select the lyric to edit only its words: chord tokens are hidden in this editor and follow their anchored text as you insert or delete words. Enter commits, Escape cancels and Shift+Enter adds a line break. The **Lyrics** section keeps the complete source with chord brackets for raw editing.
 
@@ -60,7 +63,7 @@ Each completed move updates the original bracket token immediately. **Undo** res
 
 ![A grid of guitar chord diagrams in the Chords section](https://raw.githubusercontent.com/antoniomml/chordleaf/main/docs/images/chord-library.png)
 
-Open **Chords → In song**. Each card shows a chord name and its current guitar diagram. Click the card to edit the frets; the edit hint appears on hover or keyboard focus. Values run from low E to high e: `-1` is muted, `0` open, and positive values are frets. You can mark a custom voicing with an asterisk or restore the catalog shape.
+Open **Chords** in the desktop rail, or **Harmony → Chords** on a phone. Each card shows a chord name and its current guitar diagram. Use **Edit** on a card to change its frets. Values run from low E to high e: `-1` is muted, `0` open, and positive values are frets. You can mark a custom voicing with an asterisk or restore the catalog shape.
 
 Drag a card onto the sheet, or use its compact **Add** action. **All chords → Add to sheet** places every song chord in one clearly labelled block. Diagrams can be moved, resized or removed. Drag the right edge to change width, the bottom edge to change height, or the corner to change both. Column counts stay fixed while resizing, so making the frame smaller does not unexpectedly enlarge the diagrams. Select the grid button on a diagram group to set width and height in millimeters and choose its columns, with a live preview. Rows follow the number of chords; diagrams keep their proportions inside the frame.
 
@@ -76,7 +79,7 @@ Read diagrams from low to high strings, `E A D G B e`: ○ is open, × is muted,
 
 ![Interactive guitar chord identifier](https://raw.githubusercontent.com/antoniomml/chordleaf/main/docs/images/chord-identifier.png)
 
-Open **Chords → Identify** and place a dot on each string you want to play. The horizontal fretboard follows tablature orientation: frets increase left to right, the high e string is at the top and low E is at the bottom. Its size stays fixed when the sidebar gets wider; on a wide sidebar, interpretations appear beside it. Press the same dot again to mute it. The control beside each string name switches between **× Muted** (muted) and **○ Open** (open), with contrasting backgrounds and visible labels. **− Fret 1 +** moves the visible five-fret window one fret at a time; selections outside that window remain saved and their fret numbers appear beside the string names. **Clear** mutes all strings.
+Open **Identify** in the desktop rail, or **Harmony → Identify chord** on a phone, and place a dot on each string you want to play. The horizontal fretboard follows tablature orientation: frets increase left to right, the high e string is at the top and low E is at the bottom. Its size stays fixed when the sidebar gets wider; on a wide sidebar, interpretations appear beside it. Press the same dot again to mute it. The control beside each string name switches between **× Muted** (muted) and **○ Open** (open), with contrasting backgrounds and visible labels. **− Fret 1 +** moves the visible five-fret window one fret at a time; selections outside that window remain saved and their fret numbers appear beside the string names. **Clear** mutes all strings.
 
 The panel focuses on the fretboard and possible chord names. Exact interpretations come first, followed by incomplete voicings labelled `no5` (missing fifth).
 
@@ -86,7 +89,7 @@ Select a result to retain that exact voicing. **Insert at cursor** adds it where
 
 ## Adapt the song to your voice
 
-In **Document**, **Transpose** moves all chord symbols by a semitone. Section labels such as `[Estribillo]` remain unchanged.
+In **Settings**, the **Semitones** − / + controls move all chord symbols by a semitone. Section labels such as `[Estribillo]` remain unchanged.
 
 **Capo** sets the capo fret. The chain links it to the chords: raising a linked capo by one fret lowers the chord symbols by one semitone to keep the sounding key. Enabling the chain alone changes no chords.
 
@@ -104,23 +107,26 @@ Write `{column}` on its own line to start another column, or another page in a s
 
 ## Save and share
 
-| Export      | Use it for                                                                     |
-| ----------- | ------------------------------------------------------------------------------ |
-| PDF         | Printing or sharing a fixed layout.                                            |
-| Word · DOCX | Further editing in a word processor; rendering may vary.                       |
-| Text · TXT  | Preserving lyrics, anchors, settings and custom diagrams for exact re-editing. |
+| Export                    | Use it for                                                               |
+| ------------------------- | ------------------------------------------------------------------------ |
+| Download PDF              | Printing or sharing a fixed layout.                                      |
+| Export Word · DOCX        | Further editing in a word processor; rendering may vary.                 |
+| Text · TXT                | Preserving lyrics, anchors, settings and custom diagrams for re-editing. |
+| ChordPro (.cho)           | Interchange with other chord-sheet apps.                                 |
+| Download editable project | Reopening one complete song as `.chordleaf.json`.                        |
+| Workspace backup · JSON   | Backing up all open and closed songs.                                    |
 
 Preview, PDF and Word share a layout model. Reimported PDF or Word reconstructs that model from appearance, so review chord placements. An editable `.chordleaf.json` project preserves one song, its settings and diagrams; use **Export → Download editable project**, then **New song → Open editable project** to reopen it. TXT and ChordPro remain useful interchange formats. Autosave belongs to this browser: export before changing devices or clearing browser data.
 
 ## Import a song and fit the page
 
-**New song** always opens the initial menu: **Import text or a file**, **Import from a website**, then **Start from scratch**. The menu also offers **Open editable project** and, when enabled, experimental audio import. Each import option opens its own screen; **← Back** returns to the menu. Closing and reopening starts fresh. Paste lyrics with aligned chords or open TXT, ChordPro, text-based PDF or DOCX. Legacy `.doc` files must first be saved as `.docx`.
+**New song** opens the initial menu with **Import from a website**, **Open document**, **Paste from clipboard**, **Start from scratch** and **Open editable project**. The public website also offers **Import audio**, marked Beta/Experimental. Each import option opens its own screen; **← Back** returns to the menu. Closing and reopening starts fresh. Paste lyrics with aligned chords or open TXT, ChordPro, text-based PDF or DOCX. Legacy `.doc` files must first be saved as `.docx`.
 
 For a web import, paste an HTTPS song URL from LaCuerda, AcordesWeb, TusAcordes, Chordie, Acordes.cc or Ultimate Guitar. Cifra Club often blocks server requests; its saved HTML can still be parsed locally when offered. Chordleaf converts the accessible chord version into editable lyrics and anchored chords. LaCuerda supports both its normal chord page and its `/TXT/` link; its six-string fingering legends are left out of the song text. Ultimate Guitar supports `tabs.ultimate-guitar.com` and Spanish `es.ultimate-guitar.com` chord pages. Integrations are maintained per provider rather than per song, so a provider markup change can require an adapter update. Search pages, protected content and tablature-only versions are not supported. The source URL is kept with the working song. A running Chordleaf server is needed for this option.
 
 Every import tries one and two columns, 6–10 mm margins and 8–12 pt type, choosing the largest font that fits on one A4 page. Imported column/page breaks are reflowed. At equal font sizes, one column and 10 mm margins take preference. Longer songs keep all their content on multiple pages rather than shrinking below 8 pt. **Fit to one page** repeats this search; all document controls remain editable afterwards.
 
-The preview, PDF and Word documents include a small grey **Chordleaf** footer. Catalog diagrams use the original fingering's barre information, including full and partial barres; unknown custom shapes infer a conservative barre when possible.
+New songs include a small grey **chordleaf.com** footer in the preview, PDF and Word. Turn it off in **Settings → More options → Show chordleaf.com in the footer** if you prefer. Catalog diagrams use the original fingering's barre information, including full and partial barres; unknown custom shapes infer a conservative barre when possible.
 
 ## Instrumental lines (intros and solos)
 

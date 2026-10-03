@@ -6,7 +6,9 @@ Import a chord sheet, correct it and make your own version. Place chords on the 
 
 ## Start here
 
+- [Tu primera canción en cinco minutos · Español](https://github.com/antoniomml/chordleaf/wiki/First-song.es) — five short steps with Spanish controls and screenshots.
 - [[User guide]] — illustrated steps from a new song to a printable sheet.
+- [[Audio import]] — choose models, create a draft from a recording and manage downloads.
 - [[Common questions]] — saving, imports, exports, phones and recovery.
 - [[Harmony model]] — how chord names and alternatives are interpreted.
 - [[Privacy and storage]] — where songs live and how to back them up.

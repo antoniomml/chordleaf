@@ -1,7 +1,9 @@
 ## Chordleaf help
 
 - [[Home]]
+- [Primeros pasos · Español](https://github.com/antoniomml/chordleaf/wiki/First-song.es)
 - [[User guide]]
+- [[Audio import]]
 - [[Common questions]]
 - [[Harmony model]]
 - [[Privacy and storage]]
