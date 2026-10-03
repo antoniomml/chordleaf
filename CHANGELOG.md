@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Replace the desktop packager's legacy download cache dependency with Electron's Fetch-based downloader, removing the dependency affected by GHSA-ch52-4w7c-c8xp.
+- Add a five-minute Spanish introduction with current desktop/phone controls and original demo screenshots, plus a browser audio guide covering model choices, downloads, removal and troubleshooting.
+- Update README/wiki navigation and import/export instructions; explain local audio processing, model download request metadata and the difference between song backups and cached models.
+
 ## 1.4.1 · October 2, 2026
 
 - Keep active lyric, chord, title and artist edits in browser saves, project downloads, reloads and workspace handoffs. Autosave preserves the focused field; Escape restores the previous value.

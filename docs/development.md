@@ -29,7 +29,7 @@ Open the URL printed by Vite, normally `http://localhost:5173`.
 | `pnpm test:e2e`         | Browser and automated accessibility checks; requires a server.     |
 | `pnpm format`           | Format code and documentation.                                     |
 | `pnpm format:check`     | Check formatting without modifying files.                          |
-| `pnpm docs:screenshots` | Refresh documentation screenshots using the demo song.             |
+| `pnpm docs:screenshots` | Refresh demo screenshots and verify the introductory user flow.    |
 | `pnpm pwa:icons`        | Regenerate the installable PNG icons from the logo.                |
 
 To check the interface and exports:
@@ -56,6 +56,8 @@ Do not commit that document or its generated outputs.
 ## Dependencies and pnpm
 
 Use `pnpm add`, `pnpm add -D` or `pnpm update`. Commit changes to `package.json` and `pnpm-lock.yaml` together; do not generate another package manager's lockfile.
+
+The workspace pins `app-builder-lib@26.15.3`'s `@electron/get` dependency to 5.1.0, the version already used by Electron 44.4.5. Its native Fetch downloader removes the legacy `got`/`cacheable-request`/`http-cache-semantics` chain affected by [GHSA-ch52-4w7c-c8xp](https://github.com/advisories/GHSA-ch52-4w7c-c8xp). This build dependency requires Node.js 22.12 or later; use the project's Node.js 24 environment. Custom download options follow Fetch's `RequestInit` API, and proxy builds use `ELECTRON_GET_USE_PROXY=1` with `HTTP_PROXY`/`HTTPS_PROXY`/`NO_PROXY`, as described in the [downloader's migration notes](https://github.com/electron/get/releases/tag/v5.0.0). Review and remove the scoped override when electron-builder adopts this downloader upstream; verify desktop packaging when changing it.
 
 `pnpm-workspace.yaml` allows esbuild's required install script and disables core-js's script. Review new dependencies before extending that list. The configuration follows [pnpm's `allowBuilds` model](https://github.com/pnpm/pnpm.io/blob/main/docs/migration.md).
 
