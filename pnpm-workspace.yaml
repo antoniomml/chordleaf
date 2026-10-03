@@ -5,3 +5,8 @@ allowBuilds:
   electron-winstaller: false
   onnxruntime-node: false
   protobufjs: false
+
+# Use Electron's Fetch-based downloader instead of the vulnerable legacy cache
+# chain (GHSA-ch52-4w7c-c8xp). Requires the project's Node.js 24 environment.
+overrides:
+  "app-builder-lib@26.15.3>@electron/get": 5.1.0
