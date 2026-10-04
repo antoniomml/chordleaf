@@ -1,3 +1,4 @@
+import { isMobileLayout } from "./mobile-layout.js";
 import { t } from "./i18n.js";
 import { chords, fingering, diagram, chordRE } from "./music.js";
 import { PAGE, layout } from "./layout.js";
@@ -210,7 +211,7 @@ export function setupDictionary({ song, changed, renderPages, esc, notify }) {
           : "Diagrama añadido a la hoja.",
       ),
     );
-    if (window.matchMedia("(max-width: 760px)").matches)
+    if (isMobileLayout())
       document.querySelector('[data-mobile-view="preview"]')?.click();
     revealSticker(sticker);
   }

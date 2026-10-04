@@ -10,8 +10,8 @@ export function renderKeySettings(s, key) {
 export function renderDocumentSettings(s, transposeInfo = null) {
   const hasBlanks = blankLineCount(s.text) > 0;
   return t`<h2 class="panel-title"><span>El documento</span></h2>
-    <div class="settings-meta-row"><label class="field">TÍTULO<input id="title" value="${esc(s.title)}" maxlength="90" placeholder="Nombre de la canción"></label>
-    <label class="field">ARTISTA<input id="artist" value="${esc(s.artist)}" maxlength="100" placeholder="Nombre del artista"></label></div>
+    <div class="settings-meta-row"><label class="field">TÍTULO<input id="title" value="${esc(s.title)}" maxlength="90" autocomplete="off" placeholder="Nombre de la canción"></label>
+    <label class="field">ARTISTA<input id="artist" value="${esc(s.artist)}" maxlength="100" autocomplete="off" placeholder="Nombre del artista"></label></div>
     <div id="document-options-content">
       <div class="settings-group-label">ACORDES Y CEJILLA</div>
       <div class="music-controls"><div><label>SEMITONOS</label><div class="stepper"><button id="undo-transpose" type="button" aria-label="${t("Volver al tono original")}" title="${t("Volver al tono original")}" ${transposeInfo ? "" : "disabled"}>↺</button><button id="transpose-down" aria-label="Bajar un semitono">−</button><span class="transpose-value" role="status" aria-label="${transposeInfo ? t`Transposición ${transposeInfo.offset > 0 ? "+" : ""}${transposeInfo.offset} ${Math.abs(transposeInfo.offset) === 1 ? t("semitono") : t("semitonos")}` : t("Tono original")}">${transposeInfo ? `${transposeInfo.offset > 0 ? "+" : ""}${transposeInfo.offset}` : "0"}</span><button id="transpose-up" aria-label="Subir un semitono">＋</button></div></div><div><label>CEJILLA</label><div class="stepper"><button id="capo-down" aria-label="Bajar cejilla">−</button><input id="capo" type="number" min="0" max="12" value="${s.capo}" aria-label="Cejilla"><button id="capo-up" aria-label="Subir cejilla">＋</button></div></div></div>

@@ -9,6 +9,8 @@ export default {
   "Necesita WebGPU compatible.": "Requires compatible WebGPU.",
   "En Safari usamos Whisper para reducir el consumo de memoria.":
     "Safari uses Whisper to reduce memory usage.",
+  "Turbo no está disponible en iPhone y iPad para evitar que Safari recargue la página. Usa Base o Small.":
+    "Turbo is unavailable on iPhone and iPad to prevent Safari from reloading the page. Use Base or Small.",
   "En móvil empieza con Whisper Base. Small y Turbo necesitan más memoria.":
     "On mobile, start with Whisper Base. Small and Turbo need more memory.",
   "Los modelos y el motor se guardan aquí para próximas canciones.":

@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { audioDevice, audioHardware } from "../src/browser-audio/hardware.js";
+import {
+  audioDevice,
+  audioHardware,
+  supportsBrowserModel,
+} from "../src/browser-audio/hardware.js";
 
 test("Apple browsers use the CPU path even when WebGPU advertises float16", async () => {
   for (const userAgent of [
@@ -45,4 +49,26 @@ test("Chromium retains GPU support and handles missing or rejected adapters", as
     throw new Error("GPU unavailable");
   };
   assert.equal((await audioHardware(navigator)).gpu, false);
+});
+
+test("Turbo is restricted on Apple mobile browsers while Base and Small remain available", () => {
+  for (const navigator of [
+    { userAgent: "iPhone AppleWebKit Safari" },
+    { userAgent: "iPhone AppleWebKit CriOS" },
+    { userAgent: "iPad AppleWebKit Safari" },
+    { userAgent: "Macintosh AppleWebKit Safari", maxTouchPoints: 5 },
+  ]) {
+    const hardware = audioDevice(navigator);
+    assert.equal(supportsBrowserModel("whisper-turbo", hardware), false);
+    assert.equal(supportsBrowserModel("whisper-small", hardware), true);
+    assert.equal(supportsBrowserModel("whisper", hardware), true);
+  }
+  for (const userAgent of [
+    "Macintosh AppleWebKit Safari",
+    "Android AppleWebKit Chrome Mobile",
+  ])
+    assert.equal(
+      supportsBrowserModel("whisper-turbo", audioDevice({ userAgent })),
+      true,
+    );
 });

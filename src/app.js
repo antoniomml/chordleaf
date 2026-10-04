@@ -1,3 +1,4 @@
+import { isMobileLayout } from "./mobile-layout.js";
 import { alignmentLine, replaceAlignedLyrics } from "./chord-alignment.js";
 import { setupSongExport } from "./ui/song-export.js";
 import { setupSongImport } from "./ui/song-import.js";
@@ -439,7 +440,7 @@ function sectionForDesktop(view) {
   return ["song", "search", "identify"].includes(view) ? "chords" : "document";
 }
 function syncSection() {
-  const mobile = window.matchMedia("(max-width: 760px)").matches;
+  const mobile = isMobileLayout();
   section = mobile
     ? mobileView === "music"
       ? musicSection
@@ -575,7 +576,7 @@ function renderSettingsContent() {
   if (compressButton) compressButton.onclick = compressBlanks;
 }
 function updateNavigation() {
-  const mobile = window.matchMedia("(max-width: 760px)").matches;
+  const mobile = isMobileLayout();
   $("main").dataset.mobileView = mobileView;
   $("main").dataset.desktopView = desktopView;
   $("main").dataset.editorSection = section;
@@ -839,7 +840,7 @@ function editChord(el) {
 function resizePages() {
   const width = $("#pages-scroll").clientWidth;
   if (!width) return;
-  const gutter = window.matchMedia("(max-width: 760px)").matches ? 24 : 64;
+  const gutter = isMobileLayout() ? 24 : 64;
   const available = width - gutter,
     scale =
       Math.max(
@@ -1226,7 +1227,7 @@ document.addEventListener("click", (e) => {
   }
 });
 function setSheetEditing(next) {
-  const mobile = window.matchMedia("(max-width: 760px)").matches;
+  const mobile = isMobileLayout();
   if (next && !editing && mobile) {
     const scale = Math.max(
       0.2,

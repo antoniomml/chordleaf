@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Keep deployment authentication on same-origin model downloads while omitting credentials on external model requests.
+- Whisper Turbo is unavailable on iPhone and iPad after a physical iPhone test reproduced a Safari reload during its download. Base and Small remain available.
+- Keep the phone workspace in landscape, respect the notch safe area, prevent keyboard panning and fit import dialogs above the software keyboard.
 - Run browser Whisper and chord inference with the CPU runtime without Asyncify, reduce audio/download memory copies, and offer Whisper rather than Qwen on Safari/WebKit.
 - Add downloadable local audio diagnostics, recover interrupted attempts after reload, and handle blocked model storage and stalled workers without losing existing songs.
 - Use sung phrase duration and breaths to plan lyric lines, keep negations/pronouns with the following phrase, and separate stanzas after long pauses without changing words or chord intervals.

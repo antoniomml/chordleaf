@@ -1,6 +1,6 @@
 import catalog from "./catalog.json" with { type: "json" };
 import { runtimeURLs, gpuRuntimeURLs } from "./runtime.js";
-import { audioHardware } from "./hardware.js";
+import { audioHardware, supportsBrowserModel } from "./hardware.js";
 import { whisperModels, browserLyricModels } from "./lyric-models.js";
 
 export const MODEL_CACHE = "chordleaf-audio-models-v1";
@@ -59,14 +59,22 @@ async function readBrowserReadiness() {
     names.every((name) => catalog[name].every((file) => cached.get(file.url)));
   const neural = installed("chords");
   const qwenDownloaded = installed("qwen");
+  const hardware = await browserHardware();
   const lyricModels = Object.fromEntries(
     browserLyricModels.map((name) => [name, installed(name)]),
   );
   return {
     available: neural,
     neural,
-    lyrics: Object.keys(whisperModels).some((name) => lyricModels[name]),
-    ...lyricModels,
+    lyrics: Object.keys(whisperModels).some(
+      (name) => lyricModels[name] && supportsBrowserModel(name, hardware),
+    ),
+    ...Object.fromEntries(
+      browserLyricModels.map((name) => [
+        name,
+        lyricModels[name] && supportsBrowserModel(name, hardware),
+      ]),
+    ),
     modelDownloads: lyricModels,
     voiceDownloads: Object.fromEntries(
       browserLyricModels.map((name) => [
@@ -83,7 +91,7 @@ async function readBrowserReadiness() {
     whisper: installed("whisper"),
     whisperDownloaded: installed("whisper"),
     hasWhisperFiles: hasFiles(["whisper"]),
-    qwen: qwenDownloaded && (await browserHardware()).gpu,
+    qwen: qwenDownloaded && hardware.gpu,
     qwenDownloaded,
     qwenVoiceDownloaded: voiceInstalled(["qwen", "aligner"]),
     whisperVoiceDownloaded: voiceInstalled(["whisper"]),
@@ -99,6 +107,13 @@ async function readBrowserReadiness() {
 }
 export async function downloadBrowserModels(bundle, signal, progress) {
   if (!bundles[bundle]) throw new Error("Unknown browser model");
+  if (
+    bundle === "whisper-turbo" &&
+    !supportsBrowserModel(bundle, await browserHardware())
+  )
+    throw new Error(
+      "Turbo no está disponible en iPhone y iPad para evitar que Safari recargue la página. Usa Base o Small.",
+    );
   let cache;
   try {
     cache = await caches.open(MODEL_CACHE);

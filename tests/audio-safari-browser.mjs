@@ -3,6 +3,7 @@
 import { chromium, webkit, devices, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 import { readFile, mkdir } from "node:fs/promises";
+import catalog from "../src/browser-audio/catalog.json" with { type: "json" };
 
 const url = process.env.CHORDLEAF_URL || "http://localhost:5173";
 await mkdir("artifacts", { recursive: true });
@@ -88,10 +89,22 @@ for (const engine of [chromium, webkit]) {
       };
     });
     await page.goto(url);
+    await page.evaluate(async (files) => {
+      localStorage.setItem("chordleaf-browser-audio-mode", "whisper-turbo");
+      const cache = await caches.open("chordleaf-audio-models-v1");
+      for (const file of files)
+        await cache.put(file.url, new Response("Legacy Turbo cache fixture"));
+    }, catalog["whisper-turbo"]);
     await page.locator("#empty-new").click();
     await page.locator("#audio").click();
     await expect(page.locator("#audio-browser-model-dialog")).toBeVisible();
     await expect(page.locator("#browser-model-qwen")).toBeDisabled();
+    await expect(page.locator("#browser-model-whisper-turbo")).toBeDisabled();
+    await expect(page.locator("#browser-turbo-device")).toContainText(
+      "Base o Small",
+    );
+    await expect(page.locator("#browser-model-whisper")).toBeChecked();
+    await expect(page.locator("#browser-model-whisper-small")).toBeEnabled();
     await expect(page.locator("#browser-model-device")).toContainText("Safari");
     await page.locator("#browser-model-chords").check();
     await page.locator("#browser-model-next").click();

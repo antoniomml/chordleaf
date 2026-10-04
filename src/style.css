@@ -487,7 +487,8 @@ button.primary {
   margin: 5px 6px;
   background: #464f40;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   #empty-state {
     justify-content: flex-start;
     gap: 36px;
@@ -1685,7 +1686,8 @@ button:disabled {
   opacity: 0.4;
   cursor: default;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   dialog {
     width: calc(100% - 24px);
     max-height: 90dvh;
@@ -2489,8 +2491,16 @@ select:focus-visible {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   /* iOS Safari zooms the page when a focused form control uses text below 16px. */
+  body:has(main:not([hidden]), dialog[open]) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+  }
   #app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
   #app textarea,
   #app select,
@@ -2504,7 +2514,8 @@ select:focus-visible {
   }
   .topbar {
     height: calc(52px + env(safe-area-inset-top));
-    padding: env(safe-area-inset-top) 12px 0;
+    padding: env(safe-area-inset-top) max(12px, env(safe-area-inset-right)) 0
+      max(12px, env(safe-area-inset-left));
   }
   .degree {
     min-height: 44px;
@@ -2587,6 +2598,8 @@ select:focus-visible {
     order: 1;
     display: block;
     width: 100%;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
     flex: 1;
     min-height: 0;
     overflow: hidden;
@@ -2629,7 +2642,9 @@ select:focus-visible {
     flex: 0 0 auto;
     flex-direction: row;
     gap: 3px;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    padding: 6px max(8px, env(safe-area-inset-right))
+      calc(6px + env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
     border-right: 0;
     border-top: 1px solid #3b4538;
     background: #1b201c;
@@ -2929,7 +2944,8 @@ select:focus-visible {
   }
 }
 
-@media (max-width: 760px) and (max-height: 500px) and (min-width: 560px) {
+@media (max-width: 760px) and (max-height: 500px) and (min-width: 560px),
+  (max-width: 1024px) and (max-height: 500px) and (min-width: 560px) and (hover: none) and (pointer: coarse) {
   .topbar {
     height: calc(44px + env(safe-area-inset-top));
   }
@@ -2942,8 +2958,12 @@ select:focus-visible {
   .rail {
     height: calc(52px + env(safe-area-inset-bottom));
   }
-  main[data-mobile-view="edit"] .editor-panel .source-help {
+  main[data-mobile-view="edit"] .editor-panel .source-help,
+  main[data-mobile-view="edit"] .editor-panel .editor-foot {
     display: none;
+  }
+  main[data-mobile-view="edit"] .source-heading {
+    padding: 0 14px;
   }
   .preview-toolbar {
     bottom: 8px;
@@ -2958,7 +2978,8 @@ select:focus-visible {
 
 @media (max-width: 480px) {
   .topbar {
-    padding: env(safe-area-inset-top) 12px 0;
+    padding: env(safe-area-inset-top) max(12px, env(safe-area-inset-right)) 0
+      max(12px, env(safe-area-inset-left));
   }
   .topbar .brand {
     font-size: 20px;
@@ -3023,7 +3044,8 @@ select:focus-visible {
 #settings .stepper #undo-transpose:disabled:hover {
   background: #ffffff06;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   #settings .stepper #undo-transpose {
     width: 44px;
   }
@@ -3070,7 +3092,8 @@ select:focus-visible {
   font-size: 13px;
   line-height: 1.5;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   #shape-dialog .shape-fretboard .guitar-string,
   #shape-dialog .shape-fretboard .fret-numbers,
   #shape-dialog .shape-fretboard .fret-markers {
@@ -3085,7 +3108,10 @@ select:focus-visible {
 }
 
 /* Desktop rail views give settings and lyrics the full editor column. */
-@media (min-width: 761px) {
+@media (min-width: 1025px),
+  (min-width: 761px) and (min-height: 501px),
+  (min-width: 761px) and (hover: hover),
+  (min-width: 761px) and (pointer: fine) {
   main[data-desktop-view="document"] #source-area,
   main[data-desktop-view="edit"] #settings {
     display: none;
@@ -3107,6 +3133,7 @@ select:focus-visible {
   html,
   body {
     height: auto !important;
+    position: static !important;
     background: #fff !important;
   }
   .topbar,
@@ -3968,7 +3995,8 @@ select:focus-visible {
   line-height: 1.2;
   white-space: pre;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   #sheet-alignment-tools {
     bottom: 70px;
   }
@@ -4089,4 +4117,33 @@ select:focus-visible {
   background: #fff;
   border: 1px solid #9ca893;
   border-radius: 3px;
+}
+
+/* Mobile dialogs stay inside the space above the software keyboard. */
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
+  dialog[open] {
+    position: fixed;
+    top: calc(var(--visual-viewport-height, 100dvh) / 2);
+    bottom: auto;
+    transform: translateY(-50%);
+    margin-top: 0;
+    margin-bottom: 0;
+    max-height: calc(min(100dvh, var(--visual-viewport-height, 100dvh)) - 32px);
+    overflow-y: auto;
+  }
+  #new-dialog,
+  #editor-dialog,
+  #shape-dialog,
+  #audio-browser-model-dialog {
+    max-height: calc(min(100dvh, var(--visual-viewport-height, 100dvh)) - 32px);
+  }
+  #import-back,
+  #web-submit,
+  #audio-cancel,
+  #compress-blank-lines,
+  .browser-model-download,
+  .audio-text-button {
+    min-height: 44px;
+  }
 }

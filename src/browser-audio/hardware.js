@@ -23,3 +23,10 @@ export async function audioHardware(navigator) {
     : await navigator.gpu?.requestAdapter().catch(() => null);
   return { ...device, gpu: Boolean(adapter?.features.has("shader-f16")) };
 }
+
+export function supportsBrowserModel(model, hardware) {
+  if (model === "qwen") return Boolean(hardware?.gpu);
+  // Physical iPhone Safari reloaded while downloading Turbo before inference
+  // began. Its encoder alone is 645 MB. Keep Base and Small available.
+  return model !== "whisper-turbo" || !(hardware?.mobile && hardware?.webkit);
+}

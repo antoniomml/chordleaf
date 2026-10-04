@@ -1,5 +1,6 @@
 import { t } from "../i18n.js";
 import { beginAudioDiagnostic } from "../browser-audio/diagnostics.js";
+import { supportsBrowserModel } from "../browser-audio/hardware.js";
 import {
   browserHardware,
   browserReadiness,
@@ -57,6 +58,7 @@ export function setupBrowserModels(refresh, busyChanged) {
         <label for="browser-model-${id}"><input type="radio" name="browser-audio-model" id="browser-model-${id}" value="${id}" aria-describedby="browser-${id}-state" />
           <span><span class="browser-model-title"><strong>${model.name}</strong><span class="audio-model-tag" data-kind="${model.kind}">${t(model.label)}</span></span><small>${t(model.description)}</small></span></label>
         <div class="browser-model-storage"><span id="browser-${id}-state"></span><button type="button" id="browser-${id}-remove" class="audio-text-button" hidden>Borrar</button></div>
+        ${id === "whisper-turbo" ? '<small id="browser-turbo-device" hidden></small>' : ""}
       </div>`,
         )
         .join("")}
@@ -88,11 +90,12 @@ export function setupBrowserModels(refresh, busyChanged) {
     const busy = Boolean(controller) || analyzing || checking;
     for (const bundle of modelChoices) {
       const radio = $("browser-model-" + bundle);
-      radio.disabled = busy || (bundle === "qwen" && !hardware?.gpu);
+      const supported = supportsBrowserModel(bundle, hardware);
+      radio.disabled = busy || !supported;
       radio.checked = selected === bundle;
       const card = radio.closest(".browser-model-card");
       card.classList.toggle("is-selected", radio.checked);
-      card.classList.toggle("is-disabled", bundle === "qwen" && !hardware?.gpu);
+      card.classList.toggle("is-disabled", !supported);
       const state = $("browser-" + bundle + "-state");
       const saved =
         bundle === "chords" ? ready.neural : ready.voiceDownloads?.[bundle];
@@ -112,6 +115,17 @@ export function setupBrowserModels(refresh, busyChanged) {
         ? "En Safari usamos Whisper para reducir el consumo de memoria."
         : "Necesita WebGPU compatible.",
     );
+    $("browser-turbo-device").hidden = supportsBrowserModel(
+      "whisper-turbo",
+      hardware,
+    );
+    $("browser-turbo-device").textContent = t(
+      "Turbo no está disponible en iPhone y iPad para evitar que Safari recargue la página. Usa Base o Small.",
+    );
+    $("browser-model-whisper-turbo").setAttribute(
+      "aria-describedby",
+      "browser-whisper-turbo-state browser-turbo-device",
+    );
     $("browser-model-note").textContent = t(
       hardware?.mobile && ["whisper-small", "whisper-turbo"].includes(selected)
         ? "En móvil empieza con Whisper Base. Small y Turbo necesitan más memoria."
@@ -122,7 +136,7 @@ export function setupBrowserModels(refresh, busyChanged) {
     $("browser-chords-download").hidden = Boolean(ready.neural);
     $("browser-chords-download").disabled = busy;
     $("browser-model-next").disabled =
-      busy || !selected || (selected === "qwen" && !hardware?.gpu);
+      busy || !selected || !supportsBrowserModel(selected, hardware);
     $("browser-model-next").textContent = t(
       installed(selected) ? "Siguiente" : "Descargar y continuar",
     );
@@ -150,7 +164,7 @@ export function setupBrowserModels(refresh, busyChanged) {
     ready = data;
     const saved = browserAudioPreference();
     selected =
-      modelChoices.includes(saved) && (saved !== "qwen" || hardware?.gpu)
+      modelChoices.includes(saved) && supportsBrowserModel(saved, hardware)
         ? saved
         : "whisper";
     render();
