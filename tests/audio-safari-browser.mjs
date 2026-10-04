@@ -106,6 +106,31 @@ for (const engine of [chromium, webkit]) {
     await expect(page.locator("#browser-model-whisper")).toBeChecked();
     await expect(page.locator("#browser-model-whisper-small")).toBeEnabled();
     await expect(page.locator("#browser-model-device")).toContainText("Safari");
+    // Safari's landscape bars leave 283px; hiding them provides 393px.
+    // Every model and the footer must remain reachable in either case.
+    for (const height of [283, 393]) {
+      await page.setViewportSize({ width: 852, height });
+      const dialog = page.locator("#audio-browser-model-dialog");
+      assert.ok(
+        await dialog.evaluate(
+          (el) =>
+            el.querySelector(".browser-voice-scroll").clientHeight > 100 &&
+            el.scrollHeight > el.clientHeight,
+        ),
+        "Short screens scroll the complete model dialog without collapsing choices",
+      );
+      await page.locator("#browser-model-whisper-small").check();
+      await expect(page.locator("#browser-model-whisper-small")).toBeChecked();
+      const choice = await page
+        .locator('label[for="browser-model-whisper-small"]')
+        .boundingBox();
+      assert.ok(choice.y >= 0 && choice.y + choice.height <= height);
+      await page.locator("#browser-model-next").scrollIntoViewIfNeeded();
+      const next = await page.locator("#browser-model-next").boundingBox();
+      assert.ok(next.y >= 0 && next.y + next.height <= height);
+      await page.locator("#browser-model-whisper").check();
+    }
+    await page.setViewportSize(devices["iPhone 14 Pro"].viewport);
     await page.locator("#browser-model-chords").check();
     await page.locator("#browser-model-next").click();
     await expect(page.locator("#audio-browser-model-dialog")).not.toBeVisible({

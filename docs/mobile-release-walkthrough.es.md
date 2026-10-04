@@ -1,4 +1,4 @@
-# Recorrido de los cambios móviles de Chordleaf 1.5.0
+# Recorrido de los cambios móviles de Chordleaf 1.5.1
 
 Abre [Chordleaf en español](https://chordleaf.com/es/) en Safari y recarga la página. Usa una canción de prueba para poder reconocer tus cambios. Si vienes de una URL de prueba, exporta allí una copia del espacio de trabajo e impórtala en el dominio público: cada dirección conserva sus propias canciones.
 
@@ -29,6 +29,8 @@ Gira el teléfono a horizontal. Safari deja muy poco espacio si mantiene sus bar
 ## 4. Importar una canción desde Archivos
 
 Pulsa **+ → Importar audio**. En **Modelos y ajustes**, descarga **LV-Chordia** y empieza con **Whisper Base**. **Small** sigue disponible, con una descarga mayor y un procesamiento más lento. Turbo queda limitado en iPhone/iPad después de reproducir una recarga de Safari durante su descarga; Qwen no está disponible en Safari.
+
+En horizontal, desplaza el panel de modelos completo para llegar a las opciones de Whisper y al botón **Descargar y continuar**. La lista debe seguir siendo accesible aunque Safari mantenga sus barras abiertas.
 
 Elige un audio corto desde **Seleccionar archivo**. Mantén **Incluir la letra** y selecciona el idioma de la canción, por ejemplo **Español**. Pulsa **Obtener letra y acordes** y mantén Safari abierto hasta que termine. Debe aparecer una canción nueva con letra y acordes editables. La selección de idioma se recuerda al cerrar el diálogo y recargar.
 
