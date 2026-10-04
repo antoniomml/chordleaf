@@ -1,5 +1,9 @@
 # chordleaf changelog
 
+## 1.5.1 · October 4, 2026
+
+- Keep Whisper model selection usable in short landscape viewports by scrolling the complete model dialog. Safari's bars previously reduced the optional model list to a 6px strip.
+
 ## 1.5.0 · October 4, 2026
 
 - Put phone lyric/chord edits in a viewport-sized dialog with Done/Cancel, multiline Return, preserved chord anchors and draft persistence. Keep its close controls in place during Safari touch/mouse focus changes.

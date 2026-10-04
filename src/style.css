@@ -3895,6 +3895,17 @@ select:focus-visible {
   gap: 8px;
   padding: 2px 2px 4px;
 }
+@media (max-height: 500px) {
+  /* Fixed chord/header/footer sections can consume a short Safari viewport.
+     Scroll the whole dialog so voice choices never collapse to a thin strip. */
+  #audio-browser-model-dialog[open] {
+    display: block;
+    overflow-y: auto;
+  }
+  #audio-browser-model-dialog .browser-voice-scroll {
+    overflow-y: visible;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   #audio-analysis-progress::-webkit-progress-value {
     transition: none;

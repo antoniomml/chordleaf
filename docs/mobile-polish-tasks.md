@@ -17,6 +17,8 @@ Based on the physical iPhone 14 Pro / Safari audit on 4 October 2026. Prepared f
 
 ## Current implementation
 
+- [x] Fix the optional Whisper model list collapsing to 6px in a short landscape viewport; make the entire model dialog scroll and verify reachable Small/continue controls at 283px and 393px in Chromium/WebKit.
+- [ ] Recheck this model-panel correction on the physical phone and publish the 1.5.1 follow-up with matching production/tag metadata.
 - [x] Make long direct lyric/chord edits fit the visible mobile screen without sheet scaling or horizontal panning; preserve anchors, autosave, cancellation and keyboard access.
 - [x] Investigate the physical landscape keyboard reporting a negative visual viewport; provide a usable compact editing flow and a recovery control when Safari leaves no editing space.
 - [x] Explain automatic language limitations and remember an explicitly chosen song language across dialogs/reloads, including blocked storage and UI language changes.

@@ -77,6 +77,10 @@ Word and editable-project export displayed native Safari download prompts; both 
 
 ## Validation and limits
 
+The post-merge public-domain check found an additional landscape model-panel defect: at 852×283, the fixed header/chord/footer sections reduced `.browser-voice-scroll` to 6px. The optional Whisper models could not be selected normally on the physical phone. The 1.5.1 follow-up makes short viewports scroll the complete model dialog, retaining every model choice and the continue control. Chromium/WebKit regressions exercise real selection of Small and visibility of the continue control at both 283px and 393px; physical verification of that follow-up is recorded separately when completed.
+
+![Scrollable audio model panel on a short landscape viewport, WebKit automation](images/mobile-models-landscape.png)
+
 `pnpm check` passes 196 unit tests, formatting, production build and metadata checks. All 37 browser suites pass against the built server. The final audit commit `1e35dd7` passed the [Linux checks](https://github.com/antoniomml/chordleaf/actions/runs/37229066517), including Chromium/Firefox/WebKit compatibility, and the [Mac checks](https://github.com/antoniomml/chordleaf/actions/runs/37229066518). The new mobile dialog additionally passes an automated axe audit in Chromium and WebKit. Tests cover the mobile Turbo policy, same-origin/external credentials, negative viewport values, visible viewport offsets, dialog bounds, landscape breakpoints and end-caret recovery. Synthetic keyboard tests supplement the physical checks; they cannot reproduce iOS keyboard behavior.
 
 The local Firefox binary fails before visiting the application with “Could not find profile folder”, including a retry with another temporary directory. This is not a Chordleaf failure or a passing Firefox result; the Linux CI matrix passed Firefox. The local launch failure was not counted as an application pass.
