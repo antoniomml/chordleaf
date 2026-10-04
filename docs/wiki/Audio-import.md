@@ -25,12 +25,12 @@ The chord detector needs about **13 MB**. The CPU runtime adds about **14 MB** o
 | Do not transcribe lyrics | None                | Chords only; add or paste words later.                                 |
 | Whisper Base             | 80 MB               | CPU; a smaller starting point that works without WebGPU.               |
 | Whisper Small            | 252 MB              | CPU; more memory and processing than Base.                             |
-| Whisper Large v3 Turbo   | 1.09 GB             | CPU; demanding in memory and processing, best tried on a computer.     |
+| Whisper Large v3 Turbo   | 1.09 GB             | CPU; unavailable on iPhone/iPad WebKit; intended for a computer.       |
 | Qwen 0.6B                | 1.95 GB             | Compatible WebGPU required; includes a separate lyric alignment model. |
 
 ![Browser model chooser with download sizes, required chords and optional lyrics](https://raw.githubusercontent.com/antoniomml/chordleaf/main/docs/images/audio-models-guide.png)
 
-Whisper runs in CPU/WASM without WebGPU. Start with Base on a phone: Small and Turbo need substantially more memory. Safari and other WebKit browsers use the CPU path; Qwen is disabled there, and wherever compatible WebGPU is unavailable. This does not mean Safari lacks WebGPU: Chordleaf uses its CPU runtime on WebKit to avoid Asyncify memory risks. A larger download does not guarantee correct lyrics for your recording. Singing, backing vocals, effects and dense arrangements can confuse the models; every result needs review. Models produce word timing for chord placement, which can still be approximate.
+Whisper runs in CPU/WASM without WebGPU. Start with Base on a phone; Small needs more memory and processing. Base and Small completed tests on a physical iPhone 14 Pro. Turbo is unavailable on iPhone/iPad WebKit after Safari reloaded during its large download. Safari and other WebKit browsers use the CPU path; Qwen is disabled there, and wherever compatible WebGPU is unavailable. This does not mean Safari lacks WebGPU: Chordleaf uses its CPU runtime on WebKit to avoid Asyncify memory risks. A larger download does not guarantee correct lyrics for your recording. Singing, backing vocals, effects and dense arrangements can confuse the models; every result needs review. Models produce word timing for chord placement, which can still be approximate.
 
 ## Reuse or remove downloads
 
