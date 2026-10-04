@@ -3847,7 +3847,8 @@ select:focus-visible {
   }
 }
 
-#new-dialog.is-analyzing-audio #audio-status {
+#new-dialog.is-analyzing-audio #audio-status,
+#new-dialog.is-analyzing-audio #audio-diagnostic-options {
   display: none;
 }
 

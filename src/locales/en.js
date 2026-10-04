@@ -7,6 +7,22 @@ export default {
   "Qwen 0,6B": "Qwen 0.6B",
   "No extraer letra": "Do not transcribe lyrics",
   "Necesita WebGPU compatible.": "Requires compatible WebGPU.",
+  "En Safari usamos Whisper para reducir el consumo de memoria.":
+    "Safari uses Whisper to reduce memory usage.",
+  "En móvil empieza con Whisper Base. Small y Turbo necesitan más memoria.":
+    "On mobile, start with Whisper Base. Small and Turbo need more memory.",
+  "Los modelos y el motor se guardan aquí para próximas canciones.":
+    "Models and the engine are saved here for future songs.",
+  "Diagnóstico del último intento": "Last attempt diagnostics",
+  "El informe sólo contiene información técnica. No incluye el audio, su nombre ni la letra.":
+    "The report contains technical information only. It does not include audio, filenames or lyrics.",
+  "Descargar diagnóstico": "Download diagnostics",
+  "No se pudo acceder al almacenamiento de modelos. Prueba fuera de la navegación privada o revisa los datos de sitios.":
+    "Could not access model storage. Try outside private browsing or check your website data settings.",
+  "El análisis lleva demasiado tiempo. Prueba un fragmento más corto o Whisper Base.":
+    "Analysis is taking too long. Try a shorter clip or Whisper Base.",
+  "No se pudieron obtener los acordes. Prueba un fragmento más corto y descarga el diagnóstico para revisar el fallo.":
+    "Could not detect chords. Try a shorter clip and download the diagnostics to investigate the failure.",
   "Se guardan aquí para próximas canciones.": "Saved here for future songs.",
   "Se guardan aquí · Motor local: 25 MB adicionales.":
     "Saved here · Local engine: 25 MB extra.",

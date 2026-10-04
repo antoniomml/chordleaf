@@ -6,9 +6,25 @@ import languages from "../audio-languages.json" with { type: "json" };
 import { installedLyricModel, readAudioSettings } from "../audio-models.js";
 import { t } from "../i18n.js";
 import { analysisToText, validateAnalysis } from "../audio-import.js";
+import {
+  readAudioDiagnostic,
+  recoverAudioDiagnostic,
+  exportAudioDiagnostic,
+} from "../browser-audio/diagnostics.js";
 
 export function setupAudioImport({ accept, reportError }) {
   const $ = (id) => document.getElementById(id);
+  $("audio-diagnostic-privacy").textContent = t(
+    "El informe sólo contiene información técnica. No incluye el audio, su nombre ni la letra.",
+  );
+  const refreshDiagnostic = () => {
+    $("audio-diagnostic-options").hidden =
+      !readAudioDiagnostic() || Boolean(window.chordleafDesktop);
+  };
+  recoverAudioDiagnostic();
+  refreshDiagnostic();
+  window.addEventListener("audio-diagnostic-change", refreshDiagnostic);
+  $("audio-diagnostic-download").onclick = exportAudioDiagnostic;
   // Bind specifically to an audio element; a generic .src sink could target
   // an executable element if the shell were accidentally changed.
   const player = document.querySelector("audio#audio-player");
@@ -53,6 +69,7 @@ export function setupAudioImport({ accept, reportError }) {
     }
   };
   function showAnalysis(value) {
+    if (value) $("audio-diagnostic-options").open = false;
     $("audio-progress-view").hidden = !value;
     $("audio-upload-controls").hidden = value;
     $("audio-analysis-actions").hidden = value;
@@ -372,6 +389,8 @@ export function setupAudioImport({ accept, reportError }) {
         $("audio-language").disabled = false;
         $("audio-lyrics").disabled = lyricsUnavailable();
         updateAvailability();
+        if (!$("import-error").hidden)
+          $("import-error").scrollIntoView({ block: "nearest" });
       }
     }
   };

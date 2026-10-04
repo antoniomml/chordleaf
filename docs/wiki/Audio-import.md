@@ -18,7 +18,7 @@ This guide describes the public website's browser importer. The separate desktop
 
 ## Choose a lyric model
 
-The chord detector needs about **13 MB**. The shared local runtime adds about **25 MB** once. The following sizes are approximate additional lyric downloads; the chooser reports the files still missing on your device.
+The chord detector needs about **13 MB**. The CPU runtime adds about **14 MB** once; Qwen additionally downloads its GPU runtime, about **27 MB**. The following sizes are approximate additional lyric downloads; the chooser reports the files still missing on your device.
 
 | Choice                   | Additional download | Device requirements and intended use                                   |
 | ------------------------ | ------------------- | ---------------------------------------------------------------------- |
@@ -30,7 +30,7 @@ The chord detector needs about **13 MB**. The shared local runtime adds about **
 
 ![Browser model chooser with download sizes, required chords and optional lyrics](https://raw.githubusercontent.com/antoniomml/chordleaf/main/docs/images/audio-models-guide.png)
 
-Whisper runs in CPU/WASM without WebGPU. Qwen is disabled when compatible WebGPU is unavailable. A larger download does not guarantee correct lyrics for your recording. Singing, backing vocals, effects and dense arrangements can confuse the models; every result needs review. Models produce word timing for chord placement, which can still be approximate.
+Whisper runs in CPU/WASM without WebGPU. Start with Base on a phone: Small and Turbo need substantially more memory. Safari and other WebKit browsers use the CPU path; Qwen is disabled there, and wherever compatible WebGPU is unavailable. This does not mean Safari lacks WebGPU: Chordleaf uses its CPU runtime on WebKit to avoid Asyncify memory risks. A larger download does not guarantee correct lyrics for your recording. Singing, backing vocals, effects and dense arrangements can confuse the models; every result needs review. Models produce word timing for chord placement, which can still be approximate.
 
 ## Reuse or remove downloads
 
@@ -41,6 +41,8 @@ To change models or free space, open **New song → Import audio → Models and 
 If a download is interrupted, reopen the chooser and retry. Complete verified files are reused; an incomplete file downloads again from its beginning. **Pause download** stops the current transfer. Clearing all browser site data removes saved songs as well as models: export a workspace backup first. Backups contain songs and settings, not model files or recordings.
 
 ## When something goes wrong
+
+Open **Last attempt diagnostics → Download diagnostics** in the audio import screen to save a local technical report. It contains the model, browser and processing stages, without audio, filenames or lyrics, and is never sent automatically. An unfinished attempt recovered after reloading is marked as interrupted; this cannot establish whether Safari ran out of memory or you closed the page yourself.
 
 | What you see                           | What to try                                                                                                                    |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |

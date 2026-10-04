@@ -1,5 +1,7 @@
 # Audio en el navegador y YouTube · 2 de octubre de 2026
 
+**Actualización del 4 de octubre:** Whisper y los acordes usan ahora un motor de CPU sin Asyncify; Qwen se desactiva en Safari/WebKit y hay diagnóstico local descargable. Véase la [investigación de Safari/iPhone](audio-safari-investigation.es.md) para las pruebas, cambios de memoria y límites de la validación en un teléfono físico. Las mediciones originales de esta página corresponden al motor anterior.
+
 Chordleaf incorpora una importación íntegra en el navegador: Web Audio decodifica el archivo, un Worker ejecuta los modelos ONNX y al terminar se abre directamente la canción en el editor principal, sin una pantalla intermedia de revisión. No llama a `/api/audio-import` ni envía audio o letra a un servidor. La aplicación de escritorio conserva su motor nativo.
 
 ## Modelos y descarga

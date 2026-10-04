@@ -31,7 +31,7 @@ test("short neural intervals remain visible and time rounding carries minutes", 
 test("merge retains instrumental changes and assigns nearby sung onsets", () => {
   assert.equal(
     analysisToText(example()),
-    "[Intro] [C]\n[Am]Hoy [F]canto\n[Instrumental] [G]\n[C]aquí",
+    "[Intro] [C]\n[Am]Hoy [F]canto\n\n[Instrumental] [G]\n\n[C]aquí",
   );
 });
 

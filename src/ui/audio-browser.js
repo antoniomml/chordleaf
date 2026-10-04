@@ -1,4 +1,5 @@
 import { t } from "../i18n.js";
+import { beginAudioDiagnostic } from "../browser-audio/diagnostics.js";
 import {
   browserHardware,
   browserReadiness,
@@ -106,11 +107,17 @@ export function setupBrowserModels(refresh, busyChanged) {
       remove.disabled = busy;
     }
     $("browser-model-device").hidden = Boolean(hardware?.gpu);
-    $("browser-model-device").textContent = t("Necesita WebGPU compatible.");
+    $("browser-model-device").textContent = t(
+      hardware?.webkit
+        ? "En Safari usamos Whisper para reducir el consumo de memoria."
+        : "Necesita WebGPU compatible.",
+    );
     $("browser-model-note").textContent = t(
-      ready.runtimeDownloaded
-        ? "Se guardan aquí para próximas canciones."
-        : "Se guardan aquí · Motor local: 25 MB adicionales.",
+      hardware?.mobile && ["whisper-small", "whisper-turbo"].includes(selected)
+        ? "En móvil empieza con Whisper Base. Small y Turbo necesitan más memoria."
+        : ready.runtimeDownloaded
+          ? "Se guardan aquí para próximas canciones."
+          : "Los modelos y el motor se guardan aquí para próximas canciones.",
     );
     $("browser-chords-download").hidden = Boolean(ready.neural);
     $("browser-chords-download").disabled = busy;
@@ -186,6 +193,8 @@ export function setupBrowserModels(refresh, busyChanged) {
     const current = generation;
     let success = installed(bundle);
     if (!success) {
+      const diagnostic = beginAudioDiagnostic("download", { model: bundle });
+      let checkpoint = -1;
       controller = new AbortController();
       $("browser-model-progress").value = 0;
       $("browser-model-status").hidden = false;
@@ -193,12 +202,24 @@ export function setupBrowserModels(refresh, busyChanged) {
       render();
       try {
         await downloadBrowserModels(bundle, controller.signal, (value) => {
+          const step = Math.floor(value * 10);
+          if (step !== checkpoint) {
+            checkpoint = step;
+            diagnostic.step("downloading", {
+              percent: Math.floor(value * 100),
+            });
+          }
           $("browser-model-progress").value = value;
           $("browser-model-status").textContent =
             t`Descargando · ${Math.floor(value * 100)} %`;
         });
         success = true;
+        diagnostic.finish("completed");
       } catch (error) {
+        diagnostic.finish(
+          error.name === "AbortError" ? "cancelled" : "failed",
+          error,
+        );
         if (current === generation) {
           $("browser-model-status").hidden = false;
           $("browser-model-status").textContent = t(
