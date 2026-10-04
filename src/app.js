@@ -1355,7 +1355,7 @@ $("#pages").addEventListener("keydown", (event) => {
 const languagePicker = setupLanguagePicker({ persist, toast });
 // iOS keeps the layout viewport under the on-screen keyboard: mirror the
 // visual viewport height so the editor column stays usable.
-function syncVisualViewport() {
+function syncVisualViewport(event) {
   const viewport = window.visualViewport;
   const height = viewport?.height ?? window.innerHeight;
   const input = document.activeElement;
@@ -1374,16 +1374,19 @@ function syncVisualViewport() {
     `${Math.round(height)}px`,
   );
   // Shrinking a focused textarea does not make Safari scroll its end caret.
+  // Only adjust on resize: scrolling the caret can itself emit viewport scroll
+  // events, and fighting Safari's focus pan can starve its page rendering.
+  if (event?.type === "scroll") return;
   requestAnimationFrame(() => {
-    if (keyboardOpen && isMobileLayout() && viewport?.offsetTop > 0)
-      window.scrollTo(0, 0);
     if (
       document.activeElement === input &&
       input instanceof HTMLTextAreaElement &&
       input.selectionStart === input.selectionEnd &&
       input.selectionEnd === input.value.length
-    )
-      input.scrollTop = input.scrollHeight;
+    ) {
+      const bottom = input.scrollHeight - input.clientHeight;
+      if (input.scrollTop < bottom - 1) input.scrollTop = bottom;
+    }
   });
 }
 window.visualViewport?.addEventListener("resize", syncVisualViewport);
