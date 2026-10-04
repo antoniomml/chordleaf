@@ -42,6 +42,15 @@ test("ASR loop guard detects token cycles without discarding ordinary repeated p
     repetitionStart([9, ...Array.from({ length: 24 }, (_, i) => i % 3)]),
     { start: 1, keep: 6 },
   );
+  const sentence = Array.from({ length: 12 }, (_, i) => 100 + i);
+  assert.equal(repetitionStart(Array(6).fill(sentence).flat()), null);
+  assert.deepEqual(repetitionStart([9, ...Array(8).fill(sentence).flat()]), {
+    start: 1,
+    keep: 24,
+  });
+  const changedChorus = Array(8).fill(sentence).flat();
+  changedChorus[changedChorus.length - 1] = 1000;
+  assert.equal(repetitionStart(changedChorus), null);
 });
 
 test("alignment repairs inversions and zero duration without losing transcript order", () => {

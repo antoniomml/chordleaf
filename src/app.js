@@ -14,6 +14,7 @@ import shell from "./ui/shell.html?raw";
 import { t, getLocale } from "./i18n.js";
 import { createSong as create, assertTextLength } from "./song-state.js";
 import { createInlineEdits } from "./ui/inline-edits.js";
+import { setupSheetEditor } from "./ui/sheet-editor.js";
 import { setupChordsPanel } from "./chords-panel.js";
 import { setupDictionary } from "./dictionary-ui.js";
 import { setupEditorTools } from "./editor-tools.js";
@@ -117,9 +118,11 @@ const transposeHistory = new Map();
 let chordMode = "song";
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const song = () => songs.find((s) => s.id === active);
+let sheetEditor;
 const inlineEdits = createInlineEdits({
   changed,
   finished() {
+    sheetEditor?.close();
     renderSource();
     renderSettings();
     renderPages();
@@ -235,6 +238,9 @@ function scrollToOption(element, options) {
   });
 }
 $("#app").innerHTML = t(shell.replace(/\s+/g, " "));
+sheetEditor = setupSheetEditor({
+  finish: (options) => inlineEdits.finish(options),
+});
 $("#intro-content").innerHTML = introHtml(getLocale(), { features: false });
 const exportMenu = setupMenu($("#export"), $("#export-menu"));
 $("#toast").addEventListener("click", () => {
@@ -785,8 +791,10 @@ function editLine(el) {
   let edited = lines[endIndex];
   el.innerHTML = t`<textarea class="inline-editor" aria-label="Editar letra del verso">${esc(alignmentLine(edited).lyric)}</textarea>`;
   const input = el.firstChild;
-  input.focus();
+  const editDialog = sheetEditor.open(input, "lyric");
   inlineEdits.start(input, {
+    blurWithin: editDialog,
+    multiline: Boolean(editDialog),
     get: () => target.text,
     set: (value) => (target.text = value),
     read() {
@@ -800,6 +808,7 @@ function editLine(el) {
     },
     rejectInvalid: true,
   });
+  input.focus();
   input.onclick = (e) => e.stopPropagation();
 }
 function editChord(el) {
@@ -816,9 +825,9 @@ function editChord(el) {
   el.innerHTML = t`<input class="inline-chord-editor" aria-label="Editar acorde" autocomplete="off" spellcheck="false" value="${esc(mark.chord)}" />`;
   const input = el.firstChild;
   input.size = Math.max(3, mark.chord.length + 1);
-  input.focus();
-  input.select();
+  const editDialog = sheetEditor.open(input, "chord");
   inlineEdits.start(input, {
+    blurWithin: editDialog,
     get: () => target.text,
     set: (value) => (target.text = value),
     read() {
@@ -835,6 +844,8 @@ function editChord(el) {
       return text;
     },
   });
+  input.focus();
+  input.select();
   input.onclick = (event) => event.stopPropagation();
 }
 function resizePages() {
@@ -1353,6 +1364,12 @@ $("#pages").addEventListener("keydown", (event) => {
   next.focus();
 });
 const languagePicker = setupLanguagePicker({ persist, toast });
+$("#keyboard-done").onpointerdown = (event) => {
+  if (event.button === 0) event.preventDefault();
+};
+$("#keyboard-done").onmousedown = $("#keyboard-done").onpointerdown;
+$("#keyboard-done").onclick = () => document.activeElement?.blur();
+let crampedKeyboardTimer;
 // iOS keeps the layout viewport under the on-screen keyboard: mirror the
 // visual viewport height so the editor column stays usable.
 function syncVisualViewport(event) {
@@ -1360,12 +1377,41 @@ function syncVisualViewport(event) {
   const height = viewport?.height ?? window.innerHeight;
   const input = document.activeElement;
   const editing = input?.matches("input, textarea, [contenteditable=true]");
+  // Safari can shrink innerHeight during a focus pan. clientHeight keeps the
+  // layout viewport, so the same keyboard still gets its compact controls.
+  const layoutHeight = Math.max(
+    window.innerHeight,
+    document.documentElement.clientHeight,
+  );
   const keyboardOpen = Boolean(
-    editing &&
-    (viewport?.scale ?? 1) === 1 &&
-    height < window.innerHeight - 100,
+    editing && (viewport?.scale ?? 1) === 1 && height < layoutHeight - 100,
   );
   document.documentElement.toggleAttribute("data-keyboard-open", keyboardOpen);
+  const landscape = isMobileLayout() && window.innerWidth > window.innerHeight;
+  document.documentElement.toggleAttribute(
+    "data-keyboard-compact",
+    keyboardOpen && landscape && height < 220,
+  );
+  clearTimeout(crampedKeyboardTimer);
+  if (keyboardOpen && landscape && height < 96) {
+    // Safari's address/tab bars can consume every pixel above its landscape
+    // keyboard. Dismiss that unusable keyboard without changing the draft.
+    // The landscape document can be swiped to hide those bars, then retried.
+    crampedKeyboardTimer = setTimeout(() => {
+      if (
+        document.activeElement === input &&
+        (window.visualViewport?.height ?? window.innerHeight) < 96
+      ) {
+        input.blur();
+        toast(
+          t(
+            "Oculta las barras de Safari deslizando hacia arriba o gira el teléfono para escribir.",
+          ),
+          "warning",
+        );
+      }
+    }, 150);
+  }
   // Safari can report a negative height with a landscape software keyboard.
   // Keep the last valid layout instead of collapsing the editor and dialogs.
   if (!Number.isFinite(height) || height <= 0) return;
@@ -1395,10 +1441,21 @@ function syncVisualViewport(event) {
       const bottom = input.scrollHeight - input.clientHeight;
       if (input.scrollTop < bottom - 1) input.scrollTop = bottom;
     }
+    if (
+      document.activeElement === input &&
+      !(input instanceof HTMLTextAreaElement) &&
+      keyboardOpen &&
+      landscape
+    )
+      input.scrollIntoView({ block: "nearest" });
   });
 }
 window.visualViewport?.addEventListener("resize", syncVisualViewport);
 window.visualViewport?.addEventListener("scroll", syncVisualViewport);
+document.addEventListener("focusin", syncVisualViewport);
+document.addEventListener("focusout", () =>
+  requestAnimationFrame(syncVisualViewport),
+);
 syncVisualViewport();
 window.addEventListener("resize", () => {
   renderSettings();

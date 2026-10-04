@@ -1,5 +1,14 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  Edición: "Editing",
+  "Edita solo la letra. Los acordes mantienen su posición.":
+    "Edit only the lyrics. Chords keep their positions.",
+  "Oculta las barras de Safari deslizando hacia arriba o gira el teléfono para escribir.":
+    "Swipe up to hide Safari's bars or rotate your phone to type.",
+  "El modelo ha repetido frases. Prueba a seleccionar el idioma de la canción o un fragmento con la voz más clara.":
+    "The model repeated phrases. Try selecting the song's language or a clip with clearer vocals.",
+  "Si conoces el idioma de la canción, selecciónalo. Automático puede equivocarse con la música.":
+    "If you know the song's language, select it. Automatic detection can be wrong with music.",
   "Editar acorde": "Edit chord",
   "Introduce un acorde válido, por ejemplo C o Em7.":
     "Enter a valid chord, for example C or Em7.",

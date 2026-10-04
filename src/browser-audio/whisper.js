@@ -48,6 +48,7 @@ export async function loadBrowserWhisper(model = "whisper") {
   return {
     async transcribe(audio, language) {
       let partial = false;
+      let repeated = false;
       // Transformers.js 4.3 Whisper forwards logits processors, but drops
       // custom stopping criteria. Force EOS rather than allowing a sung loop
       // to fill the transcript up to the token limit.
@@ -55,8 +56,10 @@ export async function loadBrowserWhisper(model = "whisper") {
         _call(ids, logits) {
           const width = logits.dims.at(-1);
           for (let i = 0; i < ids.length; i++) {
-            if (repetitionStart(ids[i]) || ids[i].length >= 259) {
+            const loop = repetitionStart(ids[i]);
+            if (loop || ids[i].length >= 259) {
               partial = true;
+              repeated ||= Boolean(loop);
               logits.data.subarray(i * width, (i + 1) * width).fill(-Infinity);
               const configured =
                 transcriber.model.generation_config.eos_token_id;
@@ -78,7 +81,7 @@ export async function loadBrowserWhisper(model = "whisper") {
         logits_processor: criteria,
         ...(language !== "auto" ? { language } : {}),
       });
-      return { ...output, partial };
+      return { ...output, partial, repeated };
     },
     dispose: () => transcriber.dispose(),
   };

@@ -1,5 +1,8 @@
 export function repetitionStart(tokens) {
-  for (let size = 1; size <= 8; size++) {
+  // Sung hallucinations can repeat a complete sentence rather than a few
+  // tokens. Require at least eight identical cycles so ordinary chorus
+  // repetitions remain untouched.
+  for (let size = 1; size <= 32; size++) {
     const repeats = Math.max(8, Math.ceil(24 / size));
     const start = tokens.length - size * repeats;
     if (start < 0) continue;

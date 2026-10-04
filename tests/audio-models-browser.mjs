@@ -162,6 +162,8 @@ try {
     () => !document.querySelector("#audio-file").disabled,
   );
   assert.equal(await page.locator("#audio-model-dialog").isVisible(), false);
+  assert.equal(await page.locator("#audio-language").inputValue(), "fr");
+  assert.equal(await page.locator("#audio-language-help").isVisible(), false);
   // The saved Whisper preference wins even when Qwen becomes available later.
   await page.evaluate(() => {
     window.__audioTest.readiness.lyrics = true;

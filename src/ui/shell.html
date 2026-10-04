@@ -1,3 +1,7 @@
+<div id="keyboard-toolbar">
+  <span>Edición</span>
+  <button id="keyboard-done" type="button">Listo</button>
+</div>
 <header class="topbar">
   <div class="app-title">
     <a class="brand" href="./"
@@ -784,11 +788,15 @@
           class="audio-language-field"
           for="audio-language"
           ><span>Idioma</span
-          ><select id="audio-language">
+          ><select id="audio-language" aria-describedby="audio-language-help">
             <option value="auto">Automático</option>
           </select></label
         >
       </div>
+      <p id="audio-language-help" class="chord-help">
+        Si conoces el idioma de la canción, selecciónalo. Automático puede
+        equivocarse con la música.
+      </p>
     </div>
     <audio id="audio-player" controls preload="metadata" hidden></audio>
     <div id="audio-analysis-actions" class="dialog-actions">
@@ -973,4 +981,15 @@
   <p class="expanded-help">
     Los cambios se guardan mientras escribes. Escape vuelve al documento.
   </p>
+</dialog>
+<dialog id="sheet-edit-dialog" aria-labelledby="sheet-edit-title">
+  <header class="sheet-edit-header">
+    <h2 id="sheet-edit-title">Editar letra del verso</h2>
+    <button id="sheet-edit-cancel" type="button">Cancelar</button>
+    <button id="sheet-edit-done" type="button" class="primary">Listo</button>
+  </header>
+  <p id="sheet-edit-help" class="chord-help">
+    Edita solo la letra. Los acordes mantienen su posición.
+  </p>
+  <div id="sheet-edit-field"></div>
 </dialog>

@@ -51,6 +51,7 @@ self.onmessage = async ({ data }) => {
                 language,
               );
               if (output.partial) result.warnings.push("lyrics-partial");
+              if (output.repeated) result.warnings.push("lyrics-repeated");
               const raw = (output.chunks || [])
                 .map((word) => ({
                   text: String(word.text || "").trim(),

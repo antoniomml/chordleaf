@@ -4,6 +4,7 @@ import { setupBrowserModels, browserAudioPreference } from "./audio-browser.js";
 import { browserReadiness, browserHardware } from "../browser-audio/models.js";
 import languages from "../audio-languages.json" with { type: "json" };
 import { installedLyricModel, readAudioSettings } from "../audio-models.js";
+import { readAudioLanguage, saveAudioLanguage } from "../audio-language.js";
 import { t } from "../i18n.js";
 import { analysisToText, validateAnalysis } from "../audio-import.js";
 import {
@@ -44,6 +45,11 @@ export function setupAudioImport({ accept, reportError }) {
     option.textContent = language.label;
     $("audio-language").append(option);
   }
+  $("audio-language").value = readAudioLanguage();
+  $("audio-language").onchange = () => {
+    saveAudioLanguage($("audio-language").value);
+    updateAvailability();
+  };
   let lyricModel = "whisper";
   let controller,
     generation = 0,
@@ -98,6 +104,25 @@ export function setupAudioImport({ accept, reportError }) {
       "is-disabled",
       !$("audio-lyrics").checked,
     );
+    const languageHelpInactive =
+      !$("audio-lyrics").checked ||
+      $("audio-lyrics").disabled ||
+      $("audio-language").value !== "auto";
+    $("audio-language-help").toggleAttribute(
+      "data-inactive",
+      languageHelpInactive,
+    );
+    $("audio-language-help").setAttribute(
+      "aria-hidden",
+      String(languageHelpInactive),
+    );
+    if (languageHelpInactive)
+      $("audio-language").removeAttribute("aria-describedby");
+    else
+      $("audio-language").setAttribute(
+        "aria-describedby",
+        "audio-language-help",
+      );
     $("audio-lyrics-option").classList.toggle(
       "is-disabled",
       $("audio-lyrics").disabled,
@@ -356,6 +381,8 @@ export function setupAudioImport({ accept, reportError }) {
           "No se han detectado letra ni acordes. Prueba otra grabación.",
         );
       const notices = {
+        "lyrics-repeated":
+          "El modelo ha repetido frases. Prueba a seleccionar el idioma de la canción o un fragmento con la voz más clara.",
         "lyrics-failed":
           "No se pudo obtener la letra. Puedes añadirla en el editor.",
         "lyrics-partial":

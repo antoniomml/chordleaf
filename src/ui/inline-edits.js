@@ -52,8 +52,9 @@ export function createInlineEdits({ changed, finished, invalid }) {
         input.setCustomValidity?.("");
       }
     };
-    input.onblur = () => {
+    input.onblur = (event) => {
       if (current?.input !== input) return;
+      if (options.blurWithin?.contains(event.relatedTarget)) return;
       if (!finish()) finish({ cancel: true });
     };
     input.onkeydown = (event) => {
@@ -63,6 +64,7 @@ export function createInlineEdits({ changed, finished, invalid }) {
         event.stopPropagation();
         finish({ cancel: true });
       } else if (event.key === "Enter" && !event.shiftKey) {
+        if (options.multiline && !event.ctrlKey && !event.metaKey) return;
         event.preventDefault();
         event.stopPropagation();
         finish();

@@ -30,21 +30,23 @@ for (const [engine, mobile] of [
     await source.fill("[Cmaj7]Una [Em7]casa\n[G]\nUna canción\n[C] – [G]");
     await page.locator("#align-chords").click();
     const first = page.locator('.song-line[data-line="0"]');
-    await first.locator(".lyric").click();
+    await first.locator(".lyric").first().click();
     const lyrics = page.locator(".inline-editor");
     await expect(lyrics).toHaveValue("Una casa");
     await lyrics.press("Home");
     await lyrics.pressSequentially("En ");
-    await lyrics.press("Enter");
+    if (mobile) await page.locator("#sheet-edit-done").click();
+    else await lyrics.press("Enter");
     await expect(source).toHaveValue(
       "En [Cmaj7]Una [Em7]casa\n[G]\nUna canción\n[C] – [G]",
     );
-    await first.locator(".lyric").click();
+    await first.locator(".lyric").first().click();
     await lyrics.press("Home");
     await lyrics.press("Delete");
     await lyrics.press("Delete");
     await lyrics.press("Delete");
-    await lyrics.press("Enter");
+    if (mobile) await page.locator("#sheet-edit-done").click();
+    else await lyrics.press("Enter");
     await expect(source).toHaveValue(
       "[Cmaj7]Una [Em7]casa\n[G]\nUna canción\n[C] – [G]",
     );
@@ -74,7 +76,8 @@ for (const [engine, mobile] of [
     await page.locator('.song-line[data-line="1"] .lyric').click();
     await expect(lyrics).toHaveValue("Una canción");
     await lyrics.fill("Otra canción");
-    await lyrics.press("Enter");
+    if (mobile) await page.locator("#sheet-edit-done").click();
+    else await lyrics.press("Enter");
     await expect(source).toHaveValue(
       "[Cmaj7]Una [Am7]casa\n[G]\nOtra canción\n[C] – [G]",
     );
@@ -88,6 +91,37 @@ for (const [engine, mobile] of [
     await page.screenshot({
       path: `artifacts/lyric-editing-${engine.name()}-${mobile ? "mobile" : "desktop"}.png`,
     });
+    if (mobile) {
+      await page.locator('.rail [data-mobile-view="edit"]').click();
+      const long = `[C]${"Una letra inventada y larga para comprobar el ajuste. ".repeat(18)}[G]Final\n[Am]Otra línea`;
+      await source.fill(long);
+      await page.locator("#align-chords").click();
+      await first.locator(".lyric").first().click();
+      await expect(page.locator("#sheet-edit-dialog")).toBeVisible();
+      const rect = await lyrics.boundingBox();
+      assert.ok(rect.x >= 12 && rect.x + rect.width <= 378);
+      assert.equal(
+        await lyrics.evaluate((el) => getComputedStyle(el).fontSize),
+        "16px",
+      );
+      await lyrics.press("End");
+      await lyrics.press("Enter");
+      await lyrics.pressSequentially("Otra estrofa");
+      assert.match(await lyrics.inputValue(), /\nOtra estrofa/);
+      await page.locator("#sheet-edit-cancel").click();
+      await expect(source).toHaveValue(long);
+      await expect(page.locator("#sheet-edit-dialog")).not.toBeVisible();
+      await first.locator(".lyric").first().click();
+      await lyrics.press("Home");
+      await lyrics.pressSequentially("Inicio ");
+      await page.locator("#sheet-edit-done").click();
+      const saved = await source.inputValue();
+      assert.equal((saved.match(/\[C\]/g) || []).length, 1);
+      assert.equal((saved.match(/\[G\]/g) || []).length, 1);
+      assert.equal((saved.match(/\[Am\]/g) || []).length, 1);
+      await page.reload();
+      await expect(source).toHaveValue(saved);
+    }
     if (!mobile) {
       await page.locator("#pencil").click();
       await first.locator('[data-chord="Cmaj7"]').hover();

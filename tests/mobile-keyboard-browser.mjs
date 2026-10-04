@@ -140,6 +140,68 @@ for (const engine of [chromium, webkit]) {
       box.height >= 44 && box.y >= 88 && box.y + box.height <= 231,
       JSON.stringify(box),
     );
+    // A compact landscape keyboard keeps a 44px exit control and the field.
+    await page.locator("#source").focus();
+    await page.evaluate(() => {
+      window.testKeyboardHeight = 101;
+      visualViewport.dispatchEvent(new Event("resize"));
+      window.scrollTo(0, 120);
+    });
+    await expect(page.locator("#keyboard-done")).toBeVisible();
+    await expect(page.locator(".topbar")).not.toBeVisible();
+    await expect
+      .poll(async () => {
+        const bounds = await page.locator("#source").boundingBox();
+        return (
+          bounds.height >= 44 &&
+          bounds.y >= 44 &&
+          bounds.y + bounds.height <= 101
+        );
+      })
+      .toBe(true);
+    assert.ok(await page.evaluate(() => scrollY > 0));
+    await page.locator("#keyboard-done").click();
+    await expect(page.locator("#source")).not.toBeFocused();
+    await page.evaluate(() => {
+      window.testKeyboardHeight = 283;
+      visualViewport.dispatchEvent(new Event("resize"));
+    });
+    await page.locator('.rail [data-mobile-view="document"]').click();
+    await page.locator("#artist").focus();
+    await page.evaluate(() => {
+      // A real Safari focus pan shrank innerHeight to 195px while its layout
+      // viewport remained 283px; the 101px keyboard area still needs controls.
+      Object.defineProperty(window, "innerHeight", {
+        value: 195,
+        configurable: true,
+      });
+      window.testKeyboardHeight = 101;
+      visualViewport.dispatchEvent(new Event("resize"));
+    });
+    await expect(page.locator("#keyboard-done")).toBeVisible();
+    await expect
+      .poll(async () => {
+        const bounds = await page.locator("#artist").boundingBox();
+        return bounds.y >= 44 && bounds.y + bounds.height <= 101;
+      })
+      .toBe(true);
+    await page.locator("#keyboard-done").click();
+    await page.evaluate(() => {
+      window.testKeyboardHeight = 283;
+      visualViewport.dispatchEvent(new Event("resize"));
+    });
+    await page.locator('.rail [data-mobile-view="edit"]').click();
+    await page.locator("#source").focus();
+    await page.evaluate(() => {
+      window.testKeyboardHeight = -9;
+      visualViewport.dispatchEvent(new Event("resize"));
+    });
+    await expect(page.locator("#source")).not.toBeFocused();
+    await expect(page.locator("#source")).toHaveValue(
+      Array.from({ length: 30 }, (_, i) => `[C]Original line ${i + 1}`).join(
+        "\n",
+      ),
+    );
     const desktop = await browser.newPage({
       viewport: { width: 852, height: 283 },
     });
