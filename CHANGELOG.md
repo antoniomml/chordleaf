@@ -1,6 +1,6 @@
 # chordleaf changelog
 
-## Unreleased
+## 1.5.0 · October 4, 2026
 
 - Put phone lyric/chord edits in a viewport-sized dialog with Done/Cancel, multiline Return, preserved chord anchors and draft persistence. Keep its close controls in place during Safari touch/mouse focus changes.
 - Recover from a cramped landscape keyboard without losing text; allow Safari bars to collapse and keep a compact field/Done view visible. Use the layout viewport when Safari shrinks innerHeight during focus panning.
