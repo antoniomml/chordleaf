@@ -1,6 +1,6 @@
 # Mobile polish tasks
 
-Based on the physical iPhone 14 Pro / Safari audit on 4 October 2026. Prepared for the 1.5.0 release through PR #59. Preserve song text and chord anchors; keep audio processing local.
+Based on the physical iPhone 14 Pro / Safari audit on 4 October 2026. Prepared for the 1.5.0 release through PR #59 and its 1.5.1 model-panel follow-up through PR #60. Preserve song text and chord anchors; keep audio processing local.
 
 ## Completed baseline
 
@@ -18,7 +18,7 @@ Based on the physical iPhone 14 Pro / Safari audit on 4 October 2026. Prepared f
 ## Current implementation
 
 - [x] Fix the optional Whisper model list collapsing to 6px in a short landscape viewport; make the entire model dialog scroll and verify reachable Small/continue controls at 283px and 393px in Chromium/WebKit.
-- [ ] Recheck this model-panel correction on the physical phone and publish the 1.5.1 follow-up with matching production/tag metadata.
+- [x] Recheck the model-panel correction on the physical phone: native Small selection, native scrolling/continue, fresh Base download, Files import and exact reload persistence pass on the clean `a7d6ea4` preview.
 - [x] Make long direct lyric/chord edits fit the visible mobile screen without sheet scaling or horizontal panning; preserve anchors, autosave, cancellation and keyboard access.
 - [x] Investigate the physical landscape keyboard reporting a negative visual viewport; provide a usable compact editing flow and a recovery control when Safari leaves no editing space.
 - [x] Explain automatic language limitations and remember an explicitly chosen song language across dialogs/reloads, including blocked storage and UI language changes.
