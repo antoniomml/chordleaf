@@ -123,7 +123,9 @@ export async function downloadBrowserModels(bundle, signal, progress) {
     try {
       response = await fetch(absolute(file.url), {
         signal,
-        credentials: "omit",
+        // Same-origin files may be behind deployment authentication. This
+        // never sends this site's credentials to Hugging Face or its CDN.
+        credentials: "same-origin",
         referrerPolicy: "no-referrer",
       });
     } catch (error) {

@@ -43,9 +43,17 @@ for (const engine of [chromium, webkit]) {
       locale: "es-ES",
       serviceWorkers: "block",
     });
+    await context.addCookies([
+      {
+        name: "chordleaf-test-auth",
+        value: "verified",
+        url: new URL("/", url).href,
+      },
+    ]);
     const page = await context.newPage();
     const errors = [],
-      remote = [];
+      remote = [],
+      modelRequests = [];
     let phase = "import";
     page.on("pageerror", (error) => {
       console.log(
@@ -56,6 +64,8 @@ for (const engine of [chromium, webkit]) {
       errors.push(error.message);
     });
     page.on("request", (request) => {
+      if (new URL(request.url()).pathname.startsWith("/models/"))
+        modelRequests.push(request.allHeaders());
       if (
         new URL(request.url()).origin !== new URL(url).origin &&
         !request.url().startsWith("blob:")
@@ -88,6 +98,13 @@ for (const engine of [chromium, webkit]) {
     await expect(page.locator("#audio-browser-model-dialog")).not.toBeVisible({
       timeout: 60000,
     });
+    assert.ok(modelRequests.length > 0);
+    for (const headers of await Promise.all(modelRequests))
+      assert.match(
+        headers.cookie || "",
+        /chordleaf-test-auth=verified/,
+        "Same-origin model downloads retain deployment authentication",
+      );
     await page.locator("#audio-file").setInputFiles(file);
     await page.locator("#audio-analyze").click();
     await expect(page.locator("#new-dialog")).not.toBeVisible({
@@ -231,6 +248,37 @@ for (const engine of [chromium, webkit]) {
     await page.locator("#mobile-tab-plus").click();
     await page.locator("#audio").click();
     await expect(page.locator("#audio-diagnostic-options")).toBeVisible();
+    // Same-origin authentication must not carry over to a weight host, even
+    // when that host has its own eligible cookie. Stop before downloading
+    // voice weights; only the browser's actual outgoing headers are tested.
+    await context.addCookies([
+      {
+        name: "external-weight-auth",
+        value: "private",
+        domain: "huggingface.co",
+        path: "/",
+        sameSite: "None",
+        secure: true,
+      },
+    ]);
+    let voiceHeaders;
+    await page.route("https://huggingface.co/**", async (route) => {
+      voiceHeaders = await route.request().allHeaders();
+      await route.fulfill({ status: 503, body: "Unavailable" });
+    });
+    // Readiness may automatically open this modal after a reload. Request
+    // the same modal without racing a physical click under its backdrop.
+    await page.locator("#audio-model-settings").evaluate((e) => e.click());
+    await expect(page.locator("#audio-browser-model-dialog")).toBeVisible();
+    await page.locator("#browser-model-whisper").check();
+    await page.locator("#browser-model-next").click();
+    await expect(page.locator("#browser-model-status")).toContainText(
+      "conexión",
+    );
+    assert.ok(voiceHeaders);
+    assert.equal(voiceHeaders.cookie, undefined);
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#audio-browser-model-dialog")).not.toBeVisible();
     await page.addInitScript(() => {
       const open = CacheStorage.prototype.open;
       CacheStorage.prototype.open = function (name) {
