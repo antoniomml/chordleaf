@@ -21,11 +21,13 @@ Based on the physical iPhone 14 Pro / Safari audit on 4 October 2026. Work stays
 - [x] Investigate the physical landscape keyboard reporting a negative visual viewport; provide a usable compact editing flow and a recovery control when Safari leaves no editing space.
 - [x] Explain automatic language limitations and remember an explicitly chosen song language across dialogs/reloads, including blocked storage and UI language changes.
 - [x] Extend conservative Whisper loop protection to longer repeated phrases; keep ordinary chorus repetitions and expose incomplete results instead of claiming accuracy.
-- [ ] Recheck verse grouping on representative output, avoiding changes to recognized words or chord timing.
+- [x] Recheck verse grouping on representative output, avoiding changes to recognized words or chord timing.
 - [ ] Verify updated portrait/landscape keyboards and native audio import on the physical phone; repeat the relevant browser and persistence checks.
-- [ ] Verify offline inference and accepted-codec handling where feasible with owned fixtures; record unsupported cases and actionable errors.
-- [ ] Update the audit, user-facing guidance, screenshot and PR with measured results and remaining limitations.
+- [x] Verify offline inference and accepted-codec handling where feasible with owned fixtures; record unsupported cases and actionable errors.
+- [x] Update the audit, user-facing guidance, screenshot and PR with measured results and remaining limitations.
 
 ## Limits requiring additional evidence
 
 These are test coverage items, not confirmed application defects. Do not claim they pass without testing: private browsing, exhausted storage, prolonged battery/thermal stress, screen readers, 200% zoom, ten-minute recordings and other iOS versions. Permanent PDF saving through Share/Files and a native JSON reimport remain unverified. Sung-word and chord accuracy need a representative reference corpus; a successful import or a line-planning change cannot establish accuracy.
+
+The functional changes are committed at `bd1566a`. All 196 unit tests, all 37 browser suites, the Chromium/Firefox/WebKit CI matrix and Mac checks pass. Locally generated Spanish speech completed Base/chord inference as WAV, AAC/M4A, MP3, FLAC and Vorbis/OGG in Chromium and WebKit; the four non-WAV Chromium runs also completed with the browser offline. These are desktop engine tests, not additional physical iPhone codec/offline certifications. The updated editor passes automated accessibility checks; this does not certify screen readers. The final clean phone replay is pending reconnection after Device Hub lost the physical device.

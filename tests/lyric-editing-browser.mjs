@@ -1,6 +1,7 @@
 import { chromium, webkit, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
+import axe from "axe-core";
 
 await mkdir("artifacts", { recursive: true });
 for (const [engine, mobile] of [
@@ -17,6 +18,7 @@ for (const [engine, mobile] of [
         : { width: 1440, height: 1000 },
       isMobile: mobile,
       hasTouch: mobile,
+      bypassCSP: true,
     });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
@@ -104,6 +106,20 @@ for (const [engine, mobile] of [
         await lyrics.evaluate((el) => getComputedStyle(el).fontSize),
         "16px",
       );
+      await page.addScriptTag({ content: axe.source });
+      const audit = await page.evaluate(() =>
+        axe.run(document.querySelector("#sheet-edit-dialog")),
+      );
+      assert.deepEqual(
+        audit.violations.map(({ id, nodes }) => ({
+          id,
+          targets: nodes.map(({ target }) => target),
+        })),
+        [],
+      );
+      await page.screenshot({
+        path: `artifacts/sheet-edit-dialog-${engine.name()}.png`,
+      });
       await lyrics.press("End");
       await lyrics.press("Enter");
       await lyrics.pressSequentially("Otra estrofa");

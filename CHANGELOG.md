@@ -2,13 +2,17 @@
 
 ## Unreleased
 
+- Put phone lyric/chord edits in a viewport-sized dialog with Done/Cancel, multiline Return, preserved chord anchors and draft persistence. Keep its close controls in place during Safari touch/mouse focus changes.
+- Recover from a cramped landscape keyboard without losing text; allow Safari bars to collapse and keep a compact field/Done view visible. Use the layout viewport when Safari shrinks innerHeight during focus panning.
+- Remember the song transcription language, explain Automatic's limits, and stop longer Whisper repetition loops with a review warning.
+
 - Keep deployment authentication on same-origin model downloads while omitting credentials on external model requests.
 - Whisper Turbo is unavailable on iPhone and iPad after a physical iPhone test reproduced a Safari reload during its download. Base and Small remain available.
 - Keep the phone workspace in landscape, respect the notch safe area, follow Safari keyboard panning without forcing window scrolling and fit import dialogs above the software keyboard.
 - Run browser Whisper and chord inference with the CPU runtime without Asyncify, reduce audio/download memory copies, and offer Whisper rather than Qwen on Safari/WebKit.
 - Add downloadable local audio diagnostics, recover interrupted attempts after reload, and handle blocked model storage and stalled workers without losing existing songs.
 - Use sung phrase duration and breaths to plan lyric lines, keep negations/pronouns with the following phrase, and separate stanzas after long pauses without changing words or chord intervals.
-- Verify real chord inference and audio failure recovery on Chromium/WebKit; document physical iPhone Base/Small WAV/M4A imports, native file selection, real keyboard controls, exports and the remaining landscape keyboard limitation.
+- Verify real chord inference and audio failure recovery on Chromium/WebKit; document physical iPhone Base/Small WAV/M4A imports, native file selection, real keyboard controls, exports and the landscape keyboard recovery flow.
 
 - Replace the desktop packager's legacy download cache dependency with Electron's Fetch-based downloader, removing the dependency affected by GHSA-ch52-4w7c-c8xp.
 - Add a five-minute Spanish introduction with current desktop/phone controls and original demo screenshots, plus a browser audio guide covering model choices, downloads, removal and troubleshooting.

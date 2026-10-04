@@ -12,7 +12,7 @@ This guide describes the public website's browser importer. The separate desktop
 2. Keep **LV-Chordia**, the required chord detector. Choose **Whisper Base** for a smaller first lyric download, or **Do not transcribe lyrics** if you only need chords.
 3. Review the displayed download sizes, then select **Download and continue**. Visiting Chordleaf or selecting a model does not start a download by itself. **Next** appears when the selected models are already on the device.
 4. Choose a recording, or drop a file onto the upload area. The importer accepts MP3, WAV, M4A, FLAC or OGG when the browser can decode them, up to **30 MB** and **10 minutes**, with a minimum duration of one second. Try a short WAV or MP3 first if your format fails.
-5. Keep **Include lyrics** enabled to transcribe words and choose their language, or leave **Automatic**. This setting describes the recording's language; changing EN/ES changes the interface. Disable Include lyrics for chord detection alone.
+5. Keep **Include lyrics** enabled to transcribe words and select the song language when you know it. **Automatic** can choose the wrong language over music and produce repeated phrases. Your explicit choice is remembered for the next import and after reopening this browser; changing EN/ES changes the interface, not the recording language. Disable Include lyrics for chord detection alone.
 6. Select **Get lyrics and chords** or **Get chords**. Keep the window open while it processes. **Cancel**, closing the dialog or going back stops the operation. Processing time depends on the recording, model and device; progress measures completed work, not time remaining.
 7. When analysis finishes, the resulting song opens in the editor and saves in this browser. Correct words in **Lyrics**, use **Align** to position chords, then review the page layout. Download an editable project or workspace backup to keep a portable copy.
 
@@ -42,7 +42,7 @@ If a download is interrupted, reopen the chooser and retry. Complete verified fi
 
 ## When something goes wrong
 
-Open **Last attempt diagnostics → Download diagnostics** in the audio import screen to save a local technical report. It contains the model, browser and processing stages, without audio, filenames or lyrics, and is never sent automatically. An unfinished attempt recovered after reloading is marked as interrupted; this cannot establish whether Safari ran out of memory or you closed the page yourself.
+Open **Last attempt diagnostics → Download diagnostics** in the audio import screen to save a local technical report. It contains the model, browser and processing stages, without audio, filenames or lyrics, and is never sent automatically. When Whisper detects a prolonged repeated phrase, it stops that fragment and warns that the lyrics need review. Ordinary repeated chorus phrases are retained. An unfinished attempt recovered after reloading is marked as interrupted; this cannot establish whether Safari ran out of memory or you closed the page yourself.
 
 | What you see                           | What to try                                                                                                                    |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -51,7 +51,7 @@ Open **Last attempt diagnostics → Download diagnostics** in the audio import s
 | Qwen is unavailable                    | Choose Whisper or chords only; Qwen needs compatible WebGPU.                                                                   |
 | File cannot be read                    | Try WAV or MP3, or convert the file locally to a format your browser can decode.                                               |
 | Analysis is slow or runs out of memory | Try a shorter recording, a smaller model or a computer with more available memory.                                             |
-| Words are missing or incorrect         | Correct or paste the lyrics in the editor; the result is a draft.                                                              |
+| Words are missing or incorrect         | Select the song language, try a clearer vocal fragment, then correct or paste the lyrics; the result is a draft.               |
 | Chords or timing are wrong             | Listen to the recording and edit the chord names and anchors with Align.                                                       |
 | No song opens                          | If neither lyrics nor chords are detected, the importer keeps the recording screen and shows a message. Try another recording. |
 
