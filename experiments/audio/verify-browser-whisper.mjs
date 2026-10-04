@@ -1,7 +1,7 @@
 // Opt-in real CPU inference on local audio. No private fixtures enter Git.
 // Run download-browser-research.py, build, start the static site, then:
 // CHORDLEAF_URL=http://127.0.0.1:5191 node experiments/audio/verify-browser-whisper.mjs /absolute/audio.wav
-import { chromium } from "@playwright/test";
+import { chromium, webkit, firefox, devices } from "@playwright/test";
 import assert from "node:assert/strict";
 import { writeFile, mkdtemp, rm } from "node:fs/promises";
 import { createReadStream } from "node:fs";
@@ -9,9 +9,13 @@ import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import catalog from "../../src/browser-audio/catalog.json" with { type: "json" };
+import { waitForPwaActivation } from "../../tests/helpers/pwa-ready.mjs";
 if (!process.argv[2])
   throw new Error("Provide local audio paths for verification");
 const model = process.env.CHORDLEAF_VOICE_MODEL || "whisper";
+const browserName = process.env.CHORDLEAF_BROWSER || "chromium";
+const browser = { chromium, webkit, firefox }[browserName];
+if (!browser) throw new Error("Unknown browser engine");
 if (!["whisper", "whisper-small", "whisper-turbo"].includes(model))
   throw new Error("Unknown Whisper model");
 // Stream large weights directly to Chromium. Playwright's route.fulfill
@@ -38,7 +42,7 @@ await new Promise((resolve) => assets.listen(0, "127.0.0.1", resolve));
 // A regular disk-backed profile mirrors the installed PWA. Incognito contexts
 // impose a memory-only Blob limit below Turbo's 645 MB encoder file.
 const profile = await mkdtemp(join(tmpdir(), "chordleaf-whisper-"));
-const context = await chromium.launchPersistentContext(profile, {
+const context = await browser.launchPersistentContext(profile, {
   headless: true,
   locale: "es-ES",
   // The pinned public-weight requests are redirected to a temporary local
@@ -46,6 +50,7 @@ const context = await chromium.launchPersistentContext(profile, {
   // origins; only this local verifier needs that extra connection origin.
   bypassCSP: true,
   viewport: { width: 1280, height: 720 },
+  ...(browserName === "webkit" ? devices["iPhone 14 Pro"] : {}),
 });
 try {
   const page = await context.newPage();
@@ -54,7 +59,8 @@ try {
     remote = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
-    if (message.type() === "error") console.log("Browser:", message.text());
+    if (["error", "warning"].includes(message.type()))
+      console.log("Browser:", message.text());
   });
   page.on("requestfailed", (request) =>
     console.log("Failed request:", request.url(), request.failure()),
@@ -129,13 +135,21 @@ try {
     throw error;
   }
   await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
-  console.log(`${model}: verified weights saved; starting offline inference`);
+  await page.evaluate(waitForPwaActivation);
+  const offline = browserName !== "webkit";
+  console.log(
+    `${model}: verified weights saved; starting ${browserName} inference`,
+  );
   const downloaded = remote.length;
-  await context.setOffline(true);
+  // Playwright WebKit's offline switch also blocks service-worker responses.
+  // Assert zero external requests below instead of breaking cached imports.
+  if (offline) await context.setOffline(true);
   const results = [];
   for (let i = 2; i < process.argv.length; i++) {
     if (i > 2) {
-      await page.locator("#new").click();
+      await page
+        .locator(browserName === "webkit" ? "#mobile-tab-plus" : "#new")
+        .click();
       await page.locator("#audio").click();
     }
     await page.waitForFunction(
@@ -163,9 +177,30 @@ try {
       await page.locator("#audio-upload-controls").isVisible(),
       false,
     );
-    await page
-      .locator("#new-dialog")
-      .waitFor({ state: "hidden", timeout: 180000 });
+    try {
+      await Promise.race([
+        page
+          .locator("#new-dialog")
+          .waitFor({ state: "hidden", timeout: 180000 }),
+        page
+          .locator("#import-error")
+          .waitFor({ state: "visible", timeout: 180000 })
+          .then(async () => {
+            throw new Error(await page.locator("#import-error").textContent());
+          }),
+      ]);
+    } catch (error) {
+      console.log(
+        "Analysis state:",
+        await page.locator("#audio-status").textContent(),
+      );
+      console.log(
+        "Analysis error:",
+        await page.locator("#import-error").textContent(),
+      );
+      console.log("Progress:", await page.evaluate(() => window.voiceProgress));
+      throw error;
+    }
     const result = await page.evaluate(() => window.voiceResults.at(-1));
     assert.match(result.engines.lyrics, /Whisper/);
     assert.ok(
@@ -209,13 +244,13 @@ try {
   assert.deepEqual(errors, []);
   await writeFile(
     new URL(
-      `../../artifacts/browser-audio/${model}-cpu-${process.env.CHORDLEAF_VOICE_LANGUAGE || "auto"}-results.json`,
+      `../../artifacts/browser-audio/${model}-${browserName}-cpu-${process.env.CHORDLEAF_VOICE_LANGUAGE || "auto"}-results.json`,
       import.meta.url,
     ),
     JSON.stringify(results, null, 2),
   );
   console.log(
-    `Real Whisper CPU: ${results.length} offline imports, word timestamps, compact dialog and local editor creation passed.`,
+    `Real Whisper CPU (${browserName}): ${results.length} local imports, no external inference requests, word timestamps, compact dialog and editor creation passed.`,
   );
 } finally {
   await context.close();

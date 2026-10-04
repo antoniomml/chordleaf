@@ -46,6 +46,9 @@
 body {
   margin: 0;
 }
+#keyboard-toolbar {
+  display: none;
+}
 button,
 input,
 textarea {
@@ -487,7 +490,8 @@ button.primary {
   margin: 5px 6px;
   background: #464f40;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   #empty-state {
     justify-content: flex-start;
     gap: 36px;
@@ -1685,7 +1689,8 @@ button:disabled {
   opacity: 0.4;
   cursor: default;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   dialog {
     width: calc(100% - 24px);
     max-height: 90dvh;
@@ -2489,8 +2494,24 @@ select:focus-visible {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
+  #empty-state {
+    padding-left: max(32px, env(safe-area-inset-left));
+    padding-right: max(32px, env(safe-area-inset-right));
+  }
+  .tabs-wrap {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
   /* iOS Safari zooms the page when a focused form control uses text below 16px. */
+  body:has(main:not([hidden]), dialog[open]) {
+    position: fixed;
+    top: var(--visual-viewport-top, 0px);
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+  }
   #app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
   #app textarea,
   #app select,
@@ -2504,7 +2525,8 @@ select:focus-visible {
   }
   .topbar {
     height: calc(52px + env(safe-area-inset-top));
-    padding: env(safe-area-inset-top) 12px 0;
+    padding: env(safe-area-inset-top) max(12px, env(safe-area-inset-right)) 0
+      max(12px, env(safe-area-inset-left));
   }
   .degree {
     min-height: 44px;
@@ -2587,6 +2609,8 @@ select:focus-visible {
     order: 1;
     display: block;
     width: 100%;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
     flex: 1;
     min-height: 0;
     overflow: hidden;
@@ -2622,6 +2646,16 @@ select:focus-visible {
   main[data-mobile-view="edit"] .source-container {
     min-height: 0;
   }
+  html[data-keyboard-open] main[data-mobile-view="edit"] .source-help,
+  html[data-keyboard-open] main[data-mobile-view="edit"] .editor-foot {
+    display: none;
+  }
+  html[data-keyboard-open] main[data-mobile-view="edit"] .source-heading {
+    padding: 0 14px;
+  }
+  html[data-keyboard-open] #search-chords > .chord-help:first-of-type {
+    display: none;
+  }
   .rail {
     order: 2;
     width: 100%;
@@ -2629,7 +2663,9 @@ select:focus-visible {
     flex: 0 0 auto;
     flex-direction: row;
     gap: 3px;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    padding: 6px max(8px, env(safe-area-inset-right))
+      calc(6px + env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
     border-right: 0;
     border-top: 1px solid #3b4538;
     background: #1b201c;
@@ -2724,6 +2760,9 @@ select:focus-visible {
   }
   #settings .stepper button {
     width: 44px;
+  }
+  #settings .stepper input {
+    min-height: 44px;
   }
   #settings .stepper span {
     font-size: 13px;
@@ -2929,7 +2968,8 @@ select:focus-visible {
   }
 }
 
-@media (max-width: 760px) and (max-height: 500px) and (min-width: 560px) {
+@media (max-width: 760px) and (max-height: 500px) and (min-width: 560px),
+  (max-width: 1024px) and (max-height: 500px) and (min-width: 560px) and (hover: none) and (pointer: coarse) {
   .topbar {
     height: calc(44px + env(safe-area-inset-top));
   }
@@ -2942,8 +2982,12 @@ select:focus-visible {
   .rail {
     height: calc(52px + env(safe-area-inset-bottom));
   }
-  main[data-mobile-view="edit"] .editor-panel .source-help {
+  main[data-mobile-view="edit"] .editor-panel .source-help,
+  main[data-mobile-view="edit"] .editor-panel .editor-foot {
     display: none;
+  }
+  main[data-mobile-view="edit"] .source-heading {
+    padding: 0 14px;
   }
   .preview-toolbar {
     bottom: 8px;
@@ -2958,7 +3002,8 @@ select:focus-visible {
 
 @media (max-width: 480px) {
   .topbar {
-    padding: env(safe-area-inset-top) 12px 0;
+    padding: env(safe-area-inset-top) max(12px, env(safe-area-inset-right)) 0
+      max(12px, env(safe-area-inset-left));
   }
   .topbar .brand {
     font-size: 20px;
@@ -3023,7 +3068,8 @@ select:focus-visible {
 #settings .stepper #undo-transpose:disabled:hover {
   background: #ffffff06;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   #settings .stepper #undo-transpose {
     width: 44px;
   }
@@ -3070,7 +3116,8 @@ select:focus-visible {
   font-size: 13px;
   line-height: 1.5;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   #shape-dialog .shape-fretboard .guitar-string,
   #shape-dialog .shape-fretboard .fret-numbers,
   #shape-dialog .shape-fretboard .fret-markers {
@@ -3085,7 +3132,10 @@ select:focus-visible {
 }
 
 /* Desktop rail views give settings and lyrics the full editor column. */
-@media (min-width: 761px) {
+@media (min-width: 1025px),
+  (min-width: 761px) and (min-height: 501px),
+  (min-width: 761px) and (hover: hover),
+  (min-width: 761px) and (pointer: fine) {
   main[data-desktop-view="document"] #source-area,
   main[data-desktop-view="edit"] #settings {
     display: none;
@@ -3107,6 +3157,7 @@ select:focus-visible {
   html,
   body {
     height: auto !important;
+    position: static !important;
     background: #fff !important;
   }
   .topbar,
@@ -3327,6 +3378,9 @@ select:focus-visible {
   max-width: 180px;
   border-color: transparent;
   background: #ffffff05;
+}
+#audio-language-help[data-inactive] {
+  visibility: hidden;
 }
 #audio-analysis-actions #audio-model-settings {
   display: flex;
@@ -3847,7 +3901,8 @@ select:focus-visible {
   }
 }
 
-#new-dialog.is-analyzing-audio #audio-status {
+#new-dialog.is-analyzing-audio #audio-status,
+#new-dialog.is-analyzing-audio #audio-diagnostic-options {
   display: none;
 }
 
@@ -3967,7 +4022,8 @@ select:focus-visible {
   line-height: 1.2;
   white-space: pre;
 }
-@media (max-width: 760px) {
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   #sheet-alignment-tools {
     bottom: 70px;
   }
@@ -4088,4 +4144,192 @@ select:focus-visible {
   background: #fff;
   border: 1px solid #9ca893;
   border-radius: 3px;
+}
+
+#sheet-edit-dialog {
+  width: min(700px, calc(100% - 24px));
+  padding: 16px;
+}
+#sheet-edit-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sheet-edit-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.sheet-edit-header h2 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 18px;
+}
+.sheet-edit-header button {
+  min-height: 44px;
+  flex-shrink: 0;
+  padding: 8px 10px;
+}
+#sheet-edit-help {
+  margin: 0;
+}
+#sheet-edit-field {
+  display: flex;
+  min-height: 0;
+}
+#sheet-edit-field .inline-editor {
+  position: static;
+  width: 100%;
+  height: min(240px, calc(var(--visual-viewport-height, 100dvh) - 150px));
+  min-height: 44px;
+  padding: 10px;
+  resize: none;
+  overflow-wrap: anywhere;
+  font:
+    16px/1.5 "Google Sans Code",
+    monospace;
+  color: #e5e7df;
+  background: #202421;
+}
+#sheet-edit-field .inline-chord-editor {
+  width: 100%;
+  max-width: none;
+  min-height: 44px;
+  font-size: 16px;
+}
+
+@media (max-width: 760px) and (max-height: 500px) and (min-width: 560px),
+  (max-width: 1024px) and (max-height: 500px) and (min-width: 560px) and (hover: none) and (pointer: coarse) {
+  /* A real root swipe lets Safari collapse its address/tab bars. The sticky
+     workspace remains visible while the small extra scroll range is used. */
+  html {
+    overflow-x: clip;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
+  }
+  body:has(main:not([hidden])) {
+    position: relative;
+    top: 0;
+    min-height: calc(100lvh + 160px);
+    overflow: visible;
+  }
+  body:has(main:not([hidden])) #app {
+    position: sticky;
+    top: var(--visual-viewport-top, 0px);
+    left: 0;
+    width: 100%;
+  }
+  html[data-keyboard-compact] .topbar,
+  html[data-keyboard-compact] .tabs-wrap,
+  html[data-keyboard-compact] .rail,
+  html[data-keyboard-compact] .source-heading {
+    display: none;
+  }
+  html[data-keyboard-compact] #app:not(:has(dialog[open])) #keyboard-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    padding: 0 max(14px, env(safe-area-inset-right)) 0
+      max(14px, env(safe-area-inset-left));
+    background: #1e231f;
+    box-shadow: inset 0 -1px var(--border);
+  }
+  #keyboard-done {
+    min-height: 44px;
+    min-width: 64px;
+    color: var(--green);
+    font-weight: 650;
+  }
+  html[data-keyboard-compact] main {
+    height: calc(var(--visual-viewport-height, 100dvh) - 44px);
+  }
+  html[data-keyboard-compact] #settings {
+    padding-top: 4px;
+  }
+  html[data-keyboard-compact] #settings > .panel-title {
+    display: none;
+  }
+  html[data-keyboard-compact] #source {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  html[data-keyboard-compact] #sheet-edit-dialog[open] {
+    padding: 4px 12px;
+    gap: 4px;
+    max-height: var(--visual-viewport-height, 100dvh);
+    width: calc(
+      100% - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)
+    );
+  }
+  html[data-keyboard-compact] #sheet-edit-title {
+    font-size: 14px;
+  }
+  html[data-keyboard-compact] #sheet-edit-help {
+    display: none;
+  }
+  html[data-keyboard-compact] #sheet-edit-field .inline-editor {
+    height: max(44px, calc(var(--visual-viewport-height, 100dvh) - 56px));
+    padding: 4px 8px;
+  }
+  html[data-keyboard-compact] #editor-dialog[open] {
+    height: var(--visual-viewport-height, 100dvh);
+    max-height: var(--visual-viewport-height, 100dvh);
+    padding: 4px 12px;
+  }
+  html[data-keyboard-compact] #editor-dialog .expanded-header {
+    height: 44px;
+    flex-shrink: 0;
+  }
+  html[data-keyboard-compact] #editor-dialog .expanded-header h2 {
+    font-size: 14px;
+  }
+  #collapse-editor {
+    min-height: 44px;
+  }
+  html[data-keyboard-compact] #editor-dialog .expanded-help,
+  html[data-keyboard-compact] #editor-dialog .source-help,
+  html[data-keyboard-compact] #editor-dialog .editor-foot {
+    display: none;
+  }
+  html[data-keyboard-compact] #editor-dialog .source-container {
+    min-height: 0;
+  }
+}
+
+/* Mobile dialogs stay inside the space above the software keyboard. */
+@media (max-width: 760px),
+  (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
+  dialog[open] {
+    position: fixed;
+    top: calc(
+      var(--visual-viewport-top, 0px) + var(--visual-viewport-height, 100dvh) /
+        2
+    );
+    bottom: auto;
+    transform: translateY(-50%);
+    margin-top: 0;
+    margin-bottom: 0;
+    max-height: calc(min(100dvh, var(--visual-viewport-height, 100dvh)) - 32px);
+    overflow-y: auto;
+  }
+  #new-dialog,
+  #editor-dialog,
+  #shape-dialog,
+  #audio-browser-model-dialog {
+    max-height: calc(min(100dvh, var(--visual-viewport-height, 100dvh)) - 32px);
+  }
+  #import-back,
+  #web-submit,
+  #audio-cancel,
+  #compress-blank-lines,
+  .browser-model-download,
+  .audio-text-button {
+    min-height: 44px;
+  }
 }

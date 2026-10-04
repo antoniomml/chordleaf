@@ -1,5 +1,14 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  Edición: "Editing",
+  "Edita solo la letra. Los acordes mantienen su posición.":
+    "Edit only the lyrics. Chords keep their positions.",
+  "Oculta las barras de Safari deslizando hacia arriba o gira el teléfono para escribir.":
+    "Swipe up to hide Safari's bars or rotate your phone to type.",
+  "El modelo ha repetido frases. Prueba a seleccionar el idioma de la canción o un fragmento con la voz más clara.":
+    "The model repeated phrases. Try selecting the song's language or a clip with clearer vocals.",
+  "Si conoces el idioma de la canción, selecciónalo. Automático puede equivocarse con la música.":
+    "If you know the song's language, select it. Automatic detection can be wrong with music.",
   "Editar acorde": "Edit chord",
   "Introduce un acorde válido, por ejemplo C o Em7.":
     "Enter a valid chord, for example C or Em7.",
@@ -7,6 +16,24 @@ export default {
   "Qwen 0,6B": "Qwen 0.6B",
   "No extraer letra": "Do not transcribe lyrics",
   "Necesita WebGPU compatible.": "Requires compatible WebGPU.",
+  "En Safari usamos Whisper para reducir el consumo de memoria.":
+    "Safari uses Whisper to reduce memory usage.",
+  "Turbo no está disponible en iPhone y iPad para evitar que Safari recargue la página. Usa Base o Small.":
+    "Turbo is unavailable on iPhone and iPad to prevent Safari from reloading the page. Use Base or Small.",
+  "En móvil empieza con Whisper Base. Small y Turbo necesitan más memoria.":
+    "On mobile, start with Whisper Base. Small and Turbo need more memory.",
+  "Los modelos y el motor se guardan aquí para próximas canciones.":
+    "Models and the engine are saved here for future songs.",
+  "Diagnóstico del último intento": "Last attempt diagnostics",
+  "El informe sólo contiene información técnica. No incluye el audio, su nombre ni la letra.":
+    "The report contains technical information only. It does not include audio, filenames or lyrics.",
+  "Descargar diagnóstico": "Download diagnostics",
+  "No se pudo acceder al almacenamiento de modelos. Prueba fuera de la navegación privada o revisa los datos de sitios.":
+    "Could not access model storage. Try outside private browsing or check your website data settings.",
+  "El análisis lleva demasiado tiempo. Prueba un fragmento más corto o Whisper Base.":
+    "Analysis is taking too long. Try a shorter clip or Whisper Base.",
+  "No se pudieron obtener los acordes. Prueba un fragmento más corto y descarga el diagnóstico para revisar el fallo.":
+    "Could not detect chords. Try a shorter clip and download the diagnostics to investigate the failure.",
   "Se guardan aquí para próximas canciones.": "Saved here for future songs.",
   "Se guardan aquí · Motor local: 25 MB adicionales.":
     "Saved here · Local engine: 25 MB extra.",

@@ -1,5 +1,6 @@
 import catalog from "./catalog.json" with { type: "json" };
-import { runtimeURLs } from "./runtime.js";
+import { runtimeURLs, gpuRuntimeURLs } from "./runtime.js";
+import { audioHardware, supportsBrowserModel } from "./hardware.js";
 import { whisperModels, browserLyricModels } from "./lyric-models.js";
 
 export const MODEL_CACHE = "chordleaf-audio-models-v1";
@@ -15,18 +16,26 @@ export const bundleBytes = (bundle) =>
 const resources = (bundle) => [
   ...bundles[bundle].flatMap((k) => catalog[k]),
   ...Object.values(runtimeURLs).map((url) => ({ url })),
+  ...(bundle === "qwen"
+    ? Object.values(gpuRuntimeURLs).map((url) => ({ url }))
+    : []),
 ];
 const absolute = (url) => new URL(url, self.location.origin).href;
 export async function browserHardware() {
-  const adapter = await navigator.gpu?.requestAdapter().catch(() => null);
-  return {
-    gpu: Boolean(adapter?.features.has("shader-f16")),
-  };
+  return audioHardware(navigator);
 }
 export async function browserReadiness() {
+  try {
+    return await readBrowserReadiness();
+  } catch {
+    return { available: false, neural: false, qwen: false };
+  }
+}
+async function readBrowserReadiness() {
   if (!self.caches || !self.isSecureContext)
     return { available: false, neural: false, qwen: false };
-  const cache = await caches.open(MODEL_CACHE);
+  const cache = await caches.open(MODEL_CACHE).catch(() => null);
+  if (!cache) return { available: false, neural: false, qwen: false };
   const cached = new Map();
   const allFiles = new Map(
     Object.keys(bundles)
@@ -50,14 +59,22 @@ export async function browserReadiness() {
     names.every((name) => catalog[name].every((file) => cached.get(file.url)));
   const neural = installed("chords");
   const qwenDownloaded = installed("qwen");
+  const hardware = await browserHardware();
   const lyricModels = Object.fromEntries(
     browserLyricModels.map((name) => [name, installed(name)]),
   );
   return {
     available: neural,
     neural,
-    lyrics: Object.keys(whisperModels).some((name) => lyricModels[name]),
-    ...lyricModels,
+    lyrics: Object.keys(whisperModels).some(
+      (name) => lyricModels[name] && supportsBrowserModel(name, hardware),
+    ),
+    ...Object.fromEntries(
+      browserLyricModels.map((name) => [
+        name,
+        lyricModels[name] && supportsBrowserModel(name, hardware),
+      ]),
+    ),
     modelDownloads: lyricModels,
     voiceDownloads: Object.fromEntries(
       browserLyricModels.map((name) => [
@@ -74,7 +91,7 @@ export async function browserReadiness() {
     whisper: installed("whisper"),
     whisperDownloaded: installed("whisper"),
     hasWhisperFiles: hasFiles(["whisper"]),
-    qwen: qwenDownloaded && (await browserHardware()).gpu,
+    qwen: qwenDownloaded && hardware.gpu,
     qwenDownloaded,
     qwenVoiceDownloaded: voiceInstalled(["qwen", "aligner"]),
     whisperVoiceDownloaded: voiceInstalled(["whisper"]),
@@ -90,8 +107,22 @@ export async function browserReadiness() {
 }
 export async function downloadBrowserModels(bundle, signal, progress) {
   if (!bundles[bundle]) throw new Error("Unknown browser model");
-  const cache = await caches.open(MODEL_CACHE),
-    files = resources(bundle);
+  if (
+    bundle === "whisper-turbo" &&
+    !supportsBrowserModel(bundle, await browserHardware())
+  )
+    throw new Error(
+      "Turbo no está disponible en iPhone y iPad para evitar que Safari recargue la página. Usa Base o Small.",
+    );
+  let cache;
+  try {
+    cache = await caches.open(MODEL_CACHE);
+  } catch {
+    throw new Error(
+      "No se pudo acceder al almacenamiento de modelos. Prueba fuera de la navegación privada o revisa los datos de sitios.",
+    );
+  }
+  const files = resources(bundle);
   const missing = [];
   for (const file of files)
     if (!(await cache.match(absolute(file.url)))) missing.push(file);
@@ -107,7 +138,9 @@ export async function downloadBrowserModels(bundle, signal, progress) {
     try {
       response = await fetch(absolute(file.url), {
         signal,
-        credentials: "omit",
+        // Same-origin files may be behind deployment authentication. This
+        // never sends this site's credentials to Hugging Face or its CDN.
+        credentials: "same-origin",
         referrerPolicy: "no-referrer",
       });
     } catch (error) {
@@ -116,23 +149,25 @@ export async function downloadBrowserModels(bundle, signal, progress) {
     }
     if (!response.ok)
       throw new Error("No se pudo descargar el modelo. Comprueba la conexión.");
-    const reader = response.body.getReader(),
-      parts = [];
+    const reader = response.body.getReader();
+    // Pinned weights have a known length. Fill one buffer rather than keeping
+    // hundreds of network chunks, a Blob and a second complete ArrayBuffer.
+    const buffer = file.bytes ? new Uint8Array(file.bytes) : null;
+    const parts = [];
     let bytes = 0;
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       signal.throwIfAborted();
-      parts.push(value);
       bytes += value.length;
       if (file.bytes && bytes > file.bytes) {
         await reader.cancel();
         throw new Error("Tamaño de modelo incorrecto");
       }
+      if (buffer) buffer.set(value, bytes - value.length);
+      else parts.push(value);
       progress(Math.min(1, (completed + bytes) / Math.max(required, 1)));
     }
-    const blob = new Blob(parts),
-      buffer = await blob.arrayBuffer();
     if (file.bytes && bytes !== file.bytes)
       throw new Error("Descarga incompleta");
     if (file.sha256) {
@@ -150,7 +185,7 @@ export async function downloadBrowserModels(bundle, signal, progress) {
     try {
       await cache.put(
         absolute(file.url),
-        new Response(blob, {
+        new Response(buffer || new Blob(parts), {
           headers: {
             "Content-Type": file.url.endsWith(".wasm")
               ? "application/wasm"

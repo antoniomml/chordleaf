@@ -1,3 +1,4 @@
+import { isMobileLayout } from "./mobile-layout.js";
 import { alignmentLine, replaceAlignedLyrics } from "./chord-alignment.js";
 import { setupSongExport } from "./ui/song-export.js";
 import { setupSongImport } from "./ui/song-import.js";
@@ -13,6 +14,7 @@ import shell from "./ui/shell.html?raw";
 import { t, getLocale } from "./i18n.js";
 import { createSong as create, assertTextLength } from "./song-state.js";
 import { createInlineEdits } from "./ui/inline-edits.js";
+import { setupSheetEditor } from "./ui/sheet-editor.js";
 import { setupChordsPanel } from "./chords-panel.js";
 import { setupDictionary } from "./dictionary-ui.js";
 import { setupEditorTools } from "./editor-tools.js";
@@ -116,9 +118,11 @@ const transposeHistory = new Map();
 let chordMode = "song";
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const song = () => songs.find((s) => s.id === active);
+let sheetEditor;
 const inlineEdits = createInlineEdits({
   changed,
   finished() {
+    sheetEditor?.close();
     renderSource();
     renderSettings();
     renderPages();
@@ -234,6 +238,9 @@ function scrollToOption(element, options) {
   });
 }
 $("#app").innerHTML = t(shell.replace(/\s+/g, " "));
+sheetEditor = setupSheetEditor({
+  finish: (options) => inlineEdits.finish(options),
+});
 $("#intro-content").innerHTML = introHtml(getLocale(), { features: false });
 const exportMenu = setupMenu($("#export"), $("#export-menu"));
 $("#toast").addEventListener("click", () => {
@@ -439,7 +446,7 @@ function sectionForDesktop(view) {
   return ["song", "search", "identify"].includes(view) ? "chords" : "document";
 }
 function syncSection() {
-  const mobile = window.matchMedia("(max-width: 760px)").matches;
+  const mobile = isMobileLayout();
   section = mobile
     ? mobileView === "music"
       ? musicSection
@@ -575,7 +582,7 @@ function renderSettingsContent() {
   if (compressButton) compressButton.onclick = compressBlanks;
 }
 function updateNavigation() {
-  const mobile = window.matchMedia("(max-width: 760px)").matches;
+  const mobile = isMobileLayout();
   $("main").dataset.mobileView = mobileView;
   $("main").dataset.desktopView = desktopView;
   $("main").dataset.editorSection = section;
@@ -784,8 +791,10 @@ function editLine(el) {
   let edited = lines[endIndex];
   el.innerHTML = t`<textarea class="inline-editor" aria-label="Editar letra del verso">${esc(alignmentLine(edited).lyric)}</textarea>`;
   const input = el.firstChild;
-  input.focus();
+  const editDialog = sheetEditor.open(input, "lyric");
   inlineEdits.start(input, {
+    blurWithin: editDialog,
+    multiline: Boolean(editDialog),
     get: () => target.text,
     set: (value) => (target.text = value),
     read() {
@@ -799,6 +808,7 @@ function editLine(el) {
     },
     rejectInvalid: true,
   });
+  input.focus();
   input.onclick = (e) => e.stopPropagation();
 }
 function editChord(el) {
@@ -815,9 +825,9 @@ function editChord(el) {
   el.innerHTML = t`<input class="inline-chord-editor" aria-label="Editar acorde" autocomplete="off" spellcheck="false" value="${esc(mark.chord)}" />`;
   const input = el.firstChild;
   input.size = Math.max(3, mark.chord.length + 1);
-  input.focus();
-  input.select();
+  const editDialog = sheetEditor.open(input, "chord");
   inlineEdits.start(input, {
+    blurWithin: editDialog,
     get: () => target.text,
     set: (value) => (target.text = value),
     read() {
@@ -834,12 +844,14 @@ function editChord(el) {
       return text;
     },
   });
+  input.focus();
+  input.select();
   input.onclick = (event) => event.stopPropagation();
 }
 function resizePages() {
   const width = $("#pages-scroll").clientWidth;
   if (!width) return;
-  const gutter = window.matchMedia("(max-width: 760px)").matches ? 24 : 64;
+  const gutter = isMobileLayout() ? 24 : 64;
   const available = width - gutter,
     scale =
       Math.max(
@@ -1226,7 +1238,7 @@ document.addEventListener("click", (e) => {
   }
 });
 function setSheetEditing(next) {
-  const mobile = window.matchMedia("(max-width: 760px)").matches;
+  const mobile = isMobileLayout();
   if (next && !editing && mobile) {
     const scale = Math.max(
       0.2,
@@ -1352,17 +1364,98 @@ $("#pages").addEventListener("keydown", (event) => {
   next.focus();
 });
 const languagePicker = setupLanguagePicker({ persist, toast });
+$("#keyboard-done").onpointerdown = (event) => {
+  if (event.button === 0) event.preventDefault();
+};
+$("#keyboard-done").onmousedown = $("#keyboard-done").onpointerdown;
+$("#keyboard-done").onclick = () => document.activeElement?.blur();
+let crampedKeyboardTimer;
 // iOS keeps the layout viewport under the on-screen keyboard: mirror the
 // visual viewport height so the editor column stays usable.
-function syncVisualViewport() {
-  const height = window.visualViewport?.height ?? window.innerHeight;
+function syncVisualViewport(event) {
+  const viewport = window.visualViewport;
+  const height = viewport?.height ?? window.innerHeight;
+  const input = document.activeElement;
+  const editing = input?.matches("input, textarea, [contenteditable=true]");
+  // Safari can shrink innerHeight during a focus pan. clientHeight keeps the
+  // layout viewport, so the same keyboard still gets its compact controls.
+  const layoutHeight = Math.max(
+    window.innerHeight,
+    document.documentElement.clientHeight,
+  );
+  const keyboardOpen = Boolean(
+    editing && (viewport?.scale ?? 1) === 1 && height < layoutHeight - 100,
+  );
+  document.documentElement.toggleAttribute("data-keyboard-open", keyboardOpen);
+  const landscape = isMobileLayout() && window.innerWidth > window.innerHeight;
+  document.documentElement.toggleAttribute(
+    "data-keyboard-compact",
+    keyboardOpen && landscape && height < 220,
+  );
+  clearTimeout(crampedKeyboardTimer);
+  if (keyboardOpen && landscape && height < 96) {
+    // Safari's address/tab bars can consume every pixel above its landscape
+    // keyboard. Dismiss that unusable keyboard without changing the draft.
+    // The landscape document can be swiped to hide those bars, then retried.
+    crampedKeyboardTimer = setTimeout(() => {
+      if (
+        document.activeElement === input &&
+        (window.visualViewport?.height ?? window.innerHeight) < 96
+      ) {
+        input.blur();
+        toast(
+          t(
+            "Oculta las barras de Safari deslizando hacia arriba o gira el teléfono para escribir.",
+          ),
+          "warning",
+        );
+      }
+    }, 150);
+  }
+  // Safari can report a negative height with a landscape software keyboard.
+  // Keep the last valid layout instead of collapsing the editor and dialogs.
+  if (!Number.isFinite(height) || height <= 0) return;
   document.documentElement.style.setProperty(
     "--visual-viewport-height",
     `${Math.round(height)}px`,
   );
+  // Safari may pan the visual viewport to a caret even with a fixed body.
+  // Follow that offset without scrolling the window back against its focus pan.
+  const offset = viewport?.scale === 1 ? viewport.offsetTop : 0;
+  const top = Number.isFinite(offset) ? Math.max(0, offset) : 0;
+  document.documentElement.style.setProperty(
+    "--visual-viewport-top",
+    `${top}px`,
+  );
+  // Shrinking a focused textarea does not make Safari scroll its end caret.
+  // Only adjust on resize: scrolling the caret can itself emit viewport scroll
+  // events, and fighting Safari's focus pan can starve its page rendering.
+  if (event?.type === "scroll") return;
+  requestAnimationFrame(() => {
+    if (
+      document.activeElement === input &&
+      input instanceof HTMLTextAreaElement &&
+      input.selectionStart === input.selectionEnd &&
+      input.selectionEnd === input.value.length
+    ) {
+      const bottom = input.scrollHeight - input.clientHeight;
+      if (input.scrollTop < bottom - 1) input.scrollTop = bottom;
+    }
+    if (
+      document.activeElement === input &&
+      !(input instanceof HTMLTextAreaElement) &&
+      keyboardOpen &&
+      landscape
+    )
+      input.scrollIntoView({ block: "nearest" });
+  });
 }
 window.visualViewport?.addEventListener("resize", syncVisualViewport);
 window.visualViewport?.addEventListener("scroll", syncVisualViewport);
+document.addEventListener("focusin", syncVisualViewport);
+document.addEventListener("focusout", () =>
+  requestAnimationFrame(syncVisualViewport),
+);
 syncVisualViewport();
 window.addEventListener("resize", () => {
   renderSettings();

@@ -47,11 +47,11 @@ In `mor[Emaj7]ning`, **n** is the chord’s reference character. Labels use thei
 
 Drag the vertical divider to resize the editor. Focus it with Tab and use Left/Right; Home or double-click restores its starting width. On mobile, switch between **Lyrics** and **Preview** with the bottom navigation; pinch the sheet to zoom.
 
-The expand icon beside **Lyrics and chords** opens a larger editor with the same text, cursor and undo history. **Done** or Escape returns to the document. Changes save while typing.
+The expand icon beside **Lyrics and chords** opens a larger editor with the same text, cursor and undo history. **Done** or Escape returns to the document. Changes save while typing. In landscape Safari, swipe up over the top bar to hide the browser bars before typing. The compact keyboard view keeps the field and **Done** visible. If Safari leaves no usable space, the keyboard closes with guidance and your text stays saved; portrait offers more space.
 
 The preview opens at a readable A4 width. **Fit to width** expands it to the available space and follows changes to the editor width.
 
-The preview's pencil enables editing directly on the sheet. Select the lyric to edit only its words: chord tokens are hidden in this editor and follow their anchored text as you insert or delete words. Enter commits, Escape cancels and Shift+Enter adds a line break. The **Lyrics** section keeps the complete source with chord brackets for raw editing.
+The preview's pencil enables editing directly on the sheet. Select the lyric to edit only its words: chord tokens are hidden in this editor and follow their anchored text as you insert or delete words. On a phone, a separate editor fits the visible screen: **Done** confirms, **Cancel** restores the original verse, and Return adds a line break. With a hardware keyboard, Ctrl/Cmd+Enter also confirms and Escape cancels. On desktop, Enter commits and Shift+Enter adds a line break. The **Lyrics** section keeps the complete source with chord brackets for raw editing.
 
 Use **Align** beside the text editor's expand control, or enable the preview pencil, to move chords directly on the sheet. Drag a chord over the lyric; the highlighted cell shows its target letter. A compact floating set of controls appears when you select a chord, showing only its name. Tap that name to rename just the chord; on desktop you can also double-click the chord directly. The left/right buttons move it one character at a time; a focused chord also accepts Left/Right, Home and End. On phones, alignment opens the sheet and increases the view zoom when needed so lyrics remain readable. Page edges scroll while you drag. The **Done** action or the preview pencil ends editing and restores the previous view zoom.
 

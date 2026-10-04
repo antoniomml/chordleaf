@@ -1,3 +1,4 @@
+import { isMobileLayout } from "./mobile-layout.js";
 /** UI-only workspace controls. The expanded editor moves the existing textarea,
  * so selection, undo history and autosave have a single source of truth. */
 export function setupEditorTools({ resizePages }) {
@@ -56,7 +57,7 @@ export function setupEditorTools({ resizePages }) {
   };
   splitter.ondblclick = () => setWidth(365);
   window.addEventListener("resize", () => {
-    if (window.matchMedia("(max-width: 760px)").matches) return;
+    if (isMobileLayout()) return;
     const savedWidth = parseFloat(
       workspace.style.getPropertyValue("--editor-width"),
     );

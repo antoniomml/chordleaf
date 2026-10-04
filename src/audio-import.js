@@ -124,6 +124,10 @@ export function analysisToText(input) {
     if (starts.has(position)) flush();
     // Breaths are part of the lyric phrase, not instrumental interludes.
     if (gap > 3) {
+      if (previous) {
+        flush();
+        if (lines.length && lines.at(-1) !== "") lines.push("");
+      }
       const events = [];
       while (
         index < chords.length &&
@@ -135,6 +139,7 @@ export function analysisToText(input) {
       }
       if (events.length)
         instrumental(events, previous ? "Instrumental" : "Intro");
+      if (previous && events.length) lines.push("");
     }
     let prefix = "";
     const changes = [];

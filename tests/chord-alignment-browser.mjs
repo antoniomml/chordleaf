@@ -285,8 +285,8 @@ try {
       await page
         .locator(".inline-editor")
         .evaluate((el) => getComputedStyle(el).outlineStyle),
-      "none",
-      "editing a verse does not add a green focus frame",
+      mobile ? "solid" : "none",
+      "the mobile dialog marks its field; desktop sheet editing stays unframed",
     );
     await page.locator(".inline-editor").press("Escape");
     assert.equal(

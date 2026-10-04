@@ -31,7 +31,7 @@ Los acordes entre corchetes aparecen sobre la letra en la hoja. Pon el acorde ju
 
 Pulsa **Alinear**, junto al editor de letra. En el móvil se abre la hoja para trabajar sobre ella. Selecciona un acorde y arrástralo a la letra donde debe sonar; las flechas de sus controles lo mueven letra a letra. Pulsa el nombre del acorde en esos controles para cambiarlo. **Listo** termina la alineación.
 
-Para corregir palabras directamente sobre la hoja, activa el lápiz de la vista previa y pulsa un verso. **Enter** confirma, **Escape** cancela y **Mayús + Enter** añade un salto de línea. También puedes seguir editando el texto completo desde **Letra**.
+Para corregir palabras directamente sobre la hoja, activa el lápiz de la vista previa y pulsa un verso. En el móvil se abre un editor que cabe en la pantalla: **Listo** confirma, **Cancelar** restaura el verso y la tecla de retorno añade un salto de línea. Con teclado físico, **Ctrl/Cmd + Enter** también confirma y **Escape** cancela. En el ordenador, **Enter** confirma y **Mayús + Enter** añade un salto. También puedes seguir editando el texto completo desde **Letra**. En Safari horizontal, desliza hacia arriba sobre la barra superior para ocultar las barras del navegador antes de escribir. La vista compacta deja el campo y **Listo** accesibles. Si Safari no deja espacio, se cierra el teclado con una indicación y se conserva lo escrito; en vertical hay más espacio.
 
 ## 4. Prepara la hoja para tocar
 
@@ -49,4 +49,4 @@ Descarga también **Exportar → Descargar proyecto editable**. Ese archivo `.ch
 
 La canción se guarda automáticamente en este navegador. Al cerrar su pestaña dentro de Chordleaf pasa a **Recientes**; **Ver todas** muestra la lista completa. Para guardar todas tus canciones abiertas y cerradas de una vez, usa **Exportar → Copia de seguridad · JSON**. Exporta esa copia antes de borrar los datos del sitio o cambiar de dispositivo: el guardado local no sincroniza navegadores.
 
-¿Quieres partir de una grabación? La [guía de importación de audio (inglés)](https://github.com/antoniomml/chordleaf/wiki/Audio-import) explica las descargas y los límites de esta función experimental. Para problemas de importación o guardado, consulta las [preguntas frecuentes (inglés)](https://github.com/antoniomml/chordleaf/wiki/Common-questions).
+¿Quieres partir de una grabación? La [guía de importación de audio (inglés)](https://github.com/antoniomml/chordleaf/wiki/Audio-import) explica las descargas y los límites de esta función experimental. Si conoces el idioma de la canción, selecciónalo: Automático puede equivocarse con la música. Se recuerda esa elección para la siguiente importación. Para problemas de importación o guardado, consulta las [preguntas frecuentes (inglés)](https://github.com/antoniomml/chordleaf/wiki/Common-questions).

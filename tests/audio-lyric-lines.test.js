@@ -97,3 +97,30 @@ test("a complete short sentence can end a verse without treating every ASR full 
     "It's not the words I want to hear from you.",
   ]);
 });
+
+test("slow sung phrases split at a breath without losing words or using ASR chunk IDs", () => {
+  const words = wordsFor(
+    "Quiero estar contigo y sentir tu luz quiero estar contigo y sentir tu voz",
+  );
+  for (const [i, word] of words.entries()) {
+    word.start = i * 1.2 + (i >= 7 ? 0.8 : 0);
+    word.end = word.start + 1.2;
+  }
+  assert.deepEqual(lines(words), [
+    "Quiero estar contigo y sentir tu luz",
+    "quiero estar contigo y sentir tu voz",
+  ]);
+});
+
+test("long gaps separate lyric stanzas even when harmony continues", () => {
+  const data = {
+    version: 1,
+    duration: 12,
+    words: [
+      { text: "Vuelve conmigo", start: 1, end: 3, line: 0 },
+      { text: "Vuelve otra vez", start: 8, end: 10, line: 1 },
+    ],
+    chords: [{ label: "C", start: 1, end: 12 }],
+  };
+  assert.equal(analysisToText(data), "[C]Vuelve conmigo\n\nVuelve otra vez");
+});

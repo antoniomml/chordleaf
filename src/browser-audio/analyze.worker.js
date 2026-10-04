@@ -1,5 +1,5 @@
 import * as ort from "onnxruntime-web/webgpu";
-import { runtimeURLs } from "./runtime.js";
+import { runtimeURLs, gpuRuntimeURLs } from "./runtime.js";
 import { readBrowserModel } from "./models.js";
 import { loadBrowserWhisper } from "./whisper.js";
 import { loadQwen } from "./qwen.js";
@@ -24,7 +24,9 @@ self.onmessage = async ({ data }) => {
         gpu,
         lyricsEngine = "qwen",
       } = data,
-      duration = audio.length / 16000;
+      duration = harmony.length / 22050;
+    const useGPU = Boolean(lyrics && lyricsEngine === "qwen" && gpu);
+    ort.env.wasm.wasmPaths = useGPU ? gpuRuntimeURLs : runtimeURLs;
     const result = {
       version: 1,
       duration,
@@ -49,6 +51,7 @@ self.onmessage = async ({ data }) => {
                 language,
               );
               if (output.partial) result.warnings.push("lyrics-partial");
+              if (output.repeated) result.warnings.push("lyrics-repeated");
               const raw = (output.chunks || [])
                 .map((word) => ({
                   text: String(word.text || "").trim(),
@@ -164,7 +167,7 @@ self.onmessage = async ({ data }) => {
           "Detectando acordes…",
           (lyrics ? 84 : 8) + (lyrics ? 13 : 89) * fraction,
         ),
-      gpu,
+      useGPU,
     );
     result.warnings = [...new Set(result.warnings)];
     result.metrics = { seconds: (performance.now() - started) / 1000 };
@@ -172,8 +175,10 @@ self.onmessage = async ({ data }) => {
   } catch (error) {
     console.error("Browser chord analysis failed", error);
     self.postMessage({
+      diagnostic: String(error.message || error).slice(0, 500),
+      stage: "chords-failed",
       error:
-        "No se pudieron obtener los acordes en este navegador. Prueba un fragmento más corto o Chrome/Edge actualizado.",
+        "No se pudieron obtener los acordes. Prueba un fragmento más corto y descarga el diagnóstico para revisar el fallo.",
     });
   }
 };

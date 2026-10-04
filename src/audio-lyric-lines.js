@@ -1,7 +1,7 @@
 // Sheet layout only: preserve the model's words, timings and chord anchors.
 // Model chunk IDs are computation boundaries, not musical verse boundaries.
 const dangling =
-  /^(?:a|an|the|of|to|and|or|but|if|in|on|for|with|my|your|de|del|el|la|los|las|un|una|unos|unas|y|o|que|con|por|para)$/iu;
+  /^(?:a|an|the|of|to|and|or|but|if|in|on|for|with|my|your|i|you|we|he|she|it|not|is|are|was|were|will|would|can|could|should|have|has|de|del|al|el|la|los|las|un|una|unos|unas|y|o|que|con|por|para|no|ni|me|te|se|nos|os|le|les|lo|su|sus|mi|mis)$/iu;
 const phraseEnd = /[.!?。！？]["'»”)]?$/u;
 
 export function lyricLineStarts(words) {
@@ -21,17 +21,28 @@ export function lyricLineStarts(words) {
         // Choose the whole run jointly, so a greedy long line cannot leave
         // two orphaned words on the final line. Short actual phrases can stay.
         let cost = ((length - 44) / 20) ** 2 + Math.max(0, 24 - length) * 0.12;
+        // Sung lines can span several musical phrases. Approximate groups
+        // cannot establish breaths, so only use measured word durations here.
+        if (
+          !["grouped", "segment"].includes(word.timing) &&
+          !["grouped", "segment"].includes(words[segment + i].timing)
+        ) {
+          const seconds = word.end - words[segment + i].start;
+          cost += (Math.max(0, seconds - 8) / 4) ** 2;
+        }
         if (j < size) {
           const pause = words[segment + j].start - word.end;
-          cost -= pause >= 1.2 ? 1.8 : pause >= 0.55 ? 0.9 : 0;
+          cost -= pause >= 1.2 ? 2.8 : pause >= 0.55 ? 1.4 : 0;
           cost -= phraseEnd.test(word.text)
             ? length >= 18
               ? 1.8
               : 0.25
             : /[,;:，；：]$/u.test(word.text)
-              ? 0.25
+              ? length >= 18
+                ? 0.7
+                : 0.25
               : 0;
-          if (dangling.test(word.text)) cost += 1.4;
+          if (dangling.test(word.text)) cost += 3.5;
         }
         cost += costs[j];
         if (cost < costs[i]) {
