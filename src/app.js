@@ -1373,6 +1373,14 @@ function syncVisualViewport(event) {
     "--visual-viewport-height",
     `${Math.round(height)}px`,
   );
+  // Safari may pan the visual viewport to a caret even with a fixed body.
+  // Follow that offset without scrolling the window back against its focus pan.
+  const offset = viewport?.scale === 1 ? viewport.offsetTop : 0;
+  const top = Number.isFinite(offset) ? Math.max(0, offset) : 0;
+  document.documentElement.style.setProperty(
+    "--visual-viewport-top",
+    `${top}px`,
+  );
   // Shrinking a focused textarea does not make Safari scroll its end caret.
   // Only adjust on resize: scrolling the caret can itself emit viewport scroll
   // events, and fighting Safari's focus pan can starve its page rendering.

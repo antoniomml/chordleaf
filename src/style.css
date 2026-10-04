@@ -2504,7 +2504,7 @@ select:focus-visible {
   /* iOS Safari zooms the page when a focused form control uses text below 16px. */
   body:has(main:not([hidden]), dialog[open]) {
     position: fixed;
-    top: 0;
+    top: var(--visual-viewport-top, 0px);
     left: 0;
     width: 100%;
     overflow: hidden;
@@ -4145,7 +4145,10 @@ select:focus-visible {
   (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
   dialog[open] {
     position: fixed;
-    top: calc(var(--visual-viewport-height, 100dvh) / 2);
+    top: calc(
+      var(--visual-viewport-top, 0px) + var(--visual-viewport-height, 100dvh) /
+        2
+    );
     bottom: auto;
     transform: translateY(-50%);
     margin-top: 0;

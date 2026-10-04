@@ -18,6 +18,10 @@ for (const engine of [chromium, webkit]) {
       Object.defineProperty(visualViewport, "height", {
         get: () => window.testKeyboardHeight,
       });
+      window.testViewportTop = 0;
+      Object.defineProperty(visualViewport, "offsetTop", {
+        get: () => window.testViewportTop,
+      });
     });
     await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173");
     // The first import also needs usable bounds before a song exists.
@@ -34,10 +38,18 @@ for (const engine of [chromium, webkit]) {
     await page.locator("#web-submit").click({ trial: true });
     box = await page.locator("#web-submit").boundingBox();
     assert.ok(box.height >= 44 && box.y >= 16 && box.y + box.height <= 349);
+    // Safari's focus pan can move the visible origin even with a fixed body.
+    await page.evaluate(() => {
+      window.testViewportTop = 73;
+      visualViewport.dispatchEvent(new Event("scroll"));
+    });
+    box = await dialog.boundingBox();
+    assert.ok(box.y >= 89 && box.y + box.height <= 423);
     await page.keyboard.press("Escape");
     await expect(dialog).not.toBeVisible();
     await page.evaluate(() => {
       window.testKeyboardHeight = 695;
+      window.testViewportTop = 0;
       visualViewport.dispatchEvent(new Event("resize"));
     });
     await page.locator("#empty-new").click();
@@ -49,6 +61,18 @@ for (const engine of [chromium, webkit]) {
     });
     assert.equal(await page.evaluate(() => scrollY), 0);
     await page.locator("#artist").fill("Demo artist");
+    await page.evaluate(() => {
+      window.testViewportTop = 185;
+      visualViewport.dispatchEvent(new Event("scroll"));
+    });
+    box = await page.locator(".topbar").boundingBox();
+    assert.equal(box.y, 185);
+    box = await page.locator(".rail").boundingBox();
+    assert.ok(box.y >= 185 && box.y + box.height <= 550);
+    await page.evaluate(() => {
+      window.testViewportTop = 0;
+      visualViewport.dispatchEvent(new Event("scroll"));
+    });
     box = await page.locator(".rail").boundingBox();
     assert.ok(box.y >= 0 && box.y + box.height <= 365);
     box = await page.locator("#artist").boundingBox();
