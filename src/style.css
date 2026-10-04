@@ -2493,6 +2493,14 @@ select:focus-visible {
 
 @media (max-width: 760px),
   (max-width: 1024px) and (max-height: 500px) and (hover: none) and (pointer: coarse) {
+  #empty-state {
+    padding-left: max(32px, env(safe-area-inset-left));
+    padding-right: max(32px, env(safe-area-inset-right));
+  }
+  .tabs-wrap {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
   /* iOS Safari zooms the page when a focused form control uses text below 16px. */
   body:has(main:not([hidden]), dialog[open]) {
     position: fixed;
@@ -2635,6 +2643,16 @@ select:focus-visible {
   main[data-mobile-view="edit"] .source-container {
     min-height: 0;
   }
+  html[data-keyboard-open] main[data-mobile-view="edit"] .source-help,
+  html[data-keyboard-open] main[data-mobile-view="edit"] .editor-foot {
+    display: none;
+  }
+  html[data-keyboard-open] main[data-mobile-view="edit"] .source-heading {
+    padding: 0 14px;
+  }
+  html[data-keyboard-open] #search-chords > .chord-help:first-of-type {
+    display: none;
+  }
   .rail {
     order: 2;
     width: 100%;
@@ -2739,6 +2757,9 @@ select:focus-visible {
   }
   #settings .stepper button {
     width: 44px;
+  }
+  #settings .stepper input {
+    min-height: 44px;
   }
   #settings .stepper span {
     font-size: 13px;

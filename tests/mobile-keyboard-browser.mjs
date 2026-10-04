@@ -57,6 +57,38 @@ for (const engine of [chromium, webkit]) {
     await page.locator("#source").fill("[C]An original test line");
     box = await page.locator("#source").boundingBox();
     assert.ok(box.height >= 44 && box.y >= 96 && box.y + box.height <= 305);
+    await page
+      .locator("#source")
+      .fill(
+        Array.from({ length: 30 }, (_, i) => `[C]Original line ${i + 1}`).join(
+          "\n",
+        ),
+      );
+    await page.evaluate(() => {
+      window.testKeyboardHeight = 365;
+      visualViewport.dispatchEvent(new Event("resize"));
+    });
+    await expect(page.locator(".source-help")).not.toBeVisible();
+    await page.waitForFunction(
+      () => document.querySelector("#source").scrollTop > 0,
+    );
+    const validHeight = await page.evaluate(() =>
+      document.documentElement.style.getPropertyValue(
+        "--visual-viewport-height",
+      ),
+    );
+    await page.evaluate(() => {
+      window.testKeyboardHeight = -9;
+      visualViewport.dispatchEvent(new Event("resize"));
+    });
+    assert.equal(
+      await page.evaluate(() =>
+        document.documentElement.style.getPropertyValue(
+          "--visual-viewport-height",
+        ),
+      ),
+      validHeight,
+    );
     // Landscape on the physical iPhone is 852px wide: it still needs the
     // mobile rail, one panel and usable text controls, rather than desktop UI.
     await page.setViewportSize({ width: 852, height: 283 });

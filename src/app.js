@@ -1356,11 +1356,35 @@ const languagePicker = setupLanguagePicker({ persist, toast });
 // iOS keeps the layout viewport under the on-screen keyboard: mirror the
 // visual viewport height so the editor column stays usable.
 function syncVisualViewport() {
-  const height = window.visualViewport?.height ?? window.innerHeight;
+  const viewport = window.visualViewport;
+  const height = viewport?.height ?? window.innerHeight;
+  const input = document.activeElement;
+  const editing = input?.matches("input, textarea, [contenteditable=true]");
+  const keyboardOpen = Boolean(
+    editing &&
+    (viewport?.scale ?? 1) === 1 &&
+    height < window.innerHeight - 100,
+  );
+  document.documentElement.toggleAttribute("data-keyboard-open", keyboardOpen);
+  // Safari can report a negative height with a landscape software keyboard.
+  // Keep the last valid layout instead of collapsing the editor and dialogs.
+  if (!Number.isFinite(height) || height <= 0) return;
   document.documentElement.style.setProperty(
     "--visual-viewport-height",
     `${Math.round(height)}px`,
   );
+  // Shrinking a focused textarea does not make Safari scroll its end caret.
+  requestAnimationFrame(() => {
+    if (keyboardOpen && isMobileLayout() && viewport?.offsetTop > 0)
+      window.scrollTo(0, 0);
+    if (
+      document.activeElement === input &&
+      input instanceof HTMLTextAreaElement &&
+      input.selectionStart === input.selectionEnd &&
+      input.selectionEnd === input.value.length
+    )
+      input.scrollTop = input.scrollHeight;
+  });
 }
 window.visualViewport?.addEventListener("resize", syncVisualViewport);
 window.visualViewport?.addEventListener("scroll", syncVisualViewport);
