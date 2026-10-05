@@ -46,7 +46,7 @@
     "dompurify": "^3.4.16",
     "fft.js": "4.0.4",
     "jspdf": "^4.2.1",
-    "mammoth": "^1.10.0",
+    "mammoth": "^1.13.0",
     "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
     "pdfjs-dist": "^6.3.289"
   },
