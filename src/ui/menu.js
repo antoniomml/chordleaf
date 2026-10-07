@@ -4,6 +4,26 @@ export function setupMenu(button, menu) {
     [...menu.querySelectorAll('[role^="menuitem"]')].filter(
       (item) => !item.disabled && !item.hidden,
     );
+  function fit() {
+    if (menu.hidden) return;
+    const viewport = window.visualViewport;
+    const bottom = viewport
+      ? viewport.offsetTop + viewport.height
+      : window.innerHeight;
+    menu.style.setProperty(
+      "--menu-available-height",
+      `${Math.max(32, bottom - menu.getBoundingClientRect().top - 16)}px`,
+    );
+  }
+  function focusItem(item) {
+    if (!item) return;
+    item.focus({ preventScroll: true });
+    const bounds = menu.getBoundingClientRect();
+    const rect = item.getBoundingClientRect();
+    if (rect.top < bounds.top + 6) menu.scrollTop -= bounds.top + 6 - rect.top;
+    else if (rect.bottom > bounds.bottom - 6)
+      menu.scrollTop += rect.bottom - bounds.bottom + 6;
+  }
   function close({ focus = false } = {}) {
     if (menu.hidden) return;
     menu.hidden = true;
@@ -12,9 +32,10 @@ export function setupMenu(button, menu) {
   }
   function open(focusIndex = 0) {
     menu.hidden = false;
+    fit();
     button.setAttribute("aria-expanded", "true");
     const list = items();
-    list.at(focusIndex)?.focus();
+    focusItem(list.at(focusIndex));
   }
   button.addEventListener("click", () => (menu.hidden ? open() : close()));
   button.addEventListener("keydown", (event) => {
@@ -40,10 +61,13 @@ export function setupMenu(button, menu) {
           ? list.length - 1
           : (current + (event.key === "ArrowDown" ? 1 : list.length - 1)) %
             list.length;
-    list[next]?.focus();
+    focusItem(list[next]);
   });
   document.addEventListener("click", (event) => {
     if (!event.target.closest(`#${button.id}, #${menu.id}`)) close();
   });
+  window.addEventListener("resize", fit);
+  window.visualViewport?.addEventListener("resize", fit);
+  window.visualViewport?.addEventListener("scroll", fit);
   return { open, close };
 }

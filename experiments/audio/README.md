@@ -14,7 +14,7 @@ Set `CHORDLEAF_SETUP_PYTHON` if Python 3.13 has a different executable path. `pn
 
 ```sh
 python3.13 -m venv experiments/audio/.venv
-experiments/audio/.venv/bin/pip install -r experiments/audio/requirements-neural.lock.txt
+experiments/audio/.venv/bin/pip install --require-hashes -r experiments/audio/requirements-neural.lock.txt
 CHORDLEAF_AUDIO_PYTHON="$PWD/experiments/audio/.venv/bin/python" pnpm dev --host 127.0.0.1
 ```
 

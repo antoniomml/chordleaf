@@ -9,6 +9,19 @@ import {
 
 const origin = "https://chordleaf.com";
 
+test("sitemap uses content modification dates, independently of deployment time", () => {
+  const sitemap = buildSitemap(origin);
+  const privacy = sitemap.match(
+    /<url><loc>https:\/\/chordleaf.com\/es\/privacidad\/<\/loc>(.*?)<\/url>/s,
+  )?.[1];
+  const print = sitemap.match(
+    /<url><loc>https:\/\/chordleaf.com\/en\/printable-chord-sheets\/<\/loc>(.*?)<\/url>/s,
+  )?.[1];
+  assert.match(privacy, /<lastmod>2026-10-07<\/lastmod>/);
+  assert.match(print, /<lastmod>2026-09-25<\/lastmod>/);
+  assert.equal(sitemap, buildSitemap(origin));
+});
+
 test("sitemap lists the home pair and every content page with alternates", () => {
   const sitemap = buildSitemap(origin, "2026-09-25");
   assert.match(sitemap, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);

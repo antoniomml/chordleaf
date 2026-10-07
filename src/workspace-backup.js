@@ -12,6 +12,40 @@ export function serializeWorkspace(songs, active, recent = []) {
   return text;
 }
 
+/** Split only when necessary, so every downloaded part can be restored. */
+export function workspaceBackupParts(songs, active, recent = []) {
+  function split(opened, closed) {
+    const selected = opened.some((song) => song.id === active)
+      ? active
+      : (opened[0]?.id ?? null);
+    try {
+      return [
+        {
+          text: serializeWorkspace(opened, selected, closed),
+          count: opened.length + closed.length,
+        },
+      ];
+    } catch (error) {
+      const count = opened.length + closed.length;
+      if (count <= 1) throw error;
+      const midpoint = Math.floor(count / 2);
+      const closedMidpoint = Math.max(0, midpoint - opened.length);
+      return [
+        ...split(opened.slice(0, midpoint), closed.slice(0, closedMidpoint)),
+        ...split(opened.slice(midpoint), closed.slice(closedMidpoint)),
+      ];
+    }
+  }
+  const parts = split(songs, recent);
+  return parts.map((part, index) => ({
+    ...part,
+    name:
+      parts.length === 1
+        ? "chordleaf-workspace.json"
+        : `chordleaf-workspace-${index + 1}-of-${parts.length}.json`,
+  }));
+}
+
 function validateWorkspace(text) {
   if (new TextEncoder().encode(text).length > MAX_FILE_BYTES)
     throw new Error(t("La copia supera el límite de 10 MiB."));

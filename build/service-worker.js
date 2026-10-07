@@ -59,6 +59,29 @@ const isRevalidated = (url) =>
   url.pathname.startsWith("/licenses/") ||
   url.pathname === "/logo.svg";
 
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "CHORDLEAF_OFFLINE_STATUS" || !event.ports?.[0])
+    return;
+  event.waitUntil(
+    (async () => {
+      try {
+        const asset = new URL(event.data.asset);
+        const cache = await caches.open(CACHE_VERSION);
+        const paths = new Set(
+          (await cache.keys()).map((request) => new URL(request.url).pathname),
+        );
+        const ready =
+          asset.origin === self.location.origin &&
+          SHELL.includes(asset.pathname) &&
+          SHELL.every((path) => paths.has(path));
+        event.ports[0].postMessage({ ready });
+      } catch {
+        event.ports[0].postMessage({ ready: false });
+      }
+    })(),
+  );
+});
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches

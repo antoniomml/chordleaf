@@ -18,6 +18,10 @@ Model files are kept in this site's browser cache, separately from saved songs a
 
 ## Sharing and moving your workspace
 
+Removing a saved song from **Recent** opens a confirmation naming that song. **Cancel** preserves it; **Delete song** permanently removes the browser copy after a successful save. If that write fails, the song remains. Keep exported backups of important songs before deleting them.
+
+Wait for **Offline: ready** before relying on the app without a connection. The active worker verifies that the currently open build and all its application resources are cached; failed installation is shown without blocking online editing. Clearing site data removes that cache as well. Uninstalling the web app does not guarantee deletion of its browser storage: use explicit site-data controls.
+
 Web pages, PDFs and Word documents can contain material that you should not share publicly. Use short invented examples in bug reports and keep exported songs and recovery files private unless you intend to share them.
 
 Changing the interface language preserves song content. Clearing browser storage or changing domains can remove access to the working copy. Only one browser tab can own the workspace at a time; another tab offers **Use here**. The current editor saves before handing over; if saving fails, return to that tab and export your work before retrying. Full workspace JSON backups include open and closed songs and settings, remain available with all songs closed and stay on your device.

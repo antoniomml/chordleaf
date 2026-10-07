@@ -1,5 +1,6 @@
 import catalog from "./catalog.json" with { type: "json" };
-import { runtimeURLs, gpuRuntimeURLs } from "./runtime.js";
+import { runtimeURLs } from "./runtime.js";
+import { runtimeFiles, gpuRuntimeFiles } from "./runtime-files.js";
 import { audioHardware, supportsBrowserModel } from "./hardware.js";
 import { whisperModels, browserLyricModels } from "./lyric-models.js";
 
@@ -15,11 +16,13 @@ export const bundleBytes = (bundle) =>
   bundles[bundle].flatMap((k) => catalog[k]).reduce((s, f) => s + f.bytes, 0);
 const resources = (bundle) => [
   ...bundles[bundle].flatMap((k) => catalog[k]),
-  ...Object.values(runtimeURLs).map((url) => ({ url })),
-  ...(bundle === "qwen"
-    ? Object.values(gpuRuntimeURLs).map((url) => ({ url }))
-    : []),
+  ...runtimeFiles,
+  ...(bundle === "qwen" ? gpuRuntimeFiles : []),
 ];
+export const bundleRuntimeBytes = (bundle) =>
+  resources(bundle)
+    .filter((file) => !file.name)
+    .reduce((sum, file) => sum + file.bytes, 0);
 const absolute = (url) => new URL(url, self.location.origin).href;
 export async function browserHardware() {
   return audioHardware(navigator);
@@ -103,6 +106,28 @@ async function readBrowserReadiness() {
     missingBytes: Object.fromEntries(
       Object.keys(bundles).map((name) => [name, missingBytes(name)]),
     ),
+    missingModelBytes: Object.fromEntries(
+      Object.keys(bundles).map((name) => [
+        name,
+        bundles[name]
+          .flatMap((model) => catalog[model])
+          .reduce(
+            (sum, file) => sum + (cached.get(file.url) ? 0 : file.bytes),
+            0,
+          ),
+      ]),
+    ),
+    missingRuntimeBytes: Object.fromEntries(
+      Object.keys(bundles).map((name) => [
+        name,
+        resources(name)
+          .filter((file) => !file.name)
+          .reduce(
+            (sum, file) => sum + (cached.get(file.url) ? 0 : file.bytes),
+            0,
+          ),
+      ]),
+    ),
   };
 }
 export async function downloadBrowserModels(bundle, signal, progress) {
@@ -126,7 +151,7 @@ export async function downloadBrowserModels(bundle, signal, progress) {
   const missing = [];
   for (const file of files)
     if (!(await cache.match(absolute(file.url)))) missing.push(file);
-  const required = missing.reduce((s, f) => s + (f.bytes || 25000000), 0);
+  const required = missing.reduce((s, f) => s + f.bytes, 0);
   // Quota estimates can be conservative and do not measure free disk space.
   // Attempt the write; reject only an actual storage failure, keeping the
   // files already verified so retries download just the missing resources.

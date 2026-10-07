@@ -1,3 +1,4 @@
+import contentDates from "./content-dates.json" with { type: "json" };
 import { introHtml } from "../src/ui/intro-copy.js";
 import { renderStartupEntry } from "./entry.js";
 
@@ -810,7 +811,7 @@ const pairPrivacy = {
     kicker: "Privacidad",
     title: "Privacidad — Chordleaf sin cuentas ni seguimiento",
     description:
-      "Chordleaf no usa cuentas ni cookies de seguimiento. Tus canciones se quedan en tu navegador y solo la importación web pasa por el servidor.",
+      "Sin cuentas ni seguimiento. Tus canciones y audio se procesan en tu dispositivo; la importación web y las descargas solicitadas contactan con servidores.",
     h1: "Privacidad: tus canciones se quedan en tu navegador",
     lead: "Chordleaf se diseñó para trabajar sin cuentas y sin seguimiento. El editor y tus canciones viven en tu dispositivo; no hay perfil de usuario que crear ni historial que consultar.",
     imageAlt:
@@ -837,18 +838,27 @@ const pairPrivacy = {
         h: "Tus canciones se quedan contigo",
         p: [
           "Las canciones, los acordes personalizados y los ajustes se guardan en el almacenamiento local del navegador, en el dispositivo que estás usando. No se sincronizan entre dispositivos ni salen de él.",
-          "Puedes borrar todo desde el propio navegador (borrar datos del sitio) o desinstalar la aplicación. Si quieres conservar las canciones, exporta antes una copia .chordleaf.json: ese archivo se descarga a tu equipo y no se envía a ningún sitio.",
+          "Puedes borrar todo desde el propio navegador (borrar datos del sitio) para eliminar canciones, preferencias y modelos. Desinstalar la aplicación web no garantiza que el navegador borre esos datos: usa el borrado explícito de datos del sitio. Antes, abre Exportar → Copia de seguridad · JSON para conservar todas las canciones abiertas y cerradas; un proyecto .chordleaf.json conserva una sola canción. Los archivos se descargan a tu equipo y no se envían a ningún sitio.",
           "El almacenamiento está ligado al origen del sitio. Si un día te mudas a una copia propia de Chordleaf, tus canciones no viajan solas: exporta el proyecto desde un origen e impórtalo en el otro. Es el mismo archivo que usarías para pasar una canción de un navegador a otro.",
         ],
       },
       {
         h: "Qué pasa por el servidor",
         p: [
-          "La mayoría de funciones no tocan la red: escribir, colocar acordes, maquetar, transportar y exportar se ejecuta en el navegador. Las excepciones son la descarga de la aplicación y la importación web.",
+          "La mayoría de funciones no tocan la red: escribir, colocar acordes, maquetar, transportar y exportar se ejecuta en el navegador. Las excepciones son la descarga de la aplicación, la importación web y las descargas de modelos de audio que solicites.",
           "Cuando importas por enlace, el servidor descarga la página pública para que tu navegador no tenga que hacerlo y registra en los logs técnicos la URL solicitada y, si algo falla, el error. Ese registro lo conserva el proveedor de alojamiento según su política y se usa para diagnosticar fallos o abusos, no para identificarte.",
-          "Pegar contenido o abrir un HTML guardado se procesa solo en tu dispositivo. Abrir la página original conecta tu navegador con ese proveedor, cuya política de privacidad se aplica. No se pide permiso para leer el portapapeles: el texto se lee únicamente cuando lo pegas.",
+          "Pegar contenido o abrir un HTML guardado se procesa solo en tu dispositivo. Abrir la página original conecta tu navegador con ese proveedor, cuya política de privacidad se aplica. El acceso al portapapeles sólo se solicita cuando eliges Pegar del portapapeles; si no lo permites, puedes pegar el texto en el editor.",
           "El limitador de peticiones cuenta solicitudes por dirección para evitar abusos. No se asocia a ninguna identidad y no se usa con fines publicitarios.",
           "El resto del sitio es estático: no hay base de datos de usuarios, ni API de canciones, ni panel de administración que consultar. Los archivos que ves se sirven tal cual y las canciones que escribes nunca llegan a esa infraestructura.",
+        ],
+      },
+      {
+        h: "Audio local y descargas de modelos",
+        p: [
+          "La importación de audio decodifica y analiza la grabación seleccionada en tu dispositivo. Ni el audio ni la transcripción se suben a Chordleaf o a un servicio de transcripción. La copia de reproducción es temporal y no se incluye en los proyectos ni en las copias de seguridad. La letra y los acordes resultantes se guardan como cualquier otra canción local.",
+          "Los modelos se descargan sólo cuando lo solicitas. Chordleaf sirve el detector de acordes y su motor compartido. Los modelos de letra proceden de repositorios públicos de Hugging Face, que pueden redirigir a sus servidores de entrega. Esos proveedores reciben metadatos normales de descarga, como la dirección IP y el archivo solicitado; no reciben tu grabación ni tu letra. Las peticiones externas omiten credenciales y la referencia de la página.",
+          "Los archivos de modelos se guardan en una caché de este sitio, separada de las canciones y de la aplicación sin conexión. En Nueva canción → Importar audio → Modelos y ajustes → Borrar puedes eliminar un modelo, incluidos archivos descargados parcialmente. Borrar un modelo de letra conserva el detector de acordes, el motor y tus canciones. La copia de seguridad guarda canciones y ajustes, sin audio ni modelos.",
+          "El estado Sin conexión: listo indica que la versión abierta tiene sus recursos guardados. Antes de salir de cobertura, espera esa confirmación y descarga una copia de seguridad de tus canciones importantes. El navegador todavía puede borrar datos bajo presión de almacenamiento: una caché local no sustituye un archivo de respaldo.",
         ],
       },
       {
@@ -874,7 +884,7 @@ const pairPrivacy = {
       },
       {
         q: "¿Cómo borro mis datos?",
-        a: "Borra los datos del sitio en tu navegador o desinstala la aplicación. Si quieres conservar las canciones, exporta antes el proyecto .chordleaf.json.",
+        a: "Borra explícitamente los datos del sitio en tu navegador. Desinstalar la aplicación web no garantiza el borrado. Exporta antes una copia de seguridad JSON para conservar todas las canciones abiertas y cerradas.",
       },
     ],
     related: [
@@ -891,7 +901,7 @@ const pairPrivacy = {
     kicker: "Privacy",
     title: "Privacy — Chordleaf, no accounts or tracking",
     description:
-      "Chordleaf has no accounts and no tracking cookies. Your songs stay in your browser; only a web import touches the server, to fetch the public page you asked for.",
+      "No accounts or tracking. Songs and audio stay on your device; web imports and requested model downloads contact servers without uploading your work.",
     h1: "Privacy: your songs stay in your browser",
     lead: "Chordleaf was built to work without accounts and without tracking. The editor and your songs live on your device; there is no user profile to create and no history to consult.",
     imageAlt:
@@ -918,18 +928,27 @@ const pairPrivacy = {
         h: "Your songs stay with you",
         p: [
           "Songs, custom chords and settings are stored in your browser's local storage, on the device you are using. They are not synchronised across devices and do not leave it.",
-          "You can erase everything from the browser itself (clear site data) or uninstall the app. If you want to keep your songs, export a .chordleaf.json project first: that file downloads to your machine and is not sent anywhere.",
+          "Clear site data in your browser to delete songs, preferences and models. Uninstalling the web app does not guarantee that the browser deletes this data; use its explicit site-data controls. First, choose Export → Workspace backup · JSON to keep all open and closed songs; a .chordleaf.json project keeps one song. These files download to your device and are not sent anywhere.",
           "Storage belongs to the site origin. If you move to your own Chordleaf copy one day, songs do not travel on their own: export the project from one origin and import it in the other. It is the same file you would use to move a song between browsers.",
         ],
       },
       {
         h: "What touches the server",
         p: [
-          "Most features never use the network: writing, placing chords, layout, transposition and export all run in the browser. The exceptions are downloading the app and web imports.",
+          "Most features never use the network: writing, placing chords, layout, transposition and export all run in the browser. The exceptions are downloading the app, web imports and explicitly requested audio-model downloads.",
           "When you import a link, the server fetches the public page so your browser does not have to, and technical logs record the requested URL and any error. The hosting provider keeps those logs under its own policy; they are used to diagnose failures or abuse, not to identify you.",
-          "Pasting page content or opening saved HTML uses local processing only. Opening the source page contacts that provider directly from your browser; its own privacy policy applies. No clipboard permission is requested, and copied text is read only when you paste it.",
+          "Pasting page content or opening saved HTML uses local processing only. Opening the source page contacts that provider directly from your browser; its own privacy policy applies. Clipboard access is requested only when you choose Paste from clipboard; if you decline, you can paste the text into the editor.",
           "A rate limiter counts requests per address to prevent abuse. It is not linked to any identity and is not used for advertising.",
           "The rest of the site is static: there is no user database, no song API and no admin panel to query. The files you see are served as they are, and the songs you write never reach that infrastructure.",
+        ],
+      },
+      {
+        h: "Local audio and model downloads",
+        p: [
+          "Audio import decodes and analyses your selected recording on your device. Neither the recording nor its transcription is uploaded to Chordleaf or a transcription service. The playback copy is temporary and is not included in projects or workspace backups. Resulting lyrics and chords are saved like any other local song.",
+          "Models download only when you request them. Chordleaf serves the chord detector and shared engine. Lyric models come from public Hugging Face repositories, which may redirect to their delivery servers. These providers receive ordinary download metadata, such as your IP address and the requested model file, rather than your recording or lyrics. External requests omit credentials and the page referrer.",
+          "Model files are stored in this site's cache, separately from your songs and offline app resources. New song → Import audio → Models and settings → Delete removes a model, including partially downloaded files. Deleting a lyric model preserves the chord detector, shared engine and songs. Workspace backups contain songs and settings, without recordings or models.",
+          "Offline: ready means the open build has its resources saved. Before losing coverage, wait for that confirmation and download a backup of important songs. The browser can still clear local data under storage pressure; a local cache does not replace a backup file.",
         ],
       },
       {
@@ -955,7 +974,7 @@ const pairPrivacy = {
       },
       {
         q: "How do I delete my data?",
-        a: "Clear the site data in your browser or uninstall the app. Export the .chordleaf.json project first if you want to keep your songs.",
+        a: "Explicitly clear site data in your browser; uninstalling the web app does not guarantee deletion. Export a workspace JSON backup first to keep all open and closed songs.",
       },
     ],
     related: [
@@ -1893,16 +1912,20 @@ export function buildJsonLd(origin, locale) {
   }).replaceAll("<", "\\u003c");
 }
 
-export function buildSitemap(origin, lastmod) {
+export function buildSitemap(origin, lastmod = contentDates) {
   const pairUrls = [
-    { en: `${origin}/`, es: `${origin}/es/` },
+    { en: `${origin}/`, es: `${origin}/es/`, id: "home" },
     ...contentPairs.map((pair) => ({
+      id: pair.id,
       en: contentPageUrl(origin, { ...pair.en, locale: "en" }),
       es: contentPageUrl(origin, { ...pair.es, locale: "es" }),
     })),
   ];
   const urls = pairUrls
-    .map(({ en, es }) => {
+    .map(({ en, es, id }) => {
+      const modified = typeof lastmod === "string" ? lastmod : lastmod[id];
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(modified))
+        throw new Error(`Missing content modification date: ${id}`);
       const alternates =
         `<xhtml:link rel="alternate" hreflang="en" href="${en}"/>` +
         `<xhtml:link rel="alternate" hreflang="es" href="${es}"/>` +
@@ -1910,7 +1933,7 @@ export function buildSitemap(origin, lastmod) {
       return [en, es]
         .map(
           (loc) =>
-            `<url><loc>${loc}</loc><lastmod>${lastmod}</lastmod>${alternates}</url>`,
+            `<url><loc>${loc}</loc><lastmod>${modified}</lastmod>${alternates}</url>`,
         )
         .join("");
     })
@@ -2043,10 +2066,7 @@ export function metadataPlugin(site) {
           this.emitFile({
             type: "asset",
             fileName: "sitemap.xml",
-            source: buildSitemap(
-              site.origin,
-              new Date().toISOString().slice(0, 10),
-            ),
+            source: buildSitemap(site.origin),
           });
       },
     },

@@ -43,15 +43,17 @@ export function setupChordsPanel({
   const snapshot = () =>
     JSON.stringify([song().text, song().chordShapes, song().chordStickers]);
   let searchLimit = 24;
-  const catalog = Object.entries(guitar).map(([key, positions]) => {
-    const [root, suffix] = key.split(":");
-    return {
-      name:
-        NOTES[Number(root)] +
-        suffix.replace(/\/(\d+)$/, (_, bass) => "/" + NOTES[Number(bass)]),
-      positions,
-    };
-  });
+  let catalog;
+  const readCatalog = () =>
+    (catalog ??= Object.entries(guitar).map(([key, positions]) => {
+      const [root, suffix] = key.split(":");
+      return {
+        name:
+          NOTES[Number(root)] +
+          suffix.replace(/\/(\d+)$/, (_, bass) => "/" + NOTES[Number(bass)]),
+        positions,
+      };
+    }));
   function setMode(value) {
     mode = value;
     onModeChange?.(mode);
@@ -62,6 +64,7 @@ export function setupChordsPanel({
     if (mode === "identify") drawFretboard();
   }
   function search() {
+    const catalog = readCatalog();
     const query = normalizeChord($("#catalog-search").value.trim());
     const matches = catalog.filter(
       (c) =>

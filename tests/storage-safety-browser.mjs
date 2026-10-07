@@ -189,9 +189,14 @@ for (const engine of [chromium, webkit]) {
       .locator("#dialog-recent-list li")
       .count();
     await closed.locator("#dialog-recent-list .recent-remove").first().click();
+    await closed.locator("#delete-recent-confirm").click();
     await expect(closed.locator("#dialog-recent-list li")).toHaveCount(
       countBeforeRemoval,
     );
+    await expect(closed.locator("#delete-recent-error")).toContainText(
+      "se conserva",
+    );
+    await closed.locator("#delete-recent-cancel").click();
     await closed.locator("#new-dialog .dialog-close").click();
     await closed.evaluate(
       () => (Storage.prototype.setItem = window.restoreSetItem),

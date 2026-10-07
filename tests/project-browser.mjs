@@ -113,6 +113,7 @@ try {
   await page.locator(".tab-close").click();
   await page.locator("#recent-list li").first().waitFor();
   await page.locator("#recent-list .recent-remove").first().click();
+  await page.locator("#delete-recent-confirm").click();
   assert.equal(await page.locator("#recent-list li").count(), 0);
   await page.reload();
   await page.locator("#empty-new").click();

@@ -4,7 +4,7 @@
 
 Use **EN / ES** in the top bar to choose English or Spanish. The app starts in your browser language (English for languages other than Spanish). This guide uses the English control labels. Changing the interface does not translate songs.
 
-The desktop workspace has a navigation rail, an editing panel and a sheet preview. Choose **Settings**, **Lyrics**, **Chords**, **Key**, **Search** or **Identify**. On phones, the bottom navigation switches between **Settings**, **Lyrics**, **Harmony** and **Preview**; Harmony contains key analysis, song chords, search and identification. Your text and cursor remain in place. For a shorter introduction in Spanish, see [your first song in five minutes](https://github.com/antoniomml/chordleaf/wiki/First-song.es).
+The desktop workspace has a navigation rail, an editing panel and a sheet preview. Choose **Settings**, **Lyrics**, **Chords**, **Key**, **Search** or **Identify**. On phones and portrait touch tablets, the bottom navigation switches between **Settings**, **Lyrics**, **Harmony** and **Preview**; Harmony contains key analysis, song chords, search and identification. Your text and cursor remain in place. For a shorter introduction in Spanish, see [your first song in five minutes](https://github.com/antoniomml/chordleaf/wiki/First-song.es).
 
 ![The Chordleaf workspace with a song editor and page preview](https://raw.githubusercontent.com/antoniomml/chordleaf/main/docs/images/workspace.png)
 
@@ -28,7 +28,7 @@ Choose the large **New song** action, then **Start from scratch**, or use **See 
 | PDF with selectable text | Lyrics, chords, headers and columns recovered from their positions. Review the result.                              |
 | Word (.docx)             | Text and identifiable column structure. Review titles and alignment.                                                |
 
-Imports accept up to **10 MiB per file**, **50 PDF pages** and **50,000 text characters per song**. Direct edits, chord insertion and transposition use the same song text limit. Large or complex documents can still take longer to process. Scanned PDFs need external OCR. Convert legacy `.doc` files to `.docx` first. Each song opens in a tab. Closing a song saves it in **Recent**, without a confirmation. Closed songs remain available until explicitly removed; **View all** shows the whole list. If browser storage is full or unavailable, the song stays open so you can export it.
+Imports accept up to **10 MiB per file**, **50 PDF pages** and **50,000 text characters per song**. Direct edits, chord insertion and transposition use the same song text limit. Large or complex documents can still take longer to process. Scanned PDFs need external OCR. Convert legacy `.doc` files to `.docx` first. Each song opens in a tab. Closing a song saves it in **Recent**, without a confirmation. Closed songs remain available until explicitly removed; **Delete saved song** opens a confirmation, and **Cancel** leaves the copy intact; **View all** shows the whole list. If browser storage is full or unavailable, the song stays open so you can export it.
 
 For copied text, choose **New song → Paste from clipboard** and grant access if your browser asks. If clipboard access is unavailable, start a blank song, open **Lyrics** and paste into the text editor. **Import audio** creates an experimental draft from a recording; follow the [audio guide](https://github.com/antoniomml/chordleaf/wiki/Audio-import) to choose and manage its local models.
 
@@ -140,9 +140,13 @@ If saved data cannot be read, Chordleaf leaves the original browser storage unto
 
 Chordleaf allows one active editor per browser profile and origin. A second browser tab offers **Use here**. The current tab saves before handing over. If saving fails or the tab does not respond, the current tab keeps its editing lease; export your changes there before retrying. The song tabs inside Chordleaf are safe to use together. An up-to-date HTTPS browser with Web Locks support is required.
 
+Word/PDF preparation stays visible until it finishes. Document actions are disabled during that job; you can keep editing without changing the exported snapshot.
+
+Wait for **Offline: ready** before leaving coverage. If preparation fails or an update is pending, the status explains the next step. Browser caches can still be cleared: keep downloaded backups.
+
 ## Full workspace backups
 
-Choose **Export → Workspace backup · JSON** to save all open and closed songs, layouts and custom chord shapes. This option remains available with no open song. To restore, choose **New song → Open editable project** and select the JSON backup. Open songs become new tabs and closed songs return to **Recent**; existing songs are preserved. Older backups containing only open songs still work. The versioned format supports up to 500 songs in total, 50,000 characters per song and 10 MiB per file. A backup that exceeds these limits is rejected before download; export individual projects if your library is larger. Future unsupported versions are rejected rather than guessed.
+Choose **Export → Workspace backup · JSON** to save all open and closed songs, layouts and custom chord shapes. This option remains available with no open song. To restore, choose **New song → Open editable project** and select the JSON backup. Open songs become new tabs and closed songs return to **Recent**; existing songs are preserved. Older backups containing only open songs still work. Each file supports up to 500 songs in total, 50,000 characters per song and 10 MiB. Larger libraries open a list of backup parts: download every part, keep them together and restore each through **Open editable project**. Future unsupported versions are rejected rather than guessed.
 
 Export a workspace backup before moving between a preview address and your final domain: browser storage does not move between websites. Keep the backup somewhere safe; it contains your song content.
 

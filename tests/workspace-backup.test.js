@@ -3,8 +3,60 @@ import assert from "node:assert/strict";
 import {
   serializeWorkspace,
   restoreWorkspace,
+  workspaceBackupParts,
 } from "../src/workspace-backup.js";
 import { createSong } from "../src/song-state.js";
+
+test("large backups split into restorable parts without dropping open or closed songs", () => {
+  const songs = Array.from({ length: 520 }, (_, index) =>
+    createSong({ title: `Open ${index}`, text: `[C]Canción ${index}` }),
+  );
+  const recent = Array.from({ length: 91 }, (_, index) => ({
+    song: createSong({
+      title: `Closed ${index}`,
+      text: `[G]Reciente ${index}`,
+    }),
+    closedAt: index + 1,
+  }));
+  const parts = workspaceBackupParts(songs, songs[519].id, recent);
+  assert.ok(parts.length > 1);
+  const restored = parts.map((part) => restoreWorkspace(part.text));
+  assert.deepEqual(
+    restored.flatMap((part) => part.songs.map((song) => song.title)),
+    songs.map((song) => song.title),
+  );
+  assert.deepEqual(
+    restored.flatMap((part) => part.recent.map((entry) => entry.song.text)),
+    recent.map((entry) => entry.song.text),
+  );
+  assert.equal(
+    parts.reduce((sum, part) => sum + part.count, 0),
+    611,
+  );
+  for (const part of parts) {
+    assert.ok(part.count <= 500);
+    assert.ok(new TextEncoder().encode(part.text).length <= 10 * 1024 * 1024);
+  }
+});
+
+test("backup parts respect encoded byte limits and reject an invalid song before offering downloads", () => {
+  const songs = Array.from({ length: 160 }, () =>
+    createSong({ text: "á".repeat(50000) }),
+  );
+  const parts = workspaceBackupParts(songs, songs[0].id);
+  assert.ok(parts.length > 1);
+  assert.ok(
+    parts.every((part) => restoreWorkspace(part.text).songs.length > 0),
+  );
+  assert.throws(
+    () =>
+      workspaceBackupParts(
+        [...songs, createSong({ text: "a".repeat(50001) })],
+        songs[0].id,
+      ),
+    /50.000/,
+  );
+});
 test("workspace backups preserve songs and settings with fresh IDs for safe merges", () => {
   const original = createSong({
     title: "[Original]",

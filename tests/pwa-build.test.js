@@ -86,3 +86,59 @@ test("PWA activation preserves downloaded audio models while removing the old sh
   await work;
   assert.deepEqual(removed, ["chordleaf-old-shell"]);
 });
+
+test("offline readiness checks the active worker's cache and exact requested build", async () => {
+  const source = generate("export default 1")["sw.js"];
+  const paths = JSON.parse(source.match(/const SHELL = (\[[^;]+\]);/)[1]);
+  const handlers = {};
+  let cached = true;
+  runInNewContext(source, {
+    URL,
+    self: {
+      location: { origin: "https://chordleaf.com" },
+      addEventListener(name, handler) {
+        handlers[name] = handler;
+      },
+    },
+    caches: {
+      open: async () => ({
+        keys: async () =>
+          paths
+            .filter((path) => cached || path !== "/assets/lazy-export.js")
+            .map((path) => ({ url: `https://chordleaf.com${path}` })),
+      }),
+    },
+  });
+  async function readiness(asset) {
+    let work, result;
+    handlers.message({
+      data: { type: "CHORDLEAF_OFFLINE_STATUS", asset },
+      ports: [
+        {
+          postMessage(value) {
+            result = value.ready;
+          },
+        },
+      ],
+      waitUntil(promise) {
+        work = promise;
+      },
+    });
+    await work;
+    return result;
+  }
+  assert.equal(await readiness("https://chordleaf.com/assets/editor.js"), true);
+  assert.equal(
+    await readiness("https://chordleaf.com/assets/another-build.js"),
+    false,
+  );
+  assert.equal(
+    await readiness("https://other.example/assets/editor.js"),
+    false,
+  );
+  cached = false;
+  assert.equal(
+    await readiness("https://chordleaf.com/assets/editor.js"),
+    false,
+  );
+});

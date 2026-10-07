@@ -18,7 +18,7 @@ This guide describes the public website's browser importer. The separate desktop
 
 ## Choose a lyric model
 
-The chord detector needs about **13 MB**. The CPU runtime adds about **14 MB** once; Qwen additionally downloads its GPU runtime, about **27 MB**. The following sizes are approximate additional lyric downloads; the chooser reports the files still missing on your device.
+The chord detector needs about **13 MB**. The CPU runtime adds about **14 MB** once; Qwen additionally downloads its GPU runtime, about **27 MB**. The chooser shows model files separately from the shared engine still missing on your device. These are file/storage sizes: compressed network transfer may be smaller. Progress uses the exact pinned resource sizes. The following sizes are approximate additional lyric downloads.
 
 | Choice                   | Additional download | Device requirements and intended use                                   |
 | ------------------------ | ------------------- | ---------------------------------------------------------------------- |
