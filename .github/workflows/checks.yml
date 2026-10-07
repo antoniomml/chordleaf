@@ -24,6 +24,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm audit --audit-level=high
+      - name: Audit pinned Python audio dependencies
+        timeout-minutes: 10
+        run: |
+          python3 -m venv /tmp/chordleaf-pip-audit
+          /tmp/chordleaf-pip-audit/bin/pip install pip-audit==2.10.1
+          for manifest in requirements-desktop.lock.txt requirements-neural.lock.txt requirements-browser-export.txt; do
+            /tmp/chordleaf-pip-audit/bin/pip-audit --no-deps --disable-pip --progress-spinner off -r "experiments/audio/$manifest"
+          done
       - name: Playwright version
         id: playwright-version
         run: echo "version=$(pnpm exec playwright --version | cut -d' ' -f2)" >> "$GITHUB_OUTPUT"

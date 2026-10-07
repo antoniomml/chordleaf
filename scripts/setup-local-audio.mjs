@@ -46,6 +46,7 @@ try {
     "-m",
     "pip",
     "install",
+    "--require-hashes",
     "-r",
     "experiments/audio/requirements-neural.lock.txt",
   ]);

@@ -49,6 +49,7 @@ await run(python, [
   "-m",
   "pip",
   "install",
+  "--require-hashes",
   "-r",
   "experiments/audio/requirements-desktop.lock.txt",
 ]);

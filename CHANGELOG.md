@@ -1,5 +1,18 @@
 # chordleaf changelog
 
+## 1.6.0 · October 7, 2026
+
+- Confirm saved-song deletion with the song name, a clear permanence warning and Cancel focused by default. Failed storage writes preserve the previous copy and keep the confirmation open.
+- Scroll the export menu inside the available viewport, including short landscape screens; keep the full workspace backup and keyboard navigation reachable. Improve secondary-text contrast and prevent transient notices from covering open menus.
+- Give portrait touch tablets the full-width task views used on phones, preserving song context across rotation.
+- Keep an accessible export indicator until PDF/Word preparation finishes, prevent duplicate document jobs and retain immutable export snapshots while editing. Restore controls after failures.
+- Split large workspace backups into independently restorable files when they exceed 500 songs or 10 MiB, with explicit downloads for every part; preserve all open and closed songs.
+- Show actual offline readiness only after the active worker confirms that this build and all its application resources are cached. Report unavailable or pending-update states without interrupting editing.
+- Explain local audio processing, requested Hugging Face downloads, request metadata, model deletion and explicit site-data removal on both public privacy pages. Show model weights separately from the shared audio engine, using exact build-time file sizes for storage and download progress.
+- Preserve content modification dates across rebuilds, defer chord catalog construction until search and delegate preview events while retaining complete printing and export.
+- Hash the pinned Python desktop/neural distributions, enforce hashes during installation, add Python dependency updates and advisory checks to CI, and expand browser regressions for the launch findings.
+- Update Vite and Mammoth, refresh source-map-js to 1.2.2 and scope Mammoth's argparse dependency to compatible version 2.0.1, removing GHSA-68fv-2mgg-jv7q and the sprintf-js chain affected by GHSA-hp3w-g68c-fv3c. Verify the optional Mammoth CLI on an invented Word document.
+
 ## 1.5.1 · October 4, 2026
 
 - Keep Whisper model selection usable in short landscape viewports by scrolling the complete model dialog. Safari's bars previously reduced the optional model list to a 6px strip.

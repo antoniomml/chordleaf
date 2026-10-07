@@ -7,6 +7,7 @@ import {
   downloadBrowserModels,
   removeBrowserModels,
   bundleBytes,
+  bundleRuntimeBytes,
 } from "../browser-audio/models.js";
 
 import {
@@ -68,6 +69,7 @@ export function setupBrowserModels(refresh, busyChanged) {
       </div>
     </div>
     <progress id="browser-model-progress" max="1" hidden></progress><p id="browser-model-status" role="status" aria-live="polite" hidden></p>
+    <p id="browser-runtime-size" class="browser-runtime-size"></p>
     <div class="dialog-actions browser-model-footer"><p id="browser-model-note" class="browser-model-note"></p><button type="button" id="browser-model-stop" hidden>Pausar descarga</button><button type="button" id="browser-model-next" class="primary">Siguiente</button></div>`;
   document.body.append(dialog);
   const $ = (id) => dialog.querySelector("#" + id);
@@ -102,7 +104,7 @@ export function setupBrowserModels(refresh, busyChanged) {
       state.classList.toggle("is-installed", Boolean(saved));
       state.textContent = saved
         ? t("✓ Ya en tu dispositivo")
-        : t`Descarga · ${sizeLabel(Math.max(0, (ready.missingBytes?.[bundle] ?? bundleBytes(bundle)) - (bundle === "chords" ? 0 : (ready.missingBytes?.chords ?? bundleBytes("chords")))))}`;
+        : t`Descarga · ${sizeLabel(Math.max(0, (ready.missingModelBytes?.[bundle] ?? bundleBytes(bundle)) - (bundle === "chords" ? 0 : (ready.missingModelBytes?.chords ?? bundleBytes("chords")))))}${t(" de modelo")}`;
       const remove = $("browser-" + bundle + "-remove");
       remove.hidden = !(bundle === "chords"
         ? ready.hasChordFiles
@@ -133,6 +135,12 @@ export function setupBrowserModels(refresh, busyChanged) {
           ? "Se guardan aquí para próximas canciones."
           : "Los modelos y el motor se guardan aquí para próximas canciones.",
     );
+    const runtimeMissing =
+      ready.missingRuntimeBytes?.[selected] ??
+      bundleRuntimeBytes(selected || "chords");
+    $("browser-runtime-size").textContent = runtimeMissing
+      ? t`Motor compartido · ${(runtimeMissing / 1e6).toFixed(1)} MB pendientes de guardar. La transferencia puede ser menor por compresión.`
+      : t("Motor compartido guardado. Se reutiliza entre modelos y canciones.");
     $("browser-chords-download").hidden = Boolean(ready.neural);
     $("browser-chords-download").disabled = busy;
     $("browser-model-next").disabled =

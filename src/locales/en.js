@@ -1,5 +1,32 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Copia de seguridad en varias partes": "Workspace backup in several parts",
+  "Tu biblioteca necesita varios archivos para que cada copia se pueda abrir. Descarga todas las partes y consérvalas juntas. Para restaurar la biblioteca, abre cada archivo desde Nueva canción → Abrir proyecto editable.":
+    "Your library needs several files so each backup can be reopened. Download all parts and keep them together. To restore your library, open each file through New song → Open editable project.",
+  "Parte ": "Part ",
+  " partes descargadas": " parts downloaded",
+  Descargada: "Downloaded",
+  " de modelo": " of model files",
+  "Motor compartido · ": "Shared engine · ",
+  " MB pendientes de guardar. La transferencia puede ser menor por compresión.":
+    " MB left to store. Compressed transfer may be smaller.",
+  "Motor compartido guardado. Se reutiliza entre modelos y canciones.":
+    "Shared engine saved. Reused across models and songs.",
+  "Preparando uso sin conexión…": "Preparing offline use…",
+  "Sin conexión: listo": "Offline: ready",
+  "Cierra las pestañas de Chordleaf para completar la actualización sin conexión.":
+    "Close Chordleaf tabs to finish the offline update.",
+  "Sin conexión no disponible. Vuelve a abrir Chordleaf con conexión para reintentar.":
+    "Offline use is unavailable. Open Chordleaf again while online to retry.",
+  "¿Eliminar la canción guardada?": "Delete the saved song?",
+  "Eliminar canción guardada": "Delete saved song",
+  "Eliminar canción": "Delete song",
+  "Se eliminará la copia de este navegador. Esta acción no se puede deshacer. Si quieres conservarla, cancela y descarga un proyecto o una copia de seguridad.":
+    "This browser's copy will be deleted. This cannot be undone. To keep it, cancel and download a project or workspace backup.",
+  "No se pudo eliminar la canción. La copia guardada se conserva.":
+    "The song could not be deleted. Your saved copy is preserved.",
+  "Preparando Word…": "Preparing Word…",
+
   Edición: "Editing",
   "Edita solo la letra. Los acordes mantienen su posición.":
     "Edit only the lyrics. Chords keep their positions.",

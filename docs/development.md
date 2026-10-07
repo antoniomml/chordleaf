@@ -73,7 +73,7 @@ The previous application was removed from the current tree. Historical commits r
 
 `build/metadata.js` emits ES/EN content pages into `dist/` during the build: pairs such as `/es/editor-de-acordes/` and `/en/chord-sheet-maker/`. Each page is a self-contained HTML document with canonical and reciprocal `hreflang` links, Open Graph and Twitter tags, `WebPage`/`FAQPage` JSON-LD, a real screenshot, a short FAQ, a repeated CTA and a footer with guide, privacy, import-policy, changelog and GitHub links. Pages only load the built CSS assets (`assets/index-*.css` and `content-pages.css`); they contain no executable scripts, so the CSP stays untouched.
 
-The same build writes the sitemap covering the home pair plus every content pair with `lastmod` and locale alternates. `scripts/check-metadata.mjs` (run by `pnpm check`) validates titles, descriptions, canonicals, reciprocal hreflang, structured data, footers, escaping, 600+ words per page and every internal link. Keep the copy original: no third-party lyrics, no public song index, no invented promises, and keep the privacy and import-policy pages consistent with `SECURITY.md` and the web-import section above. `public/images/editor-workspace.png` is the current screenshot used by those pages; refresh it from `docs/images/workspace.png` when the interface changes.
+The same build writes the sitemap covering the home pair plus every content pair with `lastmod` and locale alternates. `scripts/check-metadata.mjs` (run by `pnpm check`) validates titles, descriptions, canonicals, reciprocal hreflang, structured data, footers, escaping, 600+ words per page and every internal link. Update `build/content-dates.json` only when a page's substantive content changes; rebuilding alone must not advance sitemap dates. Keep the copy original: no third-party lyrics, no public song index, no invented promises, and keep the privacy and import-policy pages consistent with `SECURITY.md` and the web-import section above. `public/images/editor-workspace.png` is the current screenshot used by those pages; refresh it from `docs/images/workspace.png` when the interface changes.
 
 ## Releases
 
@@ -142,7 +142,7 @@ The website import dialog initially offers only the URL download. A structured `
 
 ## Import, export and entry controllers
 
-`src/app.js` coordinates workspace state and navigation. `src/ui/song-import.js` owns import dialogs, cancellation, validation and prepared-song callbacks; `src/ui/song-export.js` snapshots songs for exports and manages editable-project downloads. `src/ui/entry.js` and `build/entry.js` share the startup sheet and initial HTML geometry to keep the layout stable while the editor loads.
+`src/app.js` coordinates workspace state and navigation. Recent lists and explicit deletion live in `src/ui/recent-projects.js`; delegated sheet events live in `src/ui/preview-interactions.js`. Workspace backup parts are prepared before any download is offered. `src/ui/song-import.js` owns import dialogs, cancellation, validation and prepared-song callbacks; `src/ui/song-export.js` snapshots songs for exports and manages editable-project downloads. `src/ui/entry.js` and `build/entry.js` share the startup sheet and initial HTML geometry to keep the layout stable while the editor loads.
 
 ## Reproducible laboratory measurements
 
@@ -155,3 +155,9 @@ node scripts/audit-web.mjs http://localhost:5173/es/
 The script measures three fresh Chromium contexts per viewport with service workers blocked. Mobile uses 150 ms latency, 1.6 Mbps download, 750 Kbps upload and fourfold CPU throttling. Programmatic text updates dispatch the actual editor input handler, then wait for persisted content; these measurements do not represent typing speed or field INP. Download timings include generation, lazy-library loading and saving the invented output file. Run without competing browser suites for less CPU contention. Ignored outputs go to `artifacts/audit/`.
 
 The [2026-10-01 audit](audit-2026-10-01.es.md) distinguishes the live deployed version from local fixes and records unverified native Mac and Vercel-account checks. [Reviewed wiki source](wiki/README.md) is versioned here; the public GitHub wiki is a separate repository and requires a separate publication.
+
+## Python dependency maintenance
+
+Dependabot tracks `experiments/audio` weekly. CI audits the pinned desktop, neural and browser-conversion requirements without installing their heavy model runtimes. The complete desktop/neural lockfiles include SHA-256 hashes for their PyPI distributions; their setup commands enforce `--require-hashes`. After reviewed version changes, run `python3 scripts/hash-python-locks.py` to refresh hashes without changing versions, then verify installation on the intended platform. The optional direct-dependency manifests remain separate research variants.
+
+Mammoth 1.13.0 still declares argparse 1, which pulls sprintf-js affected by GHSA-hp3w-g68c-fv3c. The narrowly scoped argparse 2.0.1 override retains its legacy aliases and removes that dependency. Both browser DOCX imports and Mammoth's optional CLI were checked with invented documents; the CLI emits expected alias-deprecation warnings. Remove the override when Mammoth updates its CLI dependency upstream.

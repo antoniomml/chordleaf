@@ -120,6 +120,7 @@ for (const name of names) {
     assert.equal(registration.scope, "/");
     assert.equal(registration.state, "activated");
     assert.equal(registration.script, "/sw.js");
+    await page.locator('#empty-state [data-offline-state="ready"]').waitFor();
     await page.waitForFunction(() =>
       Boolean(navigator.serviceWorker.controller),
     );

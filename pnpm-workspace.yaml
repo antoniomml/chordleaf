@@ -10,3 +10,6 @@ allowBuilds:
 # chain (GHSA-ch52-4w7c-c8xp). Requires the project's Node.js 24 environment.
 overrides:
   "app-builder-lib@26.15.3>@electron/get": 5.1.0
+  # argparse 2 retains the legacy aliases used by Mammoth's CLI and removes
+  # its vulnerable sprintf-js dependency (GHSA-hp3w-g68c-fv3c).
+  "mammoth@1.13.0>argparse": 2.0.1

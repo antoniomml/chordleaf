@@ -1,5 +1,6 @@
 import { isMobileLayout } from "./mobile-layout.js";
 import { alignmentLine, replaceAlignedLyrics } from "./chord-alignment.js";
+import { setupRecentProjects } from "./ui/recent-projects.js";
 import { setupSongExport } from "./ui/song-export.js";
 import { setupSongImport } from "./ui/song-import.js";
 import { escapeHtml as esc } from "./ui/html.js";
@@ -34,6 +35,8 @@ import { layout, PAGE } from "./layout.js";
 import { download } from "./files.js";
 import { projectSignature } from "./project.js";
 import { registerServiceWorker } from "./pwa.js";
+import { renderOfflineStatus } from "./ui/offline-status.js";
+import { setupPreviewInteractions } from "./ui/preview-interactions.js";
 import { resolveFeatureFlags } from "./feature-flags.js";
 import { setupMenu } from "./ui/menu.js";
 import { blankLineCount, compressBlankLines } from "./text-tools.js";
@@ -329,71 +332,13 @@ function reopenRecent(id) {
   render();
   persist();
 }
-function removeRecent(id) {
-  const index = recent.findIndex((item) => item.song.id === id);
-  if (index < 0) return;
-  const previous = recent;
-  recent = forget(recent, id);
-  if (!persist()) {
-    recent = previous;
-    return;
-  }
-  renderRecent();
-  // Keep keyboard focus inside the list after a removal.
-  const buttons = document.querySelectorAll(
-    `${$("#new-dialog").open ? "#dialog-recent-list" : "#recent-list"} .recent-open`,
-  );
-  const fallback = $("#new-dialog").open ? $("#blank") : $("#empty-new");
-  (buttons[Math.min(index, buttons.length - 1)] ?? fallback)?.focus();
-}
-const relativeTime = new Intl.RelativeTimeFormat(getLocale(), {
-  numeric: "auto",
+const { render: renderRecent } = setupRecentProjects({
+  recent: () => recent,
+  setRecent: (value) => (recent = value),
+  hasSong: () => Boolean(song()),
+  persist,
+  open: reopenRecent,
 });
-function closedAgo(time) {
-  const minutes = Math.round((time - Date.now()) / 60000);
-  if (Math.abs(minutes) < 60) return relativeTime.format(minutes, "minute");
-  const hours = Math.round(minutes / 60);
-  if (Math.abs(hours) < 24) return relativeTime.format(hours, "hour");
-  const days = Math.round(hours / 24);
-  if (Math.abs(days) < 30) return relativeTime.format(days, "day");
-  return new Date(time).toLocaleDateString(getLocale());
-}
-function recentMarkup(entries) {
-  return entries
-    .map(({ song: s, closedAt }) => {
-      const title = esc(s.title || t("Canción sin título"));
-      return `<li><button class="recent-open" data-recent="${s.id}"><span class="recent-title">${title}</span><small>${esc([closedAgo(closedAt), s.artist].filter(Boolean).join(" · "))}</small></button><button class="recent-remove" data-recent-remove="${s.id}" aria-label="${t("Quitar de Recientes")}: ${title}" title="${t("Quitar de Recientes")}">×</button></li>`;
-    })
-    .join("");
-}
-const expandedRecent = new Set();
-function renderRecent() {
-  for (const [section, list, limit, button] of [
-    ["#recent-projects", "#recent-list", 6, "#recent-all"],
-    ["#dialog-recent", "#dialog-recent-list", 4, "#dialog-recent-all"],
-  ]) {
-    $(section).hidden = !recent.length;
-    const expanded = expandedRecent.has(list);
-    $(list).innerHTML = recentMarkup(
-      expanded ? recent : recent.slice(0, limit),
-    );
-    $(button).hidden = recent.length <= limit;
-    $(button).textContent = expanded ? t("Mostrar menos") : t("Ver todas");
-    $(button).setAttribute("aria-expanded", String(expanded));
-    $(button).onclick = () => {
-      if (expanded) expandedRecent.delete(list);
-      else expandedRecent.add(list);
-      renderRecent();
-    };
-  }
-  $("#export").disabled = !song() && !recent.length;
-}
-function recentClick(event) {
-  const remove = event.target.closest("[data-recent-remove]");
-  if (remove) return removeRecent(remove.dataset.recentRemove);
-  const open = event.target.closest("[data-recent]");
-  if (open) reopenRecent(open.dataset.recent);
-}
 function renderEntrySheet() {
   $("#entry-sheet").innerHTML = entrySheetMarkup(getLocale());
 }
@@ -690,6 +635,13 @@ function sourceMeta({ harmonyChanged = true } = {}) {
   if (harmonyChanged) dictionary.renderTray();
   if (section === "chords") chordPanel.refresh();
 }
+setupPreviewInteractions({
+  song,
+  editing: () => editing,
+  inlineEdits,
+  alignment: () => alignment,
+  editLine,
+});
 function renderPages() {
   if (!inlineEdits.finish({ render: false })) return;
   clearTimeout(previewTimer);
@@ -731,47 +683,6 @@ function renderPages() {
   document.querySelectorAll(".page-shell").forEach((p) => observer.observe(p));
   $("#page-count").textContent =
     t`Página ${Math.min(currentPage, l.pages.length)} de ${l.pages.length}`;
-  if (editing) {
-    document.querySelectorAll("[data-header]").forEach(
-      (el) =>
-        (el.onfocus = () => {
-          const name = el.dataset.header;
-          const original = s[name],
-            display = el.innerText;
-          inlineEdits.start(el, {
-            get: () => s[name],
-            set: (value) => (s[name] = value),
-            readInput: () => el.innerText,
-            writeInput: (value) => (el.innerText = value),
-            read: () =>
-              el.innerText === display
-                ? original
-                : el.innerText.replace(/\n/g, " ").trim(),
-            validate(value) {
-              if (value.length > (name === "title" ? 90 : 100))
-                throw new Error(t("El título o artista es demasiado largo."));
-            },
-            rejectInvalid: true,
-          });
-        }),
-    );
-    document.querySelectorAll(".song-line").forEach((el) => {
-      el.onclick = (event) => {
-        if (alignment.handles(event)) return;
-        if (!event.target.closest(".unresolved-chord")) editLine(el);
-      };
-      el.onkeydown = (e) => {
-        if (e.target.closest(".sheet-chord, .inline-editor")) return;
-        if (
-          ["Enter", " "].includes(e.key) &&
-          !e.target.closest(".unresolved-chord")
-        ) {
-          e.preventDefault();
-          editLine(el);
-        }
-      };
-    });
-  }
   dictionary.render();
   resizePages();
   alignment.refresh(l);
@@ -1072,7 +983,10 @@ function render() {
   for (const element of document.querySelectorAll(
     "[data-export], #save-project, #print-document",
   ))
-    element.disabled = empty;
+    element.disabled =
+      empty ||
+      (element.hasAttribute("data-export") &&
+        $("#export").getAttribute("aria-busy") === "true");
   renderRecent();
   if (empty) {
     clearTimeout(previewTimer);
@@ -1294,8 +1208,6 @@ $("#fit").onclick = async () => {
     $("#fit").disabled = false;
   }
 };
-$("#recent-list").addEventListener("click", recentClick);
-$("#dialog-recent-list").addEventListener("click", recentClick);
 $("#example-song").onclick = openExample;
 renderEntrySheet();
 const tooltip = $("#chord-tooltip");
@@ -1539,7 +1451,7 @@ for (const [id, delta] of [
   };
 render();
 persist();
-registerServiceWorker();
+registerServiceWorker(renderOfflineStatus);
 
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") persist();

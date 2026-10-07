@@ -9,3 +9,12 @@ updates:
     directory: /
     schedule:
       interval: weekly
+  - package-ecosystem: pip
+    directory: /experiments/audio
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      python-audio:
+        patterns:
+          - "*"

@@ -69,7 +69,7 @@ Both interface and document fonts are served by the app itself. There are no thi
 
 ## Install it, print it
 
-Chordleaf works in Chromium, Firefox and Safari. In browsers that support installing websites, use the browser's install option, or add it to your home screen on a phone. After the first successful service-worker installation, the editor, fonts, file importers and PDF/Word exporters are available offline. Updates take over when existing Chordleaf tabs close; link downloads still need a connection. **Export → Print** paints just the A4 sheet, without the workspace chrome.
+Chordleaf works in Chromium, Firefox and Safari. In browsers that support installing websites, use the browser's install option, or add it to your home screen on a phone. Wait for **Offline: ready** before relying on the editor, fonts, file importers and PDF/Word exporters without a connection. Updates take over when existing Chordleaf tabs close; link downloads still need a connection. **Export → Print** paints just the A4 sheet, without the workspace chrome.
 
 **Export → ChordPro (.cho)** writes a portable plain-text chord sheet with `{title}`, `{artist}` and `{capo}` directives, understood by apps such as SongBook, OnSong and the ChordPro toolchain, and it can be imported back here.
 

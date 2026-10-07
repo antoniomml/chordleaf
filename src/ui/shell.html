@@ -91,6 +91,10 @@
     </div>
   </div>
 </header>
+<div id="export-progress" role="status" aria-live="polite" hidden>
+  <span class="export-spinner" aria-hidden="true"></span>
+  <span id="export-progress-label"></span>
+</div>
 <div id="tabs-wrap" class="tabs-wrap">
   <nav id="tabs" class="tabs" aria-label="Canciones abiertas"></nav>
   <button id="mobile-tab-plus" aria-label="Nueva canción">
@@ -115,6 +119,7 @@
       <p class="entry-note">
         <i></i>Gratis, sin cuenta y tus canciones se quedan en este navegador.
       </p>
+      <p class="offline-state" data-offline-state role="status" hidden></p>
     </div>
     <figure id="entry-sheet" class="entry-sheet" aria-hidden="true"></figure>
   </div>
@@ -511,6 +516,12 @@
             role="status"
             aria-live="polite"
           ></span>
+          <span
+            class="offline-state"
+            data-offline-state
+            role="status"
+            hidden
+          ></span>
         </div>
       </div>
     </div>
@@ -598,6 +609,45 @@
 </main>
 <div id="chord-tooltip" role="tooltip" hidden></div>
 <div id="toast" role="status"></div>
+<dialog
+  id="workspace-backup-dialog"
+  aria-labelledby="workspace-backup-heading"
+  aria-describedby="workspace-backup-description"
+>
+  <h2 id="workspace-backup-heading">Copia de seguridad en varias partes</h2>
+  <p id="workspace-backup-description">
+    Tu biblioteca necesita varios archivos para que cada copia se pueda abrir.
+    Descarga todas las partes y consérvalas juntas. Para restaurar la
+    biblioteca, abre cada archivo desde Nueva canción → Abrir proyecto editable.
+  </p>
+  <ul id="workspace-backup-parts"></ul>
+  <p id="workspace-backup-status" role="status"></p>
+  <button id="workspace-backup-close" class="outline" type="button">
+    Cerrar
+  </button>
+</dialog>
+<dialog
+  id="delete-recent-dialog"
+  aria-labelledby="delete-recent-heading"
+  aria-describedby="delete-recent-description"
+>
+  <h2 id="delete-recent-heading">¿Eliminar la canción guardada?</h2>
+  <p id="delete-recent-name"></p>
+  <p id="delete-recent-description">
+    Se eliminará la copia de este navegador. Esta acción no se puede deshacer.
+    Si quieres conservarla, cancela y descarga un proyecto o una copia de
+    seguridad.
+  </p>
+  <p id="delete-recent-error" role="alert"></p>
+  <div class="dialog-actions">
+    <button id="delete-recent-cancel" type="button" class="outline" autofocus>
+      Cancelar
+    </button>
+    <button id="delete-recent-confirm" type="button" class="danger-button">
+      Eliminar canción
+    </button>
+  </div>
+</dialog>
 <dialog id="new-dialog" aria-labelledby="new-heading">
   <button class="dialog-close" aria-label="Cerrar">×</button
   ><button id="import-back" hidden>← Volver</button

@@ -1,5 +1,6 @@
 import { metadataPlugin } from "./build/metadata.js";
 import { pwaPlugin } from "./build/pwa.js";
+import { audioRuntimePlugin } from "./build/audio-runtime.js";
 import { defineConfig } from "vite";
 import { webImportMiddleware } from "./server/web-import.js";
 import { audioImportMiddleware } from "./server/audio-import.js";
@@ -19,6 +20,7 @@ if (
     "SITE_URL must be a public HTTPS origin without a path, query or credentials.",
   );
 export default defineConfig({
+  worker: { plugins: () => [audioRuntimePlugin()] },
   server: {
     hmr: process.env.CHORDLEAF_AUDIO_RESEARCH === "1" ? false : undefined,
     watch: {
@@ -28,6 +30,7 @@ export default defineConfig({
   plugins: [
     metadataPlugin(site),
     pwaPlugin(),
+    audioRuntimePlugin(),
     {
       name: "chordleaf-web-import",
       configureServer(server) {

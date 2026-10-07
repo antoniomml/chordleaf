@@ -1,5 +1,5 @@
 import { t } from "../i18n.js";
-import { serializeWorkspace } from "../workspace-backup.js";
+import { setupWorkspaceBackups } from "./workspace-backups.js";
 import { projectSignature, serializeProject } from "../project.js";
 import { exportSong, download, downloadName } from "../files.js";
 
@@ -14,24 +14,25 @@ export function setupSongExport({
   toast,
 }) {
   const $ = (selector) => document.querySelector(selector);
-  $("#workspace-backup").onclick = () => {
-    if (!prepare()) return;
-    try {
-      const state = workspace();
-      download(
-        new Blob(
-          [serializeWorkspace(state.songs, state.active, state.recent)],
-          {
-            type: "application/json",
-          },
-        ),
-        "chordleaf-workspace.json",
-      );
-      exportMenu.close({ focus: true });
-    } catch (error) {
-      toast(error.message, "error");
-    }
-  };
+  let busy = false;
+  function setBusy(value, type) {
+    busy = value;
+    $("#export-progress").hidden = !value;
+    $("#export-progress-label").textContent = value
+      ? type === "docx"
+        ? t("Preparando Word…")
+        : t("Preparando tu documento…")
+      : "";
+    document.documentElement.style.setProperty(
+      "--export-status-height",
+      value ? "28px" : "0px",
+    );
+    $("#export").setAttribute("aria-busy", String(value));
+    document
+      .querySelectorAll("[data-export]")
+      .forEach((button) => (button.disabled = value || !song()));
+  }
+  setupWorkspaceBackups({ workspace, prepare, exportMenu, toast });
   $("#print-document").onclick = () => {
     if (!prepare()) return;
     exportMenu.close({ focus: true });
@@ -73,11 +74,13 @@ export function setupSongExport({
   document.querySelectorAll("[data-export]").forEach(
     (b) =>
       (b.onclick = async () => {
+        if (busy) return;
         if (!prepare()) return;
         exportMenu.close({ focus: true });
         const s = song();
+        if (!s) return;
+        setBusy(true, b.dataset.export);
         try {
-          toast(t("Preparando tu documento…"));
           await exportSong(structuredClone(s), b.dataset.export);
           toast(t("Documento descargado."));
         } catch (e) {
@@ -87,6 +90,8 @@ export function setupSongExport({
             ) + e.message,
             "error",
           );
+        } finally {
+          setBusy(false);
         }
       }),
   );

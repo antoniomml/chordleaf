@@ -44,9 +44,15 @@ try {
   await page.locator("#example-song").click();
   await page.locator(".page").waitFor();
   await check("example song");
+  await page.locator("#export").click();
+  await check("desktop export menu");
+  await page.keyboard.press("Escape");
   await page.locator(".tab-close").first().click();
   await page.locator("#recent-list li").first().waitFor();
   await check("empty workspace with recent songs");
+  await page.locator("#recent-list .recent-remove").first().click();
+  await check("saved-song deletion confirmation");
+  await page.locator("#delete-recent-cancel").click();
   await page.locator("#empty-new").click();
   await check("new-song dialog");
   await page.locator("#blank").click();
@@ -80,6 +86,17 @@ try {
   await page.locator('.rail [data-mobile-view="music"]').click();
   await page.locator('[data-music-section="key"]').click();
   await check("mobile key");
+  for (const [width, height] of [
+    [320, 568],
+    [390, 844],
+    [844, 390],
+    [720, 450],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await page.locator("#export").click();
+    await check(`export menu ${width}×${height}`);
+    await page.keyboard.press("Escape");
+  }
   console.log("Automated accessibility checks passed");
 } finally {
   await browser.close();
