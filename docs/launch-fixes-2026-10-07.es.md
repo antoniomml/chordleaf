@@ -16,7 +16,7 @@ Esta versión resuelve los hallazgos de la [auditoría del 5 de octubre](audit-2
 | A8 · Mantenimiento      | Hashes de distribución Python y exigencia al instalar, Dependabot y auditoría de los tres manifiestos en CI. Controladores de Recientes, backup, estado offline y eventos de vista previa extraídos de app.js. | Las versiones Python fijadas se conservan; instalación congelada npm y regresiones del editor.                                                                         |
 | A8 · Backup grande      | Partes independientes y restaurables cuando se superan 500 canciones o 10 MiB, con descarga explícita de cada archivo.                                                                                         | Biblioteca de 601 canciones en navegador, 611 canciones abiertas/cerradas y límites de bytes Unicode en tests; todas las partes se validan antes de ofrecer descargas. |
 | A8 · Offline            | El worker activo confirma que todos los recursos del build actual están guardados antes de mostrar «Offline: listo».                                                                                           | Offline real, fallo controlado del registro, build incorrecto, origen ajeno y caché incompleta; editar sigue disponible.                                               |
-| A8 · SEO y rendimiento  | Fechas de contenido explícitas en el sitemap, catálogo de acordes diferido y eventos delegados. Las páginas fuera de pantalla omiten pintura manteniendo contenido y exportación completos.                    | Metadatos, importación, edición sobre la hoja, alineación, impresión y exportación existentes.                                                                         |
+| A8 · SEO y rendimiento  | Fechas de contenido explícitas en el sitemap, catálogo de acordes diferido y eventos delegados. Se mantienen la pintura y el contenido completos para conservar los contratos de edición y geometría.          | Metadatos, importación, edición sobre la hoja, alineación, impresión y exportación existentes.                                                                         |
 
 La revisión actual de dependencias encontró además dos avisos que no figuraban en el resultado del 5 de octubre: **GHSA-68fv-2mgg-jv7q** y **GHSA-hp3w-g68c-fv3c**. Se actualizan Vite y Mammoth, se fija source-map-js 1.2.2 y se limita el override de argparse 2.0.1 a Mammoth 1.13.0. El CLI opcional de Mammoth se comprobó con un DOCX inventado; no se instala ni ejecuta sobre documentos de usuarios.
 
@@ -30,7 +30,7 @@ La revisión actual de dependencias encontró además dos avisos que no figuraba
 - Protección de main verificada: PR obligatorio, checks `app` y `Vercel`, rama actualizada y prohibición de borrado/force-push. La versión se publica mediante ese procedimiento.
 - Capturas revisadas de escritorio, teléfono, horizontal y tablet, incluidos exportación y borrado. Las evidencias locales están en `artifacts/launch-readiness`, ignorado por Git.
 
-Los resultados de CI, el commit publicado y el tag se comprueban durante la publicación. La release debe apuntar al commit de main fusionado, y `/release.json` debe devolver exactamente esa versión y SHA; no se etiqueta un build anterior.
+El primer CI detectó lecturas de texto vacío antes del pintado al usar `content-visibility: auto` en la hoja. Se retiró esa optimización y se repiten las regresiones de navegación móvil y alineación, conservando la delegación de eventos y el catálogo diferido. Los resultados de CI, el commit publicado y el tag se comprueban durante la publicación. La release debe apuntar al commit de main fusionado, y `/release.json` debe devolver exactamente esa versión y SHA; no se etiqueta un build anterior.
 
 ## Medición de rendimiento
 
@@ -38,16 +38,16 @@ Se repite `scripts/audit-web.mjs` contra el build local servido con gzip, tres m
 
 | Mediana                   | Escritorio    | Móvil limitado |
 | ------------------------- | ------------- | -------------- |
-| Interfaz lista            | 302 ms        | 2.390 ms       |
-| FCP                       | 184 ms        | 932 ms         |
-| LCP                       | 312 ms        | 2.288 ms       |
-| CLS                       | 0             | 0,030          |
-| Bloqueo inicial observado | 58 ms         | 689 ms         |
-| Transferencia inicial     | 299.758 bytes | 299.758 bytes  |
-| PDF de 44.000 caracteres  | 304 ms        | 1.667 ms       |
-| Word de 44.000 caracteres | 467 ms        | 2.754 ms       |
+| Interfaz lista            | 256 ms        | 2.577 ms       |
+| FCP                       | 180 ms        | 872 ms         |
+| LCP                       | 268 ms        | 2.468 ms       |
+| CLS                       | 0,001         | 0,040          |
+| Bloqueo inicial observado | 5 ms          | 620 ms         |
+| Transferencia inicial     | 299.740 bytes | 299.740 bytes  |
+| PDF de 44.000 caracteres  | 289 ms        | 1.702 ms       |
+| Word de 44.000 caracteres | 547 ms        | 2.746 ms       |
 
-Las seis muestras terminan edición, guardado y exportación sin errores JavaScript ni desbordamiento horizontal. El Word largo se completa en 2,16–3,55 s en este perfil. El bloqueo móvil varía entre 446 y 782 ms y sigue siendo un área de mejora para dispositivos lentos; no se atribuye una reducción general de arranque a estos cambios. La prueba artificial de exportación superior a cuatro segundos comprueba el indicador persistente incluso cuando la preparación tarda más que estas muestras. Evidencias locales: `artifacts/audit/web-measurements.json`.
+Las seis muestras terminan edición, guardado y exportación sin errores JavaScript ni desbordamiento horizontal. El Word largo se completa en 2,71–3,54 s en este perfil. El bloqueo móvil varía entre 490 y 647 ms y sigue siendo un área de mejora para dispositivos lentos; no se atribuye una reducción general de arranque a estos cambios. La prueba artificial de exportación superior a cuatro segundos comprueba el indicador persistente incluso cuando la preparación tarda más que estas muestras. Evidencias locales: `artifacts/audit/web-measurements.json`.
 
 ## Límites que permanecen
 

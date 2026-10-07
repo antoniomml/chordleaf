@@ -1172,12 +1172,6 @@ main {
   flex-shrink: 0;
   box-shadow: 0 12px 32px #1117;
 }
-@media screen {
-  /* Shell dimensions remain explicit; skip offscreen page painting, not content. */
-  .page-shell {
-    content-visibility: auto;
-  }
-}
 .page {
   position: relative;
   transform-origin: top left;

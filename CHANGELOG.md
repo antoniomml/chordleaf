@@ -9,7 +9,7 @@
 - Split large workspace backups into independently restorable files when they exceed 500 songs or 10 MiB, with explicit downloads for every part; preserve all open and closed songs.
 - Show actual offline readiness only after the active worker confirms that this build and all its application resources are cached. Report unavailable or pending-update states without interrupting editing.
 - Explain local audio processing, requested Hugging Face downloads, request metadata, model deletion and explicit site-data removal on both public privacy pages. Show model weights separately from the shared audio engine, using exact build-time file sizes for storage and download progress.
-- Preserve content modification dates across rebuilds, defer chord catalog construction until search, delegate preview events and skip painting offscreen pages while retaining complete printing and export.
+- Preserve content modification dates across rebuilds, defer chord catalog construction until search and delegate preview events while retaining complete printing and export.
 - Hash the pinned Python desktop/neural distributions, enforce hashes during installation, add Python dependency updates and advisory checks to CI, and expand browser regressions for the launch findings.
 - Update Vite and Mammoth, refresh source-map-js to 1.2.2 and scope Mammoth's argparse dependency to compatible version 2.0.1, removing GHSA-68fv-2mgg-jv7q and the sprintf-js chain affected by GHSA-hp3w-g68c-fv3c. Verify the optional Mammoth CLI on an invented Word document.
 
