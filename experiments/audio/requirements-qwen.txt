@@ -1,5 +1,5 @@
 # Optional Apple Silicon transcription backend, tested alongside the base runtime.
 mlx-audio==0.5.7
-mlx==0.32.2
-transformers==5.17.0
-huggingface-hub==1.33.0
+mlx==0.32.3
+transformers==5.18.0
+huggingface-hub==2.1.1
