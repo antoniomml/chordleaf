@@ -1,5 +1,5 @@
 # Isolated experiment; not part of the web app's runtime dependencies.
-numpy==2.3.3
-scipy==1.16.2
-av==16.0.1
+numpy==2.5.3
+scipy==1.18.1
+av==19.0.1
 faster-whisper==1.2.1
