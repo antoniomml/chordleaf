@@ -35,7 +35,7 @@ Para corregir palabras directamente sobre la hoja, activa el lápiz de la vista 
 
 ## 4. Prepara la hoja para tocar
 
-Abre **Configuración**, en la barra lateral o en la navegación inferior. Puedes cambiar el tamaño de letra, los márgenes y las columnas. **Semitonos** mueve todos los acordes; **Cejilla** indica el traste. La opción **Mantener el tono al mover la cejilla** ajusta los acordes para conservar el tono que suena.
+Abre **Configuración**, en la barra lateral o en la navegación inferior. Puedes cambiar el tamaño de letra, los márgenes y las columnas. **Semitonos** mueve todos los acordes; **Cejilla** indica el traste. Activa **Bloquear tonalidad** para conservar el tono que suena: subir semitonos baja la cejilla y subir la cejilla baja los acordes. Los cambios se detienen en los trastes 0 y 12. **Restaurar acordes originales** también compensa la cejilla mientras está bloqueado.
 
 En la vista previa, **Ajustar a 1 página** busca una distribución legible. Las canciones largas pueden ocupar varias páginas. El zoom sólo cambia lo que ves; el PDF mantiene el tamaño A4.
 

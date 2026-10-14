@@ -26,55 +26,65 @@ const pitches = (song) =>
     m[1].split("/").map((note) => (pc(note) + song.capo) % 12),
   );
 
-test("every capo and transposition combination preserves the sounding offset, including slash basses", () => {
+test("a locked key survives every capo and semitone combination, including slash basses", () => {
   for (let originalCapo = 0; originalCapo <= 12; originalCapo++) {
     for (let offset = -14; offset <= 14; offset++) {
       const song = makeSong(originalCapo),
-        original = structuredClone(song);
-      const controller = createTransposition();
-      controller.shift(song, offset);
+        original = structuredClone(song),
+        controller = createTransposition();
+      const allowed = originalCapo - offset >= 0 && originalCapo - offset <= 12;
+      assert.equal(controller.shift(song, offset), allowed);
+      assert.equal(song.capo, allowed ? originalCapo - offset : originalCapo);
       for (const capo of [0, 12, 5, 1, 11, 3, originalCapo]) {
         controller.setCapo(song, capo);
-        assert.equal(controller.get(song.id)?.offset ?? 0, offset);
-        assert.deepEqual(
-          pitches(song),
-          pitches(original).map((chord) =>
-            chord.map((pitch) => (pitch + (offset % 12) + 12) % 12),
-          ),
-        );
+        assert.equal(controller.get(song.id)?.offset ?? 0, originalCapo - capo);
+        assert.deepEqual(pitches(song), pitches(original));
         assert.match(song.text, /\[\?H7\]/);
       }
-      controller.undo(song);
       assert.deepEqual(song, original);
       assert.equal(controller.get(song.id), undefined);
     }
   }
 });
 
-test("mixed controls and link toggles agree with an independent pitch model after every action", () => {
+test("mixed controls, resets and lock toggles agree with an independent pitch model after every action", () => {
   const song = makeSong(),
     original = structuredClone(song),
     controller = createTransposition();
   let offset = 0,
-    compensation = 0,
+    capo = original.capo,
+    locked = true,
     seed = 271828;
-  for (let i = 0; i < 1500; i++) {
+  for (let i = 0; i < 4000; i++) {
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
     const action = seed % 6;
     if (action < 2) {
       const delta = action ? 1 : -1;
-      controller.shift(song, delta);
-      offset += delta;
+      const allowed = !locked || (capo - delta >= 0 && capo - delta <= 12);
+      assert.equal(controller.canShift(song, delta), allowed);
+      assert.equal(controller.shift(song, delta), allowed);
+      if (allowed) {
+        offset += delta;
+        if (locked) capo -= delta;
+      }
     } else if (action < 4) {
-      const capo = (seed >>> 8) % 13;
-      if (song.linked) compensation += song.capo - capo;
-      controller.setCapo(song, capo);
-    } else if (action === 4) song.linked = !song.linked;
+      const next = (seed >>> 8) % 13;
+      if (locked) offset += capo - next;
+      controller.setCapo(song, next);
+      capo = next;
+    } else if (action === 4) song.linked = locked = !locked;
     else {
-      controller.undo(song);
-      offset = 0;
+      const allowed =
+        Boolean(offset) &&
+        (!locked || (capo + offset >= 0 && capo + offset <= 12));
+      assert.equal(controller.canUndo(song), allowed);
+      assert.equal(controller.undo(song), allowed);
+      if (allowed) {
+        if (locked) capo += offset;
+        offset = 0;
+      }
     }
-    const total = offset + compensation + song.capo - original.capo;
+    const total = offset + capo - original.capo;
     assert.deepEqual(
       pitches(song),
       pitches(original).map((chord) =>
@@ -82,19 +92,44 @@ test("mixed controls and link toggles agree with an independent pitch model afte
       ),
     );
     assert.equal(controller.get(song.id)?.offset ?? 0, offset);
+    assert.equal(song.capo, capo);
+    if (!offset) {
+      assert.equal(song.text, original.text);
+      assert.deepEqual(song.chordShapes, original.chordShapes);
+      assert.deepEqual(song.chordStickers, original.chordStickers);
+    }
   }
 });
 
+test("a reset under lock restores original chords and compensates the capo", () => {
+  const song = makeSong(3),
+    original = structuredClone(song),
+    controller = createTransposition();
+  controller.setCapo(song, 6);
+  assert.equal(controller.get(song.id).offset, -3);
+  assert.equal(controller.undo(song), true);
+  assert.deepEqual(song, original);
+  song.linked = false;
+  controller.shift(song, 10);
+  song.linked = true;
+  const before = structuredClone(song);
+  assert.equal(controller.canUndo(song), false);
+  assert.equal(controller.undo(song), false);
+  assert.deepEqual(song, before);
+  song.linked = false;
+  assert.equal(controller.undo(song), true);
+  assert.equal(song.text, original.text);
+});
+
 test("a failed transposition cannot partly change capo, diagrams or reset history", () => {
-  const song = makeSong(0),
+  const song = makeSong(1),
     controller = createTransposition();
   song.text = "[C]" + "a".repeat(49997);
   const before = structuredClone(song);
   assert.throws(() => controller.shift(song, 1), /50.000/);
   assert.deepEqual(song, before);
   assert.equal(controller.get(song.id), undefined);
-  // Linked capo 11 turns C into C#, which also exceeds the source limit.
-  assert.throws(() => controller.setCapo(song, 11), /50.000/);
+  assert.throws(() => controller.setCapo(song, 12), /50.000/);
   assert.deepEqual(song, before);
 });
 
@@ -112,6 +147,6 @@ test("capo input is integral and bounded; song histories are independent", () =>
   assert.equal(a.capo, 0);
   controller.setCapo(a, NaN);
   assert.equal(a.capo, 0);
-  assert.equal(controller.get(a.id).offset, 2);
+  assert.equal(controller.get(a.id).offset, 3);
   assert.equal(controller.get(b.id).offset, -3);
 });

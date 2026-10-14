@@ -37,6 +37,7 @@ import { download } from "./files.js";
 import { projectSignature } from "./project.js";
 import { registerServiceWorker } from "./pwa.js";
 import { renderOfflineStatus } from "./ui/offline-status.js";
+import { setupSheetSelection } from "./ui/sheet-selection.js";
 import { setupPreviewInteractions } from "./ui/preview-interactions.js";
 import { resolveFeatureFlags } from "./feature-flags.js";
 import { setupMenu } from "./ui/menu.js";
@@ -445,7 +446,21 @@ function renderSettings() {
   renderSettingsContent();
   if (optionsOpen && $(".more-document-options"))
     $(".more-document-options").open = true;
-  if (focusSelector) $(focusSelector)?.focus({ preventScroll: true });
+  if (focusSelector) {
+    let control = $(focusSelector);
+    if (control?.disabled) {
+      const opposite = {
+        "capo-down": "capo-up",
+        "capo-up": "capo-down",
+        "transpose-down": "transpose-up",
+        "transpose-up": "transpose-down",
+      }[control.id];
+      control = opposite
+        ? $(`#${opposite}`)
+        : control.closest(".stepper")?.querySelector("button:not(:disabled)");
+    }
+    control?.focus({ preventScroll: true });
+  }
 }
 function renderSettingsContent() {
   syncSection();
@@ -469,6 +484,7 @@ function renderSettingsContent() {
   $("#settings").innerHTML = renderDocumentSettings(
     s,
     transposeHistory.get(s.id),
+    transposeHistory.canUndo(s),
   );
   if ($("#undo-transpose")) $("#undo-transpose").onclick = undoTranspose;
   $("#showBrand").onchange = (e) => {
@@ -559,7 +575,7 @@ function updateNavigation() {
 }
 function shift(n) {
   try {
-    transposeHistory.shift(song(), n);
+    if (!transposeHistory.shift(song(), n)) return;
   } catch (error) {
     toast(error.message, "warning");
     return;
@@ -569,7 +585,7 @@ function shift(n) {
 }
 function undoTranspose() {
   if (!transposeHistory.get(song().id)) return;
-  transposeHistory.undo(song());
+  if (!transposeHistory.undo(song())) return;
   changed({ preserveTranspose: true });
   render();
 }
@@ -577,6 +593,7 @@ function setCapo(value) {
   try {
     transposeHistory.setCapo(song(), value);
   } catch (error) {
+    renderSettings();
     toast(error.message, "warning");
     return;
   }
@@ -600,6 +617,21 @@ function sourceMeta({ harmonyChanged = true } = {}) {
   if (harmonyChanged) dictionary.renderTray();
   if (section === "chords") chordPanel.refresh();
 }
+setupSheetSelection({
+  enabled: () => editing,
+  song,
+  rowFor: (el) => sheetRows.get(el),
+  finish: (options) => inlineEdits.finish(options),
+  update(text) {
+    if (!updateText(text)) return false;
+    changed();
+    renderSource();
+    renderSettings();
+    renderPages();
+    return true;
+  },
+  editLine,
+});
 setupPreviewInteractions({
   song,
   editing: () => editing,
@@ -673,6 +705,14 @@ function schedulePreview() {
 }
 function editLine(el, event) {
   if (el.querySelector(".inline-editor")) return;
+  const selection = window.getSelection();
+  const selectedRange =
+    selection?.rangeCount &&
+    !selection.isCollapsed &&
+    el.querySelector(".lyric")?.contains(selection.anchorNode) &&
+    el.querySelector(".lyric")?.contains(selection.focusNode)
+      ? selection.getRangeAt(0).cloneRange()
+      : null;
   alignment.clear();
   const endIndex = Number(el.dataset.end),
     target = song(),
@@ -701,6 +741,8 @@ function editLine(el, event) {
     input.textContent = display;
     positions = Array.from({ length: display.length + 1 }, (_, i) => i);
   }
+  if (!mobile)
+    row.draft = { raw: edited, positions, index: endIndex, lineDelta: 0 };
   const readInput = () => {
     if (mobile) return input.value;
     return readSheetLyrics(input);
@@ -729,13 +771,27 @@ function editLine(el, event) {
       assertTextLength(text);
       edited = next;
       display = value;
-      if (!mobile) positions = replacement.positions;
+      if (!mobile) {
+        positions = replacement.positions;
+        row.draft = {
+          raw: edited,
+          positions,
+          index: endIndex,
+          lineDelta: edited.split("\n").length - 1,
+        };
+      }
       return text;
     },
     rejectInvalid: true,
   });
   if (mobile) input.focus();
-  else placeLyricCaret(input, event);
+  else {
+    placeLyricCaret(input, event);
+    if (selectedRange) {
+      selection.removeAllRanges();
+      selection.addRange(selectedRange);
+    }
+  }
   input.onclick = (e) => e.stopPropagation();
 }
 function editChord(el) {

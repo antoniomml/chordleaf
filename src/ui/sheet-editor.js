@@ -30,7 +30,8 @@ export function placeLyricCaret(input, event) {
         range = document.createRange();
         range.setStart(point.offsetNode, point.offset);
       }
-    } else {
+    }
+    if (!range) {
       const point = document.caretRangeFromPoint?.(
         event.clientX,
         event.clientY,

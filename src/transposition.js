@@ -40,55 +40,71 @@ function transposed(song, n) {
   };
 }
 
-/** Semitones track explicit transposition. A linked capo changes both the
- * current chords and their reset baseline, preserving that audible offset. */
+/** Offset measures written chord changes from the original snapshot. With the
+ * key locked, either control compensates the other, preserving sounding pitch. */
 export function createTransposition() {
   const history = new Map();
   function initial(song) {
-    return (
-      history.get(song.id) ?? {
-        snapshot: snapshot(song),
-        offset: 0,
-        compensation: 0,
-      }
-    );
+    return history.get(song.id) ?? { snapshot: snapshot(song), offset: 0 };
   }
-  function apply(song, state) {
-    const next = transposed(state.snapshot, state.offset + state.compensation);
-    Object.assign(song, next);
-    if (!state.offset && !state.compensation) history.delete(song.id);
+  function apply(song, state, capo = song.capo) {
+    // Calculate everything first: validation failures leave the song and its
+    // history untouched. Always derive chords/diagrams from the same baseline.
+    const next = transposed(state.snapshot, state.offset);
+    Object.assign(song, next, { capo });
+    if (!state.offset) history.delete(song.id);
     else history.set(song.id, state);
   }
+  function canShift(song, n) {
+    return (
+      Number.isInteger(n) &&
+      (!song.linked || (song.capo - n >= 0 && song.capo - n <= 12))
+    );
+  }
+  function canUndo(song) {
+    const offset = history.get(song.id)?.offset;
+    return Boolean(offset) && canShift(song, -offset);
+  }
   return {
-    get: (id) => (history.get(id)?.offset ? history.get(id) : undefined),
+    get: (id) => history.get(id),
     delete: (id) => history.delete(id),
+    canShift,
+    canUndo,
     shift(song, n) {
+      if (!canShift(song, n)) return false;
       const previous = initial(song);
-      const offset = previous.offset + n;
-      // Derive every result from the baseline: repeated up/down changes cannot
-      // accumulate enharmonic respellings or octave shifts of custom shapes.
-      apply(song, { ...previous, offset });
+      apply(
+        song,
+        { ...previous, offset: previous.offset + n },
+        song.linked ? song.capo - n : song.capo,
+      );
+      return true;
     },
     undo(song) {
+      if (!canUndo(song)) return false;
       const previous = history.get(song.id);
-      if (!previous) return;
-      apply(song, { ...previous, offset: 0 });
+      apply(
+        song,
+        { ...previous, offset: 0 },
+        song.linked ? song.capo + previous.offset : song.capo,
+      );
+      return true;
     },
     setCapo(song, value) {
       const capo = Math.min(
         12,
         Math.max(0, Math.round(Number.isFinite(value) ? value : 0)),
       );
-      if (capo === song.capo) return;
+      if (capo === song.capo) return false;
       if (song.linked) {
         const previous = initial(song);
-        const delta = song.capo - capo;
-        apply(song, {
-          ...previous,
-          compensation: previous.compensation + delta,
-        });
-      }
-      song.capo = capo;
+        apply(
+          song,
+          { ...previous, offset: previous.offset + song.capo - capo },
+          capo,
+        );
+      } else song.capo = capo;
+      return true;
     },
   };
 }
