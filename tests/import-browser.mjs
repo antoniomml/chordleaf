@@ -68,6 +68,11 @@ try {
     "<title>Prueba - Artista - Cifra Club</title><h1>Prueba</h1><a><h2>Artista</h2></a><pre data-chord-content><div>[Intro] <b>C</b>  <b>G</b>\n\n<b>C</b>     <b>G</b>\nLuz del día</div></pre>",
     "https://www.cifraclub.com/artista/prueba/",
   );
+  const paragraphs = await parseThroughUI(
+    "<pre>C\nUna línea\n<p></p>G\nOtra línea</pre>",
+    "https://www.cifraclub.com/artista/parrafos/",
+  );
+  assert.equal(paragraphs.text, "[C]Una línea\n\n[G]Otra línea");
   const cuerda = await parseThroughUI(
     '<title>PRUEBA, Artista: Acordes</title><div id="tH1"><h1><a>Prueba</a></h1><h2><a>Artista</a></h2></div><pre id="tCode"></pre><div id="t_body"><pre>INTRO: <a>C</a> - <a>G</a>\n\n<a>C</a>     <a>G</a>\nLuz del día</pre></div>',
     "https://acordes.lacuerda.net/artista/prueba",

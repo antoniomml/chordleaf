@@ -5,7 +5,7 @@ import { songUrl, webProvider } from "./web-sources.js";
 import { readWebMarkup } from "./web-markup.js";
 
 // Read text only; never mount downloaded markup or execute website scripts.
-function preText(root) {
+function preText(root, { ignoreEmptyDivs = false } = {}) {
   function read(node) {
     if (node.nodeType === 3) return node.textContent;
     if (node.nodeType !== 1) return "";
@@ -15,8 +15,10 @@ function preText(root) {
     const text = [...node.childNodes].map(read).join("");
     // Inline chord names retain their exact horizontal spacing. importText
     // converts chord-only rows into anchored chords afterwards.
-    if (["DIV", "P"].includes(node.tagName) && text)
+    if (["DIV", "P"].includes(node.tagName)) {
+      if (ignoreEmptyDivs && node.tagName === "DIV" && !text) return "";
       return text + (text.endsWith("\n") ? "" : "\n");
+    }
     return text;
   }
   return read(root).replace(/\u00a0/g, " ");
@@ -273,7 +275,7 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
         )
           el.textContent = `[${value}]`;
       }
-      text = preText(pre);
+      text = preText(pre, { ignoreEmptyDivs: laCuerda });
       if (laCuerda) text = laCuerdaNotation(text);
       if (provider === "tusacordes") text = tusAcordesNotation(text);
       if (provider === "acordescc") text = laCuerdaNotation(text);
