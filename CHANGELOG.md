@@ -3,6 +3,7 @@
 ## 1.6.2 · October 14, 2026
 
 - Select and delete text across desktop sheet verses, wrapped rows, columns and pages with the mouse or Shift+Up/Down. Remove selected chord tokens with their text, keep unselected endpoints intact, and support undo/redo, replacement and saved drafts.
+- Keep enlarged chord drag targets clear of the lyrics underneath, so a lyric selection cannot accidentally grab a chord.
 - Replace the one-way capo link with **Lock key**: raising written semitones lowers the capo, and raising the capo lowers the chords. Keep the sounding key fixed, stop at frets 0 and 12, and compensate the capo when restoring original chords.
 - Show every written chord change in the semitone counter, including capo compensation. Preserve keyboard focus when a stepper reaches its limit and document the behavior in English and Spanish.
 - Verify thousands of mixed transposition/capo/reset operations against an independent pitch model, with cross-browser regressions for multi-line editing and source boundaries.

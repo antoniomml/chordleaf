@@ -210,15 +210,13 @@ export function setupSheetSelection({
     },
     true,
   );
-  document.addEventListener("pointermove", (event) => {
-    if (!drag || !(event.buttons & 1)) return;
-    let point = atPoint(event.clientX, event.clientY);
+  function extendTo(x, y) {
+    let point = atPoint(x, y);
     if (
       !point ||
       (!extending && rowKey(point.el.closest(".song-line")) === drag.row)
     )
       return;
-    event.preventDefault();
     if (!extending) {
       const anchor = atPoint(drag.x, drag.y);
       const offset = anchor && sourceOffset(anchor, false);
@@ -229,15 +227,20 @@ export function setupSheetSelection({
       scroll.focus({ preventScroll: true });
       drag.anchor = pointSource(offset);
       extending = true;
-      point = atPoint(event.clientX, event.clientY);
+      point = atPoint(x, y);
     }
     if (drag.anchor && point) {
       drag.focus = point;
       selectPoints(drag.anchor, point);
     }
     const bounds = scroll.getBoundingClientRect();
-    if (event.clientY > bounds.bottom - 25) scroll.scrollTop += 12;
-    if (event.clientY < bounds.top + 25) scroll.scrollTop -= 12;
+    if (y > bounds.bottom - 25) scroll.scrollTop += 12;
+    if (y < bounds.top + 25) scroll.scrollTop -= 12;
+    return true;
+  }
+  document.addEventListener("pointermove", (event) => {
+    if (drag && event.buttons & 1 && extendTo(event.clientX, event.clientY))
+      event.preventDefault();
   });
   // Cancel compatibility mouse selection: preventing pointermove alone does
   // not cancel the subsequent mousemove's native selection default on Linux.
@@ -247,7 +250,9 @@ export function setupSheetSelection({
   document.addEventListener("mouseup", (event) => {
     if (suppressClick) event.preventDefault();
   });
-  document.addEventListener("pointerup", () => {
+  document.addEventListener("pointerup", (event) => {
+    // The last move can be coalesced; release coordinates are authoritative.
+    if (drag) extendTo(event.clientX, event.clientY);
     if (extending && drag.anchor && drag.focus)
       selectPoints(drag.anchor, drag.focus, true);
     suppressClick = extending;

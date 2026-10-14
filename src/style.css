@@ -4128,7 +4128,7 @@ select:focus-visible {
 .aligning-chords .sheet-chord.alignable-chord::before {
   content: "";
   position: absolute;
-  inset: -7px -3px;
+  inset: -7px -3px 0;
 }
 .aligning-chords .sheet-chord.alignment-selected {
   background: #e7eedf;

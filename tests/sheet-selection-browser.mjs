@@ -1,5 +1,8 @@
 import { chromium, firefox, webkit, expect } from "@playwright/test";
 import assert from "node:assert/strict";
+import { mkdir } from "node:fs/promises";
+
+await mkdir("artifacts", { recursive: true });
 
 for (const engine of [chromium, firefox, webkit].filter(
   (engine) =>
@@ -7,12 +10,14 @@ for (const engine of [chromium, firefox, webkit].filter(
     process.env.CHORDLEAF_BROWSERS.split(",").includes(engine.name()),
 )) {
   const browser = await engine.launch();
+  let page;
   try {
-    const page = await browser.newPage({
+    page = await browser.newPage({
       locale: "es-ES",
       viewport: { width: 1440, height: 1000 },
       serviceWorkers: "block",
     });
+    await page.context().tracing.start({ screenshots: true, snapshots: true });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(process.env.CHORDLEAF_URL || "http://localhost:5173/es/");
@@ -27,6 +32,18 @@ for (const engine of [chromium, firefox, webkit].filter(
     await page.evaluate(() => document.fonts.ready);
     const lyric = (index) =>
       page.locator(`.song-line[data-line="${index}"] .lyric`);
+    // Expanded chord targets must never steal the lyric's upper half.
+    assert.equal(
+      await lyric(0).evaluate((el) => {
+        const rect = el.getBoundingClientRect();
+        return (
+          document
+            .elementFromPoint(rect.left + 2, rect.top + rect.height * 0.25)
+            ?.closest(".lyric") === el
+        );
+      }),
+      true,
+    );
     async function point(row, offset) {
       return row.evaluate((el, offset) => {
         const range = document.createRange();
@@ -187,6 +204,11 @@ for (const engine of [chromium, firefox, webkit].filter(
     console.log(
       `${engine.name()}: multi-verse selection, deletion, undo, replacement and wrapped source boundaries passed`,
     );
+  } catch (error) {
+    await page
+      ?.context()
+      .tracing.stop({ path: `artifacts/sheet-selection-${engine.name()}.zip` });
+    throw error;
   } finally {
     await browser.close();
   }
