@@ -50,6 +50,13 @@ export function setupSheetSelection({
       .elementFromPoint(x, y)
       ?.closest(".song-line")
       ?.querySelector(".lyric");
+    if (el) {
+      const row = el.closest(".song-line").getBoundingClientRect();
+      // Reject stale hit targets outside their printed row during native
+      // selection capture; geometry still identifies the verse under the mouse.
+      if (x < row.left || x > row.right || y < row.top || y > row.bottom)
+        el = undefined;
+    }
     if (!el) {
       let distance = Infinity;
       for (const candidate of pages.querySelectorAll(".lyric")) {

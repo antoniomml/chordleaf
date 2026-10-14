@@ -17,6 +17,58 @@ for (const engine of [chromium, firefox, webkit].filter(
       viewport: { width: 1440, height: 1000 },
       serviceWorkers: "block",
     });
+    await page.addInitScript(() => {
+      const describe = (node) => ({
+        text: node?.textContent?.slice(0, 35),
+        line: (node?.nodeType === 1 ? node : node?.parentElement)?.closest(
+          ".song-line",
+        )?.dataset.line,
+      });
+      const trace = (event) => {
+        if (!window.__recordSheetSelection) return;
+        window.__sheetSelectionEvents.push(event);
+        if (window.__sheetSelectionEvents.length > 40)
+          window.__sheetSelectionEvents.shift();
+      };
+      const original = Selection.prototype.setBaseAndExtent;
+      Selection.prototype.setBaseAndExtent = function (a, ai, b, bi) {
+        original.call(this, a, ai, b, bi);
+        trace({
+          type: "set",
+          anchor: describe(a),
+          ai,
+          focus: describe(b),
+          bi,
+          actual: describe(this.focusNode),
+          offset: this.focusOffset,
+        });
+      };
+      for (const type of [
+        "pointerdown",
+        "pointermove",
+        "pointerup",
+        "selectionchange",
+      ])
+        document.addEventListener(
+          type,
+          (event) =>
+            trace({
+              type,
+              x: event.clientX,
+              y: event.clientY,
+              hit: describe(
+                document.elementFromPoint(
+                  event.clientX ?? 0,
+                  event.clientY ?? 0,
+                ),
+              ),
+              focus: describe(getSelection().focusNode),
+              offset: getSelection().focusOffset,
+              active: document.activeElement?.className,
+            }),
+          true,
+        );
+    });
     await page.context().tracing.start({ screenshots: true, snapshots: true });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
@@ -67,6 +119,10 @@ for (const engine of [chromium, firefox, webkit].filter(
     async function select(a, ai, b, bi) {
       const start = await point(a, ai),
         end = await point(b, bi);
+      await page.evaluate(() => {
+        window.__sheetSelectionEvents = [];
+        window.__recordSheetSelection = true;
+      });
       await page.mouse.move(start.x, start.y);
       await page.mouse.down();
       await page.mouse.move(end.x, end.y, { steps: 8 });
@@ -81,6 +137,10 @@ for (const engine of [chromium, firefox, webkit].filter(
           focus: lyric(range.focusNode),
         };
       });
+      const events = await page.evaluate(() => {
+        window.__recordSheetSelection = false;
+        return window.__sheetSelectionEvents;
+      });
       assert.deepEqual(
         selection,
         {
@@ -88,7 +148,7 @@ for (const engine of [chromium, firefox, webkit].filter(
           anchor: await a.textContent(),
           focus: await b.textContent(),
         },
-        JSON.stringify({ start, end, selection }),
+        JSON.stringify({ start, end, selection, events }),
       );
     }
     // Whole verses, including their chords, disappear. Undo restores exact bytes.
