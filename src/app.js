@@ -1,5 +1,9 @@
 import { isMobileLayout } from "./mobile-layout.js";
-import { alignmentLine, replaceAlignedLyrics } from "./chord-alignment.js";
+import {
+  alignmentLine,
+  replaceAlignedLyrics,
+  replaceDisplayedLyrics,
+} from "./chord-alignment.js";
 import { setupRecentProjects } from "./ui/recent-projects.js";
 import { setupSongExport } from "./ui/song-export.js";
 import { setupSongImport } from "./ui/song-import.js";
@@ -15,22 +19,19 @@ import shell from "./ui/shell.html?raw";
 import { t, getLocale } from "./i18n.js";
 import { createSong as create, assertTextLength } from "./song-state.js";
 import { createInlineEdits } from "./ui/inline-edits.js";
-import { setupSheetEditor } from "./ui/sheet-editor.js";
+import {
+  setupSheetEditor,
+  placeLyricCaret,
+  readSheetLyrics,
+} from "./ui/sheet-editor.js";
+import { createTransposition } from "./transposition.js";
 import { setupChordsPanel } from "./chords-panel.js";
 import { setupDictionary } from "./dictionary-ui.js";
 import { setupEditorTools } from "./editor-tools.js";
 import { setupChordAlignment } from "./ui/chord-alignment.js";
 import { icon } from "./ui/icons.js";
 import "./style.css";
-import {
-  keyInfo,
-  transpose,
-  diagram,
-  transposeChord,
-  transposeSpelling,
-  chords,
-  chordRE,
-} from "./music.js";
+import { keyInfo, transpose, diagram, chords, chordRE } from "./music.js";
 import { layout, PAGE } from "./layout.js";
 import { download } from "./files.js";
 import { projectSignature } from "./project.js";
@@ -117,11 +118,12 @@ let section = "document",
 const songViews = new Map();
 const songDesktopViews = new Map();
 const songMusicSections = new Map();
-const transposeHistory = new Map();
+const transposeHistory = createTransposition();
 let chordMode = "song";
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const song = () => songs.find((s) => s.id === active);
 let sheetEditor;
+let sheetRows = new WeakMap();
 const inlineEdits = createInlineEdits({
   changed,
   finished() {
@@ -555,67 +557,30 @@ function updateNavigation() {
   pencil.setAttribute("aria-label", pencilLabel);
   pencil.setAttribute("aria-pressed", String(editing));
 }
-function transposeSong(n) {
-  const s = song();
-  const names = transposeSpelling(s.text, n);
-  if (!updateText(transpose(s.text, n, names))) return false;
-  s.chordShapes = Object.fromEntries(
-    Object.entries(s.chordShapes || {}).map(([name, shape]) => {
-      let offset = n;
-      const played = shape.frets.filter((f) => f >= 0);
-      while (played.length && Math.min(...played) + offset < 0) offset += 12;
-      while (played.length && Math.max(...played) + offset > 24) offset -= 12;
-      return [
-        transposeChord(name, n, names),
-        { ...shape, frets: shape.frets.map((f) => (f < 0 ? -1 : f + offset)) },
-      ];
-    }),
-  );
-  for (const sticker of s.chordStickers || [])
-    if (Array.isArray(sticker.chords))
-      sticker.chords = sticker.chords.map((c) => transposeChord(c, n, names));
-  return true;
-}
 function shift(n) {
-  const s = song();
-  let history = transposeHistory.get(s.id);
-  if (!history) {
-    history = {
-      snapshot: {
-        text: s.text,
-        chordShapes: structuredClone(s.chordShapes),
-        chordStickers: structuredClone(s.chordStickers),
-      },
-      offset: 0,
-    };
-  }
-  const next = history.offset + n;
-  if (next === 0) {
-    Object.assign(s, history.snapshot);
-    transposeHistory.delete(s.id);
-  } else {
-    if (!transposeSong(n)) return;
-    history.offset = next;
-    transposeHistory.set(s.id, history);
+  try {
+    transposeHistory.shift(song(), n);
+  } catch (error) {
+    toast(error.message, "warning");
+    return;
   }
   changed({ preserveTranspose: true });
   render();
 }
 function undoTranspose() {
-  const s = song(),
-    history = transposeHistory.get(s.id);
-  if (!history) return;
-  Object.assign(s, history.snapshot);
-  transposeHistory.delete(s.id);
-  changed();
+  if (!transposeHistory.get(song().id)) return;
+  transposeHistory.undo(song());
+  changed({ preserveTranspose: true });
   render();
 }
 function setCapo(value) {
-  const s = song(),
-    next = Math.min(12, Math.max(0, Number.isFinite(value) ? value : 0));
-  if (s.linked && !transposeSong(s.capo - next)) return;
-  s.capo = next;
-  changed();
+  try {
+    transposeHistory.setCapo(song(), value);
+  } catch (error) {
+    toast(error.message, "warning");
+    return;
+  }
+  changed({ preserveTranspose: true });
   render();
 }
 function renderSource() {
@@ -648,7 +613,17 @@ function renderPages() {
   previewTimer = undefined;
   const s = song(),
     l = layout(s);
+  const scroll = $("#pages-scroll"),
+    scrollTop = scroll.scrollTop,
+    scrollLeft = scroll.scrollLeft;
   $("#pages").innerHTML = renderPageMarkup(s, l, editing);
+  const rows = l.pages.flatMap((page) => page.columns.flat());
+  sheetRows = new WeakMap(
+    [...$("#pages").querySelectorAll(".song-line")].map((el, i) => [
+      el,
+      rows[i],
+    ]),
+  );
   $("#pages .sheet-chord[data-chord]")?.setAttribute("tabindex", "0");
   $("#issue-editor").hidden = true;
   const issues = [...s.text.matchAll(/\[\?[^\[\]\n]{1,40}\]/g)].length;
@@ -686,40 +661,81 @@ function renderPages() {
   dictionary.render();
   resizePages();
   alignment.refresh(l);
+  // Replacement briefly restores unscaled page heights. Restore the viewport
+  // only after the new shells have their final zoom and layout.
+  scroll.scrollTop = scrollTop;
+  scroll.scrollLeft = scrollLeft;
 }
 function schedulePreview() {
   if (song().text.length <= 10000) return renderPages();
   clearTimeout(previewTimer);
   previewTimer = setTimeout(renderPages, 120);
 }
-function editLine(el) {
-  if (el.querySelector("textarea")) return;
+function editLine(el, event) {
+  if (el.querySelector(".inline-editor")) return;
   alignment.clear();
   const endIndex = Number(el.dataset.end),
     target = song(),
-    lines = target.text.split("\n");
+    lines = target.text.split("\n"),
+    mobile = isMobileLayout(),
+    row = sheetRows.get(el);
   // A separate chord-only source row stays untouched above its lyric row.
   let edited = lines[endIndex];
-  el.innerHTML = t`<textarea class="inline-editor" aria-label="Editar letra del verso">${esc(alignmentLine(edited).lyric)}</textarea>`;
-  const input = el.firstChild;
+  let input;
+  if (mobile) {
+    el.innerHTML = t`<textarea class="inline-editor" aria-label="Editar letra del verso">${esc(alignmentLine(edited).lyric)}</textarea>`;
+    input = el.firstChild;
+  } else {
+    input = el.querySelector(".lyric");
+    input.classList.add("inline-editor", "inline-lyric-editor");
+    input.contentEditable = "plaintext-only";
+    input.setAttribute("role", "textbox");
+    input.setAttribute("aria-label", t("Editar letra del verso"));
+  }
+  let display = input.textContent,
+    positions = row.positions?.slice(0, display.length + 1) ?? [];
+  if (!mobile && !row.positions) {
+    // Instrumental rows contain printed placeholders for chord labels rather
+    // than lyric cells. Edit their actual source text, like the mobile field.
+    display = alignmentLine(edited).lyric;
+    input.textContent = display;
+    positions = Array.from({ length: display.length + 1 }, (_, i) => i);
+  }
+  const readInput = () => {
+    if (mobile) return input.value;
+    return readSheetLyrics(input);
+  };
   const editDialog = sheetEditor.open(input, "lyric");
   inlineEdits.start(input, {
     blurWithin: editDialog,
     multiline: Boolean(editDialog),
     get: () => target.text,
     set: (value) => (target.text = value),
+    ...(!mobile
+      ? {
+          readInput,
+          writeInput: (value) => (input.textContent = value),
+        }
+      : {}),
     read() {
-      const next = replaceAlignedLyrics(edited, input.value);
+      const value = readInput();
+      const replacement = mobile
+        ? { raw: replaceAlignedLyrics(edited, value) }
+        : replaceDisplayedLyrics(edited, display, value, positions);
+      const next = replacement.raw;
       const candidate = [...lines];
       candidate.splice(endIndex, 1, ...next.split("\n"));
       const text = candidate.join("\n");
       assertTextLength(text);
       edited = next;
+      display = value;
+      if (!mobile) positions = replacement.positions;
       return text;
     },
     rejectInvalid: true,
   });
-  input.focus();
+  if (mobile) input.focus();
+  else placeLyricCaret(input, event);
   input.onclick = (e) => e.stopPropagation();
 }
 function editChord(el) {

@@ -2,6 +2,7 @@ import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { lyricValue } from "./helpers/inline-editor.mjs";
 
 const browser = await chromium.launch();
 try {
@@ -91,13 +92,13 @@ try {
       items[i].transform[4] > items[i - 1].transform[4] + items[i - 1].width,
     );
   await loading.destroy();
-  // Direct editing opens lyrics without chord tokens or layout padding.
+  // Native editing keeps the printed text in place, including layout padding.
+  const printed = await page.locator(".song-line .lyric").first().innerText();
   await page.locator("#pencil").click();
   await page.locator(".song-line").first().click();
-  assert.equal(
-    await page.locator(".inline-editor").inputValue(),
-    source.split("\n")[0].replace(/\[[^\]]+\]/g, ""),
-  );
+  assert.equal(await lyricValue(page.locator(".inline-editor")), printed);
+  await page.locator(".inline-editor").press("Enter");
+  assert.equal(await page.locator("#source").inputValue(), source);
   console.log(
     "Crowded chords: single row, no visual overlaps, PDF geometry matches, source and direct editing unchanged.",
   );

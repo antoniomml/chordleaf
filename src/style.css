@@ -1290,6 +1290,29 @@ main {
     0 2px 8px #0001,
     inset 0 -1px #7e8b72;
 }
+.page .inline-lyric-editor,
+.page .inline-lyric-editor:focus {
+  top: auto;
+  width: auto;
+  min-width: 1ch;
+  max-width: 100%;
+  height: auto;
+  min-height: 1.2em;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  font: inherit;
+  line-height: 1.2;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  cursor: text;
+}
+.editable .inline-lyric-editor:hover {
+  background: transparent;
+}
 .preview-footer {
   height: 38px;
   display: flex;

@@ -12,6 +12,7 @@ import { layout, PAGE } from "./layout.js";
 import { chordRE, unresolvedChordRE } from "./music.js";
 import { parsePdfPages, chordRow } from "./pdf-import.js";
 import { registerPdfFonts } from "./fonts.js";
+import { chordAnchorOffset } from "./chord-spacing.js";
 /** Run async work in order with a bounded number of concurrent tasks. */
 export async function mapWithConcurrency(items, limit, mapper) {
   const results = new Array(items.length);
@@ -531,10 +532,11 @@ function alignText(lines) {
         for (const m of matches.reverse()) {
           const chord = m[0].replace(/[\[\]]/g, "");
           if (!chordRE.test(chord) && !unresolvedChordRE.test(chord)) continue;
+          // Plain chord rows specify the label's left edge; inline tokens
+          // specify its middle character. Preserve the printed column.
+          const at = m.index + chordAnchorOffset(chord.replace(/^\?/, ""));
           lyric =
-            lyric.padEnd(m.index, " ").slice(0, m.index) +
-            `[${chord}]` +
-            lyric.slice(m.index);
+            lyric.padEnd(at, " ").slice(0, at) + `[${chord}]` + lyric.slice(at);
         }
         out.push(lyric);
         i++;

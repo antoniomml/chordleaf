@@ -9,6 +9,29 @@ export function setupPreviewInteractions({
   editLine,
 }) {
   const pages = document.querySelector("#pages");
+  pages.addEventListener("pointerdown", (event) => {
+    const active = document.activeElement?.closest(
+      ".inline-editor, .inline-chord-editor",
+    );
+    if (
+      !editing() ||
+      event.button !== 0 ||
+      !active ||
+      active.contains(event.target) ||
+      !event.target.closest(".song-line")
+    )
+      return;
+    // Commit before the browser blurs the old field and resolves the new focus
+    // target. Rendering during blur would remove that target mid-click.
+    event.preventDefault();
+    if (!inlineEdits.finish()) {
+      event.stopImmediatePropagation();
+      return;
+    }
+    const target = document.elementFromPoint(event.clientX, event.clientY);
+    const line = target?.closest(".song-line");
+    if (line && !target.closest(".sheet-chord")) editLine(line, event);
+  });
   pages.addEventListener("focusin", (event) => {
     if (!editing()) return;
     const header = event.target.closest("[data-header]");
@@ -38,10 +61,11 @@ export function setupPreviewInteractions({
     const line = event.target.closest(".song-line");
     if (
       line &&
+      !event.target.closest(".inline-editor") &&
       !alignment().handles(event) &&
       !event.target.closest(".unresolved-chord")
     )
-      editLine(line);
+      editLine(line, event);
   });
   pages.addEventListener("keydown", (event) => {
     if (!editing() || event.target.closest(".sheet-chord, .inline-editor"))

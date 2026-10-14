@@ -69,6 +69,35 @@ try {
     await page.locator("#source").inputValue(),
     "[C/G]Uno\n{new_page}\n[Dm7]Dos",
   );
+  // Linked capo compensation must not erase the manual semitone offset or
+  // restore a stale snapshot when the semitone controls return to zero.
+  const baseline = "[C/G]Uno\n{new_page}\n[Dm7]Dos";
+  await page.locator("#transpose-up").click();
+  await page.locator("#link").click();
+  await page.locator("#capo-up").click();
+  assert.equal(await page.locator(".transpose-value").textContent(), "+1");
+  assert.equal(await page.locator("#source").inputValue(), baseline);
+  await page.locator("#transpose-down").click();
+  assert.equal(await page.locator(".transpose-value").textContent(), "0");
+  assert.notEqual(await page.locator("#source").inputValue(), baseline);
+  await page.locator("#transpose-up").click();
+  await page.locator("#capo-up").click();
+  assert.equal(await page.locator(".transpose-value").textContent(), "+1");
+  await reset.click();
+  assert.equal(await page.locator(".transpose-value").textContent(), "0");
+  assert.equal(await page.locator("#capo").inputValue(), "2");
+  await page.locator("#capo-down").click();
+  await page.locator("#capo-down").click();
+  assert.equal(await page.locator("#source").inputValue(), baseline);
+  await page.locator("#link").click();
+  await page.locator("#transpose-up").click();
+  const moved = await page.locator("#source").inputValue();
+  await page.locator("#capo-up").click();
+  assert.equal(await page.locator(".transpose-value").textContent(), "+1");
+  assert.equal(await page.locator("#source").inputValue(), moved);
+  await page.locator("#capo-down").click();
+  await reset.click();
+  assert.equal(await page.locator("#source").inputValue(), baseline);
   await page.locator(".more-document-options summary").click();
   await page.locator("#showBrand").uncheck();
   assert.equal(await page.locator(".sheet-brand").count(), 0);

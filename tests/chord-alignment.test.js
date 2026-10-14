@@ -4,7 +4,9 @@ import {
   alignmentLine,
   moveAlignedChord,
   replaceAlignedLyrics,
+  replaceDisplayedLyrics,
 } from "../src/chord-alignment.js";
+import { layout } from "../src/layout.js";
 
 test("moving one occurrence preserves exact lyrics, other chords and literal brackets", () => {
   const raw = "[Verse] [G]Una ca[G]sa [D/F#]azul  ";
@@ -103,4 +105,58 @@ test("successive lyric edits retain anchors across newlines and grapheme cluster
   const parsed = alignmentLine(replacement);
   assert.equal(parsed.lyric, "👩‍🎤");
   assert.ok(parsed.marks.every((mark) => parsed.boundaries.includes(mark.at)));
+});
+
+test("chords can move over blank space after the lyric and move back without losing other tokens", () => {
+  const result = moveAlignedChord("[C]Luz [G]azul", 0, 15);
+  assert.equal(result.raw, "Luz [G]azul       [C]");
+  assert.equal(alignmentLine(result.raw).marks.at(-1).at, 15);
+  const back = moveAlignedChord(result.raw, result.start, 0);
+  assert.equal(back.raw, "[C]Luz [G]azul       ");
+});
+
+test("editing a padded, wrapped printed row preserves all other lyrics and source spaces", () => {
+  const raw =
+    "[Cmaj7]Una ca[Dmaj7]sa [Am]azul que brilla con mucha luz. ".repeat(5);
+  const rows = layout({
+    title: "",
+    text: raw,
+    fontSize: 16,
+    margin: 10,
+    columns: 2,
+  }).pages.flatMap((p) => p.columns.flat());
+  assert.ok(rows.length > 1);
+  const row = rows[1];
+  const before = row.lyric;
+  const at = before.indexOf("a");
+  assert.ok(at >= 0);
+  const changed = replaceDisplayedLyrics(
+    raw,
+    before,
+    before.slice(0, at) + "Nueva " + before.slice(at),
+    row.positions.slice(0, before.length + 1),
+  );
+  const original = alignmentLine(raw);
+  assert.equal(
+    alignmentLine(changed.raw).lyric,
+    original.lyric.slice(0, row.positions[at]) +
+      "Nueva " +
+      original.lyric.slice(row.positions[at]),
+  );
+  const back = replaceDisplayedLyrics(
+    changed.raw,
+    before.slice(0, at) + "Nueva " + before.slice(at),
+    before,
+    changed.positions,
+  );
+  assert.equal(back.raw, raw);
+  const first = rows[0];
+  assert.ok(first.lyric.startsWith("  "));
+  const untouched = replaceDisplayedLyrics(
+    raw,
+    first.lyric,
+    first.lyric,
+    first.positions,
+  );
+  assert.equal(untouched.raw, raw);
 });

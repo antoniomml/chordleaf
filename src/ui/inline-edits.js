@@ -59,6 +59,7 @@ export function createInlineEdits({ changed, finished, invalid }) {
     };
     input.onkeydown = (event) => {
       if (current?.input !== input) return;
+      if (event.isComposing) return;
       if (event.key === "Escape") {
         event.preventDefault();
         event.stopPropagation();

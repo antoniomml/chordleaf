@@ -68,6 +68,11 @@ try {
     "<title>Prueba - Artista - Cifra Club</title><h1>Prueba</h1><a><h2>Artista</h2></a><pre data-chord-content><div>[Intro] <b>C</b>  <b>G</b>\n\n<b>C</b>     <b>G</b>\nLuz del día</div></pre>",
     "https://www.cifraclub.com/artista/prueba/",
   );
+  const paragraphs = await parseThroughUI(
+    "<pre>C\nUna línea\n<p></p>G\nOtra línea</pre>",
+    "https://www.cifraclub.com/artista/parrafos/",
+  );
+  assert.equal(paragraphs.text, "[C]Una línea\n\n[G]Otra línea");
   const cuerda = await parseThroughUI(
     '<title>PRUEBA, Artista: Acordes</title><div id="tH1"><h1><a>Prueba</a></h1><h2><a>Artista</a></h2></div><pre id="tCode"></pre><div id="t_body"><pre>INTRO: <a>C</a> - <a>G</a>\n\n<a>C</a>     <a>G</a>\nLuz del día</pre></div>',
     "https://acordes.lacuerda.net/artista/prueba",
@@ -85,8 +90,7 @@ try {
     cuerdaAligned.text.split("\n")[0],
     "INTRO:  [Bm9] [Em7] [F#7sus4]",
   );
-  assert.match(cuerdaAligned.text, /^\[Bm9\]Suena la luz/m);
-  assert.ok(!cuerdaAligned.text.split("\n").some((line) => /^ +\S/.test(line)));
+  assert.match(cuerdaAligned.text, /^ {10}S\[Bm9\]uena la luz/m);
   assert.deepEqual(
     await page
       .locator('.song-line[data-line="0"] .sheet-chord')
@@ -102,7 +106,44 @@ try {
     cuerdaAlignedTxt.text.split("\n")[0],
     "INTRO:  [Bm9] [Em7] [F#7sus4]",
   );
-  assert.match(cuerdaAlignedTxt.text, /^\[Bm9\]Suena la luz/m);
+  assert.match(cuerdaAlignedTxt.text, /^ {10}S\[Bm9\]uena la luz/m);
+  // Empty provider marker divs are inline. Chord/lyric indentation differs,
+  // and the last chord belongs over blank space beyond the final word.
+  const preserved = await parseThroughUI(
+    '<title>Demo, Artista: Acordes</title><div id="t_body"><pre>CEJILLA EN EL TERCER TRASTE\n\n<div></div>             <a>Em</a>\nUna ventana azul\n<div></div>    <a>Dadd9</a>               <a>C</a>\n  Otra luz</pre></div>',
+    "https://acordes.lacuerda.net/artista/demo.shtml",
+  );
+  assert.equal(preserved.capo, 3);
+  assert.equal(preserved.text.split("\n").length, 2);
+  const importedRows = await page.locator(".song-line").evaluateAll((rows) =>
+    rows.map((row) => ({
+      lyric: row.querySelector(".lyric").textContent,
+      columns: [...row.querySelectorAll(".sheet-chord")].map((mark) =>
+        Math.round(
+          parseFloat(mark.style.left) / (parseFloat(row.style.fontSize) * 0.6),
+        ),
+      ),
+    })),
+  );
+  assert.deepEqual(importedRows, [
+    { lyric: "Una ventana azul", columns: [13] },
+    { lyric: "  Otra luz", columns: [4, 24] },
+  ]);
+  const firstIndented = await parseThroughUI(
+    "             Em\nUna ventana azul",
+    "https://acordes.lacuerda.net/TXT/artista/demo.txt",
+    "text/plain",
+  );
+  assert.equal(firstIndented.text, preserved.text.split("\n")[0]);
+  const compact = await parseThroughUI(
+    "A4 C\nUna ventana azul",
+    "https://acordes.lacuerda.net/TXT/artista/compacta.txt",
+    "text/plain",
+  );
+  assert.deepEqual(
+    [...compact.text.matchAll(/\[([^\]]+)\]/g)].map((m) => m[1]),
+    ["Asus4", "C"],
+  );
   const cuerdaSpanish = await parseThroughUI(
     '<title>PAYASO, El Kanka: Acordes</title><div id="tH1"><h1><a>Payaso</a></h1><h2><a>El Kanka</a></h2></div><div id="t_body"><pre>- Capo en segundo traste -\n\n<a>MIm</a>         <a>SI7</a>       <a>MIm</a>\nMe dicen que soy un payaso,\n<a>MI7</a>.                   <a>LAm</a>\nporque no les tomo en serio,\n<a>DO</a> .          <a>SI7</a>\nque siempre seré un payaso,</pre></div>',
     "https://acordes.lacuerda.net/kanka/payaso.shtml",
@@ -128,10 +169,10 @@ try {
   assert.equal(cuerdaSpanish.capo, 2);
   assert.match(
     cuerdaSpanish.text,
-    /\[Em\]Me dicen qu\[B7\]e soy un \[Em\]payaso/,
+    /\[Em\]Me dicen que\[B7\] soy un pa\[Em\]yaso/,
   );
-  assert.match(cuerdaSpanish.text, /\[E7\]porque no les tomo en\[Am\] serio/);
-  assert.match(cuerdaSpanish.text, /\[C\]que siempre \[B7\]seré un payaso/);
+  assert.match(cuerdaSpanish.text, /\[E7\]porque no les tomo en s\[Am\]erio/);
+  assert.match(cuerdaSpanish.text, /\[C\]que siempre se\[B7\]ré un payaso/);
   assert.doesNotMatch(cuerdaSpanish.text, /Capo en segundo traste/);
   assert.doesNotMatch(cuerdaSpanish.text, /MIm|SI7|MI7|LAm|DO|\[E7\.\]/);
   const unresolved = await parseThroughUI(
