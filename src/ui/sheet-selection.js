@@ -231,18 +231,25 @@ export function setupSheetSelection({
       extending = true;
       point = atPoint(event.clientX, event.clientY);
     }
-    if (drag.anchor && point) selectPoints(drag.anchor, point);
+    if (drag.anchor && point) {
+      drag.focus = point;
+      selectPoints(drag.anchor, point);
+    }
     const bounds = scroll.getBoundingClientRect();
     if (event.clientY > bounds.bottom - 25) scroll.scrollTop += 12;
     if (event.clientY < bounds.top + 25) scroll.scrollTop -= 12;
   });
+  // Cancel compatibility mouse selection: preventing pointermove alone does
+  // not cancel the subsequent mousemove's native selection default on Linux.
+  document.addEventListener("mousemove", (event) => {
+    if (extending) event.preventDefault();
+  });
+  document.addEventListener("mouseup", (event) => {
+    if (suppressClick) event.preventDefault();
+  });
   document.addEventListener("pointerup", () => {
-    if (extending) {
-      const selection = window.getSelection();
-      const start = lyricPoint(selection.anchorNode, selection.anchorOffset),
-        end = lyricPoint(selection.focusNode, selection.focusOffset);
-      if (start && end && start.el === end.el) selectPoints(start, end, true);
-    }
+    if (extending && drag.anchor && drag.focus)
+      selectPoints(drag.anchor, drag.focus, true);
     suppressClick = extending;
     drag = undefined;
     extending = false;

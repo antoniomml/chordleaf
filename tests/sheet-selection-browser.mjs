@@ -42,7 +42,7 @@ for (const engine of [chromium, firefox, webkit].filter(
         return {
           x:
             rect.x +
-            rect.width * (offset === el.textContent.length ? 0.95 : 0.05),
+            rect.width * (offset === el.textContent.length ? 0.95 : 0.25),
           y: rect.y + rect.height / 2,
         };
       }, offset);
@@ -54,9 +54,24 @@ for (const engine of [chromium, firefox, webkit].filter(
       await page.mouse.down();
       await page.mouse.move(end.x, end.y, { steps: 8 });
       await page.mouse.up();
-      assert.equal(
-        await page.evaluate(() => window.getSelection().isCollapsed),
-        false,
+      const selection = await page.evaluate(() => {
+        const range = window.getSelection();
+        const lyric = (node) =>
+          node.parentElement.closest(".lyric")?.textContent;
+        return {
+          collapsed: range.isCollapsed,
+          anchor: lyric(range.anchorNode),
+          focus: lyric(range.focusNode),
+        };
+      });
+      assert.deepEqual(
+        selection,
+        {
+          collapsed: false,
+          anchor: await a.textContent(),
+          focus: await b.textContent(),
+        },
+        JSON.stringify({ start, end, selection }),
       );
     }
     // Whole verses, including their chords, disappear. Undo restores exact bytes.
