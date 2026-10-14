@@ -2,6 +2,7 @@ import { chromium, webkit, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import axe from "axe-core";
+import { expectLyricValue } from "./helpers/inline-editor.mjs";
 
 await mkdir("artifacts", { recursive: true });
 for (const [engine, mobile] of [
@@ -34,7 +35,7 @@ for (const [engine, mobile] of [
     const first = page.locator('.song-line[data-line="0"]');
     await first.locator(".lyric").first().click();
     const lyrics = page.locator(".inline-editor");
-    await expect(lyrics).toHaveValue("Una casa");
+    await expectLyricValue(lyrics, "Una casa");
     await lyrics.press("Home");
     await lyrics.pressSequentially("En ");
     if (mobile) await page.locator("#sheet-edit-done").click();
@@ -76,7 +77,7 @@ for (const [engine, mobile] of [
 
     // Legacy separate chord rows remain byte-for-byte separate when editing lyrics.
     await page.locator('.song-line[data-line="1"] .lyric').click();
-    await expect(lyrics).toHaveValue("Una canción");
+    await expectLyricValue(lyrics, "Una canción");
     await lyrics.fill("Otra canción");
     if (mobile) await page.locator("#sheet-edit-done").click();
     else await lyrics.press("Enter");

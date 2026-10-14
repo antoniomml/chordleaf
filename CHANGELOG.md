@@ -1,5 +1,13 @@
 # chordleaf changelog
 
+## 1.6.1 · October 14, 2026
+
+- Preserve chord columns when importing LaCuerda sheets, including different chord/lyric indentation, empty markup markers, normalized Spanish notation and chords after the final word. Recognize capo instructions such as “en el tercer traste”.
+- Allow chord placement over blank paper after the lyrics, with keyboard movement and undo. Preserve vertical and horizontal scroll after edits and drops on zoomed documents.
+- Edit desktop lyrics directly on the printed text with the caret at the clicked character, keeping chords visible. Preserve wrapped-row spacing, draft saves, cancellation, native line breaks and input composition.
+- Keep semitone transposition and linked capo compensation consistent across mixed operations, link toggles and reset. Derive chords and custom diagrams from a stable baseline to avoid accumulated respellings and octave shifts.
+- Add regression coverage for imported geometry, native editing, blank chord anchors, zoomed scrolling and more than 4,000 transposition/capo states.
+
 ## 1.6.0 · October 7, 2026
 
 - Confirm saved-song deletion with the song name, a clear permanence warning and Cancel focused by default. Failed storage writes preserve the previous copy and keep the confirmation open.

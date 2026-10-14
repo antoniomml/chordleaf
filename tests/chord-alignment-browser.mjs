@@ -4,6 +4,7 @@ import axe from "axe-core";
 import { mkdir, readFile } from "node:fs/promises";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import mammoth from "mammoth";
+import { lyricValue, expectLyricValue } from "./helpers/inline-editor.mjs";
 
 await mkdir("artifacts", { recursive: true });
 const browser = await chromium.launch();
@@ -176,9 +177,7 @@ try {
     if (mobile)
       await page.touchscreen.tap(t.x + t.width / 2, t.y + t.height / 2);
     else await page.mouse.click(t.x + t.width / 2, t.y + t.height / 2);
-    await expect(page.locator(".inline-editor")).toHaveValue(
-      "antes antes antes",
-    );
+    await expectLyricValue(page.locator(".inline-editor"), "antes antes antes");
     assert.equal(await source.inputValue(), original);
     await page.locator(".inline-editor").press("Escape");
     await label.press("ArrowRight");
@@ -278,7 +277,7 @@ try {
     });
     await page.locator("#sheet-alignment-edit").click();
     assert.equal(
-      await page.locator(".inline-editor").inputValue(),
+      await lyricValue(page.locator(".inline-editor")),
       "antes antes antes",
     );
     assert.equal(

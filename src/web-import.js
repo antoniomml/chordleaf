@@ -1,7 +1,7 @@
 import { t } from "./i18n.js";
 import { importText, titleCase } from "./files.js";
 import { chordRE, chords, unresolvedChordRE } from "./music.js";
-import { LACUERDA_HOSTS, songUrl, webProvider } from "./web-sources.js";
+import { songUrl, webProvider } from "./web-sources.js";
 import { readWebMarkup } from "./web-markup.js";
 
 // Read text only; never mount downloaded markup or execute website scripts.
@@ -15,7 +15,7 @@ function preText(root) {
     const text = [...node.childNodes].map(read).join("");
     // Inline chord names retain their exact horizontal spacing. importText
     // converts chord-only rows into anchored chords afterwards.
-    if (["DIV", "P"].includes(node.tagName))
+    if (["DIV", "P"].includes(node.tagName) && text)
       return text + (text.endsWith("\n") ? "" : "\n");
     return text;
   }
@@ -34,7 +34,7 @@ function laCuerdaPlainText(value) {
   return lines
     .slice(start, footer < 0 ? undefined : footer)
     .join("\n")
-    .trim();
+    .replace(/^(?:[ \t]*\n)+|(?:\n[ \t]*)+$/g, "");
 }
 function laCuerdaChord(value) {
   const spanishNotes = {
@@ -82,13 +82,27 @@ function laCuerdaNotation(text) {
             plausibleChord(chordToken(token)) ||
             /^[.\-|:]+$/.test(token),
         )
-      )
-        return line.replace(/\S+/g, (token) => {
-          if (/^[.\-|:]+$/.test(token)) return token.replace(/\./g, "");
-          if (unresolved(token)) return token;
-          const name = chordToken(token);
-          return chordRE.test(name) ? name : `[?${name}]`;
-        });
+      ) {
+        let converted = "";
+        for (const match of line.matchAll(/\S+/g)) {
+          const token = match[0];
+          let value;
+          if (/^[.\-|:]+$/.test(token)) value = token.replace(/\./g, "");
+          else if (unresolved(token)) value = token;
+          else {
+            const name = chordToken(token);
+            value = chordRE.test(name) ? name : `[?${name}]`;
+          }
+          // A normalized label can be wider than the provider's shorthand.
+          // Keep its neighbours separate when it consumes the original gap.
+          const column = Math.max(
+            match.index,
+            converted.length && value ? converted.length + 1 : 0,
+          );
+          converted = converted.padEnd(column, " ") + value;
+        }
+        return converted.padEnd(line.length, " ");
+      }
       return line.replace(
         /(?<!\S)(?:FA#7(?:\/A#)?|[A-G][#b]?(?:4(?:\/7)?|m7\/5b))(?!\S)/g,
         laCuerdaChord,
@@ -193,7 +207,11 @@ function markSectionChords(text) {
         /^(\s*(?:\[(?:Intro|Final|Solo)\]|(?:INTRO|FINAL|SOLO)\s*:)\s*)(.*)$/i,
       );
       return m
-        ? m[1] + m[2].replace(/\S+/g, (c) => (chordRE.test(c) ? `[${c}]` : c))
+        ? m[1] +
+            m[2].replace(/\S+/g, (c) => {
+              const name = laCuerdaChord(c);
+              return chordRE.test(name) ? `[${name}]` : c;
+            })
         : line;
     })
     .join("\n");
@@ -245,7 +263,7 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
             el.textContent = `[?${original}]`;
           continue;
         }
-        if (value !== original)
+        if (!laCuerda && value !== original)
           el.textContent = el.textContent.replace(original, value);
         const line = el.parentNode.textContent;
         if (
@@ -308,7 +326,7 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
     }
     // Mixed section/chord lines are instrumental, including LaCuerda TXT.
     text = markSectionChords(text);
-    if (laCuerda || provider === "chordie")
+    if (provider === "chordie")
       text = text
         .split("\n")
         .map((line) => line.trimStart())
@@ -320,7 +338,7 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
     capo = Number(capoMatch?.[1]) || 0;
     if (laCuerda && !capo) {
       const ordinalLine =
-        /^\s*-?\s*(?:capo|cejilla|capotraste)\s+en\s+(primer|segundo|tercer|cuarto|quinto|sexto|s[eé]ptimo|octavo|noveno|d[eé]cimo)\s+traste\s*-?\s*$/im;
+        /^\s*-?\s*(?:capo|cejilla|capotraste)\s+en\s+(?:el\s+)?(primer|segundo|tercer|cuarto|quinto|sexto|s[eé]ptimo|octavo|noveno|d[eé]cimo)\s+traste\s*-?\s*$/im;
       const ordinal = text
         .match(ordinalLine)?.[1]
         ?.toLowerCase()
@@ -339,7 +357,7 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
           "noveno",
           "decimo",
         ].indexOf(ordinal) + 1;
-      if (capo) text = text.replace(ordinalLine, "").trimStart();
+      if (capo) text = text.replace(ordinalLine, "").replace(/^\n+/, "");
     }
   }
   if (!text.trim())
@@ -349,11 +367,6 @@ export function parseWebSong(html, sourceUrl, contentType = "text/html") {
       ),
     );
   const result = importText(text, title || "");
-  if (LACUERDA_HOSTS.has(url.hostname))
-    result.text = result.text
-      .split("\n")
-      .map((line) => line.trimStart())
-      .join("\n");
   return {
     ...result,
     title: titleCase(title || result.title),

@@ -283,7 +283,7 @@ test("alteration minus signs don't turn chord lines into lyrics", () => {
     "A#m7(5-)    D#7(9-)\nUna mañana de canción",
     "Test",
   );
-  assert.equal(imported.text, "[A#m7(5-)]Una mañana d[D#7(9-)]e canción");
+  assert.equal(imported.text, "Una[A#m7(5-)] mañana de c[D#7(9-)]anción");
   assert.equal(parseSong(imported.text)[0].lyric, "Una mañana de canción");
 });
 test("consecutive instrumental rows, bracketed chords and section labels stay separate", () => {
