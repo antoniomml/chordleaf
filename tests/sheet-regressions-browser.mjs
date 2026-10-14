@@ -17,6 +17,13 @@ async function clickEnd(page, row) {
   const last = await cell(row, text.length - 1);
   await page.mouse.click(last.x + last.width * 0.9, last.y + last.height / 2);
 }
+const printedCellWidth = (row) =>
+  row.locator(".lyric").evaluate(
+    (el) =>
+      // Some engines round a one-character Range outwards by a full pixel.
+      // Measure the whole monospaced run so distant target cells remain accurate.
+      el.getBoundingClientRect().width / el.textContent.length,
+  );
 for (const engine of [chromium, firefox, webkit].filter(
   (engine) =>
     !process.env.CHORDLEAF_BROWSERS ||
@@ -125,7 +132,7 @@ for (const engine of [chromium, firefox, webkit].filter(
     await source.fill("Luz[Cmaj7]");
     const tail = first.locator('[data-chord="Cmaj7"]');
     const tailLabel = await tail.boundingBox(),
-      tailCell = await cell(first, 0);
+      tailWidth = await printedCellWidth(first);
     const tailRow = await first.boundingBox();
     await page.mouse.move(
       tailLabel.x + tailLabel.width / 2,
@@ -133,7 +140,7 @@ for (const engine of [chromium, firefox, webkit].filter(
     );
     await page.mouse.down();
     await page.mouse.move(
-      tailRow.x + 5.5 * tailCell.width,
+      tailRow.x + 5.5 * tailWidth,
       tailLabel.y + tailLabel.height / 2,
       { steps: 3 },
     );
@@ -160,7 +167,7 @@ for (const engine of [chromium, firefox, webkit].filter(
     assert.ok(position[0] > 2000);
     const chord = row.locator('[data-chord="C"]');
     const label = await chord.boundingBox(),
-      letter = await cell(row, 0);
+      characterWidth = await printedCellWidth(row);
     const rect = await row.boundingBox();
     const column = 27;
     await page.mouse.move(
@@ -169,7 +176,7 @@ for (const engine of [chromium, firefox, webkit].filter(
     );
     await page.mouse.down();
     await page.mouse.move(
-      rect.x + (column + 0.5) * letter.width,
+      rect.x + (column + 0.5) * characterWidth,
       label.y + label.height / 2,
       { steps: 4 },
     );
