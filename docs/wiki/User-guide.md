@@ -51,7 +51,7 @@ The expand icon beside **Lyrics and chords** opens a larger editor with the same
 
 The preview opens at a readable A4 width. **Fit to width** expands it to the available space and follows changes to the editor width.
 
-The preview's pencil enables editing directly on the sheet. Select the lyric to edit only its words: chord tokens are hidden in this editor and follow their anchored text as you insert or delete words. On a phone, a separate editor fits the visible screen: **Done** confirms, **Cancel** restores the original verse, and Return adds a line break. With a hardware keyboard, Ctrl/Cmd+Enter also confirms and Escape cancels. On desktop, Enter commits and Shift+Enter adds a line break. The **Lyrics** section keeps the complete source with chord brackets for raw editing.
+The preview's pencil enables editing directly on the sheet. Select the lyric to edit only its words: chord tokens are hidden in this editor and follow their anchored text as you insert or delete words. On a phone, a separate editor fits the visible screen: **Done** confirms, **Cancel** restores the original verse, and Return adds a line break. With a hardware keyboard, Ctrl/Cmd+Enter also confirms and Escape cancels. On desktop, click a word to place the native caret. Enter commits and Shift+Enter adds a line break. Drag between verses, or use Shift+Up/Down, to select across lines. Backspace or Delete removes the selected text and its chords; Ctrl/Cmd+Z undoes the deletion and Ctrl/Cmd+Shift+Z redoes it. The **Lyrics** section keeps the complete source with chord brackets for raw editing.
 
 Use **Align** beside the text editor's expand control, or enable the preview pencil, to move chords directly on the sheet. Drag a chord over the lyric; the highlighted cell shows its target letter. A compact floating set of controls appears when you select a chord, showing only its name. Tap that name to rename just the chord; on desktop you can also double-click the chord directly. The left/right buttons move it one character at a time; a focused chord also accepts Left/Right, Home and End. On phones, alignment opens the sheet and increases the view zoom when needed so lyrics remain readable. Page edges scroll while you drag. The **Done** action or the preview pencil ends editing and restores the previous view zoom.
 
@@ -89,9 +89,11 @@ Select a result to retain that exact voicing. **Insert at cursor** adds it where
 
 ## Adapt the song to your voice
 
+![Coupled semitone and capo controls with the key locked](https://raw.githubusercontent.com/antoniomml/chordleaf/main/docs/images/key-lock.png)
+
 In **Settings**, the **Semitones** − / + controls move all chord symbols by a semitone. Section labels such as `[Estribillo]` remain unchanged.
 
-**Capo** sets the capo fret. The chain links it to the chords: raising a linked capo by one fret lowers the chord symbols by one semitone to keep the sounding key. Enabling the chain alone changes no chords.
+**Capo** sets the capo fret. Enable **Lock key** to preserve the sounding key: raising semitones lowers the capo, and raising the capo lowers the written chords. Enabling the lock alone changes nothing. Changes stop at capo frets 0 and 12. The semitone counter tracks written chord changes, including capo compensation. **Restore original chords** also compensates the capo while locked; if that would require a fret outside 0–12, unlock first.
 
 **Key** estimates the key from the written chords and shows its degrees. This is guidance, not a definitive analysis, and is not printed.
 

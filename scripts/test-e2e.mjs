@@ -15,13 +15,25 @@ const suites = (await readdir(path.join(root, "tests")))
       (file === "browser.mjs" || file.endsWith("-browser.mjs")) &&
       !excluded.has(file),
   )
-  .sort();
+  .sort((a, b) => {
+    const priority = [
+      "sheet-selection-browser.mjs",
+      "sheet-regressions-browser.mjs",
+      "chord-alignment-browser.mjs",
+      "project-browser.mjs",
+    ];
+    const rank = (file) =>
+      priority.includes(file) ? priority.indexOf(file) : priority.length;
+    return rank(a) - rank(b) || a.localeCompare(b);
+  });
 
 if (!suites.length) {
   console.error("No browser suites found in tests/");
   process.exit(1);
 }
 
+// Run sheet editing checks first. CI stops on failure; successful runs
+// still execute every discovered suite.
 const results = [];
 for (const suite of suites) {
   console.log(`\n▶ ${suite}`);
@@ -42,13 +54,16 @@ for (const suite of suites) {
     code,
     seconds: ((Date.now() - started) / 1000).toFixed(1),
   });
+  if (code && process.env.CI) break;
 }
 
 console.log("\nBrowser suites summary:");
 for (const { suite, code, seconds } of results)
   console.log(`${code === 0 ? "✓" : "✗"} ${suite} (${seconds}s)`);
 const failed = results.filter((result) => result.code !== 0);
-console.log(
-  `${results.length - failed.length}/${results.length} suites passed`,
-);
+console.log(`${results.length - failed.length}/${suites.length} suites passed`);
+if (results.length < suites.length)
+  console.log(
+    `${suites.length - results.length} suites not run after the first CI failure`,
+  );
 process.exit(failed.length ? 1 : 0);

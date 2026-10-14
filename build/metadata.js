@@ -458,7 +458,7 @@ const pairTranspose = {
       {
         h: "Semitonos, tonos y tonalidad",
         p: [
-          "Un semitono es la distancia más pequeña entre dos notas; doce semitonos forman una octava. Subir dos semitonos equivale a subir un tono. El contador del editor empieza en 0 y cada pulsación mueve la canción un semitono.",
+          "Un semitono es la distancia más pequeña entre dos notas; doce semitonos forman una octava. Subir dos semitonos equivale a subir un tono. El contador del editor empieza en 0 y muestra cuánto han cambiado los acordes escritos, incluida la compensación de la cejilla cuando bloqueas la tonalidad.",
           "La tonalidad probable se estima a partir de los acordes escritos y se actualiza al transportar. Ese dato ayuda a decidir si el resultado es cómodo para cantar o conviene probar otra distancia. Por ejemplo, al subir dos semitonos una progresión en Do mayor, los acordes pasan a Re mayor y la tonalidad probable cambia con ellos.",
           "Si practicas con la canción original «Al otro lado» de la documentación, verás cómo se mueven los grados de la escala al cambiar los semitonos: la letra no se toca y los acordes se recalculan solos.",
         ],
@@ -467,16 +467,16 @@ const pairTranspose = {
         h: "Cejilla: cuándo ayuda",
         p: [
           "La cejilla sube el sonido real sin cambiar las posiciones que tocas. Es la opción práctica cuando quieres seguir usando formas abiertas: pones cejilla en el traste 2 y tocas como si estuvieras en el tono original.",
-          "La opción «Mantener el tono al mover la cejilla» compensa los acordes escritos para que el resultado suene igual mientras mueves la cejilla. Si la desactivas, ambos controles actúan por separado y puedes combinarlos a propósito.",
+          "Activa «Bloquear tonalidad» para conservar el tono que suena: subir semitonos baja la cejilla y subir la cejilla baja los acordes escritos. Los cambios se detienen en los trastes 0 y 12. Si desactivas el bloqueo, ambos controles actúan por separado.",
         ],
       },
       {
         h: "Cómo transportar en la práctica",
         p: [
-          "Elige la distancia con los botones − y +, y usa el símbolo ↺ para volver al tono original cuando te pierdas. La letra, los saltos de página y los diagramas no se ven afectados por el transporte. En el móvil, los controles de semitonos y cejilla viven en la pestaña de música, junto a la tonalidad probable.",
+          "Elige la distancia con los botones − y +. El símbolo ↺ restaura los acordes originales y también compensa la cejilla si la tonalidad está bloqueada. Si eso exigiría un traste fuera de 0 a 12, desbloquea primero. La letra y los saltos de página se conservan. En el móvil, encontrarás los controles de semitonos y cejilla en Configuración.",
         ],
         list: [
-          "Comprueba el indicador antes de tocar: 0 es el tono original.",
+          "Comprueba el indicador antes de tocar: 0 indica los acordes escritos originales.",
           "Revisa los acordes marcados y resuélvelos antes de imprimir.",
           "Prueba el resultado con la cejilla real sobre el mástil.",
           "Si la tonalidad queda con demasiadas alteraciones, prueba otra distancia.",
@@ -543,7 +543,7 @@ const pairTranspose = {
       {
         h: "Semitones, tones and keys",
         p: [
-          "A semitone is the smallest step between two notes, and twelve of them make an octave. Two semitones equal one tone. The counter starts at 0 and each press moves the song by one semitone.",
+          "A semitone is the smallest step between two notes, and twelve of them make an octave. Two semitones equal one tone. The counter starts at 0 and tracks written chord changes, including capo compensation while the key is locked.",
           "The likely key is estimated from the written chords and updates as you transpose, which helps you judge whether the result sits comfortably in your range. Move a progression in C major up two semitones, for instance, and the chords become D major while the key estimate follows along.",
           "The original demo song in the Chordleaf documentation, «Al otro lado», is a handy way to watch the scale degrees move as you change the offset: the lyrics stay put and the chords are recalculated for you.",
         ],
@@ -552,16 +552,16 @@ const pairTranspose = {
         h: "When a capo helps",
         p: [
           "A capo raises the sounding pitch without changing the shapes you play. It is the practical choice when you want to keep open chords: place it on fret 2 and play as if you were in the original key.",
-          "The option to keep the key while moving the capo compensates the written chords so the result keeps sounding the same. Turn it off and both controls act independently, which you can also use on purpose.",
+          "Enable “Lock key” to preserve the sounding key: raising semitones lowers the capo, and raising the capo lowers the written chords. Changes stop at capo frets 0 and 12. Turn the lock off to use both controls independently.",
         ],
       },
       {
         h: "Transposing step by step",
         p: [
-          "Choose the distance with the − and + buttons, and use the ↺ symbol to return to the original key whenever you lose track. Lyrics, page breaks and diagrams are untouched by transposition. On a phone, the semitone and capo controls sit in the music tab next to the likely key.",
+          "Choose the distance with the − and + buttons. The ↺ symbol restores the original chords and also compensates the capo while the key is locked. If that would require a fret outside 0–12, unlock first. Lyrics and page breaks stay intact. On a phone, the semitone and capo controls are in Settings.",
         ],
         list: [
-          "Check the counter before you start: 0 is the original key.",
+          "Check the counter before you start: 0 means the original written chords.",
           "Review the flagged chords and resolve them before printing.",
           "Try the result with the real capo on the neck.",
           "If the key ends up full of accidentals, try another offset.",

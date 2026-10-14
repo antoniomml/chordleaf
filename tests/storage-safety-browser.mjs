@@ -122,7 +122,11 @@ for (const engine of [chromium, webkit]) {
     ]) {
       await other.locator(selector).focus();
       await other.keyboard.press("Enter");
-      await expect(other.locator(selector)).toBeFocused();
+      // Reaching a fret limit disables that button; focus moves to its
+      // counterpart so keyboard users stay in the same control group.
+      await expect(
+        other.locator(selector === "#capo-down" ? "#capo-up" : selector),
+      ).toBeFocused();
     }
     await context.close();
     console.log(

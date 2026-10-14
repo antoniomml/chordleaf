@@ -49,7 +49,7 @@ try {
     plusBefore.y + plusBefore.height / 2,
   );
   assert.equal(await page.locator(".transpose-value").textContent(), "+2");
-  assert.equal(await page.locator("#settings .link-help").count(), 0);
+  assert.equal(await page.locator("#settings .link-help").count(), 1);
   await page.locator("#artist").fill("Artista de prueba");
   assert.equal(await page.locator(".transpose-value").textContent(), "+2");
   await page.locator("#undo-transpose").click();
@@ -69,26 +69,27 @@ try {
     await page.locator("#source").inputValue(),
     "[C/G]Uno\n{new_page}\n[Dm7]Dos",
   );
-  // Linked capo compensation must not erase the manual semitone offset or
-  // restore a stale snapshot when the semitone controls return to zero.
+  // Locking couples both controls, including reset and the capo limits.
   const baseline = "[C/G]Uno\n{new_page}\n[Dm7]Dos";
-  await page.locator("#transpose-up").click();
   await page.locator("#link").click();
+  assert.equal(await page.locator("#transpose-up").isDisabled(), true);
   await page.locator("#capo-up").click();
-  assert.equal(await page.locator(".transpose-value").textContent(), "+1");
+  assert.equal(await page.locator(".transpose-value").textContent(), "-1");
+  await page.locator("#transpose-up").click();
+  assert.equal(await page.locator("#capo").inputValue(), "0");
   assert.equal(await page.locator("#source").inputValue(), baseline);
   await page.locator("#transpose-down").click();
-  assert.equal(await page.locator(".transpose-value").textContent(), "0");
-  assert.notEqual(await page.locator("#source").inputValue(), baseline);
-  await page.locator("#transpose-up").click();
-  await page.locator("#capo-up").click();
-  assert.equal(await page.locator(".transpose-value").textContent(), "+1");
+  assert.equal(await page.locator("#capo").inputValue(), "1");
+  assert.equal(await page.locator(".transpose-value").textContent(), "-1");
   await reset.click();
-  assert.equal(await page.locator(".transpose-value").textContent(), "0");
-  assert.equal(await page.locator("#capo").inputValue(), "2");
-  await page.locator("#capo-down").click();
-  await page.locator("#capo-down").click();
+  assert.equal(await page.locator("#capo").inputValue(), "0");
   assert.equal(await page.locator("#source").inputValue(), baseline);
+  await page.locator("#capo").fill("12");
+  await page.locator("#capo").press("Tab");
+  assert.equal(await page.locator(".transpose-value").textContent(), "-12");
+  assert.equal(await page.locator("#transpose-down").isDisabled(), true);
+  assert.equal(await page.locator("#capo-up").isDisabled(), true);
+  await reset.click();
   await page.locator("#link").click();
   await page.locator("#transpose-up").click();
   const moved = await page.locator("#source").inputValue();
@@ -98,6 +99,20 @@ try {
   await page.locator("#capo-down").click();
   await reset.click();
   assert.equal(await page.locator("#source").inputValue(), baseline);
+  // Restoring the baseline must never bypass the locked capo bounds.
+  await page.locator("#transpose-up").click();
+  await page.locator("#transpose-up").click();
+  await page.locator("#capo").fill("12");
+  await page.locator("#capo").press("Tab");
+  await page.locator("#link").click();
+  assert.equal(await reset.isDisabled(), true);
+  assert.match(await reset.getAttribute("title"), /Desbloquea/);
+  await page.locator("#link").click();
+  assert.equal(await reset.isEnabled(), true);
+  await reset.click();
+  assert.equal(await page.locator("#source").inputValue(), baseline);
+  await page.locator("#capo").fill("0");
+  await page.locator("#capo").press("Tab");
   await page.locator(".more-document-options summary").click();
   await page.locator("#showBrand").uncheck();
   assert.equal(await page.locator(".sheet-brand").count(), 0);

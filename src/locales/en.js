@@ -415,8 +415,13 @@ export default {
   "líneas vacías": "blank lines",
   "No hay líneas vacías que comprimir.":
     "There are no blank lines to collapse.",
-  "Mantener el tono al mover la cejilla":
-    "Keep the sounding key when moving the capo",
+  "Bloquear tonalidad": "Lock key",
+  "Con el bloqueo activo, al subir semitonos baja la cejilla; al subir la cejilla bajan los acordes. La tonalidad que suena se mantiene. La cejilla puede ir de 0 a 12.":
+    "With the key locked, raising semitones lowers the capo; raising the capo lowers the chords. The sounding key stays the same. The capo ranges from 0 to 12.",
+  "Restaurar acordes originales": "Restore original chords",
+  "Acordes originales": "Original chords",
+  "Desbloquea la tonalidad para restaurar los acordes originales":
+    "Unlock the key to restore the original chords",
   "Los acordes se ajustan automáticamente al cambiar la cejilla.":
     "Chords adjust automatically when the capo moves.",
   "Cambiar la cejilla modifica el tono que suena.":
@@ -432,8 +437,6 @@ export default {
   "1 tono · 2 semitonos": "1 whole step · 2 semitones",
   "2 tonos · 4 semitonos": "2 whole steps · 4 semitones",
   "Deshacer transposición": "Undo transpose",
-  "Volver al tono original": "Return to original key",
-  "Tono original": "Original key",
   "Transposición ": "Transposition ",
   semitono: "semitone",
   semitonos: "semitones",
