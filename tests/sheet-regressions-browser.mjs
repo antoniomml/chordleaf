@@ -12,6 +12,11 @@ async function cell(row, offset) {
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
   }, offset);
 }
+async function clickEnd(page, row) {
+  const text = await row.locator(".lyric").innerText();
+  const last = await cell(row, text.length - 1);
+  await page.mouse.click(last.x + last.width * 0.9, last.y + last.height / 2);
+}
 for (const engine of [chromium, firefox, webkit].filter(
   (engine) =>
     !process.env.CHORDLEAF_BROWSERS ||
@@ -66,17 +71,11 @@ for (const engine of [chromium, firefox, webkit].filter(
     await expect(source).toHaveValue(
       "[Cmaj7]Una bonita casa [G]azul\n[Am]Otra línea",
     );
-    await first.locator(".lyric").click();
-    await editor.press(
-      process.platform === "darwin" ? "Meta+ArrowRight" : "End",
-    );
+    await clickEnd(page, first);
     await page.keyboard.insertText(" hoy");
     // Clicking another row must finish the first edit and place the next caret.
-    await page.locator('.song-line[data-line="1"] .lyric').click();
+    await clickEnd(page, page.locator('.song-line[data-line="1"]'));
     await expect(editor).toBeFocused();
-    await editor.press(
-      process.platform === "darwin" ? "Meta+ArrowRight" : "End",
-    );
     await page.keyboard.insertText(" más");
     await editor.press("Enter");
     await expect(source).toHaveValue(
@@ -108,10 +107,7 @@ for (const engine of [chromium, firefox, webkit].filter(
 
     for (const breaks of [1, 2]) {
       await source.fill("[C]Luz\n[G]Otra línea");
-      await first.locator(".lyric").click();
-      await editor.press(
-        process.platform === "darwin" ? "Meta+ArrowRight" : "End",
-      );
+      await clickEnd(page, first);
       for (let i = 0; i < breaks; i++) await editor.press("Shift+Enter");
       await editor.press("Enter");
       await expect(source).toHaveValue(
