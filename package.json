@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@huggingface/transformers": "4.3.0",
-    "docx": "^9.8.1",
+    "docx": "^9.10.0",
     "dompurify": "^3.4.16",
     "fft.js": "4.0.4",
     "jspdf": "^4.2.1",
