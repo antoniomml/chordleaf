@@ -48,7 +48,7 @@
     "jspdf": "^4.2.1",
     "mammoth": "^1.13.0",
     "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
-    "pdfjs-dist": "^6.3.289"
+    "pdfjs-dist": "^6.4.299"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
