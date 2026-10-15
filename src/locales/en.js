@@ -1,5 +1,29 @@
 // Spanish source copy -> English UI copy. Song content is never translated.
 export default {
+  "Nuevo acorde": "New chord",
+  "El portapapeles no contiene una fila de acordes.":
+    "The clipboard does not contain a chord row.",
+  "Copiar acordes": "Copy chords",
+  "Pegar acordes": "Paste chords",
+  "Copiar acordes (Ctrl/⌘ C)": "Copy chords (Ctrl/⌘ C)",
+  "Pegar acordes (Ctrl/⌘ V)": "Paste chords (Ctrl/⌘ V)",
+  "Eliminar acordes seleccionados": "Delete selected chords",
+  "Seleccionar fila de acordes": "Select chord row",
+  "Seleccionar acordes · Mayús para ampliar la selección":
+    "Select chords · Shift to extend selection",
+  "Fila de acordes: haz clic para escribir": "Chord row: click to type",
+  " filas de acordes seleccionadas": " chord rows selected",
+  "El fragmento de acordes no es válido.": "The chord fragment is invalid.",
+  "No hay suficientes versos para pegar todos los acordes.":
+    "There are not enough verses to paste all the chords.",
+  "Selecciona el mismo número de versos para sustituir sus acordes.":
+    "Select the same number of verses to replace their chords.",
+  "Acordes copiados. Selecciona el destino para pegarlos.":
+    "Chords copied. Select where to paste them.",
+  "Acordes pegados. La letra se mantiene.": "Chords pasted. Lyrics preserved.",
+  "Acordes copiados en Chordleaf. Usa Ctrl/⌘ C para copiarlos a otra aplicación.":
+    "Chords copied within Chordleaf. Use Ctrl/⌘ C to copy them to another app.",
+  "Usa Ctrl/⌘ V para pegar los acordes.": "Use Ctrl/⌘ V to paste chords.",
   "Copia de seguridad en varias partes": "Workspace backup in several parts",
   "Tu biblioteca necesita varios archivos para que cada copia se pueda abrir. Descarga todas las partes y consérvalas juntas. Para restaurar la biblioteca, abre cada archivo desde Nueva canción → Abrir proyecto editable.":
     "Your library needs several files so each backup can be reopened. Download all parts and keep them together. To restore your library, open each file through New song → Open editable project.",

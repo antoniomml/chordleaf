@@ -74,7 +74,7 @@ for (const engine of [chromium, firefox, webkit].filter(
       path: `artifacts/native-lyric-editor-${engine.name()}.png`,
     });
     await page.keyboard.insertText("bonita ");
-    await editor.press("Enter");
+    await editor.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue(
       "[Cmaj7]Una bonita casa [G]azul\n[Am]Otra línea",
     );
@@ -84,7 +84,7 @@ for (const engine of [chromium, firefox, webkit].filter(
     await clickEnd(page, page.locator('.song-line[data-line="1"]'));
     await expect(editor).toBeFocused();
     await page.keyboard.insertText(" más");
-    await editor.press("Enter");
+    await editor.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue(
       "[Cmaj7]Una bonita casa [G]azul hoy\n[Am]Otra línea más",
     );
@@ -102,21 +102,21 @@ for (const engine of [chromium, firefox, webkit].filter(
     const spot = await cell(wrapped, continuation.indexOf(word));
     await page.mouse.click(spot.x + spot.width * 0.1, spot.y + spot.height / 2);
     await page.keyboard.insertText("nuevo ");
-    await editor.press("Enter");
+    await editor.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue(long.replace(word, "nuevo " + word));
 
     await source.fill(original);
     await first.locator(".lyric").click();
     await editor.press("ControlOrMeta+a");
     await editor.press("Backspace");
-    await editor.press("Enter");
+    await editor.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue("[Cmaj7][G]\n[Am]Otra línea");
 
     for (const breaks of [1, 2]) {
       await source.fill("[C]Luz\n[G]Otra línea");
       await clickEnd(page, first);
       for (let i = 0; i < breaks; i++) await editor.press("Shift+Enter");
-      await editor.press("Enter");
+      await editor.press("ControlOrMeta+Enter");
       await expect(source).toHaveValue(
         "[C]Luz" + "\n".repeat(breaks) + "\n[G]Otra línea",
       );
@@ -124,7 +124,7 @@ for (const engine of [chromium, firefox, webkit].filter(
     await source.fill("[C]Luz\n[G]Otra línea");
     await first.locator(".lyric").click();
     await editor.fill("Nueva letra\n\n");
-    await editor.press("Enter");
+    await editor.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue("[C]Nueva letra\n\n\n[G]Otra línea");
 
     // A long chord label adds printed tail padding; that padding must still

@@ -97,7 +97,7 @@ try {
   await page.locator("#pencil").click();
   await page.locator(".song-line").first().click();
   assert.equal(await lyricValue(page.locator(".inline-editor")), printed);
-  await page.locator(".inline-editor").press("Enter");
+  await page.locator(".inline-editor").press("ControlOrMeta+Enter");
   assert.equal(await page.locator("#source").inputValue(), source);
   console.log(
     "Crowded chords: single row, no visual overlaps, PDF geometry matches, source and direct editing unchanged.",

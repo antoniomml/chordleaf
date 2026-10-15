@@ -406,7 +406,7 @@ try {
     "none",
     "keyboard focus remains visible on lyrics",
   );
-  await keyboardLyric.press("Enter");
+  await keyboardLyric.press("ControlOrMeta+Enter");
   await english.locator(".inline-editor").press("Escape");
   assert.equal(
     await english.locator("#sheet-alignment-tools").isVisible(),

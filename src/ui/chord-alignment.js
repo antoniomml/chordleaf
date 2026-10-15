@@ -12,6 +12,10 @@ export function setupChordAlignment({
   editVerse,
   editChord,
   finish,
+  documentHistory,
+  prepareUndo = () => true,
+  onSelect,
+  extraActive = () => false,
 }) {
   const pages = document.querySelector("#pages");
   const scroll = document.querySelector("#pages-scroll");
@@ -114,8 +118,11 @@ export function setupChordAlignment({
     }
     for (const id of ["selection", "left", "right", "edit"])
       $(`#sheet-alignment-${id}`).hidden = !chord;
-    $("#sheet-alignment-undo").disabled = !history.length;
-    tools.hidden = !enabled() || (!chord && !history.length);
+    const canUndo = documentHistory
+      ? Boolean(documentHistory.peek())
+      : history.length > 0;
+    $("#sheet-alignment-undo").disabled = !canUndo;
+    tools.hidden = !enabled() || (!chord && !canUndo && !extraActive());
   }
   function select(el) {
     const row = rows.find((r) => r.el === el.closest(".song-line"));
@@ -131,6 +138,7 @@ export function setupChordAlignment({
       endIndex: row.endIndex,
       start: Number(el.dataset.alignStart),
     };
+    onSelect?.();
     paintSelection();
     return true;
   }
@@ -468,6 +476,11 @@ export function setupChordAlignment({
   $("#sheet-alignment-left").onclick = () => step(-1);
   $("#sheet-alignment-right").onclick = () => step(1);
   $("#sheet-alignment-undo").onclick = () => {
+    if (documentHistory) {
+      if (!prepareUndo()) return;
+      documentHistory.restore();
+      return;
+    }
     if (!current() || !history.length) return;
     stopDrag(false);
     const old = history.pop();
@@ -521,5 +534,20 @@ export function setupChordAlignment({
       paintSelection();
     },
     tools,
+    repaint: paintSelection,
+    prepareRestore(text) {
+      const previous = history.at(-1);
+      if (owner === song() && previous?.text === text) {
+        selected = previous.selected;
+        expected = text;
+        history.pop();
+      }
+    },
+    selection() {
+      const value = current() && selected && mark();
+      return value
+        ? { ...selected, at: value.at, chord: value.chord }
+        : undefined;
+    },
   };
 }

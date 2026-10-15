@@ -15,14 +15,14 @@ export function setupSheetSelection({
   finish,
   update,
   editLine,
+  history,
+  pending = () => false,
 }) {
   const pages = document.querySelector("#pages"),
     scroll = document.querySelector("#pages-scroll");
   let drag,
     extending = false,
     suppressClick = false;
-  const history = [],
-    future = [];
   const available = () => enabled() && !isMobileLayout();
   const rowKey = (el) => `${el.dataset.line}:${rowFor(el)?.offset ?? 0}`;
   function lyricPoint(node, offset) {
@@ -185,12 +185,7 @@ export function setupSheetSelection({
       start = sourceOffset(selection.start, false),
       end = sourceOffset(selection.end, true);
     const after = before.slice(0, start) + text + before.slice(end);
-    if (!finish({ render: false }) || !update(after)) return true;
-    if (history.at(-1)?.after !== before || history.at(-1)?.owner !== song().id)
-      history.length = 0;
-    future.length = 0;
-    history.push({ before, after, offset: start, owner: song().id });
-    if (history.length > 50) history.shift();
+    if (!finish({ render: false }) || !update(after, start)) return true;
     focusSource(start + text.length);
     return true;
   }
@@ -204,7 +199,9 @@ export function setupSheetSelection({
         !available() ||
         event.button !== 0 ||
         event.pointerType === "touch" ||
-        event.target.closest(".sheet-chord") ||
+        event.target.closest(
+          ".sheet-chord, .sheet-chord-lane, .sheet-chord-handle, .inline-chord-editor",
+        ) ||
         !event.target.closest(".song-line")
       )
         return;
@@ -273,7 +270,12 @@ export function setupSheetSelection({
   pages.addEventListener(
     "click",
     (event) => {
-      if (suppressClick || selected()) {
+      if (
+        (suppressClick || selected()) &&
+        !event.target.closest(
+          ".sheet-chord-lane, .sheet-chord-handle, .inline-chord-editor",
+        )
+      ) {
         event.preventDefault();
         event.stopImmediatePropagation();
         suppressClick = false;
@@ -321,22 +323,17 @@ export function setupSheetSelection({
       const command = event.ctrlKey || event.metaKey,
         key = event.key.toLowerCase();
       const redo = command && ((key === "z" && event.shiftKey) || key === "y");
-      const entry = redo ? future.at(-1) : history.at(-1);
+      const entry = history.peek(redo);
       if (
         command &&
         (event.target === scroll || event.target.closest(".lyric")) &&
         (key === "z" || redo) &&
-        entry?.owner === song().id &&
-        (redo ? entry.before : entry.after) === song().text
+        entry &&
+        !pending()
       ) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (
-          finish({ render: false }) &&
-          update(redo ? entry.after : entry.before)
-        ) {
-          (redo ? future : history).pop();
-          (redo ? history : future).push(entry);
+        if (finish({ render: false }) && history.restore(redo)) {
           focusSource(entry.offset);
         }
         return;

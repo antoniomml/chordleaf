@@ -24,11 +24,22 @@ import {
   placeLyricCaret,
   readSheetLyrics,
 } from "./ui/sheet-editor.js";
+import {
+  sheetCaretOffset,
+  setSheetCaret,
+  paintLyricDraft,
+} from "./ui/sheet-draft.js";
+import {
+  displaySourceBoundary,
+  backspaceSheetBoundary,
+} from "./sheet-selection.js";
 import { createTransposition } from "./transposition.js";
 import { setupChordsPanel } from "./chords-panel.js";
 import { setupDictionary } from "./dictionary-ui.js";
 import { setupEditorTools } from "./editor-tools.js";
 import { setupChordAlignment } from "./ui/chord-alignment.js";
+import { setupSheetChords } from "./ui/sheet-chords.js";
+import { createDocumentHistory } from "./document-history.js";
 import { icon } from "./ui/icons.js";
 import "./style.css";
 import { keyInfo, transpose, diagram, chords, chordRE } from "./music.js";
@@ -124,14 +135,25 @@ let chordMode = "song";
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const song = () => songs.find((s) => s.id === active);
 let sheetEditor;
+let sheetChords;
 let sheetRows = new WeakMap();
+const documentHistory = createDocumentHistory({
+  song,
+  update: (text) => {
+    alignment.prepareRestore(text);
+    return applyDocumentText(text, 0, false);
+  },
+});
 const inlineEdits = createInlineEdits({
   changed,
-  finished() {
+  committed: (before, after) => documentHistory.record(before, after),
+  finished({ restoreFocus }) {
     sheetEditor?.close();
     renderSource();
     renderSettings();
     renderPages();
+    if (restoreFocus && document.activeElement === document.body)
+      $("#pages-scroll").focus({ preventScroll: true });
   },
   invalid(message) {
     setSaveState(message, { error: true, announce: true });
@@ -147,6 +169,16 @@ function updateText(text) {
     toast(error.message, "warning");
     return false;
   }
+}
+function applyDocumentText(text, offset = 0, record = true) {
+  const before = song().text;
+  if (!updateText(text)) return false;
+  if (record) documentHistory.record(before, text, offset);
+  changed();
+  renderSource();
+  renderSettings();
+  renderPages();
+  return true;
 }
 /** Keep the visible save label in sync without announcing every keystroke.
  * Screen readers only hear the hidden live region on real transitions. */
@@ -605,8 +637,7 @@ function renderSource() {
   sourceMeta();
 }
 function sourceMeta({ harmonyChanged = true } = {}) {
-  $("#align-chords").disabled =
-    !chords(song().text).length && !/\[\?[^\[\]\n]{1,40}\]/.test(song().text);
+  $("#align-chords").disabled = !song().text.trim();
   const lines = song().text.split("\n").length;
   if ($("#line-numbers").childElementCount !== lines)
     $("#line-numbers").innerHTML = Array.from(
@@ -622,14 +653,9 @@ setupSheetSelection({
   song,
   rowFor: (el) => sheetRows.get(el),
   finish: (options) => inlineEdits.finish(options),
-  update(text) {
-    if (!updateText(text)) return false;
-    changed();
-    renderSource();
-    renderSettings();
-    renderPages();
-    return true;
-  },
+  update: applyDocumentText,
+  history: documentHistory,
+  pending: () => inlineEdits.hasChanges(),
   editLine,
 });
 setupPreviewInteractions({
@@ -693,6 +719,7 @@ function renderPages() {
   dictionary.render();
   resizePages();
   alignment.refresh(l);
+  sheetChords?.refresh(l);
   // Replacement briefly restores unscaled page heights. Restore the viewport
   // only after the new shells have their final zoom and layout.
   scroll.scrollTop = scrollTop;
@@ -748,9 +775,64 @@ function editLine(el, event) {
     return readSheetLyrics(input);
   };
   const editDialog = sheetEditor.open(input, "lyric");
+  const originalMarks = alignmentLine(edited).marks;
+  let reflowPending = false;
+  function reflowDraft() {
+    if (reflowPending) return;
+    reflowPending = true;
+    queueMicrotask(() => {
+      reflowPending = false;
+      if (document.activeElement !== input) return;
+      const at = displaySourceBoundary(positions, sheetCaretOffset(input));
+      const prefix = alignmentLine(edited).lyric.slice(0, at);
+      const parts = prefix.split("\n"),
+        index = endIndex + parts.length - 1;
+      const column = parts.at(-1).length;
+      if (inlineEdits.finish()) focusLyricPosition(index, column);
+    });
+  }
   inlineEdits.start(input, {
+    history: true,
     blurWithin: editDialog,
     multiline: Boolean(editDialog),
+    ...(!mobile
+      ? {
+          backspace() {
+            const selection = window.getSelection();
+            if (!selection?.isCollapsed || sheetCaretOffset(input) !== 0)
+              return false;
+            if (!inlineEdits.capture()) return true;
+            const at = displaySourceBoundary(positions, 0);
+            const result = backspaceSheetBoundary(
+              target.text,
+              endIndex,
+              at,
+              Number(el.dataset.line),
+            );
+            if (
+              result &&
+              inlineEdits.finish({ render: false }) &&
+              applyDocumentText(result.text, result.offset)
+            )
+              focusLyricPosition(result.index, result.at);
+            return true;
+          },
+          enter() {
+            document.execCommand("insertText", false, "\n");
+            reflowDraft();
+          },
+          afterInput() {
+            paintLyricDraft(el, input, row, edited, positions, originalMarks);
+            const scale = el.getBoundingClientRect().width / row.width;
+            if (
+              readInput().includes("\n") ||
+              input.getBoundingClientRect().height / scale >
+                target.fontSize * 1.5
+            )
+              reflowDraft();
+          },
+        }
+      : {}),
     get: () => target.text,
     set: (value) => (target.text = value),
     ...(!mobile
@@ -794,8 +876,27 @@ function editLine(el, event) {
   }
   input.onclick = (e) => e.stopPropagation();
 }
+function focusLyricPosition(index, at) {
+  let best;
+  for (const el of $("#pages").querySelectorAll(".song-line")) {
+    if (Number(el.dataset.end) !== index) continue;
+    const row = sheetRows.get(el),
+      lyric = el.querySelector(".lyric");
+    for (let offset = 0; offset <= lyric.textContent.length; offset++) {
+      const distance = Math.abs(
+        displaySourceBoundary(row.positions, offset) - at,
+      );
+      if (!best || distance < best.distance || (distance === 0 && offset === 0))
+        best = { el, offset, distance };
+    }
+  }
+  if (!best) return;
+  editLine(best.el);
+  const field = best.el.querySelector(".inline-lyric-editor");
+  if (field) setSheetCaret(field, best.offset);
+}
 function editChord(el) {
-  if (el.querySelector("input")) return;
+  if (el.isContentEditable) return;
   alignment.clear();
   const index = Number(el.closest(".song-line").dataset.line),
     target = song(),
@@ -804,17 +905,34 @@ function editChord(el) {
       (mark) => mark.start === Number(el.dataset.alignStart),
     );
   if (!mark) return;
-  el.removeAttribute("role");
-  el.innerHTML = t`<input class="inline-chord-editor" aria-label="Editar acorde" autocomplete="off" spellcheck="false" value="${esc(mark.chord)}" />`;
-  const input = el.firstChild;
-  input.size = Math.max(3, mark.chord.length + 1);
-  const editDialog = sheetEditor.open(input, "chord");
+  const input = el;
+  const cw = parseFloat(el.closest(".song-line").style.fontSize) * 0.6;
+  const anchor =
+    parseFloat(el.style.left) +
+    Math.floor((el.textContent.length - 1) / 2) * cw;
+  input.classList.add("inline-chord-editor");
+  input.contentEditable = "plaintext-only";
+  input.setAttribute("role", "textbox");
+  input.setAttribute("aria-label", t("Editar acorde"));
+  input.setAttribute("aria-multiline", "false");
+  input.spellcheck = false;
+  input.textContent = mark.chord;
+  input.style.left = `${anchor - Math.floor((mark.chord.length - 1) / 2) * cw}px`;
   inlineEdits.start(input, {
-    blurWithin: editDialog,
+    history: true,
+    deferred: true,
+    singleLine: true,
+    readInput: () => input.textContent,
+    writeInput: (value) => {
+      input.textContent = value;
+    },
+    afterInput() {
+      input.style.left = `${anchor - Math.floor(Math.max(0, input.textContent.length - 1) / 2) * cw}px`;
+    },
     get: () => target.text,
     set: (value) => (target.text = value),
     read() {
-      const value = input.value.trim();
+      const value = input.textContent.trim();
       if (!chordRE.test(value))
         throw new Error(t("Introduce un acorde válido, por ejemplo C o Em7."));
       const candidate = [...lines];
@@ -828,7 +946,11 @@ function editChord(el) {
     },
   });
   input.focus();
-  input.select();
+  const range = document.createRange();
+  range.selectNodeContents(input);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
   input.onclick = (event) => event.stopPropagation();
 }
 function resizePages() {
@@ -1071,8 +1193,15 @@ function render() {
   renderPages();
 }
 $("#source").oninput = (e) => {
+  const value = e.target.value;
+  // A pending sheet draft must finish before accepting newer source text;
+  // otherwise the preview's capture would restore the older verse.
+  if (!inlineEdits.finish({ render: false })) {
+    e.target.value = song().text;
+    return;
+  }
   const previousText = song().text;
-  if (!updateText(e.target.value)) {
+  if (!updateText(value)) {
     e.target.value = song().text;
     return;
   }
@@ -1469,6 +1598,10 @@ setupEditorTools({ resizePages });
 const alignment = setupChordAlignment({
   song,
   enabled: () => editing,
+  documentHistory,
+  prepareUndo: () => inlineEdits.finish(),
+  onSelect: () => sheetChords?.clear(),
+  extraActive: () => sheetChords?.active(),
   editChord,
   editVerse(el) {
     editLine(el);
@@ -1476,13 +1609,33 @@ const alignment = setupChordAlignment({
   finish() {
     setSheetEditing(false);
   },
-  update(text) {
-    if (!updateText(text)) return false;
-    changed();
-    renderSource();
-    renderPages();
-    return true;
-  },
+  update: applyDocumentText,
+});
+sheetChords = setupSheetChords({
+  song,
+  enabled: () => editing,
+  alignment,
+  inlineEdits,
+  update: applyDocumentText,
+  notify: toast,
+});
+previewScroll.addEventListener("keydown", (event) => {
+  const key = event.key.toLowerCase();
+  if (
+    event.defaultPrevented ||
+    event.isComposing ||
+    !(event.metaKey || event.ctrlKey) ||
+    !editing ||
+    event.target.closest("input, textarea") ||
+    inlineEdits.hasChanges()
+  )
+    return;
+  const redo = (key === "z" && event.shiftKey) || key === "y";
+  if ((key === "z" || redo) && documentHistory.peek(redo)) {
+    event.preventDefault();
+    if (inlineEdits.finish({ render: false })) documentHistory.restore(redo);
+    previewScroll.focus({ preventScroll: true });
+  }
 });
 for (const [id, name] of [
   ["pencil", "edit"],

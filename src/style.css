@@ -4075,6 +4075,7 @@ select:focus-visible {
   bottom: 54px;
   transform: translateX(-50%);
   max-width: calc(100% - 24px);
+  width: max-content;
   padding: 4px 6px;
   border: 1px solid var(--field-border);
   border-radius: 12px;
@@ -4087,6 +4088,8 @@ select:focus-visible {
 }
 .sheet-alignment-controls {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
   gap: 2px;
 }
@@ -4275,15 +4278,129 @@ select:focus-visible {
 }
 #pages .inline-chord-editor {
   width: auto;
-  min-width: 3ch;
+  min-width: 1ch;
+  min-height: 1.2em;
   max-width: 24ch;
   margin: 0;
-  padding: 2px 4px;
+  padding: 0;
   font: inherit;
-  color: #111;
-  background: #fff;
-  border: 1px solid #9ca893;
-  border-radius: 3px;
+  font-weight: bold;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  white-space: pre;
+  cursor: text;
+  user-select: text;
+  touch-action: auto;
+}
+#pages .inline-chord-editor::before {
+  content: none;
+}
+#pages .sheet-chord.inline-chord-editor {
+  color: #526837;
+}
+.song-line:has(.sheet-new-chord-editor) .sheet-chord-caret {
+  display: none;
+}
+
+/* Chord editing overlays never add rows to the exported page layout. */
+.sheet-chord-handle,
+.sheet-chord-lane {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  font: inherit;
+}
+.sheet-chord-handle {
+  left: -22px;
+  top: 0;
+  width: 18px;
+  color: #89977f;
+  cursor: pointer;
+  touch-action: none;
+  opacity: 0;
+}
+.sheet-chord-handle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 20%;
+  bottom: 20%;
+  border-left: 2px solid currentColor;
+}
+.song-line:hover .sheet-chord-handle,
+.sheet-chord-handle:focus-visible,
+.sheet-chord-handle[aria-pressed="true"] {
+  opacity: 1;
+}
+.sheet-chord-handle:hover,
+.sheet-chord-handle[aria-pressed="true"] {
+  color: #42682e;
+  background: #e7eedf;
+}
+.sheet-chord-lane {
+  left: 0;
+  width: 100%;
+  cursor: text;
+  border-bottom: 1px solid transparent;
+}
+.sheet-chord-lane:hover,
+.sheet-chord-lane:focus-visible,
+.chord-row-selected .sheet-chord-lane {
+  background: #e7eedf80;
+  border-bottom-color: #a5b795;
+}
+.empty-chord-lane {
+  z-index: 4;
+  background: transparent;
+  border-bottom: 1px dashed #bac5b2;
+}
+.empty-chord-lane:hover,
+.chord-row-selected .empty-chord-lane {
+  background: #eef4e9;
+}
+.chord-row-selected .sheet-chord {
+  background: #e7eedf;
+  box-shadow: inset 0 -1px #7e8b72;
+}
+.sheet-chord-caret,
+.sheet-chord-letter {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+}
+.sheet-chord-caret {
+  border-left: 2px solid #42682e;
+}
+.sheet-chord-letter {
+  background: #bed59e60;
+  border-bottom: 2px solid #42682e;
+}
+#pages .sheet-new-chord-editor {
+  position: absolute;
+  z-index: 6;
+}
+#sheet-chord-actions {
+  display: inline-flex;
+}
+#sheet-chord-actions[hidden] {
+  display: none;
+}
+@media print {
+  .sheet-chord-handle,
+  .sheet-chord-lane,
+  .sheet-chord-caret,
+  .sheet-chord-letter {
+    display: none !important;
+  }
+  .chord-row-selected .sheet-chord {
+    background: none !important;
+    box-shadow: none !important;
+  }
 }
 
 #sheet-edit-dialog {
@@ -4334,6 +4451,7 @@ select:focus-visible {
   background: #202421;
 }
 #sheet-edit-field .inline-chord-editor {
+  position: static;
   width: 100%;
   max-width: none;
   min-height: 44px;

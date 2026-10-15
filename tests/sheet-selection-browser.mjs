@@ -187,7 +187,7 @@ for (const engine of [chromium, firefox, webkit].filter(
     // Typed replacement and persistence use the same selected range.
     await select(lyric(0), 0, lyric(2), 0);
     await page.keyboard.type("Nueva ");
-    await page.keyboard.press("Enter");
+    await page.keyboard.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue(
       "Nueva [Am]Tercera línea\n[F]Última línea",
     );

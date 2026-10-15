@@ -39,7 +39,7 @@ for (const [engine, mobile] of [
     await lyrics.press("Home");
     await lyrics.pressSequentially("En ");
     if (mobile) await page.locator("#sheet-edit-done").click();
-    else await lyrics.press("Enter");
+    else await lyrics.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue(
       "En [Cmaj7]Una [Em7]casa\n[G]\nUna canción\n[C] – [G]",
     );
@@ -49,7 +49,7 @@ for (const [engine, mobile] of [
     await lyrics.press("Delete");
     await lyrics.press("Delete");
     if (mobile) await page.locator("#sheet-edit-done").click();
-    else await lyrics.press("Enter");
+    else await lyrics.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue(
       "[Cmaj7]Una [Em7]casa\n[G]\nUna canción\n[C] – [G]",
     );
@@ -58,7 +58,7 @@ for (const [engine, mobile] of [
     await first.locator('[data-chord="Em7"]').click();
     await page.locator("#sheet-alignment-selection").click();
     const chord = page.locator(".inline-chord-editor");
-    await expect(chord).toHaveValue("Em7");
+    await expectLyricValue(chord, "Em7");
     await chord.press("ArrowLeft");
     await expect(chord).toBeFocused();
     await chord.fill("Am7");
@@ -80,12 +80,12 @@ for (const [engine, mobile] of [
     await expectLyricValue(lyrics, "Una canción");
     await lyrics.fill("Otra canción");
     if (mobile) await page.locator("#sheet-edit-done").click();
-    else await lyrics.press("Enter");
+    else await lyrics.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue(
       "[Cmaj7]Una [Am7]casa\n[G]\nOtra canción\n[C] – [G]",
     );
     await page.locator('.song-line[data-line="3"] [data-chord="C"]').click();
-    await expect(chord).toHaveValue("C");
+    await expectLyricValue(chord, "C");
     await chord.fill("D");
     await chord.press("Enter");
     await expect(source).toHaveValue(
