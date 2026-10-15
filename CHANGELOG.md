@@ -1,5 +1,14 @@
 # chordleaf changelog
 
+## 1.7.0 · October 16, 2026
+
+- Add and rename chords directly on the printed document, using the chord label itself as the editor. Reveal an empty chord row from the verse's left margin, without permanent per-verse menu buttons.
+- Select and copy chord rows independently of lyrics, then paste their progression onto another stanza. Preserve original chord columns over shorter lyrics, support plain-text chord rows from other editors, and replace selected destination rows atomically.
+- Move chord labels with every lyric keystroke on desktop. Keep the native caret and existing chord drag feedback while editing text, including wrapped verses and collision padding.
+- Use Enter to start a new desktop verse and continue typing there; use Backspace at the start to join the previous verse or remove an empty line. Preserve chord tokens, legacy chord/lyric pairs and Unicode characters.
+- Share per-song undo/redo across chord insertion, renaming, movement, pasting, lyric edits and verse joins. Preserve pending drafts when saving or switching back to the source editor.
+- Add unit and browser regressions for chord-only clipboard data, native chord editing on desktop and mobile, live alignment, verse creation/deletion and history.
+
 ## 1.6.2 · October 14, 2026
 
 - Select and delete text across desktop sheet verses, wrapped rows, columns and pages with the mouse or Shift+Up/Down. Remove selected chord tokens with their text, keep unselected endpoints intact, and support undo/redo, replacement and saved drafts.

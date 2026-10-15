@@ -1,6 +1,6 @@
 /** Keep active sheet drafts in the model without replacing their focused field.
  * Saving captures the draft; Escape restores the value from before editing. */
-export function createInlineEdits({ changed, finished, invalid }) {
+export function createInlineEdits({ changed, finished, invalid, committed }) {
   let current;
   function capture({ report = false } = {}) {
     if (!current) return true;
@@ -22,7 +22,7 @@ export function createInlineEdits({ changed, finished, invalid }) {
       return false;
     }
   }
-  function finish({ render = true, cancel = false } = {}) {
+  function finish({ render = true, cancel = false, restoreFocus = true } = {}) {
     if (!current) return true;
     if (!cancel && !capture({ report: true })) return false;
     const edit = current;
@@ -31,7 +31,8 @@ export function createInlineEdits({ changed, finished, invalid }) {
       edit.set(edit.original);
       changed();
     }
-    if (render) finished();
+    if (!cancel && edit.history) committed?.(edit.original, edit.get());
+    if (render) finished({ restoreFocus });
     return true;
   }
   function start(input, options) {
@@ -47,15 +48,23 @@ export function createInlineEdits({ changed, finished, invalid }) {
     };
     input.oninput = () => {
       if (current?.input !== input) return;
-      if (!capture() && options.rejectInvalid) {
+      if (options.deferred) {
+        input.setCustomValidity?.("");
+        options.afterInput?.();
+        return;
+      }
+      const accepted = capture();
+      if (!accepted && options.rejectInvalid) {
         writeInput(current.accepted);
         input.setCustomValidity?.("");
       }
+      if (accepted) options.afterInput?.();
     };
     input.onblur = (event) => {
       if (current?.input !== input) return;
       if (options.blurWithin?.contains(event.relatedTarget)) return;
-      if (!finish()) finish({ cancel: true });
+      if (!finish({ restoreFocus: false }))
+        finish({ cancel: true, restoreFocus: false });
     };
     input.onkeydown = (event) => {
       if (current?.input !== input) return;
@@ -64,7 +73,28 @@ export function createInlineEdits({ changed, finished, invalid }) {
         event.preventDefault();
         event.stopPropagation();
         finish({ cancel: true });
-      } else if (event.key === "Enter" && !event.shiftKey) {
+      } else if (
+        event.key === "Backspace" &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        options.backspace?.()
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+      } else if (
+        event.key === "Enter" &&
+        options.enter &&
+        !event.ctrlKey &&
+        !event.metaKey
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        options.enter();
+      } else if (
+        event.key === "Enter" &&
+        (!event.shiftKey || options.singleLine)
+      ) {
         if (options.multiline && !event.ctrlKey && !event.metaKey) return;
         event.preventDefault();
         event.stopPropagation();
@@ -73,5 +103,11 @@ export function createInlineEdits({ changed, finished, invalid }) {
     };
     return true;
   }
-  return { start, capture, finish };
+  return {
+    start,
+    capture,
+    finish,
+    hasChanges: () =>
+      Boolean(current?.history && current.get() !== current.original),
+  };
 }

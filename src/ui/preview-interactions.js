@@ -30,7 +30,11 @@ export function setupPreviewInteractions({
     }
     const target = document.elementFromPoint(event.clientX, event.clientY);
     const line = target?.closest(".song-line");
-    if (line && !target.closest(".sheet-chord")) editLine(line, event);
+    if (
+      line &&
+      !target.closest(".sheet-chord, .sheet-chord-lane, .sheet-chord-handle")
+    )
+      editLine(line, event);
   });
   pages.addEventListener("focusin", (event) => {
     if (!editing()) return;
@@ -61,14 +65,21 @@ export function setupPreviewInteractions({
     const line = event.target.closest(".song-line");
     if (
       line &&
-      !event.target.closest(".inline-editor") &&
+      !event.target.closest(
+        ".inline-editor, .inline-chord-editor, .sheet-chord-lane, .sheet-chord-handle",
+      ) &&
       !alignment().handles(event) &&
       !event.target.closest(".unresolved-chord")
     )
       editLine(line, event);
   });
   pages.addEventListener("keydown", (event) => {
-    if (!editing() || event.target.closest(".sheet-chord, .inline-editor"))
+    if (
+      !editing() ||
+      event.target.closest(
+        ".sheet-chord, .inline-editor, .inline-chord-editor, .sheet-chord-lane, .sheet-chord-handle",
+      )
+    )
       return;
     const line = event.target.closest(".song-line");
     if (
