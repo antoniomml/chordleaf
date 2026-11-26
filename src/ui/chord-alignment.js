@@ -12,6 +12,10 @@ export function setupChordAlignment({
   editVerse,
   editChord,
   finish,
+  documentHistory,
+  prepareUndo = () => true,
+  onSelect,
+  extraActive = () => false,
 }) {
   const pages = document.querySelector("#pages");
   const scroll = document.querySelector("#pages-scroll");
@@ -99,12 +103,11 @@ export function setupChordAlignment({
     if (chord) {
       chord.el.classList.add("alignment-selected");
       highlight(chord.row, chord.m.x + (chord.m.anchorOffset || 0));
-      const active = mark(),
-        line = model();
+      const active = mark();
       $("#sheet-alignment-selection").textContent = chord.m.chord;
       $("#sheet-alignment-edit").disabled = false;
       $("#sheet-alignment-left").disabled = active.at === 0;
-      $("#sheet-alignment-right").disabled = active.at === line.lyric.length;
+      $("#sheet-alignment-right").disabled = false;
     } else {
       selected = undefined;
       $("#sheet-alignment-selection").textContent = "";
@@ -115,8 +118,11 @@ export function setupChordAlignment({
     }
     for (const id of ["selection", "left", "right", "edit"])
       $(`#sheet-alignment-${id}`).hidden = !chord;
-    $("#sheet-alignment-undo").disabled = !history.length;
-    tools.hidden = !enabled() || (!chord && !history.length);
+    const canUndo = documentHistory
+      ? Boolean(documentHistory.peek())
+      : history.length > 0;
+    $("#sheet-alignment-undo").disabled = !canUndo;
+    tools.hidden = !enabled() || (!chord && !canUndo && !extraActive());
   }
   function select(el) {
     const row = rows.find((r) => r.el === el.closest(".song-line"));
@@ -132,6 +138,7 @@ export function setupChordAlignment({
       endIndex: row.endIndex,
       start: Number(el.dataset.alignStart),
     };
+    onSelect?.();
     paintSelection();
     return true;
   }
@@ -173,7 +180,6 @@ export function setupChordAlignment({
       paintSelection();
       return;
     }
-    selectedChord()?.el.scrollIntoView({ block: "nearest", inline: "nearest" });
     $("#sheet-alignment-status").textContent = t(
       "Acorde movido. Cambios guardados en la canción.",
     );
@@ -183,6 +189,10 @@ export function setupChordAlignment({
     const line = model(),
       active = mark();
     const index = line.boundaries.findIndex((at) => at >= active.at);
+    if (delta > 0 && active.at === line.lyric.length) {
+      move(active.at + 1);
+      return;
+    }
     move(
       line.boundaries[
         Math.max(0, Math.min(line.boundaries.length - 1, index + delta))
@@ -208,16 +218,31 @@ export function setupChordAlignment({
       cw = (layout.cw * rect.width) / row.width;
     const column = Math.max(
       0,
-      Math.min(row.lyric.length, Math.floor((x - rect.left) / cw)),
+      Math.min(
+        Math.floor(row.width / layout.cw) - 1,
+        Math.floor((x - rect.left) / cw),
+      ),
     );
+    const end = row.positions.length;
     const offset =
-      row.positions[Math.min(column, row.positions.length - 1)] + prefix(row);
+      (column < end
+        ? row.positions[column]
+        : (row.positions.at(-1) ?? -1) + column - end + 1) + prefix(row);
     const line = model();
-    const at = line.boundaries.reduce(
-      (best, value) =>
-        Math.abs(value - offset) < Math.abs(best - offset) ? value : best,
-      line.boundaries[0],
+    // Blank paper is available after the final wrapped row of a verse.
+    const last = rows.findLast((r) => r.index === row.index);
+    const sourceEnd = row.positions.findIndex(
+      (at) => at + prefix(row) >= line.lyric.length,
     );
+    const endColumn = sourceEnd < 0 ? row.positions.length : sourceEnd;
+    const at =
+      row === last && column >= endColumn
+        ? line.lyric.length + column - endColumn
+        : line.boundaries.reduce(
+            (best, value) =>
+              Math.abs(value - offset) < Math.abs(best - offset) ? value : best,
+            line.boundaries[0],
+          );
     return { row, column, at };
   }
   function previewDrag() {
@@ -251,15 +276,10 @@ export function setupChordAlignment({
       return drag.y >= rect.top && drag.y <= rect.bottom;
     });
     if (row) {
-      const rect = row.el.getBoundingClientRect(),
-        cw = (layout.cw * rect.width) / row.width;
-      // Stop at the verse's letters: scrolling the paper margin under the
-      // finger would discard a valid target at the start or end of a row.
+      const rect = row.el.getBoundingClientRect();
+      // The entire column, including blank space after the lyric, is editable.
       if (drag.x > bounds.right - 25)
-        scroll.scrollLeft += Math.min(
-          8,
-          Math.max(0, rect.left + row.lyric.length * cw - drag.x),
-        );
+        scroll.scrollLeft += Math.min(8, Math.max(0, rect.right - drag.x));
       else if (drag.x < bounds.left + 25)
         scroll.scrollLeft -= Math.min(8, Math.max(0, drag.x - rect.left));
     }
@@ -279,14 +299,17 @@ export function setupChordAlignment({
     paintSelection();
   }
   pages.addEventListener("pointerdown", (event) => {
-    if (event.target.closest(".inline-chord-editor")) return;
+    const element = pages.contains(event.target)
+      ? event.target
+      : document.elementFromPoint(event.clientX, event.clientY);
+    if (!element || element.closest(".inline-chord-editor")) return;
     lyricTap = undefined;
     if (!event.isPrimary) {
       stopDrag(false);
       return;
     }
     suppressClick = false;
-    const el = event.target.closest(".sheet-chord[data-chord]");
+    const el = element.closest(".sheet-chord[data-chord]");
     if (
       event.pointerType === "touch" &&
       current() &&
@@ -453,6 +476,11 @@ export function setupChordAlignment({
   $("#sheet-alignment-left").onclick = () => step(-1);
   $("#sheet-alignment-right").onclick = () => step(1);
   $("#sheet-alignment-undo").onclick = () => {
+    if (documentHistory) {
+      if (!prepareUndo()) return;
+      documentHistory.restore();
+      return;
+    }
     if (!current() || !history.length) return;
     stopDrag(false);
     const old = history.pop();
@@ -506,5 +534,20 @@ export function setupChordAlignment({
       paintSelection();
     },
     tools,
+    repaint: paintSelection,
+    prepareRestore(text) {
+      const previous = history.at(-1);
+      if (owner === song() && previous?.text === text) {
+        selected = previous.selected;
+        expected = text;
+        history.pop();
+      }
+    },
+    selection() {
+      const value = current() && selected && mark();
+      return value
+        ? { ...selected, at: value.at, chord: value.chord }
+        : undefined;
+    },
   };
 }

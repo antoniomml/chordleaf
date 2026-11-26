@@ -39,7 +39,7 @@ await page.locator('.rail [data-desktop-view="edit"]').click();
 await page.locator("#pencil").click();
 await page.locator(".song-line").first().click();
 await page.locator(".inline-editor").fill("Un verso editado en la hoja");
-await page.locator(".inline-editor").press("Enter");
+await page.locator(".inline-editor").press("ControlOrMeta+Enter");
 assert.ok((await source.inputValue()).startsWith("[G]Un verso"));
 assert.deepEqual(
   (await source.inputValue()).match(/\[[^\]]+\]/g),
