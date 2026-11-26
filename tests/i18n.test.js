@@ -9,7 +9,7 @@ test("UI literals translate but interpolated song content does not", () => {
     assert.equal(t`Cerrar ${"Nueva canción"}`, "Close Nueva canción");
     assert.equal(t`Página ${2} de ${3}`, "Page 2 of 3");
     assert.equal(t("Canción sin título"), "Untitled song");
-    assert.equal(t("Una columna"), "One column");
+    assert.equal(t("1 columna"), "1 column");
     assert.match(introHtml("en"), /Write your way/);
     assert.match(introHtml("es"), /Escribe a tu manera/);
     assert.equal(

@@ -4,6 +4,7 @@ import { PAGE } from "../layout.js";
 
 /** Produce one complete preview from the current layout model. */
 export function renderPageMarkup(s, l, editing) {
+  const editVerse = t("Editar verso");
   return l.pages
     .map(
       (p, i) =>
@@ -11,7 +12,7 @@ export function renderPageMarkup(s, l, editing) {
           .flat()
           .map(
             (r) =>
-              `<div class="song-line ${editing ? "editable" : ""}" data-line="${r.index}" data-end="${r.endIndex ?? r.index}" style="left:${r.x}px;top:${r.y}px;width:${r.width}px;height:${r.height}px;font-size:${l.size}px" ${editing ? t('role="group" aria-label="Editar verso"') : ""}>${r.marks.map((m) => `<span class="sheet-chord${m.issue ? " unresolved-chord" : ""}" ${m.issue ? `data-issue-line="${r.index}" data-issue-offset="${m.rawIndex}" role="button" tabindex="0" aria-label="${t("Revisar acorde")}: ${esc(m.chord)}"` : `data-chord="${esc(m.name ?? m.chord)}" data-align-start="${m.rawIndex}" tabindex="-1"`} style="left:${m.x * l.cw}px;top:${(m.lane || 0) * l.size * 1.44}px">${esc(m.chord)}</span>`).join("")}<span class="lyric" ${editing ? t('tabindex="0" role="button" aria-label="Editar verso"') : ""} style="top:${r.lyricOffset}px">${esc(r.lyric) || " "}</span></div>`,
+              `<div class="song-line ${editing ? "editable" : ""}" data-line="${r.index}" data-end="${r.endIndex ?? r.index}" style="left:${r.x}px;top:${r.y}px;width:${r.width}px;height:${r.height}px;font-size:${l.size}px" ${editing ? `role="group" aria-label="${editVerse}"` : ""}>${r.marks.map((m) => `<span class="sheet-chord${m.issue ? " unresolved-chord" : ""}" ${m.issue ? `data-issue-line="${r.index}" data-issue-offset="${m.rawIndex}" role="button" tabindex="0" aria-label="${t("Revisar acorde")}: ${esc(m.chord)}"` : `data-chord="${esc(m.name ?? m.chord)}" data-align-start="${m.rawIndex}" tabindex="-1"`} style="left:${m.x * l.cw}px;top:${(m.lane || 0) * l.size * 1.44}px">${esc(m.chord)}</span>`).join("")}<span class="lyric" ${editing ? `tabindex="0" role="button" aria-label="${editVerse}${r.lyric.trim() ? `: ${esc(r.lyric.trim())}` : ""}"` : ""} style="top:${r.lyricOffset}px">${esc(r.lyric) || " "}</span></div>`,
           )
           .join(
             "",
