@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { chordPro, downloadName, importText, titleCase } from "../src/files.js";
+import { layout } from "../src/layout.js";
 
 test("download names drop unsafe characters and keep the song title", () => {
   assert.equal(downloadName("Luz / del : día", "Canción"), "Luz - del - día");
@@ -107,4 +108,20 @@ test("chord rows with repeat marks and section labels stay chords", () => {
 
 test("title case keeps Irish-style surnames", () => {
   assert.equal(titleCase("GILBERT O'SULLIVAN"), "Gilbert O'Sullivan");
+});
+
+test("chord rows preserve label columns, distinct indentation and chords after the final word", () => {
+  const sheet =
+    "             Em\nUna ventana azul\n    Dadd9               C\n  Otra luz";
+  const imported = importText(sheet, "Demo");
+  const rows = layout({ ...imported, columns: 1, margin: 10, fontSize: 10 })
+    .pages[0].columns[0];
+  assert.equal(rows[0].lyric, "Una ventana azul");
+  assert.equal(rows[0].marks[0].x, 13);
+  assert.equal(rows[1].lyric.trimEnd(), "  Otra luz");
+  assert.deepEqual(
+    rows[1].marks.map((m) => m.x),
+    [4, 24],
+  );
+  assert.equal(importText(chordPro(imported)).text, imported.text);
 });
