@@ -2,6 +2,7 @@ import { chromium, webkit, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import axe from "axe-core";
+import { expectLyricValue } from "./helpers/inline-editor.mjs";
 
 await mkdir("artifacts", { recursive: true });
 for (const [engine, mobile] of [
@@ -34,11 +35,11 @@ for (const [engine, mobile] of [
     const first = page.locator('.song-line[data-line="0"]');
     await first.locator(".lyric").first().click();
     const lyrics = page.locator(".inline-editor");
-    await expect(lyrics).toHaveValue("Una casa");
+    await expectLyricValue(lyrics, "Una casa");
     await lyrics.press("Home");
     await lyrics.pressSequentially("En ");
     if (mobile) await page.locator("#sheet-edit-done").click();
-    else await lyrics.press("Enter");
+    else await lyrics.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue(
       "En [Cmaj7]Una [Em7]casa\n[G]\nUna canción\n[C] – [G]",
     );
@@ -48,7 +49,7 @@ for (const [engine, mobile] of [
     await lyrics.press("Delete");
     await lyrics.press("Delete");
     if (mobile) await page.locator("#sheet-edit-done").click();
-    else await lyrics.press("Enter");
+    else await lyrics.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue(
       "[Cmaj7]Una [Em7]casa\n[G]\nUna canción\n[C] – [G]",
     );
@@ -57,7 +58,7 @@ for (const [engine, mobile] of [
     await first.locator('[data-chord="Em7"]').click();
     await page.locator("#sheet-alignment-selection").click();
     const chord = page.locator(".inline-chord-editor");
-    await expect(chord).toHaveValue("Em7");
+    await expectLyricValue(chord, "Em7");
     await chord.press("ArrowLeft");
     await expect(chord).toBeFocused();
     await chord.fill("Am7");
@@ -76,15 +77,15 @@ for (const [engine, mobile] of [
 
     // Legacy separate chord rows remain byte-for-byte separate when editing lyrics.
     await page.locator('.song-line[data-line="1"] .lyric').click();
-    await expect(lyrics).toHaveValue("Una canción");
+    await expectLyricValue(lyrics, "Una canción");
     await lyrics.fill("Otra canción");
     if (mobile) await page.locator("#sheet-edit-done").click();
-    else await lyrics.press("Enter");
+    else await lyrics.press("ControlOrMeta+Enter");
     await expect(source).toHaveValue(
       "[Cmaj7]Una [Am7]casa\n[G]\nOtra canción\n[C] – [G]",
     );
     await page.locator('.song-line[data-line="3"] [data-chord="C"]').click();
-    await expect(chord).toHaveValue("C");
+    await expectLyricValue(chord, "C");
     await chord.fill("D");
     await chord.press("Enter");
     await expect(source).toHaveValue(

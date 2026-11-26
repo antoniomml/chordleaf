@@ -39,20 +39,27 @@ export function alignmentLine(raw) {
   };
 }
 
-/** Relocate just one bracket token. Every other source byte stays in order. */
+/** Relocate just one bracket token. Moving beyond the lyric adds only the
+ * spaces needed for the new anchor; every existing source byte stays in order. */
 export function moveAlignedChord(raw, start, destination) {
   const line = alignmentLine(raw),
     mark = line.marks.find((m) => m.start === start);
   if (!mark) return { raw, start };
-  const at = line.boundaries.reduce(
-    (best, value) =>
-      Math.abs(value - destination) < Math.abs(best - destination)
-        ? value
-        : best,
-    0,
-  );
+  const at =
+    Number.isFinite(destination) && destination > line.lyric.length
+      ? Math.round(destination)
+      : line.boundaries.reduce(
+          (best, value) =>
+            Math.abs(value - destination) < Math.abs(best - destination)
+              ? value
+              : best,
+          0,
+        );
   if (at === mark.at) return { raw, start };
-  const rest = raw.slice(0, mark.start) + raw.slice(mark.end);
+  const rest =
+    raw.slice(0, mark.start) +
+    raw.slice(mark.end) +
+    " ".repeat(Math.max(0, at - line.lyric.length));
   const remaining = alignmentLine(rest);
   let insert = at;
   for (const other of remaining.marks)
@@ -113,4 +120,42 @@ export function replaceAlignedLyrics(raw, next) {
     end = at;
   }
   return result + next.slice(end);
+}
+
+/** Apply an edit to one printed row. The inverse layout map distinguishes
+ * actual lyrics from collision padding and preserves hidden wrap spaces. */
+export function replaceDisplayedLyrics(raw, before, after, positions) {
+  if (before === after) return { raw, positions };
+  let prefix = 0,
+    suffix = 0;
+  while (
+    prefix < before.length &&
+    prefix < after.length &&
+    before[prefix] === after[prefix]
+  )
+    prefix++;
+  while (
+    suffix < before.length - prefix &&
+    suffix < after.length - prefix &&
+    before.at(-suffix - 1) === after.at(-suffix - 1)
+  )
+    suffix++;
+  const lyric = alignmentLine(raw).lyric;
+  const boundary = (at) =>
+    Math.min(lyric.length, positions[at] ?? lyric.length);
+  const start = boundary(prefix),
+    end = boundary(before.length - suffix);
+  const inserted = after.slice(prefix, after.length - suffix);
+  const delta = inserted.length - (end - start);
+  return {
+    raw: replaceAlignedLyrics(
+      raw,
+      lyric.slice(0, start) + inserted + lyric.slice(end),
+    ),
+    positions: [
+      ...positions.slice(0, prefix),
+      ...Array.from({ length: inserted.length }, (_, i) => start + i),
+      ...positions.slice(before.length - suffix).map((at) => at + delta),
+    ],
+  };
 }

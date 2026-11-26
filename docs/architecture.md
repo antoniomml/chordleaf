@@ -21,6 +21,10 @@ chordleaf is a browser application built with ES modules and Vite. Editing and f
 | `src/ui/song-import.js`              | Import dialogs, cancellation, validation and prepared-song callbacks.                         |
 | `src/ui/song-export.js`              | Snapshot exports, print controls and editable-project downloads.                              |
 | `src/ui/inline-edits.js`             | Capture focused sheet drafts without replacing the input; commit or cancel them consistently. |
+| `src/ui/sheet-chords.js`             | Chord-only cursor, inline insertion, row selection and clipboard interactions on the sheet.   |
+| `src/ui/sheet-draft.js`              | Native text caret mapping and immediate chord positioning while lyrics are edited.            |
+| `src/chord-editing.js`               | Validated chord fragments and atomic source transformations, independent of visual padding.   |
+| `src/document-history.js`            | Shared, bounded document undo/redo per song, invalidated by unrelated source changes.         |
 | `src/ui/entry.js` / `build/entry.js` | Shared sheet and static entry layout before editor initialization.                            |
 | `src/pdf-import.js`                  | Geometric interpretation of extracted PDF text.                                               |
 | `src/fonts.js`                       | Document font loading and embedding.                                                          |

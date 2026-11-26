@@ -1,5 +1,9 @@
 import { isMobileLayout } from "./mobile-layout.js";
-import { alignmentLine, replaceAlignedLyrics } from "./chord-alignment.js";
+import {
+  alignmentLine,
+  replaceAlignedLyrics,
+  replaceDisplayedLyrics,
+} from "./chord-alignment.js";
 import { setupRecentProjects } from "./ui/recent-projects.js";
 import { setupSongExport } from "./ui/song-export.js";
 import { setupSongImport } from "./ui/song-import.js";
@@ -15,27 +19,36 @@ import shell from "./ui/shell.html?raw";
 import { t, getLocale } from "./i18n.js";
 import { createSong as create, assertTextLength } from "./song-state.js";
 import { createInlineEdits } from "./ui/inline-edits.js";
-import { setupSheetEditor } from "./ui/sheet-editor.js";
+import {
+  setupSheetEditor,
+  placeLyricCaret,
+  readSheetLyrics,
+} from "./ui/sheet-editor.js";
+import {
+  sheetCaretOffset,
+  setSheetCaret,
+  paintLyricDraft,
+} from "./ui/sheet-draft.js";
+import {
+  displaySourceBoundary,
+  backspaceSheetBoundary,
+} from "./sheet-selection.js";
+import { createTransposition } from "./transposition.js";
 import { setupChordsPanel } from "./chords-panel.js";
 import { setupDictionary } from "./dictionary-ui.js";
 import { setupEditorTools } from "./editor-tools.js";
 import { setupChordAlignment } from "./ui/chord-alignment.js";
+import { setupSheetChords } from "./ui/sheet-chords.js";
+import { createDocumentHistory } from "./document-history.js";
 import { icon } from "./ui/icons.js";
 import "./style.css";
-import {
-  keyInfo,
-  transpose,
-  diagram,
-  transposeChord,
-  transposeSpelling,
-  chords,
-  chordRE,
-} from "./music.js";
+import { keyInfo, transpose, diagram, chords, chordRE } from "./music.js";
 import { layout, PAGE } from "./layout.js";
 import { download } from "./files.js";
 import { projectSignature } from "./project.js";
 import { registerServiceWorker } from "./pwa.js";
 import { renderOfflineStatus } from "./ui/offline-status.js";
+import { setupSheetSelection } from "./ui/sheet-selection.js";
 import { setupPreviewInteractions } from "./ui/preview-interactions.js";
 import { resolveFeatureFlags } from "./feature-flags.js";
 import { setupMenu } from "./ui/menu.js";
@@ -117,18 +130,30 @@ let section = "document",
 const songViews = new Map();
 const songDesktopViews = new Map();
 const songMusicSections = new Map();
-const transposeHistory = new Map();
+const transposeHistory = createTransposition();
 let chordMode = "song";
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const song = () => songs.find((s) => s.id === active);
 let sheetEditor;
+let sheetChords;
+let sheetRows = new WeakMap();
+const documentHistory = createDocumentHistory({
+  song,
+  update: (text) => {
+    alignment.prepareRestore(text);
+    return applyDocumentText(text, 0, false);
+  },
+});
 const inlineEdits = createInlineEdits({
   changed,
-  finished() {
+  committed: (before, after) => documentHistory.record(before, after),
+  finished({ restoreFocus }) {
     sheetEditor?.close();
     renderSource();
     renderSettings();
     renderPages();
+    if (restoreFocus && document.activeElement === document.body)
+      $("#pages-scroll").focus({ preventScroll: true });
   },
   invalid(message) {
     setSaveState(message, { error: true, announce: true });
@@ -144,6 +169,16 @@ function updateText(text) {
     toast(error.message, "warning");
     return false;
   }
+}
+function applyDocumentText(text, offset = 0, record = true) {
+  const before = song().text;
+  if (!updateText(text)) return false;
+  if (record) documentHistory.record(before, text, offset);
+  changed();
+  renderSource();
+  renderSettings();
+  renderPages();
+  return true;
 }
 /** Keep the visible save label in sync without announcing every keystroke.
  * Screen readers only hear the hidden live region on real transitions. */
@@ -443,7 +478,21 @@ function renderSettings() {
   renderSettingsContent();
   if (optionsOpen && $(".more-document-options"))
     $(".more-document-options").open = true;
-  if (focusSelector) $(focusSelector)?.focus({ preventScroll: true });
+  if (focusSelector) {
+    let control = $(focusSelector);
+    if (control?.disabled) {
+      const opposite = {
+        "capo-down": "capo-up",
+        "capo-up": "capo-down",
+        "transpose-down": "transpose-up",
+        "transpose-up": "transpose-down",
+      }[control.id];
+      control = opposite
+        ? $(`#${opposite}`)
+        : control.closest(".stepper")?.querySelector("button:not(:disabled)");
+    }
+    control?.focus({ preventScroll: true });
+  }
 }
 function renderSettingsContent() {
   syncSection();
@@ -467,6 +516,7 @@ function renderSettingsContent() {
   $("#settings").innerHTML = renderDocumentSettings(
     s,
     transposeHistory.get(s.id),
+    transposeHistory.canUndo(s),
   );
   if ($("#undo-transpose")) $("#undo-transpose").onclick = undoTranspose;
   $("#showBrand").onchange = (e) => {
@@ -555,67 +605,31 @@ function updateNavigation() {
   pencil.setAttribute("aria-label", pencilLabel);
   pencil.setAttribute("aria-pressed", String(editing));
 }
-function transposeSong(n) {
-  const s = song();
-  const names = transposeSpelling(s.text, n);
-  if (!updateText(transpose(s.text, n, names))) return false;
-  s.chordShapes = Object.fromEntries(
-    Object.entries(s.chordShapes || {}).map(([name, shape]) => {
-      let offset = n;
-      const played = shape.frets.filter((f) => f >= 0);
-      while (played.length && Math.min(...played) + offset < 0) offset += 12;
-      while (played.length && Math.max(...played) + offset > 24) offset -= 12;
-      return [
-        transposeChord(name, n, names),
-        { ...shape, frets: shape.frets.map((f) => (f < 0 ? -1 : f + offset)) },
-      ];
-    }),
-  );
-  for (const sticker of s.chordStickers || [])
-    if (Array.isArray(sticker.chords))
-      sticker.chords = sticker.chords.map((c) => transposeChord(c, n, names));
-  return true;
-}
 function shift(n) {
-  const s = song();
-  let history = transposeHistory.get(s.id);
-  if (!history) {
-    history = {
-      snapshot: {
-        text: s.text,
-        chordShapes: structuredClone(s.chordShapes),
-        chordStickers: structuredClone(s.chordStickers),
-      },
-      offset: 0,
-    };
-  }
-  const next = history.offset + n;
-  if (next === 0) {
-    Object.assign(s, history.snapshot);
-    transposeHistory.delete(s.id);
-  } else {
-    if (!transposeSong(n)) return;
-    history.offset = next;
-    transposeHistory.set(s.id, history);
+  try {
+    if (!transposeHistory.shift(song(), n)) return;
+  } catch (error) {
+    toast(error.message, "warning");
+    return;
   }
   changed({ preserveTranspose: true });
   render();
 }
 function undoTranspose() {
-  const s = song(),
-    history = transposeHistory.get(s.id);
-  if (!history) return;
-  Object.assign(s, history.snapshot);
-  transposeHistory.delete(s.id);
-  changed();
+  if (!transposeHistory.get(song().id)) return;
+  if (!transposeHistory.undo(song())) return;
+  changed({ preserveTranspose: true });
   render();
 }
 function setCapo(value) {
-  const s = song(),
-    next = Math.min(12, Math.max(0, Number.isFinite(value) ? value : 0));
-  if (s.linked && !transposeSong(s.capo - next)) return;
-  s.capo = next;
-  changed();
+  try {
+    transposeHistory.setCapo(song(), value);
+  } catch (error) {
+    renderSettings();
+    toast(error.message, "warning");
+    return;
+  }
+  changed({ preserveTranspose: true });
   render();
 }
 function renderSource() {
@@ -623,8 +637,7 @@ function renderSource() {
   sourceMeta();
 }
 function sourceMeta({ harmonyChanged = true } = {}) {
-  $("#align-chords").disabled =
-    !chords(song().text).length && !/\[\?[^\[\]\n]{1,40}\]/.test(song().text);
+  $("#align-chords").disabled = !song().text.trim();
   const lines = song().text.split("\n").length;
   if ($("#line-numbers").childElementCount !== lines)
     $("#line-numbers").innerHTML = Array.from(
@@ -635,6 +648,16 @@ function sourceMeta({ harmonyChanged = true } = {}) {
   if (harmonyChanged) dictionary.renderTray();
   if (section === "chords") chordPanel.refresh();
 }
+setupSheetSelection({
+  enabled: () => editing,
+  song,
+  rowFor: (el) => sheetRows.get(el),
+  finish: (options) => inlineEdits.finish(options),
+  update: applyDocumentText,
+  history: documentHistory,
+  pending: () => inlineEdits.hasChanges(),
+  editLine,
+});
 setupPreviewInteractions({
   song,
   editing: () => editing,
@@ -648,7 +671,17 @@ function renderPages() {
   previewTimer = undefined;
   const s = song(),
     l = layout(s);
+  const scroll = $("#pages-scroll"),
+    scrollTop = scroll.scrollTop,
+    scrollLeft = scroll.scrollLeft;
   $("#pages").innerHTML = renderPageMarkup(s, l, editing);
+  const rows = l.pages.flatMap((page) => page.columns.flat());
+  sheetRows = new WeakMap(
+    [...$("#pages").querySelectorAll(".song-line")].map((el, i) => [
+      el,
+      rows[i],
+    ]),
+  );
   $("#pages .sheet-chord[data-chord]")?.setAttribute("tabindex", "0");
   $("#issue-editor").hidden = true;
   const issues = [...s.text.matchAll(/\[\?[^\[\]\n]{1,40}\]/g)].length;
@@ -686,44 +719,184 @@ function renderPages() {
   dictionary.render();
   resizePages();
   alignment.refresh(l);
+  sheetChords?.refresh(l);
+  // Replacement briefly restores unscaled page heights. Restore the viewport
+  // only after the new shells have their final zoom and layout.
+  scroll.scrollTop = scrollTop;
+  scroll.scrollLeft = scrollLeft;
 }
 function schedulePreview() {
   if (song().text.length <= 10000) return renderPages();
   clearTimeout(previewTimer);
   previewTimer = setTimeout(renderPages, 120);
 }
-function editLine(el) {
-  if (el.querySelector("textarea")) return;
+function editLine(el, event) {
+  if (el.querySelector(".inline-editor")) return;
+  const selection = window.getSelection();
+  const selectedRange =
+    selection?.rangeCount &&
+    !selection.isCollapsed &&
+    el.querySelector(".lyric")?.contains(selection.anchorNode) &&
+    el.querySelector(".lyric")?.contains(selection.focusNode)
+      ? selection.getRangeAt(0).cloneRange()
+      : null;
   alignment.clear();
   const endIndex = Number(el.dataset.end),
     target = song(),
-    lines = target.text.split("\n");
+    lines = target.text.split("\n"),
+    mobile = isMobileLayout(),
+    row = sheetRows.get(el);
   // A separate chord-only source row stays untouched above its lyric row.
   let edited = lines[endIndex];
-  el.innerHTML = t`<textarea class="inline-editor" aria-label="Editar letra del verso">${esc(alignmentLine(edited).lyric)}</textarea>`;
-  const input = el.firstChild;
+  let input;
+  if (mobile) {
+    el.innerHTML = t`<textarea class="inline-editor" aria-label="Editar letra del verso">${esc(alignmentLine(edited).lyric)}</textarea>`;
+    input = el.firstChild;
+  } else {
+    input = el.querySelector(".lyric");
+    input.classList.add("inline-editor", "inline-lyric-editor");
+    input.contentEditable = "plaintext-only";
+    input.setAttribute("role", "textbox");
+    input.setAttribute("aria-label", t("Editar letra del verso"));
+  }
+  let display = input.textContent,
+    positions = row.positions?.slice(0, display.length + 1) ?? [];
+  if (!mobile && !row.positions) {
+    // Instrumental rows contain printed placeholders for chord labels rather
+    // than lyric cells. Edit their actual source text, like the mobile field.
+    display = alignmentLine(edited).lyric;
+    input.textContent = display;
+    positions = Array.from({ length: display.length + 1 }, (_, i) => i);
+  }
+  if (!mobile)
+    row.draft = { raw: edited, positions, index: endIndex, lineDelta: 0 };
+  const readInput = () => {
+    if (mobile) return input.value;
+    return readSheetLyrics(input);
+  };
   const editDialog = sheetEditor.open(input, "lyric");
+  const originalMarks = alignmentLine(edited).marks;
+  let reflowPending = false;
+  function reflowDraft() {
+    if (reflowPending) return;
+    reflowPending = true;
+    queueMicrotask(() => {
+      reflowPending = false;
+      if (document.activeElement !== input) return;
+      const at = displaySourceBoundary(positions, sheetCaretOffset(input));
+      const prefix = alignmentLine(edited).lyric.slice(0, at);
+      const parts = prefix.split("\n"),
+        index = endIndex + parts.length - 1;
+      const column = parts.at(-1).length;
+      if (inlineEdits.finish()) focusLyricPosition(index, column);
+    });
+  }
   inlineEdits.start(input, {
+    history: true,
     blurWithin: editDialog,
     multiline: Boolean(editDialog),
+    ...(!mobile
+      ? {
+          backspace() {
+            const selection = window.getSelection();
+            if (!selection?.isCollapsed || sheetCaretOffset(input) !== 0)
+              return false;
+            if (!inlineEdits.capture()) return true;
+            const at = displaySourceBoundary(positions, 0);
+            const result = backspaceSheetBoundary(
+              target.text,
+              endIndex,
+              at,
+              Number(el.dataset.line),
+            );
+            if (
+              result &&
+              inlineEdits.finish({ render: false }) &&
+              applyDocumentText(result.text, result.offset)
+            )
+              focusLyricPosition(result.index, result.at);
+            return true;
+          },
+          enter() {
+            document.execCommand("insertText", false, "\n");
+            reflowDraft();
+          },
+          afterInput() {
+            paintLyricDraft(el, input, row, edited, positions, originalMarks);
+            const scale = el.getBoundingClientRect().width / row.width;
+            if (
+              readInput().includes("\n") ||
+              input.getBoundingClientRect().height / scale >
+                target.fontSize * 1.5
+            )
+              reflowDraft();
+          },
+        }
+      : {}),
     get: () => target.text,
     set: (value) => (target.text = value),
+    ...(!mobile
+      ? {
+          readInput,
+          writeInput: (value) => (input.textContent = value),
+        }
+      : {}),
     read() {
-      const next = replaceAlignedLyrics(edited, input.value);
+      const value = readInput();
+      const replacement = mobile
+        ? { raw: replaceAlignedLyrics(edited, value) }
+        : replaceDisplayedLyrics(edited, display, value, positions);
+      const next = replacement.raw;
       const candidate = [...lines];
       candidate.splice(endIndex, 1, ...next.split("\n"));
       const text = candidate.join("\n");
       assertTextLength(text);
       edited = next;
+      display = value;
+      if (!mobile) {
+        positions = replacement.positions;
+        row.draft = {
+          raw: edited,
+          positions,
+          index: endIndex,
+          lineDelta: edited.split("\n").length - 1,
+        };
+      }
       return text;
     },
     rejectInvalid: true,
   });
-  input.focus();
+  if (mobile) input.focus();
+  else {
+    placeLyricCaret(input, event);
+    if (selectedRange) {
+      selection.removeAllRanges();
+      selection.addRange(selectedRange);
+    }
+  }
   input.onclick = (e) => e.stopPropagation();
 }
+function focusLyricPosition(index, at) {
+  let best;
+  for (const el of $("#pages").querySelectorAll(".song-line")) {
+    if (Number(el.dataset.end) !== index) continue;
+    const row = sheetRows.get(el),
+      lyric = el.querySelector(".lyric");
+    for (let offset = 0; offset <= lyric.textContent.length; offset++) {
+      const distance = Math.abs(
+        displaySourceBoundary(row.positions, offset) - at,
+      );
+      if (!best || distance < best.distance || (distance === 0 && offset === 0))
+        best = { el, offset, distance };
+    }
+  }
+  if (!best) return;
+  editLine(best.el);
+  const field = best.el.querySelector(".inline-lyric-editor");
+  if (field) setSheetCaret(field, best.offset);
+}
 function editChord(el) {
-  if (el.querySelector("input")) return;
+  if (el.isContentEditable) return;
   alignment.clear();
   const index = Number(el.closest(".song-line").dataset.line),
     target = song(),
@@ -732,17 +905,34 @@ function editChord(el) {
       (mark) => mark.start === Number(el.dataset.alignStart),
     );
   if (!mark) return;
-  el.removeAttribute("role");
-  el.innerHTML = t`<input class="inline-chord-editor" aria-label="Editar acorde" autocomplete="off" spellcheck="false" value="${esc(mark.chord)}" />`;
-  const input = el.firstChild;
-  input.size = Math.max(3, mark.chord.length + 1);
-  const editDialog = sheetEditor.open(input, "chord");
+  const input = el;
+  const cw = parseFloat(el.closest(".song-line").style.fontSize) * 0.6;
+  const anchor =
+    parseFloat(el.style.left) +
+    Math.floor((el.textContent.length - 1) / 2) * cw;
+  input.classList.add("inline-chord-editor");
+  input.contentEditable = "plaintext-only";
+  input.setAttribute("role", "textbox");
+  input.setAttribute("aria-label", t("Editar acorde"));
+  input.setAttribute("aria-multiline", "false");
+  input.spellcheck = false;
+  input.textContent = mark.chord;
+  input.style.left = `${anchor - Math.floor((mark.chord.length - 1) / 2) * cw}px`;
   inlineEdits.start(input, {
-    blurWithin: editDialog,
+    history: true,
+    deferred: true,
+    singleLine: true,
+    readInput: () => input.textContent,
+    writeInput: (value) => {
+      input.textContent = value;
+    },
+    afterInput() {
+      input.style.left = `${anchor - Math.floor(Math.max(0, input.textContent.length - 1) / 2) * cw}px`;
+    },
     get: () => target.text,
     set: (value) => (target.text = value),
     read() {
-      const value = input.value.trim();
+      const value = input.textContent.trim();
       if (!chordRE.test(value))
         throw new Error(t("Introduce un acorde válido, por ejemplo C o Em7."));
       const candidate = [...lines];
@@ -756,7 +946,11 @@ function editChord(el) {
     },
   });
   input.focus();
-  input.select();
+  const range = document.createRange();
+  range.selectNodeContents(input);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
   input.onclick = (event) => event.stopPropagation();
 }
 function resizePages() {
@@ -999,8 +1193,15 @@ function render() {
   renderPages();
 }
 $("#source").oninput = (e) => {
+  const value = e.target.value;
+  // A pending sheet draft must finish before accepting newer source text;
+  // otherwise the preview's capture would restore the older verse.
+  if (!inlineEdits.finish({ render: false })) {
+    e.target.value = song().text;
+    return;
+  }
   const previousText = song().text;
-  if (!updateText(e.target.value)) {
+  if (!updateText(value)) {
     e.target.value = song().text;
     return;
   }
@@ -1397,6 +1598,10 @@ setupEditorTools({ resizePages });
 const alignment = setupChordAlignment({
   song,
   enabled: () => editing,
+  documentHistory,
+  prepareUndo: () => inlineEdits.finish(),
+  onSelect: () => sheetChords?.clear(),
+  extraActive: () => sheetChords?.active(),
   editChord,
   editVerse(el) {
     editLine(el);
@@ -1404,13 +1609,33 @@ const alignment = setupChordAlignment({
   finish() {
     setSheetEditing(false);
   },
-  update(text) {
-    if (!updateText(text)) return false;
-    changed();
-    renderSource();
-    renderPages();
-    return true;
-  },
+  update: applyDocumentText,
+});
+sheetChords = setupSheetChords({
+  song,
+  enabled: () => editing,
+  alignment,
+  inlineEdits,
+  update: applyDocumentText,
+  notify: toast,
+});
+previewScroll.addEventListener("keydown", (event) => {
+  const key = event.key.toLowerCase();
+  if (
+    event.defaultPrevented ||
+    event.isComposing ||
+    !(event.metaKey || event.ctrlKey) ||
+    !editing ||
+    event.target.closest("input, textarea") ||
+    inlineEdits.hasChanges()
+  )
+    return;
+  const redo = (key === "z" && event.shiftKey) || key === "y";
+  if ((key === "z" || redo) && documentHistory.peek(redo)) {
+    event.preventDefault();
+    if (inlineEdits.finish({ render: false })) documentHistory.restore(redo);
+    previewScroll.focus({ preventScroll: true });
+  }
 });
 for (const [id, name] of [
   ["pencil", "edit"],

@@ -43,6 +43,8 @@ It is for singers, guitarists, teachers and anyone preparing their own printable
 
 The printed sheet shows chords above the lyrics, without brackets. For a change inside a word, `mor[G]ning` anchors the chord to the **n**.
 
+You can also use the sheet's pencil to edit chords directly. Click a gap in a chord row, type `Am7`, and press Enter; double-click an existing chord to write over its name. Chords and lyrics are edited on the page without a separate chord field. On desktop, chords follow the lyrics with every keystroke, Enter starts a new verse and continues typing there, and Ctrl/⌘ Enter finishes editing. Backspace at the start of a verse joins it with the previous one, preserving the chords; on an empty verse, it removes the blank line. For a verse without chords, click its left margin to reveal an empty chord row. Select several chord rows with Shift-click in the margin or by dragging from a gap in a chord row, then copy and paste onto other lyrics with Ctrl/⌘ C and V. Pasting at a chord cursor adds the fragment; pasting over selected rows replaces their chords. The original columns are kept even when the new lyrics are shorter, and Ctrl/⌘ Z undoes the entire paste.
+
 **3. Make it comfortable to play.** The desktop rail has **Settings**, **Lyrics**, **Chords**, **Key**, **Search** and **Identify**. Each opens its own panel beside the sheet. Use Settings for transposition, capo and page layout; Lyrics for the bracketed source; Chords, Search and Identify for guitar positions. When ready, choose **Export**. **Export → Print** sends the A4 pages to the browser print dialog without the workspace controls.
 
 [Explore the controls in the user guide →](https://github.com/antoniomml/chordleaf/wiki/User-guide)

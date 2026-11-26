@@ -1,5 +1,30 @@
 # chordleaf changelog
 
+## 1.7.0 · October 16, 2026
+
+- Add and rename chords directly on the printed document, using the chord label itself as the editor. Reveal an empty chord row from the verse's left margin, without permanent per-verse menu buttons.
+- Select and copy chord rows independently of lyrics, then paste their progression onto another stanza. Preserve original chord columns over shorter lyrics, support plain-text chord rows from other editors, and replace selected destination rows atomically.
+- Move chord labels with every lyric keystroke on desktop. Keep the native caret and existing chord drag feedback while editing text, including wrapped verses and collision padding.
+- Use Enter to start a new desktop verse and continue typing there; use Backspace at the start to join the previous verse or remove an empty line. Preserve chord tokens, legacy chord/lyric pairs and Unicode characters.
+- Share per-song undo/redo across chord insertion, renaming, movement, pasting, lyric edits and verse joins. Preserve pending drafts when saving or switching back to the source editor.
+- Add unit and browser regressions for chord-only clipboard data, native chord editing on desktop and mobile, live alignment, verse creation/deletion and history.
+
+## 1.6.2 · October 14, 2026
+
+- Select and delete text across desktop sheet verses, wrapped rows, columns and pages with the mouse or Shift+Up/Down. Remove selected chord tokens with their text, keep unselected endpoints intact, and support undo/redo, replacement and saved drafts.
+- Keep enlarged chord drag targets clear of the lyrics underneath, so a lyric selection cannot accidentally grab a chord.
+- Replace the one-way capo link with **Lock key**: raising written semitones lowers the capo, and raising the capo lowers the chords. Keep the sounding key fixed, stop at frets 0 and 12, and compensate the capo when restoring original chords.
+- Show every written chord change in the semitone counter, including capo compensation. Preserve keyboard focus when a stepper reaches its limit and document the behavior in English and Spanish.
+- Verify thousands of mixed transposition/capo/reset operations against an independent pitch model, with cross-browser regressions for multi-line editing and source boundaries.
+
+## 1.6.1 · October 14, 2026
+
+- Preserve chord columns when importing LaCuerda sheets, including different chord/lyric indentation, empty markup markers, normalized Spanish notation and chords after the final word. Recognize capo instructions such as “en el tercer traste”.
+- Allow chord placement over blank paper after the lyrics, with keyboard movement and undo. Preserve vertical and horizontal scroll after edits and drops on zoomed documents.
+- Edit desktop lyrics directly on the printed text with the caret at the clicked character, keeping chords visible. Preserve wrapped-row spacing, draft saves, cancellation, native line breaks and input composition.
+- Keep semitone transposition and linked capo compensation consistent across mixed operations, link toggles and reset. Derive chords and custom diagrams from a stable baseline to avoid accumulated respellings and octave shifts.
+- Add regression coverage for imported geometry, native editing, blank chord anchors, zoomed scrolling and more than 4,000 transposition/capo states.
+
 ## 1.6.0 · October 7, 2026
 
 - Confirm saved-song deletion with the song name, a clear permanence warning and Cancel focused by default. Failed storage writes preserve the previous copy and keep the confirmation open.
