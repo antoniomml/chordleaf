@@ -104,7 +104,12 @@ export function setupChordAlignment({
       chord.el.classList.add("alignment-selected");
       highlight(chord.row, chord.m.x + (chord.m.anchorOffset || 0));
       const active = mark();
-      $("#sheet-alignment-selection").textContent = chord.m.chord;
+      const chordButton = $("#sheet-alignment-selection");
+      chordButton.textContent = chord.m.chord;
+      chordButton.setAttribute(
+        "aria-label",
+        `${t("Editar acorde")}: ${chord.m.chord}`,
+      );
       $("#sheet-alignment-edit").disabled = false;
       $("#sheet-alignment-left").disabled = active.at === 0;
       $("#sheet-alignment-right").disabled = false;

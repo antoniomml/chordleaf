@@ -312,12 +312,13 @@ export function setupDictionary({ song, changed, renderPages, esc, notify }) {
   function renderTray() {
     const names = chords(song().text);
     tray.querySelector(".dictionary-items").innerHTML = names.length
-      ? t`<div class="dictionary-item dictionary-all" draggable="true" data-all="true"><div><strong>Todos los acordes</strong><span>${names.length} diagramas en un bloque</span></div><button class="add-sticker" aria-label="Añadir todos los diagramas">Añadir a la hoja</button></div>` +
+      ? t`<div class="dictionary-item dictionary-all" draggable="true" data-all="true"><div><strong>Todos los acordes</strong><span>${names.length} diagramas en un bloque</span></div><button class="add-sticker" aria-label="Añadir a la hoja todos los diagramas">Añadir a la hoja</button></div>` +
         names
-          .map(
-            (name) =>
-              t`<div class="dictionary-item chord-card" draggable="true" data-name="${esc(name)}"><button class="edit-shape" aria-label="Editar posición de ${esc(name)}"><strong>${esc(name)}${song().chordShapes?.[name]?.star ? "*" : ""}</strong>${unresolvedChords(song(), [name]).length ? t('<span class="missing-shape">Falta posición · arreglar</span>') : diagram(name, 0, song().chordShapes?.[name]?.frets)}</button><div class="chord-card-actions"><button class="edit-shape-text" aria-label="${unresolvedChords(song(), [name]).length ? t`Definir posición de ${esc(name)}` : t`Editar ${esc(name)}`}">${unresolvedChords(song(), [name]).length ? t("Arreglar") : t("Editar")}</button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}">Añadir</button></div></div>`,
-          )
+          .map((name) => {
+            const shape = song().chordShapes?.[name];
+            const missing = unresolvedChords(song(), [name]).length > 0;
+            return t`<div class="dictionary-item chord-card" draggable="true" data-name="${esc(name)}"><button class="edit-shape"><span class="visually-hidden">Editar posición de </span><strong>${esc(name)}${shape?.star ? '<span aria-hidden="true">*</span>' : ""}</strong>${missing ? t('<span class="missing-shape">Falta posición · arreglar</span>') : `<span aria-hidden="true">${diagram(name, 0, shape?.frets)}</span>`}</button><div class="chord-card-actions"><button class="edit-shape-text" aria-label="${missing ? t`Arreglar posición de ${esc(name)}` : t`Editar ${esc(name)}`}">${missing ? t("Arreglar") : t("Editar")}</button><button class="add-sticker" aria-label="Añadir diagrama de ${esc(name)}">Añadir</button></div></div>`;
+          })
           .join("")
       : t("<p>Añade acordes a la canción para crear tu diccionario.</p>");
     tray.querySelectorAll(".dictionary-item").forEach((el) => {
