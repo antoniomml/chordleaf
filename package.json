@@ -43,7 +43,7 @@
   "dependencies": {
     "@huggingface/transformers": "4.3.0",
     "docx": "^9.8.1",
-    "dompurify": "^3.4.16",
+    "dompurify": "^3.5.0",
     "fft.js": "4.0.4",
     "jspdf": "^4.2.1",
     "mammoth": "^1.13.0",
@@ -52,8 +52,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "axe-core": "^4.13.0",
-    "electron": "44.4.5",
+    "axe-core": "^4.14.0",
+    "electron": "44.11.6",
     "electron-builder": "26.15.3",
     "prettier": "^3.9.9",
     "vite": "^8.3.3"

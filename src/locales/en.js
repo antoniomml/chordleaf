@@ -545,8 +545,8 @@ export default {
   "Volver a intentar": "Try again",
   "Vista del documento": "Document preview",
   "Canción sin título": "Untitled song",
-  "Una columna": "One column",
-  "Dos columnas": "Two columns",
+  "1 columna": "1 column",
+  "2 columnas": "2 columns",
   "Recuperar datos": "Recover data",
   "Copia descargada. Conserva el archivo y consulta la guía de recuperación.":
     "Recovery copy downloaded. Keep the file and consult the recovery guide.",
@@ -616,8 +616,8 @@ export default {
   "Acercar documento": "Zoom in",
   "Ajustar el tamaño para intentar una página":
     "Adjust settings to try fitting one page",
-  "Ajustar a 1 página": "Fit to one page",
-  "1 pág.": "1 page",
+  "Ajustar a 1 página": "Fit to 1 page",
+  "1 página": "1 page",
   "Opciones de la hoja": "Sheet options",
   "Editar directamente la hoja": "Edit on the sheet",
   "Editar letra y acordes": "Edit lyrics and chords",
@@ -833,7 +833,8 @@ export default {
   " diagramas en un bloque": " diagrams in one block",
   Editar: "Edit",
   Añadir: "Add",
-  "Añadir todos los diagramas": "Add all diagrams",
+  "Añadir a la hoja todos los diagramas": "Add to sheet (all diagrams)",
+  "Arreglar posición de ": "Fix position of ",
   "Editar posición de ": "Edit position of ",
   "Añadir diagrama de ": "Add diagram of ",
   "Añadir a la hoja": "Add to sheet",
@@ -890,7 +891,6 @@ export default {
     "Position missing · choose to define it",
   "Falta posición · arreglar": "Position missing · fix",
   Arreglar: "Fix",
-  "Definir posición de ": "Define position of ",
   "Toca un traste por cuerda. El 0 está antes de la cejuela; púlsalo para dejarla al aire o apagarla.":
     "Tap a fret on each string. Fret 0 is before the nut; tap it to set the string open or muted.",
   "Toca los trastes. El 0, antes de la cejuela, alterna al aire y apagada.":
