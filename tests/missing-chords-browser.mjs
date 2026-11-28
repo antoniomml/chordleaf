@@ -35,7 +35,7 @@ try {
   assert.equal(await page.locator("#shape-dialog").isVisible(), true);
   await page.locator("#shape-dialog .cancel-shape").click();
   await page
-    .getByRole("button", { name: "Añadir todos los diagramas" })
+    .getByRole("button", { name: "Añadir a la hoja todos los diagramas" })
     .click();
   const missing = page.locator("#missing-shapes-dialog");
   assert.equal(await missing.isVisible(), true);
@@ -62,7 +62,7 @@ try {
   await page.locator(".chord-sticker .remove-sticker").click();
 
   await page
-    .getByRole("button", { name: "Añadir todos los diagramas" })
+    .getByRole("button", { name: "Añadir a la hoja todos los diagramas" })
     .click();
   await missing
     .getByRole("button", { name: "F#7/A# · Definir posición" })
