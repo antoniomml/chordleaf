@@ -250,7 +250,10 @@ assert.equal(
   "Emaj7*",
 );
 await page
-  .getByRole("button", { name: "Añadir todos los diagramas", exact: true })
+  .getByRole("button", {
+    name: "Añadir a la hoja todos los diagramas",
+    exact: true,
+  })
   .click();
 assert.equal(await page.locator(".chord-sticker").count(), 1);
 const sticker = page.locator(".chord-sticker");
