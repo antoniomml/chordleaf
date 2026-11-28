@@ -30,7 +30,10 @@ try {
   assert.ok((await page.locator("#source").boundingBox()).height > 300);
   await page.locator('[data-section="chords"]').click();
   await page
-    .getByRole("button", { name: "Añadir todos los diagramas", exact: true })
+    .getByRole("button", {
+      name: "Añadir a la hoja todos los diagramas",
+      exact: true,
+    })
     .click();
   const sticker = page.locator(".chord-sticker");
   await sticker.focus();
